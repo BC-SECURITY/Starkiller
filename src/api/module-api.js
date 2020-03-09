@@ -1,0 +1,21 @@
+import { axiosInstance as axios } from '@/api/axios-instance';
+
+/**
+ * Returns a full list of modules.
+ */
+export function getModules() {
+  return axios.get('/modules')
+    .then(({ data }) => data.modules)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
+ * Executes a module against an agent.
+ * @param {*} name module name
+ * @param {*} options module options
+ */
+export function executeModule(name, options) {
+  return axios.post(`/modules/${name}`, options)
+    .then(({ data }) => data.modules)
+    .catch(error => Promise.reject(error.response.data.error));
+}
