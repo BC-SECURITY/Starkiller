@@ -7,6 +7,15 @@ assignees: ''
 
 ---
 
+**Empire Version**
+- Empire 3.x
+
+**Starkiller Version**
+
+**OS Information (Linux flavor, Python version)**
+- OS: 
+- Python: 
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
