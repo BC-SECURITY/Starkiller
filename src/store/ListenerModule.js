@@ -25,8 +25,8 @@ export default {
       const listeners = await listenerApi.getListeners();
       context.commit('setListeners', listeners);
     },
-    async createListener(context, options) {
-      await listenerApi.createListener(options);
+    async createListener(context, { type, options }) {
+      await listenerApi.createListener(type, options);
       context.dispatch('getListeners');
     },
     async getListenerTypes(context) {

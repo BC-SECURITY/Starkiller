@@ -1,6 +1,6 @@
 {
   "name": "starkiller",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -19,7 +19,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "axios": "0.18.0",
+    "axios": "0.18.1",
     "chai-as-promised": "^7.1.1",
     "core-js": "^3.4.4",
     "electron-store": "^5.1.0",
