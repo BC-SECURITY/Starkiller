@@ -251,7 +251,7 @@ export default {
       }
     },
     async create() {
-      await this.$store.dispatch('listener/createListener', this.form);
+      await this.$store.dispatch('listener/createListener', { type: this.listenerType, options: this.form });
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;

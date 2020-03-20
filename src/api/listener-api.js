@@ -23,8 +23,8 @@ export function getListenerOptions(type) {
  * Create a listener.
  * @param {Object} options the options needed for creating a listener.
  */
-export function createListener(options) {
-  return axios.post('/listeners/http', options)
+export function createListener(type, options) {
+  return axios.post(`/listeners/${type}`, options)
     .then(({ data }) => data)
     .catch(error => Promise.reject(error.response.data.error));
 }
