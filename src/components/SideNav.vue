@@ -29,6 +29,10 @@
         <i class="el-icon-key" />
         <span>Credentials</span>
       </el-menu-item>
+      <el-menu-item index="/reporting">
+        <i class="el-icon-notebook-2" />
+        <span>Reporting</span>
+      </el-menu-item>
       <el-menu-item index="/users">
         <i class="el-icon-user" />
         <span>Users</span>
