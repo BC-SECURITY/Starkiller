@@ -20,6 +20,11 @@
         sortable
       />
       <el-table-column
+        prop="Description"
+        label="Description"
+        min-width="180"
+      />
+      <el-table-column
         prop="Language"
         label="Language"
         :formatter="toLower"
