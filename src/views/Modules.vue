@@ -28,7 +28,7 @@
           <p>{{ props.row.Description }}</p>
 
           <p><b>Comments:</b></p>
-          <p>{{ props.row.Comments.join(', ') }}</p>
+          <p>{{ props.row.Comments.join('\n ') }}</p>
         </template>
       </el-table-column>
       <el-table-column
