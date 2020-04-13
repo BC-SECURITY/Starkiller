@@ -11,8 +11,26 @@
     <el-table
       :data="filteredModules"
       class="main-table"
-      @row-click="viewModule"
     >
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <p><b>Name:</b> {{ props.row.Name }}</p>
+          <p><b>NeedsAdmin:</b> {{ props.row.NeedsAdmin }}</p>
+          <p><b>OpsecSafe:</b> {{ props.row.OpsecSafe }}</p>
+          <p><b>Language:</b> {{ props.row.Language }}</p>
+          <p><b>MinLanguageVersion:</b> {{ props.row.MinLanguageVersion }}</p>
+          <p><b>Background:</b> {{ props.row.Background }}</p>
+
+          <p><b>Author:</b></p>
+          <p>{{ props.row.Author.join(', ') }}</p>
+
+          <p><b>Description:</b></p>
+          <p>{{ props.row.Description }}</p>
+
+          <p><b>Comments:</b></p>
+          <p>{{ props.row.Comments.join('\n ') }}</p>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="Name"
         label="Name"
