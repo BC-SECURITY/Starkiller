@@ -14,21 +14,21 @@
     >
       <el-table-column type="expand">
         <template slot-scope="props">
-          <p>Name: {{ props.row.Name }}</p>
-          <p>NeedsAdmin: {{ props.row.NeedsAdmin }}</p>
-          <p>OpsecSafe: {{ props.row.OpsecSafe }}</p>
-          <p>Language: {{ props.row.Language }}</p>
-          <p>MinLanguageVersion: {{ props.row.MinLanguageVersion }}</p>
-          <p>Background: {{ props.row.Background }}</p><br><br>
+          <p><b>Name:</b> {{ props.row.Name }}</p>
+          <p><b>NeedsAdmin:</b> {{ props.row.NeedsAdmin }}</p>
+          <p><b>OpsecSafe:</b> {{ props.row.OpsecSafe }}</p>
+          <p><b>Language:</b> {{ props.row.Language }}</p>
+          <p><b>MinLanguageVersion:</b> {{ props.row.MinLanguageVersion }}</p>
+          <p><b>Background:</b> {{ props.row.Background }}</p>
 
-          <p>Author:</p>
-          <p>{{ props.row.Author }}</p><br><br>
+          <p><b>Author:</b></p>
+          <p>{{ props.row.Author.join(', ') }}</p>
 
-          <p>Description:</p>
-          <p>{{ props.row.Description }}</p><br><br>
+          <p><b>Description:</b></p>
+          <p>{{ props.row.Description }}</p>
 
-          <p>Comments:</p>
-          <p>{{ props.row.Comments }}</p>
+          <p><b>Comments:</b></p>
+          <p>{{ props.row.Comments.join(', ') }}</p>
         </template>
       </el-table-column>
       <el-table-column
