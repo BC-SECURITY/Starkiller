@@ -9,21 +9,25 @@
     >
       <el-table-column type="expand">
         <template slot-scope="props">
-          <p>Sender: {{ props.row.agentname }}</p>
-          <p>Message: {{ props.row.message.message }}</p>
-          <p>Timestamp: {{ props.row.timestamp }}</p>
-          <p>Task ID: {{ props.row.taskID }}</p>
+          <p><b>Agent:</b> {{ props.row.agent_name }}</p>
+          <p><b>Task Command:</b></p>
+          <p class="mono">
+            {{ props.row.task }}
+          </p>
+          <p><b>Task Result:</b></p>
+          <p class="mono">
+            {{ props.row.results }}
+          </p>
         </template>
       </el-table-column>
       <el-table-column
-        prop="ID"
-        label="id"
-        width="80"
+        prop="agent_name"
+        label="Agent"
         sortable
       />
       <el-table-column
-        prop="agentname"
-        label="Sender"
+        prop="taskID"
+        label="Task ID"
         sortable
       />
       <el-table-column
@@ -32,8 +36,8 @@
         sortable
       />
       <el-table-column
-        prop="message.message"
-        label="Message"
+        prop="task"
+        label="Task Command"
         sortable
       >
         <template slot-scope="scope">
@@ -41,8 +45,8 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="taskID"
-        label="Task ID"
+        prop="username"
+        label="User"
         width="120"
         sortable
       />
@@ -83,9 +87,9 @@ export default {
     async getReporting() {
       this.reporting = await reportingApi.getReporting();
     },
-    truncateMessage({ message }) {
-      if (message.message) {
-        return message.message.length > 30 ? `${message.message.substr(0, 30)}...` : message.message;
+    truncateMessage({ task }) {
+      if (task) {
+        return task.length > 30 ? `${task.substr(0, 30)}...` : task;
       }
 
       return '';
@@ -95,5 +99,9 @@ export default {
 </script>
 
 <style>
-
+.mono {
+  white-space: pre-wrap;
+  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+  line-height: 1.6em;
+}
 </style>
