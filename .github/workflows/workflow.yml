@@ -17,7 +17,7 @@ jobs:
       - name: Build project
         run: |
           yarn
-          yarn electron:build:mac
+          yarn electron:build:mac --p never
       - name: Upload Release Asset Mac
         id: upload-release-asset-mac
         uses: actions/upload-release-asset@v1
@@ -41,7 +41,7 @@ jobs:
       - name: Build project
         run: |
           yarn
-          yarn electron:build:lin
+          yarn electron:build:lin --p never
       - name: Upload Release Asset Linux
         id: upload-release-asset-linux 
         uses: actions/upload-release-asset@v1
@@ -66,7 +66,7 @@ jobs:
       - name: Build project
         run: |
           yarn
-          yarn electron:build:win
+          yarn electron:build:win --p never
       - name: Upload Release Asset Windows
         id: upload-release-asset-windows
         uses: actions/upload-release-asset@v1
