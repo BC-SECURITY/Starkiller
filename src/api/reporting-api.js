@@ -1,7 +1,7 @@
 import { axiosInstance as axios } from '@/api/axios-instance';
 
 /**
- * Returns a full list of stagers.
+ * Returns a full list of reporting events for agents.
  */
 // eslint-disable-next-line import/prefer-default-export
 export function getReporting() {
