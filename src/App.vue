@@ -35,9 +35,9 @@ export default {
     },
     empireVersion(val) {
       if (val.length > 0) {
-        if (!semver.satisfies(val.split(' ')[0], '>=3.1.1')) {
+        if (!semver.satisfies(val.split(' ')[0], '>=3.1.5')) {
           this.$alert(
-            'Starkiller is recommended to be used with Empire 3.1.1 or greater.'
+            'Starkiller 1.1.x is recommended to be used with Empire 3.1.5 or greater.'
             + ' You may continue, but some features may not work properly.',
             'Incompatabile Empire Version',
           );

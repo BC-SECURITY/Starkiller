@@ -32,6 +32,13 @@ yarn electron:build:win
 yarn electron:build:mac
 ```
 
+## Compatability Table
+While for the most part, you can use older versions of Empire with Starkiller back to 3.1.1, it is recommended that you use the latest versions of each. The reason being that Starkiller’s new features occasionally depend on new functionality within Empire. If you are using an older version of Empire, Starkiller will warn you when logging in, but will allow you to continue. If a there is a new minimum version of empire required to get all the features out of Starkiller, we will do a minor version bump to Starkiller.
+| Starkiller Release | Minimum Empire Version | Notes  |
+| ------------------ |:-------------:| ---------------:|
+| 1.0.x              | 3.1.1         | 3.1.1 is the first version of Empire to include all the user endpoints necessary for Starkiller to function |
+| 1.1.x              | 3.1.5         | 3.1.5 updated the reporting endpoint to have the same result as running it in the CLI. Starkiller 1.1.x uses that reporting endpoint for the reporting tab |
+
 ## Changelog
 
 Detailed changes for each release are documented in the [release notes](https://github.com/bc-security/starkiller/releases).
