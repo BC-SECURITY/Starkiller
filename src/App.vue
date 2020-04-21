@@ -1,9 +1,21 @@
 <template>
   <div id="app">
-    <side-nav v-if="isLoggedIn" />
-    <router-view
-      id="router-view"
-    />
+    <v-app>
+      <side-nav v-if="isLoggedIn" />
+
+      <!-- Sizes your content based upon application components -->
+      <v-content>
+        <!-- Provides the application the proper gutter -->
+        <v-container fluid>
+          <!-- If using vue-router -->
+          <router-view />
+        </v-container>
+      </v-content>
+
+      <v-footer app>
+        Copyright Me
+      </v-footer>
+    </v-app>
   </div>
 </template>
 <script>
@@ -53,35 +65,35 @@ export default {
 };
 </script>
 <style lang="scss">
-@import 'app.scss';
+// @import 'app.scss';
 
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+// #app {
+//   font-family: 'Avenir', Helvetica, Arial, sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   text-align: center;
+//   color: #2c3e50;
 
-  display: flex;
-  flex-direction: row;
-}
+//   // display: flex;
+//   // flex-direction: row;
+// }
 
-#router-view {
-  display: flex;
-  flex-direction: column;
-  overflow-x: auto;
-}
+// #router-view {
+//   // display: flex;
+//   // flex-direction: column;
+//   // overflow-x: auto;
+// }
 
-.nav {
-  padding: 10px 30px 0px 30px;
+// .nav {
+//   padding: 10px 30px 0px 30px;
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+//   a {
+//     font-weight: bold;
+//     color: #2c3e50;
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
+//     &.router-link-exact-active {
+//       color: #42b983;
+//     }
+//   }
+// }
 </style>

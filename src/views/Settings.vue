@@ -82,7 +82,7 @@ export default {
 </script>
 
 <style>
-.page {
+/* .page {
   display: flex;
   padding-left: 20px;
   padding-right: 20px;
@@ -104,5 +104,5 @@ export default {
 
 .no-left {
   padding-left: 0px;
-}
+} */
 </style>

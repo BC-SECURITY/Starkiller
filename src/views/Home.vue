@@ -1,5 +1,5 @@
 <template>
-  <div class="home route-container">
+  <div>
     <img
       alt="Starkiller"
       width="200px"
@@ -22,8 +22,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.home {
-  padding-top: 30px;
-  align-items: center;
-}
+// .home {
+//   padding-top: 30px;
+//   align-items: center;
+// }
 </style>

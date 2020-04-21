@@ -1,51 +1,52 @@
 <template>
   <div>
-    <el-menu
-      :default-active="$route.path"
-      class="el-menu-vertical-demo"
-      :router="true"
-      :collapse="isCollapse"
+    <v-navigation-drawer
+      absolute
+      permanent
+      dark
+      expand-on-hover
     >
-      <el-menu-item @click="isCollapse = !isCollapse">
-        <i :class="isCollapse ? 'el-icon-arrow-right' : 'el-icon-arrow-left'" />
-      </el-menu-item>
-      <el-menu-item index="/listeners">
-        <i class="el-icon-headset" />
-        <span>Listeners</span>
-      </el-menu-item>
-      <el-menu-item index="/stagers">
-        <i class="el-icon-suitcase-1" />
-        <span>Stagers</span>
-      </el-menu-item>
-      <el-menu-item index="/agents">
-        <i class="el-icon-connection" />
-        <span>Agents</span>
-      </el-menu-item>
-      <el-menu-item index="/modules">
-        <i class="el-icon-s-grid" />
-        <span>Modules</span>
-      </el-menu-item>
-      <el-menu-item index="/credentials">
-        <i class="el-icon-key" />
-        <span>Credentials</span>
-      </el-menu-item>
-      <el-menu-item index="/reporting">
-        <i class="el-icon-notebook-2" />
-        <span>Reporting</span>
-      </el-menu-item>
-      <el-menu-item index="/users">
-        <i class="el-icon-user" />
-        <span>Users</span>
-      </el-menu-item>
-      <el-menu-item index="/settings">
-        <i class="el-icon-setting" />
-        <span>Settings</span>
-      </el-menu-item>
-      <el-menu-item index="/about">
-        <i class="el-icon-info" />
-        <span>About</span>
-      </el-menu-item>
-    </el-menu>
+      <v-list
+        dense
+        nav
+        class="px-0"
+      >
+        <v-list-item
+          two-line
+          :class="miniVariant && 'px-0'"
+        >
+          <v-list-item-avatar>
+            <img src="https://raw.githubusercontent.com/BC-SECURITY/Starkiller/master/src/assets/icon.png">
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-list-item-title>Starkiller</v-list-item-title>
+            <v-list-item-subtitle>v1.2.0</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider />
+        <v-list
+          dense
+          nav
+        >
+          <v-list-item
+            v-for="item in items"
+            :key="item.title"
+            link
+            :to="item.title"
+          >
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-list>
+    </v-navigation-drawer>
   </div>
 </template>
 
@@ -53,10 +54,18 @@
 export default {
   data() {
     return {
-      isCollapse: true,
+      items: [
+        { title: 'Listeners', icon: 'fa-headphones' },
+        { title: 'Stagers', icon: 'fa-suitcase-rolling' },
+        { title: 'Agents', icon: 'fa-link' },
+        { title: 'Modules', icon: 'fa-grip-horizontal' },
+        { title: 'Credentials', icon: 'fa-key' },
+        { title: 'Reporting', icon: 'fa-sticky-note' },
+        { title: 'Users', icon: 'fa-user' },
+        { title: 'Settings', icon: 'fa-cog' },
+        { title: 'About', icon: 'fa-info-circle' },
+      ],
     };
-  },
-  methods: {
   },
 };
 </script>

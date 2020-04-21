@@ -1,39 +1,39 @@
 <template>
   <div class="hello">
-    <el-form
+    <v-form
       class="inputs"
       @submit.prevent.native="submit"
     >
-      <el-input
+      <v-text-field
         v-model="form.url"
         placeholder="URL"
       >
         <template slot="prepend">
           https://
         </template>
-      </el-input>
-      <el-input
+      </v-text-field>
+      <v-text-field
         v-model="form.username"
         placeholder="Username"
       />
-      <el-input
+      <v-text-field
         v-model="form.password"
         placeholder="Password"
         show-password
       />
-      <el-checkbox
+      <v-checkbox
         v-model="rememberMe"
         class="remember-checkbox"
         label="Remember URL and Username"
       />
-      <el-button
+      <v-btn
         type="primary"
         native-type="submit"
         round
       >
         Submit
-      </el-button>
-    </el-form>
+      </v-btn>
+    </v-form>
   </div>
 </template>
 
@@ -106,7 +106,7 @@ export default {
   padding-right: 30px;
 }
 
-.el-input {
+.v-text-field {
   padding-bottom: 10px;
   max-width: 500px;
 }
