@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-navigation-drawer
-      absolute
+      app
       permanent
       dark
       expand-on-hover
@@ -13,7 +13,6 @@
       >
         <v-list-item
           two-line
-          :class="miniVariant && 'px-0'"
         >
           <v-list-item-avatar>
             <img src="https://raw.githubusercontent.com/BC-SECURITY/Starkiller/master/src/assets/icon.png">
@@ -54,6 +53,7 @@
 export default {
   data() {
     return {
+      miniVariant: false,
       items: [
         { title: 'Listeners', icon: 'fa-headphones' },
         { title: 'Stagers', icon: 'fa-suitcase-rolling' },

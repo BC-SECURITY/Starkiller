@@ -65,7 +65,7 @@ export default {
 };
 </script>
 <style lang="scss">
-// @import 'app.scss';
+@import 'app.scss';
 
 // #app {
 //   font-family: 'Avenir', Helvetica, Arial, sans-serif;

@@ -6,20 +6,18 @@
     >
       <v-text-field
         v-model="form.url"
-        placeholder="URL"
-      >
-        <template slot="prepend">
-          https://
-        </template>
-      </v-text-field>
+        label="Name"
+      />
       <v-text-field
         v-model="form.username"
-        placeholder="Username"
+        label="Username"
       />
       <v-text-field
         v-model="form.password"
-        placeholder="Password"
-        show-password
+        label="Password"
+        :type="showPassword ? 'text' : 'password'"
+        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        @click:append="showPassword = !showPassword"
       />
       <v-checkbox
         v-model="rememberMe"
@@ -27,9 +25,11 @@
         label="Remember URL and Username"
       />
       <v-btn
-        type="primary"
-        native-type="submit"
-        round
+        color="primary"
+        type="submit"
+        :loading="loading"
+        :disabled="loading"
+        rounded
       >
         Submit
       </v-btn>
@@ -45,6 +45,8 @@ export default {
   name: 'Login',
   data() {
     return {
+      loading: false,
+      showPassword: false,
       rememberMe: false,
       form: {
         url: '',
@@ -69,6 +71,7 @@ export default {
     },
     loginError(val) {
       if (val.length > 0) {
+        this.loading = false;
         this.$notify.error({
           title: 'Error Logging In',
           message: val,
@@ -83,6 +86,7 @@ export default {
   },
   methods: {
     submit() {
+      this.loading = true;
       electronStore.set('rememberMe', this.rememberMe);
 
       if (this.rememberMe === true) {
@@ -99,41 +103,5 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.hello {
-  padding-left: 30px;
-  padding-right: 30px;
-}
-
-.v-text-field {
-  padding-bottom: 10px;
-  max-width: 500px;
-}
-
-.inputs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.remember-checkbox {
-  padding-right: 275px;
-  padding-bottom: 10px
-}
-
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="home">
     <img
       alt="Starkiller"
       width="200px"
@@ -22,8 +22,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// .home {
-//   padding-top: 30px;
-//   align-items: center;
-// }
+.home {
+  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 </style>

@@ -2,13 +2,13 @@
   <div class="route-container">
     <div class="headers">
       <h3>Listeners</h3>
-      <el-button
-        type="primary"
-        round
+      <v-btn
+        color="primary"
+        rounded
         @click="create"
       >
         Create Listener
-      </el-button>
+      </v-btn>
     </div>
     <listener-viewer
       :visible="visible"
@@ -16,53 +16,19 @@
       :view-object="viewObject"
       @close="close"
     />
-    <el-table
-      :data="listeners"
-      class="main-table"
-      @row-click="viewListener"
+    <v-data-table
+      :headers="headers"
+      :items="listeners"
     >
-      <el-table-column
-        prop="ID"
-        label="id"
-        sortable
-      />
-      <el-table-column
-        prop="name"
-        label="Name"
-        sortable
-      />
-      <el-table-column
-        prop="module"
-        label="Module"
-        sortable
-      />
-      <el-table-column
-        prop="options.Host.Value"
-        label="Host"
-        sortable
-      />
-      <el-table-column
-        prop="options.Port.Value"
-        label="Port"
-        sortable
-      />
-      <el-table-column
-        fixed="right"
-        label="Operations"
-        width="120"
-      >
-        <template slot-scope="scope">
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            label="Kill"
-            circle
-            size="small"
-            @click="killListener(scope.$index, listeners)"
-          />
-        </template>
-      </el-table-column>
-    </el-table>
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          small
+          @click="killListener(item)"
+        >
+          fa-trash-alt
+        </v-icon>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
@@ -77,6 +43,19 @@ export default {
   },
   data() {
     return {
+      headers: [
+        {
+          text: 'id',
+          align: 'start',
+          sortable: false,
+          value: 'ID',
+        },
+        { text: 'Name', value: 'name' },
+        { text: 'Module', value: 'module' },
+        { text: 'Host', value: 'options.Host.Value' },
+        { text: 'Port', value: 'options.Port.Value' },
+        { text: 'Actions', value: 'actions', sortable: false },
+      ],
       visible: false,
       view: false,
       viewObject: {},
@@ -100,14 +79,14 @@ export default {
       this.viewObject = {};
       this.getListeners();
     },
-    async killListener(index, rows) {
+    async killListener(item) {
       try {
-        await this.$confirm(`Are you sure you want to kill listener ${rows[index].name}?`);
+        await this.$confirm(`Are you sure you want to kill listener ${item.name}?`);
       } catch (err) {
         return;
       }
 
-      this.$store.dispatch('listener/killListener', rows[index].name);
+      this.$store.dispatch('listener/killListener', item.name);
     },
     viewListener(row, column) {
       if (column.label === 'Operations') {
