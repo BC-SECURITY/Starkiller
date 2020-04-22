@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app>
+    <v-app :dark="isDarkMode">
       <side-nav v-if="isLoggedIn" />
 
       <!-- Sizes your content based upon application components -->
@@ -31,6 +31,7 @@ export default {
   computed: {
     ...mapGetters({
       isLoggedIn: 'profile/isLoggedIn',
+      isDarkMode: 'profile/isDarkMode',
     }),
     ...mapState({
       empireVersion: state => state.profile.empireVersion,
@@ -40,6 +41,16 @@ export default {
     },
   },
   watch: {
+    isDarkMode: {
+      immediate: true,
+      handler(val) {
+        if (val === true) {
+          this.$vuetify.theme.dark = true;
+        } else {
+          this.$vuetify.theme.dark = false;
+        }
+      },
+    },
     isLoggedIn(val) {
       if (val === false) {
         this.$router.push({ path: '/' });

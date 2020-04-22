@@ -3,7 +3,6 @@
     <v-navigation-drawer
       app
       permanent
-      dark
       expand-on-hover
     >
       <v-list
