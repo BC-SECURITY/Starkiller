@@ -30,12 +30,16 @@ export function getListenerOptions(type) {
 
 /**
  * Create a listener.
+ * This returns a 200 for some errors. Usually when trying to start on a busy port :(
  * @param {Object} options the options needed for creating a listener.
  */
 export function createListener(type, options) {
   return axios.post(`/listeners/${type}`, options)
-    .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .then(({ data }) => {
+      if (data.error) return Promise.reject(data.error);
+      return data;
+    })
+    .catch(error => Promise.reject(error.response ? error.response.data.error : error));
 }
 
 /**

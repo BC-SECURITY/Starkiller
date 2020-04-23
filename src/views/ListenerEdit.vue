@@ -5,6 +5,7 @@
     <v-card style="padding: 10px">
       <v-form
         ref="form"
+        v-model="valid"
         style="max-width: 500px"
       >
         <v-autocomplete
@@ -17,25 +18,25 @@
         <v-text-field
           v-if="fieldExists('Name')"
           v-model="form.Name"
+          :rules="rules['Name']"
           label="Name"
           outlined
           dense
           required
         />
-
         <v-text-field
           v-if="fieldExists('Host')"
           v-model="form.Host"
+          :rules="rules['Host']"
           label="Host"
           outlined
           dense
           required
         />
-
-
         <v-text-field
           v-if="fieldExists('Port')"
           v-model="form.Port"
+          :rules="rules['Port']"
           label="Port"
           outlined
           dense
@@ -47,6 +48,7 @@
           v-for="field in requiredFields"
           :key="field.name"
           v-model="form[field.name]"
+          :rules="rules[field.name]"
           :label="field.name"
           :type="field.type === 'string' ? 'text' : 'number'"
           outlined
@@ -62,6 +64,7 @@
                 v-for="field in optionalFields"
                 :key="field.name"
                 v-model="form[field.name]"
+                :rules="rules[field.name]"
                 :label="field.name"
                 :type="field.type === 'string' ? 'text' : 'number'"
                 outlined
@@ -70,6 +73,13 @@
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
+        <v-btn
+          class="mt-4 primary"
+          :loading="loading"
+          @click="submit"
+        >
+          submit
+        </v-btn>
       </v-form>
     </v-card>
   </div>
@@ -88,12 +98,17 @@ export default {
       listenerType: '',
       listenerOptions: {},
       form: {},
+      valid: true,
+      loading: false,
     };
   },
   computed: {
     ...mapState({
       listenerTypes: state => state.listener.types,
     }),
+    isNew() {
+      return this.$route.name === 'listenerNew';
+    },
     /**
      * Fields that go in the "Optional" drawer
      */
@@ -119,13 +134,29 @@ export default {
      * listenerOptions.
      */
     fields() {
-      if (!this.id) {
+      if (this.isNew) {
         return Object.keys(this.listenerOptions)
           .map(key => ({ name: key, ...this.listenerOptions[key] }));
       }
 
       return Object.keys(this.listener.options)
         .map(key => ({ name: key, ...this.listener.options[key] }));
+    },
+    /**
+     * The rules for the form, currently this is only to check for empty required fields.
+     */
+    rules() {
+      return this.fields.reduce((map, field) => {
+        // eslint-disable-next-line no-param-reassign
+        map[field.name] = [];
+        if (field.Required === true) {
+          map[field.name].push(
+            v => !!v || `${field.name} is required`,
+          );
+        }
+
+        return map;
+      }, {});
     },
     id() {
       return this.$route.params.id;
@@ -172,16 +203,51 @@ export default {
           }));
       },
     },
+    id(val) {
+      if (val) {
+        this.getListener(val);
+      }
+    },
   },
   mounted() {
     this.$store.dispatch('listener/getListenerTypes');
 
-    if (this.$route.name === 'listenerEdit') {
-      listenerApi.getListener(this.$route.params.id)
-        .then((data) => { this.listener = data; });
+    if (!this.isNew) {
+      this.getListener(this.id);
     }
   },
   methods: {
+    async submit() {
+      if (this.loading) {
+        return;
+      }
+
+      try {
+        await this.$confirm('Do you want to create this listener?');
+      } catch (err) {
+        return;
+      }
+
+      this.loading = true;
+      await this.create();
+      this.loading = false;
+      // route back to list? switch to view mode?
+    },
+    create() {
+      return listenerApi.createListener(this.listenerType, this.form)
+        .then(() => this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } }))
+        .catch(err => this.$notify.error({
+          title: 'Error Creating Listener',
+          message: err,
+        }));
+    },
+    getListener(id) {
+      listenerApi.getListener(id)
+        .then((data) => {
+          this.listener = data;
+          this.listenerType = data.module;
+        });
+    },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;
     },
