@@ -10,25 +10,32 @@
   >
     <!-- This is super hacky. For some reason the scrollable-pane is not working  -->
     <!-- unless content is wrapped in the split panel... -->
-    <split-pane
+    <!-- <split-pane
       :min-percent="20"
       :default-percent="100"
       split="horizontal"
     >
       <template slot="paneL">
-        <div class="content">
-          <el-tabs>
-            <el-tab-pane label="View">
-              <div class="scrollable-pane">
-                <listener-form
-                  :view="view"
-                  :view-object="viewObject"
-                  @done="formDone"
-                />
-              </div>
-            </el-tab-pane>
-          </el-tabs>
-        </div>
+        <div class="content"> -->
+    <v-card>
+      <v-tabs v-model="tabs">
+        <v-tab key="View">
+          View
+        </v-tab>
+      </v-tabs>
+      <v-tabs-items v-model="tabs">
+        <v-tab-item key="View">
+          <div class="scrollable-pane">
+            <listener-form
+              :view="view"
+              :view-object="viewObject"
+              @done="formDone"
+            />
+          </div>
+        </v-tab-item>
+      </v-tabs-items>
+    </v-card>
+    <!-- </div>
       </template>
       <template slot="paneR">
         <div
@@ -38,11 +45,14 @@
           <span>filler</span>
         </div>
       </template>
-    </split-pane>
+    </split-pane> -->
   </el-drawer>
+  <!-- This is super hacky. For some reason the scrollable-pane is not working  -->
+  <!-- unless content is wrapped in the split panel... -->
 </template>
 
 <script>
+/* eslint-disable max-len */
 import ListenerForm from '@/components/listeners/ListenerForm.vue';
 import SplitPane from 'vue-splitpane';
 
@@ -74,6 +84,21 @@ export default {
       default: () => {},
     },
   },
+  data() {
+    return {
+      tabs: 'View',
+    };
+  },
+  watch: {
+    visible() {
+      this.$nextTick(() => {
+        const tmp = document.createElement('input');
+        this.$el.appendChild(tmp);
+        tmp.focus();
+        this.$el.removeChild(tmp);
+      });
+    },
+  },
   methods: {
     done(done) {
       this.$emit('close');
@@ -86,12 +111,15 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.content {
-  padding-left: 50px;
-  padding-right: 50px;
-  height: 100%;
+<style lang="scss">
+.el-drawer {
+  background: rgb(30,30,30);
 }
+
+.el-drawer__body {
+  background: rgb(30,30,30);
+}
+
 
 .el-tab-pane {
   height: 100%;

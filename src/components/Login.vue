@@ -7,16 +7,22 @@
       <v-text-field
         v-model="form.url"
         label="Name"
+        dense
+        outlined
       />
       <v-text-field
         v-model="form.username"
         label="Username"
+        dense
+        outlined
       />
       <v-text-field
         v-model="form.password"
         label="Password"
         :type="showPassword ? 'text' : 'password'"
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        outlined
+        dense
         @click:append="showPassword = !showPassword"
       />
       <v-checkbox

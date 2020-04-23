@@ -24,6 +24,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "listeners" */ '../views/Listeners.vue'),
   },
   {
+    path: '/listeners/:id',
+    name: 'listenerEdit',
+    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
+  },
+  {
+    path: '/listeners/new',
+    name: 'listenerNew', // same component
+    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
+  },
+  {
     path: '/stagers',
     name: 'stagers',
     component: () => import(/* webpackChunkName: "stagers" */ '../views/Stagers.vue'),

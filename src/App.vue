@@ -54,6 +54,8 @@ export default {
     isLoggedIn(val) {
       if (val === false) {
         this.$router.push({ path: '/' });
+      } else if (val === true) {
+        this.$router.push({ path: '/listeners' });
       }
     },
     empireVersion(val) {
@@ -71,6 +73,8 @@ export default {
   mounted() {
     if (this.isLoggedIn === false) {
       this.$router.push({ path: '/' });
+    } else if (this.isLoggedIn === true) {
+      this.$router.push({ path: '/listeners' });
     }
   },
 };

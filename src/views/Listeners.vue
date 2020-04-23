@@ -1,5 +1,7 @@
 <template>
   <div class="route-container">
+    <v-breadcrumbs :items="breads" />
+
     <div class="headers">
       <h3>Listeners</h3>
       <v-btn
@@ -10,17 +12,18 @@
         Create Listener
       </v-btn>
     </div>
-    <listener-viewer
-      :visible="visible"
-      :view="view"
-      :view-object="viewObject"
-      @close="close"
-    />
     <v-data-table
       :headers="headers"
       :items="listeners"
     >
       <template v-slot:item.actions="{ item }">
+        <v-icon
+          style="padding-right: 5px"
+          small
+          @click="viewListener(item)"
+        >
+          fa-pencil-alt
+        </v-icon>
         <v-icon
           small
           @click="killListener(item)"
@@ -34,15 +37,20 @@
 
 <script>
 import { mapState } from 'vuex';
-import ListenerViewer from '@/components/listeners/ListenerViewer.vue';
 
 export default {
   name: 'Listeners',
   components: {
-    ListenerViewer,
   },
   data() {
     return {
+      breads: [
+        {
+          text: 'Listeners',
+          disabled: true,
+          href: '/listeners',
+        },
+      ],
       headers: [
         {
           text: 'id',
@@ -71,13 +79,7 @@ export default {
   },
   methods: {
     create() {
-      this.visible = true;
-    },
-    close() {
-      this.visible = false;
-      this.view = false;
-      this.viewObject = {};
-      this.getListeners();
+      this.$router.push({ name: 'listenerNew' });
     },
     async killListener(item) {
       try {
@@ -88,14 +90,8 @@ export default {
 
       this.$store.dispatch('listener/killListener', item.name);
     },
-    viewListener(row, column) {
-      if (column.label === 'Operations') {
-        return;
-      }
-
-      this.visible = true;
-      this.view = true;
-      this.viewObject = row;
+    viewListener(item) {
+      this.$router.push({ name: 'listenerEdit', params: { id: item.name } });
     },
     getListeners() {
       this.$store.dispatch('listener/getListeners');
@@ -105,5 +101,4 @@ export default {
 </script>
 
 <style>
-
 </style>

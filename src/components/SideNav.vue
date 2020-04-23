@@ -32,7 +32,7 @@
             v-for="item in items"
             :key="item.title"
             link
-            :to="item.title"
+            :to="{ name: item.pathName }"
           >
             <v-list-item-icon>
               <v-icon>{{ item.icon }}</v-icon>
@@ -54,15 +54,15 @@ export default {
     return {
       miniVariant: false,
       items: [
-        { title: 'Listeners', icon: 'fa-headphones' },
-        { title: 'Stagers', icon: 'fa-suitcase-rolling' },
-        { title: 'Agents', icon: 'fa-link' },
-        { title: 'Modules', icon: 'fa-grip-horizontal' },
-        { title: 'Credentials', icon: 'fa-key' },
-        { title: 'Reporting', icon: 'fa-sticky-note' },
-        { title: 'Users', icon: 'fa-user' },
-        { title: 'Settings', icon: 'fa-cog' },
-        { title: 'About', icon: 'fa-info-circle' },
+        { title: 'Listeners', pathName: 'listeners', icon: 'fa-headphones' },
+        { title: 'Stagers', pathName: 'stagers', icon: 'fa-suitcase-rolling' },
+        { title: 'Agents', pathName: 'agents', icon: 'fa-link' },
+        { title: 'Modules', pathName: 'modules', icon: 'fa-grip-horizontal' },
+        { title: 'Credentials', pathName: 'credentials', icon: 'fa-key' },
+        { title: 'Reporting', pathName: 'reporting', icon: 'fa-sticky-note' },
+        { title: 'Users', pathName: 'users', icon: 'fa-user' },
+        { title: 'Settings', pathName: 'settings', icon: 'fa-cog' },
+        { title: 'About', pathName: 'about', icon: 'fa-info-circle' },
       ],
     };
   },
