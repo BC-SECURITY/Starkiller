@@ -1,47 +1,34 @@
 <template>
   <div>
     <v-breadcrumbs :items="breads" />
-    <h3>{{ id ? 'Edit' : 'New' }} Listener</h3>
+    <h3>{{ id ? 'Edit' : 'New' }} Stager</h3>
     <v-card style="padding: 10px">
+      <info-viewer
+        class="info-viewer"
+        :info-array="stagerInfoArray"
+      />
       <v-form
         ref="form"
         v-model="valid"
         style="max-width: 500px"
       >
+        <!-- todo rules? -->
         <v-autocomplete
-          v-model="listenerType"
-          :items="listenerTypes"
+          v-model="stagerType"
+          :items="stagerTypes"
           dense
           outlined
           label="Type"
         />
-        <v-text-field
-          v-if="fieldExists('Name')"
-          v-model="form.Name"
-          :rules="rules['Name']"
-          label="Name"
-          outlined
+
+        <v-autocomplete
+          v-if="fieldExists('Listener')"
+          v-model="form.Listener"
+          :rules="rules['Listener']"
+          :items="listeners"
           dense
-          required
-        />
-        <v-text-field
-          v-if="fieldExists('Host')"
-          v-model="form.Host"
-          :rules="rules['Host']"
-          label="Host"
           outlined
-          dense
-          required
-        />
-        <v-text-field
-          v-if="fieldExists('Port')"
-          v-model="form.Port"
-          :rules="rules['Port']"
-          label="Port"
-          outlined
-          dense
-          required
-          type="number"
+          label="Listener"
         />
 
         <v-text-field
@@ -87,34 +74,41 @@
 
 <script>
 import * as listenerApi from '@/api/listener-api';
-import { mapState } from 'vuex';
+import * as stagerApi from '@/api/stager-api';
+import { mapGetters } from 'vuex';
 import Vue from 'vue';
+import InfoViewer from '@/components/InfoViewer.vue';
 
 export default {
-  name: 'ListenerEdit',
+  name: 'StagerEdit',
+  components: {
+    InfoViewer,
+  },
   data() {
     return {
-      listener: { options: {} },
-      listenerType: '',
-      listenerOptions: {},
+      stager: { options: {} },
+      stagerType: '',
+      stagerOptions: {},
       form: {},
       valid: true,
       loading: false,
+      stagerInfoArray: [],
     };
   },
   computed: {
-    ...mapState({
-      listenerTypes: state => state.listener.types,
+    ...mapGetters({
+      stagerTypes: 'stager/stagerTypes',
+      listeners: 'listener/listenerNames',
     }),
     isNew() {
-      return this.$route.name === 'listenerNew';
+      return this.$route.name === 'stagerNew';
     },
     /**
      * Fields that go in the "Optional" drawer
      */
     optionalFields() {
       return this.fields
-        .filter(el => ['Name', 'Port', 'Host'].indexOf(el.name) < 0)
+        .filter(el => ['Listener'].indexOf(el.name) < 0)
         .filter(el => el.Required === false)
         .map(el => ({ ...el, type: this.fieldType(el) }));
     },
@@ -124,7 +118,7 @@ export default {
      */
     requiredFields() {
       return this.fields
-        .filter(el => ['Name', 'Port', 'Host'].indexOf(el.name) < 0)
+        .filter(el => ['Listener'].indexOf(el.name) < 0)
         .filter(el => el.Required === true)
         .map(el => ({ ...el, type: this.fieldType(el) }));
     },
@@ -135,12 +129,12 @@ export default {
      */
     fields() {
       if (this.isNew) {
-        return Object.keys(this.listenerOptions)
-          .map(key => ({ name: key, ...this.listenerOptions[key] }));
+        return Object.keys(this.stagerOptions)
+          .map(key => ({ name: key, ...this.stagerOptions[key] }));
       }
 
-      return Object.keys(this.listener.options)
-        .map(key => ({ name: key, ...this.listener.options[key] }));
+      return Object.keys(this.stager.options)
+        .map(key => ({ name: key, ...this.stager.options[key] }));
     },
     /**
      * The rules for the form, currently this is only to check for empty required fields.
@@ -164,15 +158,15 @@ export default {
     breads() {
       return [
         {
-          text: 'Listeners',
+          text: 'Stagers',
           disabled: false,
-          to: '/listeners',
+          to: '/stagers',
           exact: true,
         },
         {
           text: this.id ? `Edit ${this.id}` : 'New',
           disabled: true,
-          to: '/listeners-edit',
+          to: '/stagers-edit',
         },
       ];
     },
@@ -194,13 +188,22 @@ export default {
     /**
      * When the type dropdown changes, we get the options for the new type.
      */
-    listenerType: {
+    /**
+     * When the type dropdown changes, we get the options for the new type.
+     */
+    stagerType: {
       async handler(val) {
-        this.listenerOptions = await listenerApi.getListenerOptions(val)
+        const a = await stagerApi.getStagerByName(val)
           .catch(err => this.$notify.error({
             title: 'Error',
             message: err,
           }));
+        this.stagerOptions = a.options;
+        this.stagerInfoArray = [
+          { key: 'Author', value: a.Author.join(', ') },
+          { key: 'Comments', value: a.Comments.join('\n') },
+          { key: 'Description', value: a.Description },
+        ];
       },
     },
     id(val) {
@@ -210,11 +213,8 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('listener/getListenerTypes');
-
-    if (!this.isNew) {
-      this.getListener(this.id);
-    }
+    this.$store.dispatch('stager/getStagers');
+    this.$store.dispatch('listener/getListeners');
   },
   methods: {
     async submit() {
@@ -223,7 +223,7 @@ export default {
       }
 
       try {
-        await this.$confirm('Do you want to create this listener?');
+        await this.$confirm('Do you want to generate this stager?');
       } catch (err) {
         return;
       }
@@ -233,19 +233,15 @@ export default {
       this.loading = false;
     },
     create() {
-      return listenerApi.createListener(this.listenerType, this.form)
-        .then(() => this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } }))
+      return stagerApi.generateStager({ StagerName: this.stagerType, ...this.form })
+        .then((stager) => {
+          this.$store.dispatch('stager/addStager', stager);
+          this.$router.push({ name: 'stagers' });
+        })
         .catch(err => this.$notify.error({
-          title: 'Error Creating Listener',
+          title: 'Error Creating Stager',
           message: err,
         }));
-    },
-    getListener(id) {
-      listenerApi.getListener(id)
-        .then((data) => {
-          this.listener = data;
-          this.listenerType = data.module;
-        });
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;

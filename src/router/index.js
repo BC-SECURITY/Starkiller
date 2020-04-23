@@ -39,6 +39,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "stagers" */ '../views/Stagers.vue'),
   },
   {
+    path: '/stagers/new',
+    name: 'stagerNew',
+    component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
+  },
+  {
     path: '/agents',
     name: 'agents',
     component: () => import(/* webpackChunkName: "agents" */ '../views/Agents.vue'),

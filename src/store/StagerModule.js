@@ -16,17 +16,10 @@ export default {
       const stagers = await stagerApi.getStagers();
       context.commit('setStagers', stagers);
     },
-    async generateStager(context, options) {
-      const data = await stagerApi.generateStager(options);
+    async addStager(context, stager) {
       const arr = namespacedElectronStore.get('generatedStagers', []);
-
-      if (typeof data === 'string') {
-        // this one comes back with a 200 if it fails :/
-        return;
-      }
-
-      const name = Object.keys(data)[0];
-      const item = { ...data[name], name, createdAt: new Date().toISOString() };
+      const name = Object.keys(stager)[0];
+      const item = { ...stager[name], name, createdAt: new Date().toISOString() };
       arr.push(item);
       namespacedElectronStore.set('generatedStagers', arr);
     },
