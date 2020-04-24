@@ -1,7 +1,22 @@
 <template>
   <div>
     <v-breadcrumbs :items="breads" />
-    <h3>{{ id ? 'Edit' : 'New' }} Listener</h3>
+    <div class="headers">
+      <h3>{{ mode }} Listener</h3>
+      <!-- <v-btn
+        color="purple darken-3"
+        fab
+        small
+        @click="editMode = !editMode"
+      >
+        <v-icon v-if="editMode">
+          mdi-close
+        </v-icon>
+        <v-icon v-else>
+          mdi-pencil
+        </v-icon>
+      </v-btn> -->
+    </div>
     <v-card style="padding: 10px">
       <v-form
         ref="form"
@@ -14,6 +29,7 @@
           dense
           outlined
           label="Type"
+          :readonly="!editMode"
         />
         <v-text-field
           v-if="fieldExists('Name')"
@@ -23,6 +39,7 @@
           outlined
           dense
           required
+          :readonly="!editMode"
         />
         <v-text-field
           v-if="fieldExists('Host')"
@@ -32,6 +49,7 @@
           outlined
           dense
           required
+          :readonly="!editMode"
         />
         <v-text-field
           v-if="fieldExists('Port')"
@@ -42,6 +60,7 @@
           dense
           required
           type="number"
+          :readonly="!editMode"
         />
 
         <v-text-field
@@ -54,6 +73,7 @@
           outlined
           dense
           required
+          :readonly="!editMode"
         />
 
         <v-expansion-panels>
@@ -69,11 +89,13 @@
                 :type="field.type === 'string' ? 'text' : 'number'"
                 outlined
                 dense
+                :readonly="!editMode"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
         <v-btn
+          v-if="isNew"
           class="mt-4 primary"
           :loading="loading"
           @click="submit"
@@ -100,6 +122,10 @@ export default {
       form: {},
       valid: true,
       loading: false,
+      // Listeners are not editable, but I figured I would do a proof of concept for if we ever can edit
+      // things. I'd also imagine that when we do an update, it will only be certain fields, so when we go
+      // to edit mode, we could also remove all the immutable fields.
+      editMode: false,
     };
   },
   computed: {
@@ -108,6 +134,11 @@ export default {
     }),
     isNew() {
       return this.$route.name === 'listenerNew';
+    },
+    mode() {
+      if (this.isNew) return 'New';
+      if (this.editMode) return 'Edit';
+      return 'View';
     },
     /**
      * Fields that go in the "Optional" drawer

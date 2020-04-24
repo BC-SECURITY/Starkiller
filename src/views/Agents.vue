@@ -12,7 +12,7 @@
     >
       <template v-slot:item.name="{ item }">
         <v-icon
-          v-if="item.isAdmin"
+          v-if="item.high_integrity === 1"
           small
         >
           fa-user-cog
