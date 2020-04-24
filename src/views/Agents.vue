@@ -97,6 +97,7 @@ export default {
   },
   data() {
     return {
+      moment,
       visible: false,
       view: false,
       viewObject: {},
@@ -109,7 +110,6 @@ export default {
   },
   mounted() {
     this.getAgents();
-    this.moment = moment;
   },
   methods: {
     close() {

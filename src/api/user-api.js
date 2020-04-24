@@ -14,7 +14,7 @@ export function getUsers() {
  * @param {string} username
  * @param {string} password
  */
-export function addUser(username, password) {
+export function createUser(username, password) {
   return axios.post('/users', { username, password })
     .then(({ data }) => data)
     .catch(error => Promise.reject(error.response.data.error));

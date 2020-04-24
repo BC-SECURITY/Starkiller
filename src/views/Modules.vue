@@ -8,6 +8,7 @@
         style="max-width: 250px"
       />
     </div>
+    <!-- TODO if we refactor the way we fetch modules we can add a loading state to the table. -->
     <v-data-table
       :headers="headers"
       :items="filteredModules"
@@ -67,10 +68,10 @@ export default {
      */
     moduleSearch() {
       return this.modules.map(({
-        Author, Language, MinLanguageVersion, Name,
+        Author, Language, MinLanguageVersion, Name, Description,
       }) => ({
         name: Name,
-        search: `${Author}${Language}${MinLanguageVersion}${Name}`,
+        search: `${Author} ${Language} ${MinLanguageVersion} ${Name} ${Description}`.toLowerCase(),
       }));
     },
   },
@@ -95,13 +96,10 @@ export default {
   methods: {
     doFilter(query) {
       const results = this.moduleSearch
-        .filter(el => el.search.includes(query))
+        .filter(el => el.search.includes(query.toLowerCase()))
         .map(el => el.name);
 
       this.filteredModules = this.modules.filter(el => results.indexOf(el.Name) !== -1);
-    },
-    viewModule() {
-
     },
     toLower(row, column, cellValue) {
       if (cellValue == null) {

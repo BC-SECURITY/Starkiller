@@ -51,6 +51,7 @@ export default {
   },
   data() {
     return {
+      moment,
       reporting: [],
       breads: [
         {
@@ -71,7 +72,6 @@ export default {
   },
   mounted() {
     this.getReporting();
-    this.moment = moment;
   },
   methods: {
     async getReporting() {

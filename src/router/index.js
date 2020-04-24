@@ -59,6 +59,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "users" */ '../views/Users.vue'),
   },
   {
+    path: '/users/:id',
+    name: 'userEdit',
+    component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+  },
+  {
+    path: '/users/new',
+    name: 'userNew',
+    component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+  },
+  {
     path: '/credentials',
     name: 'credentials',
     component: () => import(/* webpackChunkName: "credentials" */ '../views/Credentials.vue'),

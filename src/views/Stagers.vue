@@ -54,7 +54,6 @@
 
 <script>
 import { namespacedElectronStore as electronStore } from '@/store/electron-store';
-import StagerViewer from '@/components/stagers/StagerViewer.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import CopyMixin from '@/mixins/copy-stager';
 import moment from 'moment';
@@ -62,11 +61,11 @@ import moment from 'moment';
 export default {
   name: 'Stagers',
   components: {
-    StagerViewer,
   },
   mixins: [DownloadMixin, CopyMixin],
   data() {
     return {
+      moment,
       breads: [
         {
           text: 'Stagers',
@@ -92,7 +91,6 @@ export default {
   computed: {
   },
   mounted() {
-    this.moment = moment;
     this.getStagers();
   },
   methods: {
@@ -103,8 +101,7 @@ export default {
       this.visible = false;
       this.view = false;
       this.viewObject = {};
-      // electronStore is a bit slower. We could wrap this stuff
-      // into the vuex store for reactivity.
+      // electronStore is a bit slower. So give it time to save.
       setTimeout(() => this.getStagers(), 1000);
     },
     viewStager(row, column) {
