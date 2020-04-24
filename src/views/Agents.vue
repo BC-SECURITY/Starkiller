@@ -8,6 +8,7 @@
     <v-data-table
       :headers="headers"
       :items="agents"
+      @click:row="viewAgent"
     >
       <template v-slot:item.name="{ item }">
         <v-icon
@@ -32,7 +33,7 @@
       <template v-slot:item.actions="{ item }">
         <v-icon
           small
-          @click="killAgent(item)"
+          @click.stop="killAgent(item)"
         >
           fa-trash-alt
         </v-icon>

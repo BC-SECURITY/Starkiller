@@ -15,18 +15,12 @@
     <v-data-table
       :headers="headers"
       :items="listeners"
+      @click:row="viewListener"
     >
       <template v-slot:item.actions="{ item }">
         <v-icon
-          style="padding-right: 5px"
           small
-          @click="viewListener(item)"
-        >
-          fa-pencil-alt
-        </v-icon>
-        <v-icon
-          small
-          @click="killListener(item)"
+          @click.stop="killListener(item)"
         >
           fa-trash-alt
         </v-icon>
