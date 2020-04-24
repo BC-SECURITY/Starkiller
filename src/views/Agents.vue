@@ -1,87 +1,49 @@
 <template>
   <div class="route-container">
+    <v-breadcrumbs :items="breads" />
+
     <div class="headers">
       <h3>Agents</h3>
     </div>
+    <v-data-table
+      :headers="headers"
+      :items="agents"
+    >
+      <template v-slot:item.name="{ item }">
+        <v-icon
+          v-if="item.isAdmin"
+          small
+        >
+          fa-user-cog
+        </v-icon>
+        {{ item.name }}
+      </template>
+      <template v-slot:item.process_name="{ item }">
+        <span>{{ truncateMessage(item.process_name) }}</span>
+      </template>
+      <template v-slot:item.checkin_time="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.checkin_time).format('lll') }}</span>
+        </v-tooltip>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          small
+          @click="killAgent(item)"
+        >
+          fa-trash-alt
+        </v-icon>
+      </template>
+    </v-data-table>
     <agent-viewer
       :visible="visible"
       :view="view"
       :view-object="viewObject"
       @close="close"
     />
-    <el-table
-      :data="agents"
-      class="main-table"
-      :row-class-name="tableRowClassName"
-      @row-click="viewAgent"
-    >
-      <el-table-column
-        prop="name"
-        label="Name"
-        sortable
-        min-width="130"
-        :show-overflow-tooltip="true"
-      />
-      <el-table-column
-        prop="checkin_time"
-        label="Checkin Time"
-        width="180"
-        sortable
-      >
-        <template slot-scope="scope">
-          <el-tooltip :content="moment(scope.row.checkin_time).format('lll')">
-            <div>{{ moment(scope.row.checkin_time).fromNow() }}</div>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="hostname"
-        label="Hostname"
-        width="180"
-        sortable
-        :show-overflow-tooltip="true"
-      />
-      <el-table-column
-        prop="process_name"
-        label="Process"
-        width="180"
-        sortable
-        :show-overflow-tooltip="true"
-      />
-      <el-table-column
-        prop="language"
-        label="Language"
-        sortable
-        width="140"
-      />
-      <el-table-column
-        prop="username"
-        label="Username"
-        width="150"
-        sortable
-      />
-      <el-table-column
-        prop="working_hours"
-        label="Working Hours"
-        width="180"
-      />
-      <el-table-column
-        fixed="right"
-        label="Operations"
-        width="120"
-      >
-        <template slot-scope="scope">
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            label="Kill"
-            circle
-            size="small"
-            @click="killAgent(scope.$index, agents)"
-          />
-        </template>
-      </el-table-column>
-    </el-table>
   </div>
 </template>
 
@@ -97,6 +59,23 @@ export default {
   },
   data() {
     return {
+      breads: [
+        {
+          text: 'Agents',
+          disabled: true,
+          href: '/agents',
+        },
+      ],
+      headers: [
+        { text: 'Name', value: 'name' },
+        { text: 'Check-in Time', value: 'checkin_time' },
+        { text: 'Hostname', value: 'hostname' },
+        { text: 'Process', value: 'process_name' },
+        { text: 'Language', value: 'language' },
+        { text: 'Username', value: 'username' },
+        { text: 'Working Hours', value: 'working_hours' },
+        { text: 'Actions', value: 'actions' },
+      ],
       moment,
       visible: false,
       view: false,
@@ -118,37 +97,34 @@ export default {
       this.viewObject = {};
       this.getAgents();
     },
-    tableRowClassName({ row }) {
-      if (row.stale === true) {
-        return 'warning-row';
-      }
-      return 'l';
-    },
     getAgents() {
       this.$store.dispatch('agent/getAgents');
     },
-    async killAgent(index, rows) {
+    async killAgent(item) {
       try {
-        await this.$confirm(`Do you want to kill agent ${rows[index].name}?`);
+        await this.$confirm(`Do you want to kill agent ${item.name}?`);
       } catch (err) {
         return;
       }
 
-      this.$store.dispatch('agent/killAgent', { name: rows[index].name });
+      this.$store.dispatch('agent/killAgent', { name: item.name });
       this.$notify({
-        message: `Agent ${rows[index].name} tasked to run TASK_EXIT.`,
+        message: `Agent ${item.name} tasked to run TASK_EXIT.`,
         type: 'success',
       });
       this.getAgents();
     },
-    viewAgent(row, column) {
-      if (column.label === 'Operations') {
-        return;
-      }
-
+    viewAgent(item) {
       this.visible = true;
       this.view = true;
-      this.viewObject = row;
+      this.viewObject = item;
+    },
+    truncateMessage(str) {
+      if (str) {
+        return str.length > 30 ? `${str.substr(0, 30)}...` : str;
+      }
+
+      return '';
     },
   },
 };
