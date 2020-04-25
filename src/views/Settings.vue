@@ -10,18 +10,55 @@
     <div class="page">
       <div class="first-part">
         <span>{{ user.username }}</span>
-        <el-button
-          type="text"
+        <v-btn
+          color="primary"
+          text
           @click="logout"
         >
           Logout
-        </el-button>
+        </v-btn>
       </div>
       <el-divider />
       <div class="headers no-left">
         <h4>Update Password</h4>
       </div>
-      <update-password-form :user-id="userId" />
+      <v-form
+        ref="form"
+        v-model="valid"
+        style="max-width: 500px"
+      >
+        <v-text-field
+          v-model="form.password"
+          :type="showPassword ? 'text' : 'password'"
+          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          :rules="rules['password']"
+          label="Password"
+          autocomplete="off"
+          outlined
+          dense
+          required
+          @click:append="showPassword = !showPassword"
+        />
+        <v-text-field
+          v-model="form.confirmPassword"
+          :type="showConfirm ? 'text' : 'password'"
+          :append-icon="showConfirm ? 'mdi-eye' : 'mdi-eye-off'"
+          :rules="rules['confirmPassword']"
+          label="Confirm Password"
+          autocomplete="off"
+          outlined
+          dense
+          required
+          @click:append="showConfirm = !showConfirm"
+        />
+        <v-btn
+          class="mt-4 primary"
+          :loading="loading"
+          @click="submit"
+        >
+          submit
+        </v-btn>
+      </v-form>
       <el-divider />
       <div class="headers no-left">
         <h4> Api Token </h4>
@@ -38,12 +75,30 @@
 </template>
 
 <script>
+import * as userApi from '@/api/user-api';
 import { mapState } from 'vuex';
-import UpdatePasswordForm from '@/components/users/UpdatePasswordForm.vue';
 
 export default {
   components: {
-    UpdatePasswordForm,
+  },
+  data() {
+    return {
+      form: {},
+      rules: {
+        password: [
+          v => !!v || 'Password is required',
+          v => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
+        ],
+        confirmPassword: [
+          v => !!v || 'Confirmation is required',
+          v => v === this.form.password || 'Password must match',
+        ],
+      },
+      showPassword: false,
+      showConfirm: false,
+      loading: false,
+      valid: false,
+    };
   },
   computed: {
     ...mapState({
@@ -90,32 +145,35 @@ export default {
 
       this.$store.dispatch('profile/logout');
     },
+    submit() {
+      if (this.$refs.form.validate()) {
+        return userApi.updatePassword(this.user.id, this.form.password)
+          .then(() => {
+            this.$notify({
+              message: 'Password updated',
+              type: 'success',
+            });
+            this.form = {};
+            this.$refs.form.resetValidation();
+          })
+          .catch(err => this.$notify.error({
+            title: 'Error Updating Password',
+            message: err,
+          }));
+      }
+
+      return false;
+    },
   },
 };
 </script>
 
 <style>
-/* .page {
-  display: flex;
-  padding-left: 20px;
-  padding-right: 20px;
-  flex-direction: column;
-  align-items: start;
-}
-
-.first-part {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 200px;
-}
-
 .point:hover {
   cursor: pointer;
 }
 
 .no-left {
   padding-left: 0px;
-} */
+}
 </style>

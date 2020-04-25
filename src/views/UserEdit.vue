@@ -15,6 +15,7 @@
           outlined
           dense
           required
+          :disabled="!isNew"
         />
         <v-text-field
           v-model="form.password"
@@ -53,6 +54,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import * as userApi from '@/api/user-api';
 
 export default {
@@ -60,10 +62,18 @@ export default {
   data() {
     return {
       form: {},
-      rules: {
-        name: [],
-        password: [],
-        confirmPassword: [],
+      rules: { // todo validation
+        name: [
+          v => !!v || 'Name is required',
+          v => v.length > 3 || 'Name must be larger than 3 characters',
+        ],
+        password: [
+          v => !!v || 'Password is required',
+          v => v.length > 5 || 'Password must be larger than 5 characters',
+        ],
+        confirmPassword: [
+          v => !!v || 'Confirm your password',
+        ],
       },
       user: {},
       valid: true,
@@ -113,14 +123,26 @@ export default {
       }
 
       this.loading = true;
-      await this.create();
+      if (this.isNew) {
+        await this.create();
+      } else {
+        await this.updatePassword();
+      }
       this.loading = false;
     },
     create() {
       return userApi.createUser(this.form.username, this.form.password)
-        .then(() => this.$router.push({ name: 'users' })) // I'd route to userEdit but the user endpoint doesn't return the created object or its id. Api upgrades needed :(
+        .then(() => this.$router.push({ name: 'users' }))
         .catch(err => this.$notify.error({
           title: 'Error Creating User',
+          message: err,
+        }));
+    },
+    updatePassword() {
+      return userApi.updatePassword(this.id, this.form.password)
+        .then(() => this.$router.push({ name: 'users' }))
+        .catch(err => this.$notify.error({
+          title: 'Error Updating Password',
           message: err,
         }));
     },
@@ -128,6 +150,7 @@ export default {
       userApi.getUser(id)
         .then((data) => {
           this.user = data;
+          Vue.set(this.form, 'username', data.username);
         });
     },
   },

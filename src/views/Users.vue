@@ -15,6 +15,7 @@
     <v-data-table
       :headers="headers"
       :items="users"
+      @click:row="viewUser"
     >
       <template v-slot:item.last_logon_time="{ item }">
         <v-tooltip top>
@@ -35,7 +36,7 @@
                 v-model="item.enabled"
                 :disabled="item.admin"
                 label="Enabled"
-                @change="disableUser($event, item)"
+                @click.stop="disableUser(item)"
               />
             </div>
           </template>
@@ -48,14 +49,12 @@
 
 <script>
 import { mapState } from 'vuex';
-import UserViewer from '@/components/users/UserViewer.vue';
 import * as userApi from '@/api/user-api';
 import moment from 'moment';
 
 export default {
   name: 'Users',
   components: {
-    UserViewer,
   },
   data() {
     return {
@@ -97,32 +96,31 @@ export default {
       this.viewObject = {};
       this.getUsers();
     },
-    async disableUser(enabled, item) {
-      debugger;
+    async disableUser(item) {
+      // eslint-disable-next-line no-param-reassign
+      item.enabled = !item.enabled;
       try {
-        await this.$confirm(`Are you sure you want to ${enabled ? 'enable' : 'disable'} user ${item.username}?`);
+        await this.$confirm(`Are you sure you want to ${item.enabled ? 'enable' : 'disable'} user ${item.username}?`);
       } catch (err) {
-        item.enabled = !enabled; // eslint-disable-line no-param-reassign
+        item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
         return;
       }
 
-      userApi.disableUser(item.ID, !enabled)
+      userApi.disableUser(item.ID, !item.enabled)
         .catch((err) => {
           this.$notify.error({
             title: 'Error',
             message: err,
           });
-          item.enabled = !enabled; // eslint-disable-line no-param-reassign
+          item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
         });
     },
-    viewUser(row, column) {
-      if (column.label === 'Operations') {
-        return;
-      }
-
+    viewUser(item) {
       this.visible = true;
       this.view = true;
-      this.viewObject = row;
+      this.viewObject = item;
+      debugger;
+      this.$router.push({ name: 'userEdit', params: { id: item.ID } });
     },
     getUsers() {
       this.$store.dispatch('user/getUsers');
