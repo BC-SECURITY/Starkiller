@@ -125,7 +125,7 @@ export default {
       // Listeners are not editable, but I figured I would do a proof of concept for if we ever can edit
       // things. I'd also imagine that when we do an update, it will only be certain fields, so when we go
       // to edit mode, we could also remove all the immutable fields.
-      editMode: false,
+      editMode: true,
     };
   },
   computed: {
@@ -249,7 +249,7 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.loading) {
+      if (this.loading || !this.$refs.form.validate()) {
         return;
       }
 

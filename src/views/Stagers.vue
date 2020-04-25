@@ -1,5 +1,5 @@
 <template>
-  <div class="route-container">
+  <div>
     <v-breadcrumbs :items="breads" />
 
     <div class="headers">
@@ -81,14 +81,8 @@ export default {
         { text: 'Created At', value: 'createdAt' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
-      visible: false,
-      view: false,
-      viewObject: {},
       stagers: [],
-      tooltipText: 'These are stagers you have generated in the past.',
     };
-  },
-  computed: {
   },
   mounted() {
     this.getStagers();
@@ -98,20 +92,8 @@ export default {
       this.$router.push({ name: 'stagerNew' });
     },
     close() {
-      this.visible = false;
-      this.view = false;
-      this.viewObject = {};
       // electronStore is a bit slower. So give it time to save.
       setTimeout(() => this.getStagers(), 1000);
-    },
-    viewStager(row, column) {
-      if (column.label === 'Operations') {
-        return;
-      }
-
-      this.visible = true;
-      this.view = true;
-      this.viewObject = row;
     },
     async deleteStager(index) {
       try {

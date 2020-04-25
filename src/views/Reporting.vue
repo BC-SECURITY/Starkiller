@@ -1,5 +1,5 @@
 <template>
-  <div class="route-container">
+  <div>
     <v-breadcrumbs :items="breads" />
 
     <div class="headers">

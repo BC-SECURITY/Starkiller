@@ -1,5 +1,5 @@
 <template>
-  <div class="route-container">
+  <div>
     <v-breadcrumbs :items="breads" />
 
     <div class="headers">
@@ -72,9 +72,6 @@ export default {
         { text: 'Last Logon', value: 'last_logon_time' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
-      visible: false,
-      view: false,
-      viewObject: {},
     };
   },
   computed: {
@@ -87,13 +84,9 @@ export default {
   },
   methods: {
     create() {
-      this.visible = true;
       this.$router.push({ name: 'userNew' });
     },
     close() {
-      this.visible = false;
-      this.view = false;
-      this.viewObject = {};
       this.getUsers();
     },
     async disableUser(item) {
@@ -116,10 +109,6 @@ export default {
         });
     },
     viewUser(item) {
-      this.visible = true;
-      this.view = true;
-      this.viewObject = item;
-      debugger;
       this.$router.push({ name: 'userEdit', params: { id: item.ID } });
     },
     getUsers() {

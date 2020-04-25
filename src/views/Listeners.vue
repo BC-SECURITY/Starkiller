@@ -1,5 +1,5 @@
 <template>
-  <div class="route-container">
+  <div class>
     <v-breadcrumbs :items="breads" />
 
     <div class="headers">
@@ -58,9 +58,6 @@ export default {
         { text: 'Port', value: 'options.Port.Value' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
-      visible: false,
-      view: false,
-      viewObject: {},
     };
   },
   computed: {

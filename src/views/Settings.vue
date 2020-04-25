@@ -1,5 +1,5 @@
 <template>
-  <div class="route-container">
+  <div>
     <div class="headers">
       <h3>Settings</h3>
     </div>

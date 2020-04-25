@@ -62,7 +62,7 @@ export default {
   data() {
     return {
       form: {},
-      rules: { // todo validation
+      rules: {
         name: [
           v => !!v || 'Name is required',
           v => v.length > 3 || 'Name must be larger than 3 characters',
@@ -112,7 +112,7 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.loading) {
+      if (this.loading || !this.$refs.form.validate()) {
         return;
       }
 

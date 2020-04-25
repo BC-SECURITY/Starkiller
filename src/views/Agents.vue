@@ -1,10 +1,11 @@
 <template>
-  <div class="route-container">
+  <div>
     <v-breadcrumbs :items="breads" />
 
     <div class="headers">
       <h3>Agents</h3>
     </div>
+    <!-- TODO Colors for stale -->
     <v-data-table
       :headers="headers"
       :items="agents"

@@ -73,7 +73,6 @@
 </template>
 
 <script>
-import * as listenerApi from '@/api/listener-api';
 import * as stagerApi from '@/api/stager-api';
 import { mapGetters } from 'vuex';
 import Vue from 'vue';
@@ -188,9 +187,6 @@ export default {
     /**
      * When the type dropdown changes, we get the options for the new type.
      */
-    /**
-     * When the type dropdown changes, we get the options for the new type.
-     */
     stagerType: {
       async handler(val) {
         const a = await stagerApi.getStagerByName(val)
@@ -218,10 +214,10 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.loading) {
+      if (this.loading || !this.$refs.form.validate()) {
         return;
       }
-
+      
       try {
         await this.$confirm('Do you want to generate this stager?');
       } catch (err) {
