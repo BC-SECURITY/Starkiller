@@ -49,6 +49,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "agents" */ '../views/Agents.vue'),
   },
   {
+    path: '/agents/:id',
+    name: 'agentEdit',
+    component: () => import(/* webpackChunkName: "agent-edit" */ '../views/AgentEdit.vue'),
+  },
+  {
     path: '/modules',
     name: 'modules',
     component: () => import(/* webpackChunkName: "modules" */ '../views/Modules.vue'),

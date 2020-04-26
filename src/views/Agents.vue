@@ -120,6 +120,7 @@ export default {
       this.visible = true;
       this.view = true;
       this.viewObject = item;
+      this.$router.push({ name: 'agentEdit', params: { id: item.name } });
     },
     truncateMessage(str) {
       if (str) {

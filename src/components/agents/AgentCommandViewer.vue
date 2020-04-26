@@ -15,14 +15,13 @@
 </template>
 
 <script>
-/* eslint-disable max-len */
 import * as agentApi from '@/api/agent-api';
 
 export default {
   props: {
-    viewObject: {
-      type: Object,
-      default: () => {},
+    name: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -65,7 +64,7 @@ export default {
   },
   mounted() {
     this.interval = setInterval(async () => {
-      this.results = await agentApi.getResults(this.viewObject.name);
+      this.results = await agentApi.getResults(this.name);
     }, 5000);
   },
   beforeDestroy() {

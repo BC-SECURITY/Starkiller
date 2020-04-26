@@ -13,12 +13,25 @@
       </v-content>
 
       <v-footer app>
-        Copyright Me
+        <span class="mr-2">Copyright (c) 2020 BC Security |</span>
+        <a
+          class="mr-2"
+          target="_blank"
+          href="https://github.com/bc-security/starkiller"
+          @click.prevent="openExternalBrowser"
+        > Starkiller |</a>
+        <a
+          target="_blank"
+          href="https://github.com/bc-security/empire"
+          @click.prevent="openExternalBrowser"
+        > Empire</a>
       </v-footer>
     </v-app>
   </div>
 </template>
 <script>
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { remote } from 'electron';
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
 import SideNav from '@/components/SideNav.vue';
@@ -76,6 +89,11 @@ export default {
     } else if (this.isLoggedIn === true) {
       this.$router.push({ path: '/listeners' });
     }
+  },
+  methods: {
+    openExternalBrowser(e) {
+      remote.shell.openExternal(e.target.href);
+    },
   },
 };
 </script>
