@@ -5,39 +5,45 @@
     <div class="headers">
       <h3>Agents</h3>
     </div>
-    <!-- TODO Colors for stale -->
     <v-data-table
       :headers="headers"
       :items="agents"
       @click:row="viewAgent"
     >
-      <template v-slot:item.name="{ item }">
-        <v-icon
-          v-if="item.high_integrity === 1"
-          small
-        >
-          fa-user-cog
-        </v-icon>
-        {{ item.name }}
-      </template>
-      <template v-slot:item.process_name="{ item }">
-        <span>{{ truncateMessage(item.process_name) }}</span>
-      </template>
-      <template v-slot:item.checkin_time="{ item }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.checkin_time).format('lll') }}</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-icon
-          small
-          @click.stop="killAgent(item)"
-        >
-          fa-trash-alt
-        </v-icon>
+      <!-- Use item template to apply conditional row formatting -->
+      <template v-slot:item="{ item }">
+        <tr :class="{'warning-row': item.stale}">
+          <td>
+            <v-icon
+              v-if="item.high_integrity === 1"
+              small
+            >
+              fa-user-cog
+            </v-icon>
+            {{ item.name }}
+          </td>
+          <td>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
+              </template>
+              <span>{{ moment(item.checkin_time).format('lll') }}</span>
+            </v-tooltip>
+          </td>
+          <td> {{ item.hostname }}</td>
+          <td><span>{{ truncateMessage(item.process_name) }}</span></td>
+          <td> {{ item.language }}</td>
+          <td> {{ item.username }}</td>
+          <td> {{ item.working_hours }}</td>
+          <td>
+            <v-icon
+              small
+              @click.stop="killAgent(item)"
+            >
+              fa-trash-alt
+            </v-icon>
+          </td>
+        </tr>
       </template>
     </v-data-table>
   </div>
@@ -107,5 +113,13 @@ export default {
 };
 </script>
 
-<style>
+<style scoped style="scss">
+.warning-row {
+  background: #FFCCCC;
+}
+
+.v-data-table.theme--dark
+  .warning-row {
+    background: #bd4c4c;
+  }
 </style>
