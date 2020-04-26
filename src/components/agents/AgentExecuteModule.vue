@@ -53,7 +53,7 @@
         <v-btn
           type="primary"
           color="primary"
-          class="ml-1 mr-1"
+          class="mt-4"
           :loading="loading"
           @click="submit"
         >

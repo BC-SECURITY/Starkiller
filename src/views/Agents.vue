@@ -8,11 +8,13 @@
     <v-data-table
       :headers="headers"
       :items="agents"
-      @click:row="viewAgent"
     >
       <!-- Use item template to apply conditional row formatting -->
       <template v-slot:item="{ item }">
-        <tr :class="{'warning-row': item.stale}">
+        <tr
+          :class="{'warning-row': item.stale}"
+          @click="viewAgent(item)"
+        >
           <td>
             <v-icon
               v-if="item.high_integrity === 1"
