@@ -22,11 +22,10 @@
               View
             </v-tab>
             <v-tab
-              v-for="i in tabs"
-              :key="i"
-              :href="`#tab-${i}`"
+              key="interact"
+              href="#tab-interact"
             >
-              {{ i }}
+              Interact
             </v-tab>
             <v-tab-item
               key="view"
@@ -37,6 +36,17 @@
                 flat
               >
                 <agent-form :agent="agent" />
+              </v-card>
+            </v-tab-item>
+            <v-tab-item
+              key="interact"
+              :value="'tab-interact'"
+            >
+              <v-card
+                class="scrollable-pane"
+                flat
+              >
+                <agent-interact :agent="agent" />
               </v-card>
             </v-tab-item>
             <v-tab-item
