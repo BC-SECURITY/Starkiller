@@ -40,24 +40,16 @@
         </v-icon>
       </template>
     </v-data-table>
-    <agent-viewer
-      :visible="visible"
-      :view="view"
-      :view-object="viewObject"
-      @close="close"
-    />
   </div>
 </template>
 
 <script>
 import moment from 'moment';
 import { mapState } from 'vuex';
-import AgentViewer from '@/components/agents/AgentViewer.vue';
 
 export default {
   name: 'Agents',
   components: {
-    AgentViewer,
   },
   data() {
     return {
@@ -79,9 +71,6 @@ export default {
         { text: 'Actions', value: 'actions' },
       ],
       moment,
-      visible: false,
-      view: false,
-      viewObject: {},
     };
   },
   computed: {
@@ -93,12 +82,6 @@ export default {
     this.getAgents();
   },
   methods: {
-    close() {
-      this.visible = false;
-      this.view = false;
-      this.viewObject = {};
-      this.getAgents();
-    },
     getAgents() {
       this.$store.dispatch('agent/getAgents');
     },
@@ -117,9 +100,6 @@ export default {
       this.getAgents();
     },
     viewAgent(item) {
-      this.visible = true;
-      this.view = true;
-      this.viewObject = item;
       this.$router.push({ name: 'agentEdit', params: { id: item.name } });
     },
     truncateMessage(str) {

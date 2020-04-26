@@ -86,9 +86,6 @@ export default {
     create() {
       this.$router.push({ name: 'userNew' });
     },
-    close() {
-      this.getUsers();
-    },
     async disableUser(item) {
       // eslint-disable-next-line no-param-reassign
       item.enabled = !item.enabled;

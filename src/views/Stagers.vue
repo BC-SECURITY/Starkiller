@@ -91,10 +91,6 @@ export default {
     create() {
       this.$router.push({ name: 'stagerNew' });
     },
-    close() {
-      // electronStore is a bit slower. So give it time to save.
-      setTimeout(() => this.getStagers(), 1000);
-    },
     async deleteStager(index) {
       try {
         await this.$confirm('Are you sure you want to delete this stager?');

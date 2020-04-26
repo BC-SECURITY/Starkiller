@@ -1,7 +1,10 @@
 <template>
   <div>
     <v-breadcrumbs :items="breads" />
-    <div class="mb-2" style="display: flex; justify-content: flex-end;">
+    <div
+      class="mb-2"
+      style="display: flex; justify-content: flex-end;"
+    >
       <!-- TODO Wrap this into a component? -->
       <v-tooltip top>
         <template v-slot:activator="{ on }">
@@ -11,6 +14,7 @@
             fab
             x-small
             v-on="on"
+            @click="clearQueue"
           >
             <v-icon>fa-calendar-times</v-icon>
           </v-btn>
@@ -24,6 +28,7 @@
             fab
             x-small
             v-on="on"
+            @click="killAgent"
           >
             <v-icon>fa-trash-alt</v-icon>
           </v-btn>
@@ -38,7 +43,6 @@
         split="horizontal"
       >
         <template slot="paneL">
-          <!-- <div class="content"> -->
           <v-tabs
             v-model="activeTab"
             class="scrollable-pane"
@@ -82,7 +86,6 @@
               </v-card>
             </v-tab-item>
           </v-tabs>
-        <!-- </div> -->
         </template>
         <template slot="paneR">
           <div
@@ -120,14 +123,6 @@ export default {
     return {
       agent: {},
       activeTab: 'View',
-      tabs: [
-        // 'View',
-        'Shell Command',
-        'Module',
-        // 'Clear Queued Tasks',
-        // 'Kill Agent',
-        // 'Remove Agent',
-      ],
     };
   },
   computed: {
@@ -167,33 +162,37 @@ export default {
           this.agent = data;
         });
     },
+    async killAgent() {
+      try {
+        await this.$confirm(`Do you want to kill agent ${this.agent.name}?`);
+      } catch (err) {
+        return;
+      }
+
+      this.$store.dispatch('agent/killAgent', { name: this.agent.name });
+      this.$notify({
+        message: `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
+        type: 'success',
+      });
+      this.$router.push({ name: 'agents' });
+    },
+    async clearQueue() {
+      try {
+        await this.$confirm('Do you want to clear queue?');
+      } catch (err) {
+        return;
+      }
+      this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
+      this.$notify({
+        message: `Clearing queued tasks for Agent ${this.agent.name}.`,
+        type: 'success',
+      });
+    },
   },
 };
 </script>
 
 <style>
-
-
-.content {
-  /* padding-left: 50px; */
-  /* padding-right: 50px; */
-  height: 100%;
-}
-
-.el-tab-pane {
-  height: 100%;
-}
-
-.el-tabs {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.el-tabs__content {
-  flex: 1;
-}
-
 .scrollable-pane {
   max-height: 100%;
   overflow: auto;
