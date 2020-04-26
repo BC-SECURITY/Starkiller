@@ -4,6 +4,7 @@
     <div class="headers">
       <h3>Modules</h3>
       <v-text-field
+        v-model="filter"
         outlined
         dense
         label="Search"
