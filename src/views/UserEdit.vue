@@ -116,12 +116,6 @@ export default {
         return;
       }
 
-      try {
-        await this.$confirm('Do you want to create this user?');
-      } catch (err) {
-        return;
-      }
-
       this.loading = true;
       if (this.isNew) {
         await this.create();
@@ -133,18 +127,12 @@ export default {
     create() {
       return userApi.createUser(this.form.username, this.form.password)
         .then(() => this.$router.push({ name: 'users' }))
-        .catch(err => this.$notify.error({
-          title: 'Error Creating User',
-          message: err,
-        }));
+        .catch(err => this.$toast.error(`Error: ${err}`));
     },
     updatePassword() {
       return userApi.updatePassword(this.id, this.form.password)
         .then(() => this.$router.push({ name: 'users' }))
-        .catch(err => this.$notify.error({
-          title: 'Error Updating Password',
-          message: err,
-        }));
+        .catch(err => this.$toast.error(`Error: ${err}`));
     },
     getUser(id) {
       userApi.getUser(id)

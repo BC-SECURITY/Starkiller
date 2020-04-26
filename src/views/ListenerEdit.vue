@@ -7,9 +7,9 @@
         color="purple darken-3"
         fab
         small
-        @click="editMode = !editMode"
+        @click="canEdit = !canEdit"
       >
-        <v-icon v-if="editMode">
+        <v-icon v-if="canEdit">
           mdi-close
         </v-icon>
         <v-icon v-else>
@@ -29,7 +29,7 @@
           dense
           outlined
           label="Type"
-          :readonly="!editMode"
+          :readonly="!canEdit"
         />
         <v-text-field
           v-if="fieldExists('Name')"
@@ -39,7 +39,7 @@
           outlined
           dense
           required
-          :readonly="!editMode"
+          :readonly="!canEdit"
         />
         <v-text-field
           v-if="fieldExists('Host')"
@@ -49,7 +49,7 @@
           outlined
           dense
           required
-          :readonly="!editMode"
+          :readonly="!canEdit"
         />
         <v-text-field
           v-if="fieldExists('Port')"
@@ -60,7 +60,7 @@
           dense
           required
           type="number"
-          :readonly="!editMode"
+          :readonly="!canEdit"
         />
 
         <v-text-field
@@ -73,7 +73,7 @@
           outlined
           dense
           required
-          :readonly="!editMode"
+          :readonly="!canEdit"
         />
 
         <v-expansion-panels>
@@ -89,7 +89,7 @@
                 :type="field.type === 'string' ? 'text' : 'number'"
                 outlined
                 dense
-                :readonly="!editMode"
+                :readonly="!canEdit"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -122,10 +122,10 @@ export default {
       form: {},
       valid: true,
       loading: false,
-      // Listeners are not editable, but I figured I would do a proof of concept for if we ever can edit
-      // things. I'd also imagine that when we do an update, it will only be certain fields, so when we go
-      // to edit mode, we could also remove all the immutable fields.
-      editMode: true,
+      // Listeners are not editable atm, but I figured I would do a proof of concept for if
+      // we ever can edit things. I'd also imagine that when we do an update, it will only
+      // be certain fields, so when we go to edit mode, we could also remove all the immutable fields.
+      editMode: false,
     };
   },
   computed: {
@@ -139,6 +139,9 @@ export default {
       if (this.isNew) return 'New';
       if (this.editMode) return 'Edit';
       return 'View';
+    },
+    canEdit() {
+      return this.isNew || this.editMode;
     },
     /**
      * Fields that go in the "Optional" drawer
@@ -201,7 +204,7 @@ export default {
           exact: true,
         },
         {
-          text: this.id ? `Edit ${this.id}` : 'New',
+          text: this.id ? `${this.id}` : 'New',
           disabled: true,
           to: '/listeners-edit',
         },
@@ -228,10 +231,7 @@ export default {
     listenerType: {
       async handler(val) {
         this.listenerOptions = await listenerApi.getListenerOptions(val)
-          .catch(err => this.$notify.error({
-            title: 'Error',
-            message: err,
-          }));
+          .catch(err => this.$toast.error(`Error: ${err}`));
       },
     },
     id(val) {
@@ -253,12 +253,6 @@ export default {
         return;
       }
 
-      try {
-        await this.$confirm('Do you want to create this listener?');
-      } catch (err) {
-        return;
-      }
-
       this.loading = true;
       await this.create();
       this.loading = false;
@@ -266,10 +260,7 @@ export default {
     create() {
       return listenerApi.createListener(this.listenerType, this.form)
         .then(() => this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } }))
-        .catch(err => this.$notify.error({
-          title: 'Error Creating Listener',
-          message: err,
-        }));
+        .catch(err => this.$toast.error(`Error: ${err}`));
     },
     getListener(id) {
       listenerApi.getListener(id)
@@ -296,5 +287,4 @@ export default {
 </script>
 
 <style>
-
 </style>

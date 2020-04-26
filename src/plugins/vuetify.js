@@ -3,7 +3,14 @@ import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
 import colors from 'vuetify/lib/util/colors';
 
+import VuetifyToast from 'vuetify-toast-snackbar';
+
 Vue.use(Vuetify);
+Vue.use(VuetifyToast, {
+  x: 'right',
+  y: 'top',
+  color: 'accent',
+});
 
 
 export default new Vuetify({

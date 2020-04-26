@@ -69,7 +69,7 @@
         @click="copyTokenToClipboard"
       >
         <span>{{ apiToken }}</span>
-        <i class="el-icon-paperclip center-icon" />
+        <i class="fa fa-paperclip center-icon" />
       </div>
     </div>
   </div>
@@ -130,44 +130,23 @@ export default {
   },
   methods: {
     async copyTokenToClipboard() {
-      try {
-        await navigator.clipboard.writeText(this.apiToken);
-        this.$notify({
-          title: 'Success',
-          message: 'Output copied to clipboard',
-          type: 'success',
-        });
-      } catch (e) {
-        this.$notify.error({
-          title: 'Error',
-          message: 'Could not copy to clipboard',
-        });
-      }
+      await navigator.clipboard.writeText(this.apiToken);
+      this.$toast.success('Output copied to clipboard');
     },
     async logout() {
-      try {
-        await this.$confirm('Are you sure you want to logout?');
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('', 'Are you sure you want to logout?', { color: 'green' })) {
+        this.$store.dispatch('profile/logout');
       }
-
-      this.$store.dispatch('profile/logout');
     },
     submit() {
       if (this.$refs.form.validate()) {
         return userApi.updatePassword(this.user.id, this.form.password)
           .then(() => {
-            this.$notify({
-              message: 'Password updated',
-              type: 'success',
-            });
+            this.$toast.success('Password updated');
             this.form = {};
             this.$refs.form.resetValidation();
           })
-          .catch(err => this.$notify.error({
-            title: 'Error Updating Password',
-            message: err,
-          }));
+          .catch(err => this.$toast.error(`Error: ${err}`));
       }
 
       return false;

@@ -104,19 +104,14 @@ export default {
       // We may want to come back in the future to add the ability to edit working hours, etc.
     },
     async submitRename() {
-      if (this.nameLoading) { return; }
+      if (this.nameLoading || !this.$refs.nameForm.validate()) { return; }
 
-      try {
-        await this.$refs.nameForm.validate();
-        await this.$confirm('Are you sure you want to rename this agent?');
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('', 'Are you sure you want to rename this agent?', { color: 'green' })) {
+        this.nameLoading = true;
+        await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: this.nameForm.name })
+          .catch(() => { this.nameLoading = false; });
+        this.nameLoading = false;
       }
-
-      this.nameLoading = true;
-      await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: this.nameForm.name })
-        .catch(() => { this.nameLoading = false; });
-      this.nameLoading = false;
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;

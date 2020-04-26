@@ -73,13 +73,9 @@ export default {
       this.$router.push({ name: 'listenerNew' });
     },
     async killListener(item) {
-      try {
-        await this.$confirm(`Are you sure you want to kill listener ${item.name}?`);
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${item.name}?`, { color: 'red' })) {
+        this.$store.dispatch('listener/killListener', item.name);
       }
-
-      this.$store.dispatch('listener/killListener', item.name);
     },
     viewListener(item) {
       this.$router.push({ name: 'listenerEdit', params: { id: item.name } });

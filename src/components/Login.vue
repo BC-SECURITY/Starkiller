@@ -78,10 +78,7 @@ export default {
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;
-        this.$notify.error({
-          title: 'Error Logging In',
-          message: val,
-        });
+        this.$toast.error(`Error Logging In: ${val}`);
       }
     },
   },

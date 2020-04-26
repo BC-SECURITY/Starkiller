@@ -190,16 +190,15 @@ export default {
     stagerType: {
       async handler(val) {
         const a = await stagerApi.getStagerByName(val)
-          .catch(err => this.$notify.error({
-            title: 'Error',
-            message: err,
-          }));
-        this.stagerOptions = a.options;
-        this.stagerInfoArray = [
-          { key: 'Author', value: a.Author.join(', ') },
-          { key: 'Comments', value: a.Comments.join('\n') },
-          { key: 'Description', value: a.Description },
-        ];
+          .catch(err => this.$toast.error(`Error: ${err}`));
+        if (a) {
+          this.stagerOptions = a.options;
+          this.stagerInfoArray = [
+            { key: 'Author', value: a.Author.join(', ') },
+            { key: 'Comments', value: a.Comments.join('\n') },
+            { key: 'Description', value: a.Description },
+          ];
+        }
       },
     },
     id(val) {
@@ -217,12 +216,6 @@ export default {
       if (this.loading || !this.$refs.form.validate()) {
         return;
       }
-      
-      try {
-        await this.$confirm('Do you want to generate this stager?');
-      } catch (err) {
-        return;
-      }
 
       this.loading = true;
       await this.create();
@@ -234,10 +227,7 @@ export default {
           this.$store.dispatch('stager/addStager', stager);
           this.$router.push({ name: 'stagers' });
         })
-        .catch(err => this.$notify.error({
-          title: 'Error Creating Stager',
-          message: err,
-        }));
+        .catch(err => this.$toast.error(`Error: ${err}`));
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;

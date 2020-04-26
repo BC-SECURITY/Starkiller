@@ -89,19 +89,10 @@ export default {
     async disableUser(item) {
       // eslint-disable-next-line no-param-reassign
       item.enabled = !item.enabled;
-      try {
-        await this.$confirm(`Are you sure you want to ${item.enabled ? 'enable' : 'disable'} user ${item.username}?`);
-      } catch (err) {
-        item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
-        return;
-      }
 
       userApi.disableUser(item.ID, !item.enabled)
         .catch((err) => {
-          this.$notify.error({
-            title: 'Error',
-            message: err,
-          });
+          this.$toast.error(`Error: ${err}`);
           item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
         });
     },

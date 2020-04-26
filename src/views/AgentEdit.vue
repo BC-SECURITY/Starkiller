@@ -24,7 +24,7 @@
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <v-btn
-            color="red"
+            color="error"
             fab
             x-small
             v-on="on"
@@ -163,30 +163,17 @@ export default {
         });
     },
     async killAgent() {
-      try {
-        await this.$confirm(`Do you want to kill agent ${this.agent.name}?`);
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
+        this.$store.dispatch('agent/killAgent', { name: this.agent.name });
+        this.$toast.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
+        this.$router.push({ name: 'agents' });
       }
-
-      this.$store.dispatch('agent/killAgent', { name: this.agent.name });
-      this.$notify({
-        message: `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
-        type: 'success',
-      });
-      this.$router.push({ name: 'agents' });
     },
     async clearQueue() {
-      try {
-        await this.$confirm('Do you want to clear queue?');
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('', 'Do you want to clear queue?', { color: 'red' })) {
+        this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
+        this.$toast.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
       }
-      this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
-      this.$notify({
-        message: `Clearing queued tasks for Agent ${this.agent.name}.`,
-        type: 'success',
-      });
     },
   },
 };

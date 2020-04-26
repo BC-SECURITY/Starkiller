@@ -2,6 +2,7 @@
   <div id="app">
     <v-app :dark="isDarkMode">
       <side-nav v-if="isLoggedIn" />
+      <confirm ref="confirm" />
 
       <!-- Sizes your content based upon application components -->
       <v-content>
@@ -35,11 +36,13 @@ import { remote } from 'electron';
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
 import SideNav from '@/components/SideNav.vue';
+import Confirm from '@/components/Confirm.vue';
 
 export default {
   name: 'App',
   components: {
     SideNav,
+    Confirm,
   },
   computed: {
     ...mapGetters({
@@ -84,6 +87,8 @@ export default {
     },
   },
   mounted() {
+    this.$root.$confirm = this.$refs.confirm.open;
+
     if (this.isLoggedIn === false) {
       this.$router.push({ path: '/' });
     } else if (this.isLoggedIn === true) {

@@ -92,14 +92,10 @@ export default {
       this.$router.push({ name: 'stagerNew' });
     },
     async deleteStager(index) {
-      try {
-        await this.$confirm('Are you sure you want to delete this stager?');
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('Delete', 'Are you sure you want to delete this stager?', { color: 'red' })) {
+        this.stagers.splice(index, 1);
+        electronStore.set('generatedStagers', this.stagers);
       }
-
-      this.stagers.splice(index, 1);
-      electronStore.set('generatedStagers', this.stagers);
     },
     isDownload(stager) {
       return stager.OutFile.Value.length > 0;
