@@ -17,14 +17,14 @@ export default new Vuetify({
   theme: {
     themes: {
       light: {
-        primary: colors.purple.darken4, // #E53935
-        secondary: colors.purple.lighten4, // #FFCDD2
-        accent: colors.indigo.base, // #3F51B5
+        primary: colors.orange.darken2,
+        secondary: colors.orange.lighten2,
+        accent: colors.orange.base,
       },
       dark: {
-        primary: colors.purple.darken1, // #E53935
-        secondary: colors.purple.lighten4, // #FFCDD2
-        accent: colors.indigo.base, // #3F51B5
+        primary: colors.orange.darken2,
+        secondary: colors.orange.lighten2,
+        accent: colors.orange.base,
       },
     },
   },
