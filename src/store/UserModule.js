@@ -17,10 +17,6 @@ export default {
       const response = await userApi.getUsers();
       context.commit('setUsers', response);
     },
-    // async createUser(context, { username, password }) {
-    //   await userApi.addUser(username, password);
-    //   context.dispatch('getUsers');
-    // },
   },
   getters: {
   },

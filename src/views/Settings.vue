@@ -31,7 +31,7 @@
         <v-text-field
           v-model="form.password"
           :type="showPassword ? 'text' : 'password'"
-          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['password']"
           label="Password"
           autocomplete="off"
@@ -43,7 +43,7 @@
         <v-text-field
           v-model="form.confirmPassword"
           :type="showConfirm ? 'text' : 'password'"
-          :append-icon="showConfirm ? 'mdi-eye' : 'mdi-eye-off'"
+          :append-icon="showConfirm ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['confirmPassword']"
           label="Confirm Password"
           autocomplete="off"

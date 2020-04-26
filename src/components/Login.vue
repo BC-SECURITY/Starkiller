@@ -20,14 +20,13 @@
         v-model="form.password"
         label="Password"
         :type="showPassword ? 'text' : 'password'"
-        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
         outlined
         dense
         @click:append="showPassword = !showPassword"
       />
       <v-checkbox
         v-model="rememberMe"
-        class="remember-checkbox"
         label="Remember URL and Username"
       />
       <v-btn
