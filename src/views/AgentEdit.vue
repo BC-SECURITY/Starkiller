@@ -1,6 +1,36 @@
 <template>
   <div>
     <v-breadcrumbs :items="breads" />
+    <div class="mb-2" style="display: flex; justify-content: flex-end;">
+      <!-- TODO Wrap this into a component? -->
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            color="primary"
+            class="mr-2"
+            fab
+            x-small
+            v-on="on"
+          >
+            <v-icon>fa-calendar-times</v-icon>
+          </v-btn>
+        </template>
+        <span>Clear Queued Tasks</span>
+      </v-tooltip>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            color="red"
+            fab
+            x-small
+            v-on="on"
+          >
+            <v-icon>fa-trash-alt</v-icon>
+          </v-btn>
+        </template>
+        <span>Kill Agent</span>
+      </v-tooltip>
+    </div>
     <div style="height: 84vh">
       <split-pane
         :min-percent="20"
@@ -16,17 +46,30 @@
             grow
           >
             <v-tab
-              key="view"
-              href="#tab-view"
-            >
-              View
-            </v-tab>
-            <v-tab
               key="interact"
               href="#tab-interact"
             >
               Interact
             </v-tab>
+            <v-tab
+              key="view"
+              href="#tab-view"
+            >
+              View
+            </v-tab>
+            <v-tab-item
+              key="interact"
+              :value="'tab-interact'"
+            >
+              <v-card
+                class="scrollable-pane"
+                flat
+              >
+                <agent-interact :agent="agent" />
+                <v-divider />
+                <agent-execute-module :agent-name="agent.name" />
+              </v-card>
+            </v-tab-item>
             <v-tab-item
               key="view"
               :value="'tab-view'"
@@ -38,31 +81,8 @@
                 <agent-form :agent="agent" />
               </v-card>
             </v-tab-item>
-            <v-tab-item
-              key="interact"
-              :value="'tab-interact'"
-            >
-              <v-card
-                class="scrollable-pane"
-                flat
-              >
-                <agent-interact :agent="agent" />
-              </v-card>
-            </v-tab-item>
-            <v-tab-item
-              v-for="i in tabs"
-              :key="i"
-              :value="'tab-' + i"
-            >
-              <v-card
-                flat
-                tile
-              >
-                <v-card-text>Text</v-card-text>
-              </v-card>
-            </v-tab-item>
           </v-tabs>
-          <!-- </div> -->
+        <!-- </div> -->
         </template>
         <template slot="paneR">
           <div
@@ -120,7 +140,7 @@ export default {
           exact: true,
         },
         {
-          text: 'Edit',
+          text: `${this.id}`,
           disabled: true,
           to: '/agent-edit',
         },

@@ -1,95 +1,67 @@
 <template>
-  <div class="agent-execute-module">
-    <h4>Execute Module</h4>
+  <div style="padding: 10px">
+    <h4 style="margin-bottom: 10px;">Execute Module</h4>
     <info-viewer
       class="info-viewer"
       :info-array="moduleInfoArray"
     />
-    <el-form
+    <v-form
       ref="form"
-      :model="form"
-      :label-position="labelPosition"
-      label-width="125px"
-      class="form"
     >
-      <el-form-item
-        label="Module"
-      >
-        <el-select
-          v-model="selectedModule"
-          filterable
-          placeholder="Please enter a module name"
-          class="inline-input module-select"
-          @change="handleSelect"
-        >
-          <el-option
-            v-for="item in selectOptions"
-            :key="item.Name"
-            :label="item.Name"
-            :value="item.Name"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item
+      <v-autocomplete
+        v-model="selectedModule"
+        :items="selectOptions"
+        placeholder="Please enter a module name"
+        outlined
+        dense
+        clearable
+        @change="handleSelect"
+      />
+      <v-text-field
         v-if="fieldExists('Agent')"
-        prop="Agent"
+        v-model="form.Agent"
         label="Agent"
-      >
-        <el-input
-          v-model="form.Agent"
-          disabled
-        />
-      </el-form-item>
-      <el-form-item
-        v-for="lis in requiredFields"
-        :key="lis.name"
-        :prop="lis.name"
-        :label="lis.name"
-      >
-        <el-input
-          v-model="form[lis.name]"
-          :type="lis.type === 'string' ? 'text' : 'number'"
-          :step="lis.type === 'float' ? '0.01' : ''"
-        />
-      </el-form-item>
-      <el-collapse v-if="optionalFields.length > 0">
-        <el-collapse-item
-          title="Optional"
-          name="1"
-        >
-          <el-form-item
-            v-for="lis in optionalFields"
-            :key="lis.name"
-            :label="lis.name"
-          >
-            <el-input
-              v-model="form[lis.name]"
-              :type="lis.type === 'string' ? 'text' : 'number'"
-              :step="lis.type === 'float' ? '0.01' : ''"
+        outlined
+        dense
+      />
+      <v-text-field
+        v-for="field in requiredFields"
+        :key="field.name"
+        v-model="form[field.name]"
+        :label="field.name"
+        :type="field.type === 'string' ? 'text' : 'number'"
+        outlined
+        dense
+      />
+      <v-expansion-panels v-if="optionalFields.length > 0">
+        <v-expansion-panel>
+          <v-expansion-panel-header>Optional Fields</v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-text-field
+              v-for="field in optionalFields"
+              :key="field.name"
+              v-model="form[field.name]"
+              :label="field.name"
+              :type="field.type === 'string' ? 'text' : 'number'"
+              outlined
+              dense
             />
-          </el-form-item>
-        </el-collapse-item>
-      </el-collapse>
-      <el-form-item
-        v-if="!view"
-        size="large"
-      >
-        <div class="footer">
-          <el-button @click="cancel">
-            Cancel
-          </el-button>
-          <el-button
-            type="primary"
-            :loading="loading"
-            @click="submit"
-          >
-            {{ loading ? 'Submitting ...' : 'Submit' }}
-          </el-button>
-        </div>
-      </el-form-item>
-    </el-form>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+      <div>
+        <v-btn
+          type="primary"
+          color="primary"
+          class="ml-1 mr-1"
+          :loading="loading"
+          @click="submit"
+        >
+          Submit
+        </v-btn>
+      </div>
+    </v-form>
   </div>
-  <!-- <span>Side Note: When a module is selected, link to the module's page</span> -->
 </template>
 
 <script>
@@ -109,10 +81,7 @@ export default {
   },
   data() {
     return {
-      view: false,
       loading: false,
-      selectLoading: false,
-      labelPosition: 'left',
       selectedModule: '',
       selectedItem: {},
       form: {},
@@ -120,7 +89,7 @@ export default {
   },
   computed: {
     ...mapState({
-      selectOptions: state => state.module.modules,
+      selectOptions: state => state.module.modules.map(el => el.Name),
     }),
     fields() {
       if (Object.keys(this.selectedItem).length < 1) {
@@ -212,30 +181,9 @@ export default {
     submit() {
       this.$store.dispatch('module/executeModule', { name: this.selectedModule, options: this.form });
     },
-    cancel() {
-
-    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.agent-execute-module {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.info-viewer {
-  width: 100%;
-  max-width: 800px;
-}
-
-.form {
-  max-width: 600px;
-}
-
-.module-select {
-  width: 400px;
-}
 </style>

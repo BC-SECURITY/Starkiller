@@ -8,7 +8,6 @@
         <v-row>
           <v-col
             cols="8"
-            md="4"
           >
             <v-text-field
               v-model="form.command"
