@@ -12,7 +12,6 @@
         v-model="valid"
         style="max-width: 500px"
       >
-        <!-- todo rules? -->
         <v-autocomplete
           v-model="stagerType"
           :items="stagerTypes"
