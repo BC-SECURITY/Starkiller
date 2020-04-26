@@ -36,7 +36,7 @@
         <span>Kill Agent</span>
       </v-tooltip>
     </div>
-    <div style="height: 84vh">
+    <div class="split-view">
       <split-pane
         :min-percent="20"
         :default-percent="60"
@@ -180,6 +180,13 @@ export default {
 </script>
 
 <style>
+.split-view {
+  /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
+     That's 94vh - height of breadcrumbs (57) - height of interact buttons (32px)
+     - height of footer (36px) */
+  height: calc(94vh - 57px - 32px - 36px);
+}
+
 .scrollable-pane {
   max-height: 100%;
   overflow: auto;
