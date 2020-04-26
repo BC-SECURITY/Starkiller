@@ -1,5 +1,6 @@
 <template>
   <div>
+    <v-breadcrumbs :items="breads" />
     <div class="headers">
       <h3>About</h3>
     </div>
@@ -32,6 +33,17 @@
 import { remote } from 'electron';
 
 export default {
+  data() {
+    return {
+      breads: [
+        {
+          text: 'About',
+          disabled: true,
+          href: '/about',
+        },
+      ],
+    };
+  },
   methods: {
     openExternalBrowser(e) {
       remote.shell.openExternal(e.target.href);

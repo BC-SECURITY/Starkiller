@@ -1,5 +1,6 @@
 <template>
   <div>
+    <v-breadcrumbs :items="breads" />
     <div class="headers">
       <h3>Settings</h3>
     </div>
@@ -18,8 +19,8 @@
           Logout
         </v-btn>
       </div>
-      <el-divider />
-      <div class="headers no-left">
+      <v-divider />
+      <div class="headers pl-0 mt-2">
         <h4>Update Password</h4>
       </div>
       <v-form
@@ -52,15 +53,15 @@
           @click:append="showConfirm = !showConfirm"
         />
         <v-btn
-          class="mt-4 primary"
+          class="mt-4 mb-4 primary"
           :loading="loading"
           @click="submit"
         >
           submit
         </v-btn>
       </v-form>
-      <el-divider />
-      <div class="headers no-left">
+      <v-divider />
+      <div class="headers pl-0 mt-2">
         <h4> Api Token </h4>
       </div>
       <div
@@ -98,6 +99,13 @@ export default {
       showConfirm: false,
       loading: false,
       valid: false,
+      breads: [
+        {
+          text: 'Settings',
+          disabled: true,
+          href: '/settings',
+        },
+      ],
     };
   },
   computed: {
@@ -171,9 +179,5 @@ export default {
 <style>
 .point:hover {
   cursor: pointer;
-}
-
-.no-left {
-  padding-left: 0px;
 }
 </style>

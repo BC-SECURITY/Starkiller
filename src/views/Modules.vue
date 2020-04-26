@@ -1,5 +1,6 @@
 <template>
   <div>
+    <v-breadcrumbs :items="breads" />
     <div class="headers">
       <h3>Modules</h3>
       <v-text-field
@@ -55,6 +56,13 @@ export default {
       ],
       filter: '',
       filteredModules: [],
+      breads: [
+        {
+          text: 'Modules',
+          disabled: true,
+          href: '/modules',
+        },
+      ],
     };
   },
   computed: {
