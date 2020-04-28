@@ -33,7 +33,6 @@
         color="primary"
         type="submit"
         :loading="loading"
-        :disabled="loading"
         rounded
       >
         Submit

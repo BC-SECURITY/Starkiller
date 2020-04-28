@@ -98,7 +98,7 @@ export default {
       }
     },
     isDownload(stager) {
-      return stager.OutFile.Value.length > 0;
+      return stager.OutFile && stager.OutFile.Value.length > 0;
     },
     async copy(stager) {
       return this.copyStager(stager.Output);

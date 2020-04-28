@@ -3,6 +3,7 @@
     <v-form
       ref="form"
       class="form"
+      @submit.prevent.native="submit"
     >
       <v-container>
         <v-row>
@@ -21,8 +22,9 @@
             md="4"
           >
             <v-btn
-              type="submit"
               color="primary"
+              :loading="loading"
+              type="submit"
             >
               Run
             </v-btn>
@@ -45,6 +47,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       form: {
         command: '',
       },
@@ -52,9 +55,16 @@ export default {
     };
   },
   methods: {
-    submit() {
-      agentApi.shell(this.agent.name, this.form.command);
+    async submit() {
+      if (this.form.command.length < 1) {
+        return;
+      }
+
+      this.loading = true;
+      await agentApi.shell(this.agent.name, this.form.command);
       this.form.command = '';
+      this.loading = false;
+      this.$toast.success(`Shell Command queued for ${this.agent.name}`);
     },
   },
 };

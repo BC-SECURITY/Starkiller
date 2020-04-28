@@ -15,15 +15,8 @@
         outlined
         dense
         required
-        :readonly="!editMode"
+        readonly
       />
-      <v-btn
-        class="mt-4 primary"
-        :loading="loading"
-        @click="submit"
-      >
-        submit
-      </v-btn>
     </v-form>
   </div>
 </template>
@@ -49,7 +42,7 @@ export default {
       labelPosition: 'left',
       nameForm: {},
       rules: {},
-      nameRules: {
+      nameRules: { // todo vr still need name update functionality in the new ui.
         name: [
           { required: true, message: 'Please input name', trigger: 'blur' },
           { min: 3, message: 'Length should be at least 3', trigger: 'blur' },

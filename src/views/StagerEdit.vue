@@ -11,6 +11,7 @@
         ref="form"
         v-model="valid"
         style="max-width: 500px"
+        @submit.prevent.native="submit"
       >
         <v-autocomplete
           v-model="stagerType"
@@ -60,9 +61,9 @@
           </v-expansion-panel>
         </v-expansion-panels>
         <v-btn
+          type="submit"
           class="mt-4 primary"
           :loading="loading"
-          @click="submit"
         >
           submit
         </v-btn>
@@ -218,15 +219,22 @@ export default {
 
       this.loading = true;
       await this.create();
-      this.loading = false;
     },
     create() {
       return stagerApi.generateStager({ StagerName: this.stagerType, ...this.form })
         .then((stager) => {
           this.$store.dispatch('stager/addStager', stager);
-          this.$router.push({ name: 'stagers' });
+          // electron-store is slower and needs some time to save
+          // before we go back to the list view.
+          setTimeout(() => {
+            this.$router.push({ name: 'stagers' });
+            this.loading = false;
+          }, 2500);
         })
-        .catch(err => this.$toast.error(`Error: ${err}`));
+        .catch((err) => {
+          this.$toast.error(`Error: ${err}`);
+          this.loading = false;
+        });
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;

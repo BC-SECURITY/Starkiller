@@ -27,6 +27,7 @@
         ref="form"
         v-model="valid"
         style="max-width: 500px"
+        @submit.prevent.native="submit"
       >
         <v-text-field
           v-model="form.password"
@@ -53,9 +54,9 @@
           @click:append="showConfirm = !showConfirm"
         />
         <v-btn
+          type="submit"
           class="mt-4 mb-4 primary"
           :loading="loading"
-          @click="submit"
         >
           submit
         </v-btn>
@@ -139,17 +140,22 @@ export default {
       }
     },
     submit() {
-      if (this.$refs.form.validate()) {
-        return userApi.updatePassword(this.user.id, this.form.password)
-          .then(() => {
-            this.$toast.success('Password updated');
-            this.form = {};
-            this.$refs.form.resetValidation();
-          })
-          .catch(err => this.$toast.error(`Error: ${err}`));
+      if (this.loading || !this.$refs.form.validate()) {
+        return;
       }
 
-      return false;
+      this.loading = true;
+      userApi.updatePassword(this.user.id, this.form.password)
+        .then(() => {
+          this.$toast.success('Password updated');
+          this.form = {};
+          this.$refs.form.resetValidation();
+          this.loading = false;
+        })
+        .catch((err) => {
+          this.$toast.error(`Error: ${err}`);
+          this.loading = false;
+        });
     },
   },
 };

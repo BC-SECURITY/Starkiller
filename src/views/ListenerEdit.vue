@@ -22,6 +22,7 @@
         ref="form"
         v-model="valid"
         style="max-width: 500px"
+        @submit.prevent.native="submit"
       >
         <v-autocomplete
           v-model="listenerType"
@@ -96,9 +97,9 @@
         </v-expansion-panels>
         <v-btn
           v-if="isNew"
+          type="submit"
           class="mt-4 primary"
           :loading="loading"
-          @click="submit"
         >
           submit
         </v-btn>

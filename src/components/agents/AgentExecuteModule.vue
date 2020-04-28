@@ -1,12 +1,15 @@
 <template>
   <div style="padding: 10px">
-    <h4 style="margin-bottom: 10px;">Execute Module</h4>
+    <h4 style="margin-bottom: 10px;">
+      Execute Module
+    </h4>
     <info-viewer
       class="info-viewer"
       :info-array="moduleInfoArray"
     />
     <v-form
       ref="form"
+      @submit.prevent.native="submit"
     >
       <v-autocomplete
         v-model="selectedModule"
@@ -51,11 +54,10 @@
       </v-expansion-panels>
       <div>
         <v-btn
-          type="primary"
+          type="submit"
           color="primary"
           class="mt-4"
           :loading="loading"
-          @click="submit"
         >
           Submit
         </v-btn>
@@ -68,6 +70,7 @@
 import Vue from 'vue';
 import { mapState } from 'vuex';
 import InfoViewer from '@/components/InfoViewer.vue';
+import * as moduleApi from '@/api/module-api';
 
 export default {
   components: {
@@ -81,6 +84,7 @@ export default {
   },
   data() {
     return {
+      rules: {}, // todo vr need to add rules for validation
       loading: false,
       selectedModule: '',
       selectedItem: {},
@@ -178,8 +182,13 @@ export default {
 
       return 'string';
     },
-    submit() {
-      this.$store.dispatch('module/executeModule', { name: this.selectedModule, options: this.form });
+    async submit() {
+      this.loading = true;
+      await moduleApi.executeModule(this.selectedModule, this.form);
+      this.loading = false;
+      this.$toast.success(`Module execution queued for ${this.agentName}`);
+      this.selectedItem = {};
+      this.selectedModule = '';
     },
   },
 };
