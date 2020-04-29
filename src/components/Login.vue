@@ -68,11 +68,6 @@ export default {
     }),
   },
   watch: {
-    isLoggedIn(val) {
-      if (val === true) {
-        this.$router.push({ path: '/listeners' });
-      }
-    },
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;

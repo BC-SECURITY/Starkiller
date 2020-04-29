@@ -1,5 +1,9 @@
 <template>
   <div class="agent-command-viewer">
+    <v-icon
+      v-if="!initalized"
+      class="fa-3x fas fa-spinner fa-spin"
+    />
     <ul class="shell-body">
       <div
         v-for="result in agentResults"
@@ -29,6 +33,7 @@ export default {
       commands: [],
       results: [],
       interval: null,
+      initialized: false,
     };
   },
   computed: {
@@ -65,6 +70,7 @@ export default {
   mounted() {
     this.interval = setInterval(async () => {
       this.results = await agentApi.getResults(this.name);
+      this.initialized = true;
     }, 5000);
   },
   beforeDestroy() {

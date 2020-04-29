@@ -53,7 +53,7 @@ export default {
       empireVersion: state => state.profile.empireVersion,
     }),
     isLoginPage() {
-      return this.$route.path === '/';
+      return this.$route.name === 'home';
     },
   },
   watch: {
@@ -68,10 +68,10 @@ export default {
       },
     },
     isLoggedIn(val) {
-      if (val === false) {
-        this.$router.push({ path: '/' });
-      } else if (val === true) {
-        this.$router.push({ path: '/listeners' });
+      if (val === false && !this.isLoginPage) {
+        this.$router.push({ name: 'home' });
+      } else if (val === true && this.$route.name !== 'listeners') {
+        this.$router.push({ name: 'listeners' });
       }
     },
     empireVersion(val) {
@@ -89,10 +89,10 @@ export default {
   mounted() {
     this.$root.$confirm = this.$refs.confirm.open;
 
-    if (this.isLoggedIn === false) {
-      this.$router.push({ path: '/' });
-    } else if (this.isLoggedIn === true) {
-      this.$router.push({ path: '/listeners' });
+    if (this.isLoggedIn === false && !this.isLoginPage) {
+      this.$router.push({ name: 'home' });
+    } else if (this.isLoggedIn === true && this.$route.name !== 'listeners') {
+      this.$router.push({ name: 'listeners' });
     }
   },
   methods: {

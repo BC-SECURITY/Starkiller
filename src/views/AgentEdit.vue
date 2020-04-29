@@ -9,32 +9,8 @@
       <v-dialog
         ref="nameDialog"
         v-model="dialog"
-        persistent
-        max-width="600px"
+        max-width="500px"
       >
-        <template v-slot:activator="{ on }">
-          <v-tooltip
-            top
-            v-on="on"
-          >
-            <template v-slot:activator="{ on2 }">
-              <div v-on="on2">
-                <v-btn
-                  color="primary"
-                  class="mr-2"
-                  fab
-                  x-small
-                  v-on="on"
-                >
-                  <v-icon style="padding-left: 4px">
-                    fa-user-edit
-                  </v-icon>
-                </v-btn>
-              </div>
-            </template>
-            <span>Rename Agent</span>
-          </v-tooltip>
-        </template>
         <v-card>
           <v-card-title>
             <span class="headline">Rename</span>
@@ -47,13 +23,13 @@
                 <v-row>
                   <v-col
                     cols="12"
-                    sm="6"
-                    md="4"
                   >
                     <v-text-field
                       v-model="nameForm.name"
                       label="Name"
                       :rules="nameRules['name']"
+                      outlined
+                      dense
                       required
                     />
                   </v-col>
@@ -81,7 +57,28 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-tooltip top>
+      <v-tooltip
+        bottom
+      >
+        <template v-slot:activator="{ on }">
+          <v-btn
+            color="primary"
+            class="mr-2"
+            fab
+            x-small
+            v-on="on"
+            @click="dialog = true"
+          >
+            <v-icon
+              style="padding-left: 4px"
+            >
+              fa-user-edit
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>Rename Agent</span>
+      </v-tooltip>
+      <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
             color="primary"
@@ -96,7 +93,7 @@
         </template>
         <span>Clear Queued Tasks</span>
       </v-tooltip>
-      <v-tooltip top>
+      <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
             color="error"
@@ -169,6 +166,7 @@
           >
             <agent-command-viewer
               :name="this.$route.params.id"
+              @new-results="scrollResults"
             />
           </div>
         </template>
@@ -200,7 +198,7 @@ export default {
       nameRules: {
         name: [
           v => !!v || 'Name is required',
-          v => (!!v && v.length > 5) || 'Name must at least 3 characters',
+          v => (!!v && v.length > 4) || 'Name must be at least 5 characters',
         ],
       },
       nameLoading: false,
@@ -273,6 +271,12 @@ export default {
 
       this.nameLoading = false;
       this.dialog = false;
+    },
+    /**
+     * When new results appear in the AgentCommandViewer, scroll it down to the bottom.
+     */
+    scrollResults() {
+      this.$refs.bottomScrollable.scrollTop = this.$refs.bottomScrollable.scrollHeight;
     },
   },
 };

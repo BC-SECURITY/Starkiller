@@ -10,19 +10,26 @@
       :items="agents"
     >
       <!-- Use item template to apply conditional row formatting -->
+      <!-- Unfortunately breaks the default "mobile view" -->
       <template v-slot:item="{ item }">
         <tr
           :class="{'warning-row': item.stale}"
           @click="viewAgent(item)"
         >
           <td>
-            <v-icon
-              v-if="item.high_integrity === 1"
-              small
-            >
-              fa-user-cog
-            </v-icon>
-            {{ item.name }}
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-icon
+                  v-if="item.high_integrity === 1"
+                  small
+                  v-on="on"
+                >
+                  fa-user-cog
+                </v-icon>
+              </template>
+              <span>Elevated Process</span>
+            </v-tooltip>
+            <span>{{ item.name }}</span>
           </td>
           <td>
             <v-tooltip top>

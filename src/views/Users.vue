@@ -28,15 +28,20 @@
       </template>
       <template v-slot:item.actions="{ item }">
         <v-tooltip
+          v-if="isAdmin"
           :disabled="!item.admin"
           top
         >
           <template v-slot:activator="{ on }">
-            <div v-on="on">
+            <div
+              style="max-width: 120px"
+              v-on="on"
+            >
               <v-switch
                 v-model="item.enabled"
                 :disabled="item.admin"
                 label="Enabled"
+                v-on="on"
                 @click.stop="disableUser(item)"
               />
             </div>
