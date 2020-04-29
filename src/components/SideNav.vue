@@ -19,7 +19,7 @@
 
           <v-list-item-content>
             <v-list-item-title>Starkiller</v-list-item-title>
-            <v-list-item-subtitle>v1.2.0</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ version }}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
 
@@ -49,9 +49,12 @@
 </template>
 
 <script>
+import { version } from '../../package.json';
+
 export default {
   data() {
     return {
+      version,
       miniVariant: false,
       items: [
         { title: 'Listeners', pathName: 'listeners', icon: 'fa-headphones' },
