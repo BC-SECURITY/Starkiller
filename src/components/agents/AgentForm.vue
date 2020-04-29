@@ -40,14 +40,7 @@ export default {
       nameLoading: false,
       loading: false,
       labelPosition: 'left',
-      nameForm: {},
       rules: {},
-      nameRules: { // todo vr still need name update functionality in the new ui.
-        name: [
-          { required: true, message: 'Please input name', trigger: 'blur' },
-          { min: 3, message: 'Length should be at least 3', trigger: 'blur' },
-        ],
-      },
       form: {},
     };
   },
@@ -84,7 +77,6 @@ export default {
         }, {});
 
         Vue.set(this, 'form', map2);
-        Vue.set(this, 'nameForm', { name: map2.name });
       },
     },
   },
@@ -95,16 +87,6 @@ export default {
     submit() {
       // no-op
       // We may want to come back in the future to add the ability to edit working hours, etc.
-    },
-    async submitRename() {
-      if (this.nameLoading || !this.$refs.nameForm.validate()) { return; }
-
-      if (await this.$root.$confirm('', 'Are you sure you want to rename this agent?', { color: 'green' })) {
-        this.nameLoading = true;
-        await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: this.nameForm.name })
-          .catch(() => { this.nameLoading = false; });
-        this.nameLoading = false;
-      }
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;

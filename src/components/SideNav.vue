@@ -35,7 +35,7 @@
             :to="{ name: item.pathName }"
           >
             <v-list-item-icon>
-              <v-icon>{{ item.icon }}</v-icon>
+              <v-icon :class="item.class">{{ item.icon }}</v-icon>
             </v-list-item-icon>
 
             <v-list-item-content>
@@ -55,7 +55,9 @@ export default {
       miniVariant: false,
       items: [
         { title: 'Listeners', pathName: 'listeners', icon: 'fa-headphones' },
-        { title: 'Stagers', pathName: 'stagers', icon: 'fa-suitcase-rolling' },
+        {
+          title: 'Stagers', pathName: 'stagers', icon: 'fa-suitcase-rolling', class: 'pl-1',
+        },
         { title: 'Agents', pathName: 'agents', icon: 'fa-link' },
         { title: 'Modules', pathName: 'modules', icon: 'fa-grip-horizontal' },
         { title: 'Credentials', pathName: 'credentials', icon: 'fa-key' },

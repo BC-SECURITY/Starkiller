@@ -23,14 +23,17 @@
       <v-text-field
         v-if="fieldExists('Agent')"
         v-model="form.Agent"
+        :rules="rules['Agent']"
         label="Agent"
         outlined
         dense
+        disabled
       />
       <v-text-field
         v-for="field in requiredFields"
         :key="field.name"
         v-model="form[field.name]"
+        :rules="rules[field.name]"
         :label="field.name"
         :type="field.type === 'string' ? 'text' : 'number'"
         outlined
@@ -44,6 +47,7 @@
               v-for="field in optionalFields"
               :key="field.name"
               v-model="form[field.name]"
+              :rules="rules[field.name]"
               :label="field.name"
               :type="field.type === 'string' ? 'text' : 'number'"
               outlined
@@ -84,7 +88,6 @@ export default {
   },
   data() {
     return {
-      rules: {}, // todo vr need to add rules for validation
       loading: false,
       selectedModule: '',
       selectedItem: {},
@@ -115,6 +118,22 @@ export default {
         .filter(el => ['Agent'].indexOf(el.name) < 0)
         .filter(el => el.Required === false)
         .map(el => ({ ...el, type: this.fieldType(el) }));
+    },
+    /**
+     * The rules for the form, currently this is only to check for empty required fields.
+     */
+    rules() {
+      return this.fields.reduce((map, field) => {
+        // eslint-disable-next-line no-param-reassign
+        map[field.name] = [];
+        if (field.Required === true) {
+          map[field.name].push(
+            v => !!v || `${field.name} is required`,
+          );
+        }
+
+        return map;
+      }, {});
     },
     moduleInfoArray() {
       if (Object.keys(this.selectedItem).length === 0) {
@@ -183,9 +202,14 @@ export default {
       return 'string';
     },
     async submit() {
+      if (this.loading || !this.$refs.form.validate()) {
+        return;
+      }
+
       this.loading = true;
       await moduleApi.executeModule(this.selectedModule, this.form);
       this.loading = false;
+
       this.$toast.success(`Module execution queued for ${this.agentName}`);
       this.selectedItem = {};
       this.selectedModule = '';

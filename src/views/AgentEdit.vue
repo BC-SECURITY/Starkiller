@@ -6,6 +6,81 @@
       style="display: flex; justify-content: flex-end;"
     >
       <!-- TODO Wrap this into a component? -->
+      <v-dialog
+        ref="nameDialog"
+        v-model="dialog"
+        persistent
+        max-width="600px"
+      >
+        <template v-slot:activator="{ on }">
+          <v-tooltip
+            top
+            v-on="on"
+          >
+            <template v-slot:activator="{ on2 }">
+              <div v-on="on2">
+                <v-btn
+                  color="primary"
+                  class="mr-2"
+                  fab
+                  x-small
+                  v-on="on"
+                >
+                  <v-icon style="padding-left: 4px">
+                    fa-user-edit
+                  </v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>Rename Agent</span>
+          </v-tooltip>
+        </template>
+        <v-card>
+          <v-card-title>
+            <span class="headline">Rename</span>
+          </v-card-title>
+          <v-card-text>
+            <v-form
+              ref="nameForm"
+            >
+              <v-container>
+                <v-row>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    md="4"
+                  >
+                    <v-text-field
+                      v-model="nameForm.name"
+                      label="Name"
+                      :rules="nameRules['name']"
+                      required
+                    />
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="dialog = false"
+            >
+              Close
+            </v-btn>
+            <v-btn
+              color="blue darken-1"
+              text
+              :loading="nameLoading"
+              @click="renameAgent"
+            >
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <v-btn
@@ -122,7 +197,16 @@ export default {
   data() {
     return {
       agent: {},
+      nameRules: {
+        name: [
+          v => !!v || 'Name is required',
+          v => (!!v && v.length > 5) || 'Name must at least 3 characters',
+        ],
+      },
+      nameLoading: false,
+      nameForm: {},
       activeTab: 'View',
+      dialog: false,
     };
   },
   computed: {
@@ -174,6 +258,21 @@ export default {
         this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
         this.$toast.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
       }
+    },
+    async renameAgent() {
+      if (this.nameLoading || !this.$refs.nameForm.validate()) { return; }
+
+      this.nameLoading = true;
+      try {
+        await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: this.nameForm.name });
+        this.$toast.success(`Agent ${this.agent.name} tasked to change name.`);
+        this.$router.push({ name: 'agents' });
+      } catch (err) {
+        this.$toast.error(`Error: ${err}`);
+      }
+
+      this.nameLoading = false;
+      this.dialog = false;
     },
   },
 };
