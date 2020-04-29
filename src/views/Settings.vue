@@ -4,10 +4,6 @@
     <div class="headers">
       <h3>Settings</h3>
     </div>
-    <v-switch
-      v-model="darkModeSwitch"
-      :label="`Dark Mode`"
-    />
     <div class="page">
       <div class="first-part">
         <span>{{ user.username }}</span>
@@ -19,6 +15,11 @@
           Logout
         </v-btn>
       </div>
+      <v-divider />
+      <v-switch
+        v-model="darkModeSwitch"
+        :label="`Dark Mode`"
+      />
       <v-divider />
       <div class="headers pl-0 mt-2">
         <h4>Update Password</h4>

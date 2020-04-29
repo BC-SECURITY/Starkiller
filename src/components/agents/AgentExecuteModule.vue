@@ -207,12 +207,16 @@ export default {
       }
 
       this.loading = true;
-      await moduleApi.executeModule(this.selectedModule, this.form);
-      this.loading = false;
+      try {
+        await moduleApi.executeModule(this.selectedModule, this.form);
+        this.$toast.success(`Module execution queued for ${this.agentName}`);
+        this.selectedItem = {};
+        this.selectedModule = '';
+      } catch (err) {
+        this.$toast.error(`Error: ${err}`);
+      }
 
-      this.$toast.success(`Module execution queued for ${this.agentName}`);
-      this.selectedItem = {};
-      this.selectedModule = '';
+      this.loading = false;
     },
   },
 };
