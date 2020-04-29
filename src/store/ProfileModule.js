@@ -11,7 +11,7 @@ export default {
     user: {},
     loginError: '',
     empireVersion: '',
-    darkMode: false,
+    darkMode: true,
   },
   mutations: {
     setApplicationState(state, {
