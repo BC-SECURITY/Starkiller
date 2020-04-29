@@ -35,7 +35,9 @@
             :to="{ name: item.pathName }"
           >
             <v-list-item-icon>
-              <v-icon :class="item.class">{{ item.icon }}</v-icon>
+              <v-icon :class="item.class">
+                {{ item.icon }}
+              </v-icon>
             </v-list-item-icon>
 
             <v-list-item-content>

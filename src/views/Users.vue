@@ -5,6 +5,7 @@
     <div class="headers">
       <h3>Users</h3>
       <v-btn
+        v-if="isAdmin"
         color="primary"
         rounded
         @click="create"
@@ -48,7 +49,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import * as userApi from '@/api/user-api';
 import moment from 'moment';
 
@@ -78,6 +79,9 @@ export default {
     ...mapState({
       users: state => state.user.users,
     }),
+    ...mapGetters({
+      isAdmin: 'profile/isAdmin',
+    }),
   },
   mounted() {
     this.getUsers();
@@ -97,7 +101,9 @@ export default {
         });
     },
     viewUser(item) {
-      this.$router.push({ name: 'userEdit', params: { id: item.ID } });
+      if (this.isAdmin === true) {
+        this.$router.push({ name: 'userEdit', params: { id: item.ID } });
+      }
     },
     getUsers() {
       this.$store.dispatch('user/getUsers');

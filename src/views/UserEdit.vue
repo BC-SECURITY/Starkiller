@@ -93,7 +93,7 @@ export default {
           exact: true,
         },
         {
-          text: this.id ? `Edit ${this.id}` : 'New',
+          text: this.id ? `${this.id}` : 'New',
           disabled: true,
           to: '/users-edit',
         },

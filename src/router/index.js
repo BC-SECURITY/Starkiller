@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import store from '@/store/index';
 import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
@@ -67,6 +68,9 @@ const routes = [
     path: '/users/:id',
     name: 'userEdit',
     component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+    meta: {
+      requiresAdmin: true,
+    },
   },
   {
     path: '/users/new',
@@ -94,6 +98,28 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes,
+});
+
+function isAuthenticated() {
+  return store.getters['profile/token'].length > 0;
+}
+
+function isAdmin() {
+  return store.getters['profile/isAdmin'] === true;
+}
+
+// Auth
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'home' && !isAuthenticated()) {
+    next({ name: 'home' });
+  } else next();
+});
+
+// Admin
+router.beforeEach((to, from, next) => {
+  if (to.meta && to.meta.requiresAdmin && !isAdmin()) {
+    next({ name: 'listeners' });
+  } else next();
 });
 
 export default router;

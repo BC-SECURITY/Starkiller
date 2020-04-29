@@ -79,5 +79,8 @@ export default {
     isDarkMode(state) {
       return state.darkMode;
     },
+    token(state) {
+      return state.token;
+    },
   },
 };
