@@ -1,142 +1,117 @@
 <template>
-  <div class="route-container">
+  <div>
+    <v-breadcrumbs :items="breads" />
+
     <div class="headers">
       <h3>Users</h3>
-      <el-button
-        type="primary"
-        round
+      <v-btn
+        v-if="isAdmin"
+        color="primary"
+        rounded
         @click="create"
       >
         Create User
-      </el-button>
+      </v-btn>
     </div>
-    <user-viewer
-      :visible="visible"
-      :view="view"
-      :view-object="viewObject"
-      @close="close"
-    />
-    <el-table
-      :data="users"
-      class="main-table"
-      :row-class-name="tableRowClassName"
-      @row-click="viewUser"
+    <v-data-table
+      :headers="headers"
+      :items="users"
+      @click:row="viewUser"
     >
-      <el-table-column
-        prop="ID"
-        label="id"
-        sortable
-      />
-      <el-table-column
-        prop="username"
-        label="Name"
-        sortable
-      />
-      <el-table-column
-        prop="last_logon_time"
-        label="Last Logon"
-        sortable
-      >
-        <template slot-scope="scope">
-          <el-tooltip :content="moment(scope.row.last_logon_time).format('lll')">
-            <div>{{ moment(scope.row.last_logon_time).fromNow() }}</div>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-      <el-table-column
-        fixed="right"
-        label="Operations"
-        width="120"
-      >
-        <template slot-scope="scope">
-          <el-tooltip
-            :disabled="!users[scope.$index].admin"
-            content="Cannot disable admin user"
-          >
-            <el-switch
-              v-model="users[scope.$index].enabled"
-              :disabled="users[scope.$index].admin"
-              inactive-color="#ff4949"
-              @change="disableUser($event, scope.$index, users)"
-            />
-          </el-tooltip>
-        </template>
-      </el-table-column>
-    </el-table>
+      <template v-slot:item.last_logon_time="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ moment(item.last_logon_time).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.last_logon_time).format('lll') }}</span>
+        </v-tooltip>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-tooltip
+          v-if="isAdmin"
+          :disabled="!item.admin"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <div
+              style="max-width: 120px"
+              v-on="on"
+            >
+              <v-switch
+                v-model="item.enabled"
+                :disabled="item.admin"
+                label="Enabled"
+                v-on="on"
+                @click.stop="disableUser(item)"
+              />
+            </div>
+          </template>
+          <span>Cannot disable admin user</span>
+        </v-tooltip>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import UserViewer from '@/components/users/UserViewer.vue';
+import { mapState, mapGetters } from 'vuex';
 import * as userApi from '@/api/user-api';
 import moment from 'moment';
 
 export default {
   name: 'Users',
   components: {
-    UserViewer,
   },
   data() {
     return {
-      visible: false,
-      view: false,
-      viewObject: {},
+      moment,
+      breads: [
+        {
+          text: 'Users',
+          disabled: true,
+          href: '/users',
+        },
+      ],
+      headers: [
+        { text: 'id', align: 'start', value: 'ID' },
+        { text: 'Name', value: 'username' },
+        { text: 'Last Logon', value: 'last_logon_time' },
+        { text: 'Actions', value: 'actions', sortable: false },
+      ],
     };
   },
   computed: {
     ...mapState({
       users: state => state.user.users,
     }),
+    ...mapGetters({
+      isAdmin: 'profile/isAdmin',
+    }),
   },
   mounted() {
     this.getUsers();
-    this.moment = moment;
   },
   methods: {
     create() {
-      this.visible = true;
+      this.$router.push({ name: 'userNew' });
     },
-    close() {
-      this.visible = false;
-      this.view = false;
-      this.viewObject = {};
-      this.getUsers();
-    },
-    async disableUser(enabled, index, rows) {
-      try {
-        await this.$confirm(`Are you sure you want to ${enabled ? 'enable' : 'disable'} user ${rows[index].username}?`);
-      } catch (err) {
-        rows[index].enabled = !enabled; // eslint-disable-line no-param-reassign
-        return;
-      }
+    async disableUser(item) {
+      // eslint-disable-next-line no-param-reassign
+      item.enabled = !item.enabled;
 
-      userApi.disableUser(rows[index].ID, !enabled)
+      userApi.disableUser(item.ID, !item.enabled)
         .catch((err) => {
-          this.$notify.error({
-            title: 'Error',
-            message: err,
-          });
-          rows[index].enabled = !enabled; // eslint-disable-line no-param-reassign
+          this.$toast.error(`Error: ${err}`);
+          item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
         });
     },
-    viewUser(row, column) {
-      if (column.label === 'Operations') {
-        return;
+    viewUser(item) {
+      if (this.isAdmin === true) {
+        this.$router.push({ name: 'userEdit', params: { id: item.ID } });
       }
-
-      this.visible = true;
-      this.view = true;
-      this.viewObject = row;
     },
     getUsers() {
       this.$store.dispatch('user/getUsers');
-    },
-    tableRowClassName({ row }) {
-      if (row.enabled === false) {
-        return 'warning-row';
-      }
-      return 'l';
     },
   },
 };

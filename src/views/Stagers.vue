@@ -1,110 +1,59 @@
 <template>
-  <div class="route-container">
+  <div>
+    <v-breadcrumbs :items="breads" />
+
     <div class="headers">
-      <div style="display: flex; flex-direction: row;">
-        <h3>Stagers</h3>
-        <el-tooltip :content="tooltipText">
-          <i
-            style="align-self: center;"
-            class="el-icon-question"
-          />
-        </el-tooltip>
-      </div>
-      <el-button
-        type="primary"
-        round
+      <h3>Stagers</h3>
+      <v-btn
+        color="primary"
+        rounded
         @click="create"
       >
         Generate Stager
-      </el-button>
+      </v-btn>
     </div>
-    <stager-viewer
-      :visible="visible"
-      :view="view"
-      :view-object="viewObject"
-      @close="close"
-    />
-    <el-table
-      :data="stagers"
-      class="main-table"
-      @row-click="viewStager"
+    <v-data-table
+      :headers="headers"
+      :items="stagers"
     >
-      <el-table-column
-        prop="name"
-        label="Name"
-        sortable
-      />
-      <el-table-column
-        prop="Listener.Value"
-        label="Listener"
-        width="180"
-        sortable
-      />
-      <el-table-column
-        prop="Language.Value"
-        label="Language"
-        width="180"
-        sortable
-      />
-      <el-table-column
-        prop="SafeChecks.Value"
-        label="SafeChecks"
-        width="180"
-        sortable
-      />
-      <el-table-column
-        prop="createdAt"
-        label="Created At"
-        width="180"
-        sortable
-      >
-        <template slot-scope="scope">
-          <el-tooltip :content="moment(scope.row.createdAt).format('lll')">
-            <div>{{ moment(scope.row.createdAt).fromNow() }}</div>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-      <el-table-column
-        fixed="right"
-        label="Operations"
-        width="150"
-      >
-        <template slot-scope="scope">
-          <el-button
-            v-if="isDownload(scope.$index, stagers)"
-            type="success"
-            icon="el-icon-download"
-            label="Download"
-            circle
-            size="small"
-            @click="download(scope.$index, stagers)"
-          />
-          <el-button
-            v-else
-            type="success"
-            icon="el-icon-paperclip"
-            label="Copy"
-            circle
-            size="small"
-            @click="copy(scope.$index, stagers)"
-          />
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            label="Delete"
-            circle
-            size="small"
-            @click="deleteStager(scope.$index)"
-          />
-        </template>
-      </el-table-column>
-    </el-table>
+      <template v-slot:item.createdAt="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ moment(item.createdAt).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.createdAt).format('lll') }}</span>
+        </v-tooltip>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          v-if="isDownload(item)"
+          style="padding-right: 5px"
+          small
+          @click="download(item)"
+        >
+          fa-download
+        </v-icon>
+        <v-icon
+          v-else
+          style="padding-right: 5px"
+          small
+          @click="copy(item)"
+        >
+          fa-paperclip
+        </v-icon>
+        <v-icon
+          small
+          @click="deleteStager(item)"
+        >
+          fa-trash-alt
+        </v-icon>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
 <script>
 import { namespacedElectronStore as electronStore } from '@/store/electron-store';
-import StagerViewer from '@/components/stagers/StagerViewer.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import CopyMixin from '@/mixins/copy-stager';
 import moment from 'moment';
@@ -112,65 +61,49 @@ import moment from 'moment';
 export default {
   name: 'Stagers',
   components: {
-    StagerViewer,
   },
   mixins: [DownloadMixin, CopyMixin],
   data() {
     return {
-      visible: false,
-      view: false,
-      viewObject: {},
+      moment,
+      breads: [
+        {
+          text: 'Stagers',
+          disabled: true,
+          href: '/stagers',
+        },
+      ],
+      headers: [
+        { text: 'Name', value: 'name' },
+        { text: 'Listener', value: 'Listener.Value' },
+        { text: 'Language', value: 'Language.Value' },
+        { text: 'SafeChecks', value: 'SafeChecks.Value' },
+        { text: 'Created At', value: 'createdAt' },
+        { text: 'Actions', value: 'actions', sortable: false },
+      ],
       stagers: [],
-      tooltipText: 'These are stagers you have generated in the past.',
     };
   },
-  computed: {
-  },
   mounted() {
-    this.moment = moment;
     this.getStagers();
   },
   methods: {
     create() {
-      this.visible = true;
-    },
-    close() {
-      this.visible = false;
-      this.view = false;
-      this.viewObject = {};
-      // electronStore is a bit slower. We could wrap this stuff
-      // into the vuex store for reactivity.
-      setTimeout(() => this.getStagers(), 1000);
-    },
-    viewStager(row, column) {
-      if (column.label === 'Operations') {
-        return;
-      }
-
-      this.visible = true;
-      this.view = true;
-      this.viewObject = row;
+      this.$router.push({ name: 'stagerNew' });
     },
     async deleteStager(index) {
-      try {
-        await this.$confirm('Are you sure you want to delete this stager?');
-      } catch (err) {
-        return;
+      if (await this.$root.$confirm('Delete', 'Are you sure you want to delete this stager?', { color: 'red' })) {
+        this.stagers.splice(index, 1);
+        electronStore.set('generatedStagers', this.stagers);
       }
-
-      this.stagers.splice(index, 1);
-      electronStore.set('generatedStagers', this.stagers);
     },
-    isDownload(index, rows) {
-      const stager = rows[index];
-      return stager.OutFile.Value.length > 0;
+    isDownload(stager) {
+      return stager.OutFile && stager.OutFile.Value.length > 0;
     },
-    async copy(index, rows) {
-      const stager = rows[index];
+    async copy(stager) {
       return this.copyStager(stager.Output);
     },
-    async download(index, rows) {
-      const stager = rows[index];
+    async download(stager) {
       return this.downloadStager(stager.Output, stager.OutFile.Value);
     },
     getStagers() {

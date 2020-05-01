@@ -1,6 +1,15 @@
 import { axiosInstance as axios } from '@/api/axios-instance';
 
 /**
+ * Returns a single users.
+ */
+export function getUser(id) {
+  return axios.get(`/users/${id}`)
+    .then(({ data }) => data)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
  * Returns a full list of users.
  */
 export function getUsers() {
@@ -14,7 +23,7 @@ export function getUsers() {
  * @param {string} username
  * @param {string} password
  */
-export function addUser(username, password) {
+export function createUser(username, password) {
   return axios.post('/users', { username, password })
     .then(({ data }) => data)
     .catch(error => Promise.reject(error.response.data.error));

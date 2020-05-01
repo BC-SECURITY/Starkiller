@@ -5,19 +5,8 @@ export default {
      * @param {*} output text to copy
      */
     async copyStager(output) {
-      try {
-        await navigator.clipboard.writeText(output);
-        this.$notify({
-          title: 'Success',
-          message: 'Output copied to clipboard',
-          type: 'success',
-        });
-      } catch (e) {
-        this.$notify.error({
-          title: 'Error',
-          message: 'Could not copy to clipboard',
-        });
-      }
+      await navigator.clipboard.writeText(output);
+      this.$toast.success('Output copied to clipboard');
     },
   },
 };

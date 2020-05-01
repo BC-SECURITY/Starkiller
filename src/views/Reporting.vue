@@ -1,68 +1,43 @@
 <template>
-  <div class="route-container">
+  <div>
+    <v-breadcrumbs :items="breads" />
+
     <div class="headers">
       <h3>Reporting</h3>
     </div>
-    <el-table
-      :data="reporting"
-      class="main-table"
+    <v-data-table
+      :headers="headers"
+      :items="reporting"
+      item-key="id"
+      show-expand
     >
-      <el-table-column type="expand">
-        <template slot-scope="props">
-          <p><b>Agent:</b> {{ props.row.agent_name }}</p>
-          <p><b>Task Command:</b></p>
-          <p class="mono">
-            {{ props.row.task }}
-          </p>
-          <p><b>Task Result:</b></p>
-          <p class="mono">
-            {{ props.row.results }}
-          </p>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="agent_name"
-        label="Agent"
-        sortable
-      />
-      <el-table-column
-        prop="taskID"
-        label="Task ID"
-        sortable
-      />
-      <el-table-column
-        prop="event_type"
-        label="Event Type"
-        sortable
-      />
-      <el-table-column
-        prop="task"
-        label="Task Command"
-        sortable
-      >
-        <template slot-scope="scope">
-          <div>{{ truncateMessage(scope.row) }}</div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="username"
-        label="User"
-        width="120"
-        sortable
-      />
-      <el-table-column
-        prop="timestamp"
-        label="timestamp"
-        width="180"
-        sortable
-      >
-        <template slot-scope="scope">
-          <el-tooltip :content="moment(scope.row.timestamp).format('lll')">
-            <div>{{ moment(scope.row.timestamp).fromNow() }}</div>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-    </el-table>
+      <template v-slot:expanded-item="{ headers, item }">
+        <td :colspan="headers.length">
+          <div>
+            <p><b>Agent:</b> {{ item.agent_name }}</p>
+            <p><b>Task Command:</b></p>
+            <p class="mono">
+              {{ item.task }}
+            </p>
+            <p><b>Task Result:</b></p>
+            <p class="mono">
+              {{ item.results }}
+            </p>
+          </div>
+        </td>
+      </template>
+      <template v-slot:item.task="{ item }">
+        <span>{{ truncateMessage(item.task) }}</span>
+      </template>
+      <template v-slot:item.timestamp="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ moment(item.timestamp).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.timestamp).format('lll') }}</span>
+        </v-tooltip>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
@@ -76,18 +51,37 @@ export default {
   },
   data() {
     return {
+      moment,
       reporting: [],
+      breads: [
+        {
+          text: 'Credentials',
+          disabled: true,
+          href: '/credentials',
+        },
+      ],
+      headers: [
+        { text: 'Agent', value: 'agent_name' },
+        { text: 'Task ID', value: 'taskID' },
+        { text: 'Event Type', value: 'event_type' },
+        { text: 'Task Command', value: 'task' },
+        { text: 'User', value: 'username' },
+        { text: 'Timestamp', value: 'timestamp' },
+      ],
     };
   },
   mounted() {
     this.getReporting();
-    this.moment = moment;
   },
   methods: {
     async getReporting() {
-      this.reporting = await reportingApi.getReporting();
+      const arr = await reportingApi.getReporting();
+
+      // add unique ids for the expandable rows to work.
+      let i = 1;
+      this.reporting = arr.map(el => ({ ...el, id: i++ }));
     },
-    truncateMessage({ task }) {
+    truncateMessage(task) {
       if (task) {
         return task.length > 30 ? `${task.substr(0, 30)}...` : task;
       }

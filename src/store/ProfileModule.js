@@ -2,6 +2,7 @@ import axios from 'axios';
 import { setInstance } from '@/api/axios-instance';
 import { initNamespacedStore } from '@/store/electron-store';
 
+
 export default {
   namespaced: true,
   state: {
@@ -10,6 +11,7 @@ export default {
     user: {},
     loginError: '',
     empireVersion: '',
+    darkMode: true,
   },
   mutations: {
     setApplicationState(state, {
@@ -29,6 +31,9 @@ export default {
       state.token = '';
       state.url = '';
       state.user = {};
+    },
+    setDarkMode(state, val) {
+      state.darkMode = val;
     },
   },
   actions: {
@@ -60,6 +65,9 @@ export default {
       axios.post(`https://${context.state.url}/api/admin/logout?token=${context.state.token}`);
       context.commit('setLogout');
     },
+    darkMode(context, val) {
+      context.commit('setDarkMode', val);
+    },
   },
   getters: {
     isLoggedIn(state) {
@@ -67,6 +75,12 @@ export default {
     },
     isAdmin(state) {
       return state.user.admin === true;
+    },
+    isDarkMode(state) {
+      return state.darkMode;
+    },
+    token(state) {
+      return state.token;
     },
   },
 };
