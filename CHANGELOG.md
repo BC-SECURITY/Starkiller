@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2020-04-30
+Including but not limited to:
+- Replace element-ui with Vuetify
+- Dark Mode
+- New UX flows
+- Better error feedback (like when a request to execute a module fails)
+- Better UI feedback when submitting a form (loading on buttons)
+- Simplified a lot of the code
+- Hide non-admin features from non-admin users
+- Stay logged in after closing the app
+- Indicator for elevated process on agents list
+
 ## [1.1.1] - 2020-04-15
 - Corrected an issue with writing to electron-store in Windows [@vinnybod](https://github.com/vinnybod) [#17](https://github.com/BC-SECURITY/Starkiller/pull/17)
 
