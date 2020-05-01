@@ -20,7 +20,8 @@
           target="_blank"
           href="https://github.com/bc-security/starkiller"
           @click.prevent="openExternalBrowser"
-        > Starkiller |</a>
+        > Starkiller </a>
+        <span class="mr-2">|</span>
         <a
           target="_blank"
           href="https://github.com/bc-security/empire"

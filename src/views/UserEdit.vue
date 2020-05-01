@@ -66,14 +66,15 @@ export default {
       rules: {
         name: [
           v => !!v || 'Name is required',
-          v => v.length > 3 || 'Name must be larger than 3 characters',
+          v => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
         ],
         password: [
           v => !!v || 'Password is required',
-          v => v.length > 5 || 'Password must be larger than 5 characters',
+          v => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
         ],
         confirmPassword: [
-          v => !!v || 'Confirm your password',
+          v => !!v || 'Confirmation is required',
+          v => v === this.form.password || 'Password must match',
         ],
       },
       user: {},
