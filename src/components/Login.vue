@@ -1,39 +1,43 @@
 <template>
   <div class="hello">
-    <el-form
+    <v-form
       class="inputs"
       @submit.prevent.native="submit"
     >
-      <el-input
+      <v-text-field
         v-model="form.url"
-        placeholder="URL"
-      >
-        <template slot="prepend">
-          https://
-        </template>
-      </el-input>
-      <el-input
+        label="Name"
+        dense
+        outlined
+      />
+      <v-text-field
         v-model="form.username"
-        placeholder="Username"
+        label="Username"
+        dense
+        outlined
       />
-      <el-input
+      <v-text-field
         v-model="form.password"
-        placeholder="Password"
-        show-password
+        label="Password"
+        :type="showPassword ? 'text' : 'password'"
+        :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
+        outlined
+        dense
+        @click:append="showPassword = !showPassword"
       />
-      <el-checkbox
+      <v-checkbox
         v-model="rememberMe"
-        class="remember-checkbox"
         label="Remember URL and Username"
       />
-      <el-button
-        type="primary"
-        native-type="submit"
-        round
+      <v-btn
+        color="primary"
+        type="submit"
+        :loading="loading"
+        rounded
       >
         Submit
-      </el-button>
-    </el-form>
+      </v-btn>
+    </v-form>
   </div>
 </template>
 
@@ -45,6 +49,8 @@ export default {
   name: 'Login',
   data() {
     return {
+      loading: false,
+      showPassword: false,
       rememberMe: false,
       form: {
         url: '',
@@ -62,17 +68,10 @@ export default {
     }),
   },
   watch: {
-    isLoggedIn(val) {
-      if (val === true) {
-        this.$router.push({ path: '/listeners' });
-      }
-    },
     loginError(val) {
       if (val.length > 0) {
-        this.$notify.error({
-          title: 'Error Logging In',
-          message: val,
-        });
+        this.loading = false;
+        this.$toast.error(`Error Logging In: ${val}`);
       }
     },
   },
@@ -83,6 +82,7 @@ export default {
   },
   methods: {
     submit() {
+      this.loading = true;
       electronStore.set('rememberMe', this.rememberMe);
 
       if (this.rememberMe === true) {
@@ -99,41 +99,5 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.hello {
-  padding-left: 30px;
-  padding-right: 30px;
-}
-
-.el-input {
-  padding-bottom: 10px;
-  max-width: 500px;
-}
-
-.inputs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.remember-checkbox {
-  padding-right: 275px;
-  padding-bottom: 10px
-}
-
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
 </style>

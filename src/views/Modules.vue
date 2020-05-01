@@ -1,68 +1,38 @@
 <template>
-  <div class="route-container">
+  <div>
+    <v-breadcrumbs :items="breads" />
     <div class="headers">
       <h3>Modules</h3>
-      <el-input
+      <v-text-field
         v-model="filter"
-        placeholder="Search"
+        outlined
+        dense
+        label="Search"
         style="max-width: 250px"
       />
     </div>
-    <el-table
-      :data="filteredModules"
-      class="main-table"
+    <!-- TODO if we refactor the way we fetch modules we can add a loading state to the table. -->
+    <v-data-table
+      :headers="headers"
+      :items="filteredModules"
+      item-key="Name"
+      show-expand
     >
-      <el-table-column type="expand">
-        <template slot-scope="props">
-          <p><b>Name:</b> {{ props.row.Name }}</p>
-          <p><b>NeedsAdmin:</b> {{ props.row.NeedsAdmin }}</p>
-          <p><b>OpsecSafe:</b> {{ props.row.OpsecSafe }}</p>
-          <p><b>Language:</b> {{ props.row.Language }}</p>
-          <p><b>MinLanguageVersion:</b> {{ props.row.MinLanguageVersion }}</p>
-          <p><b>Background:</b> {{ props.row.Background }}</p>
+      <template v-slot:expanded-item="{ headers, item }">
+        <td :colspan="headers.length">
+          <div class="d-flex flex-column">
+            <b>Author:</b>
+            {{ item.Author ? item.Author.join(', ') : '' }}
 
-          <p><b>Author:</b></p>
-          <p>{{ props.row.Author.join(', ') }}</p>
+            <b>Description:</b>
+            {{ item.Description }}
 
-          <p><b>Description:</b></p>
-          <p>{{ props.row.Description }}</p>
-
-          <p><b>Comments:</b></p>
-          <p>{{ props.row.Comments.join('\n ') }}</p>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="Name"
-        label="Name"
-        min-width="180"
-        sortable
-      />
-      <el-table-column
-        prop="Language"
-        label="Language"
-        :formatter="toLower"
-        sortable
-        :sort-method="sortLanguage"
-      />
-      <el-table-column
-        prop="MinLanguageVersion"
-        label="Min Version"
-        sortable
-        :sort-method="sortMinLanguageVersion"
-      />
-      <el-table-column
-        prop="NeedsAdmin"
-        label="Needs Admin"
-        :formatter="cellValueRenderer"
-        sortable
-      />
-      <el-table-column
-        prop="OpsecSafe"
-        label="Opsec Safe"
-        :formatter="cellValueRenderer"
-        sortable
-      />
-    </el-table>
+            <b>Comments:</b>
+            {{ item.Comments ? item.Comments.join('\n ') : '' }}
+          </div>
+        </td>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
@@ -74,8 +44,27 @@ export default {
   name: 'Modules',
   data() {
     return {
+      headers: [
+        {
+          text: 'Name',
+          align: 'start',
+          value: 'Name',
+        },
+        { text: 'Language', value: 'Language', sort: this.sortLanguage },
+        { text: 'MinLanguageVersion', value: 'MinLanguageVersion', sort: this.sortMinLanguageVersion },
+        { text: 'Needs Admin', value: 'NeedsAdmin' },
+        { text: 'OpsecSafe', value: 'OpsecSafe' },
+        { text: 'Background', value: 'Background' },
+      ],
       filter: '',
       filteredModules: [],
+      breads: [
+        {
+          text: 'Modules',
+          disabled: true,
+          href: '/modules',
+        },
+      ],
     };
   },
   computed: {
@@ -89,10 +78,10 @@ export default {
      */
     moduleSearch() {
       return this.modules.map(({
-        Author, Language, MinLanguageVersion, Name,
+        Author, Language, MinLanguageVersion, Name, Description,
       }) => ({
         name: Name,
-        search: `${Author}${Language}${MinLanguageVersion}${Name}`,
+        search: `${Author} ${Language} ${MinLanguageVersion} ${Name} ${Description}`.toLowerCase(),
       }));
     },
   },
@@ -117,21 +106,10 @@ export default {
   methods: {
     doFilter(query) {
       const results = this.moduleSearch
-        .filter(el => el.search.includes(query))
+        .filter(el => el.search.includes(query.toLowerCase()))
         .map(el => el.name);
 
       this.filteredModules = this.modules.filter(el => results.indexOf(el.Name) !== -1);
-    },
-    viewModule() {
-
-    },
-    cellValueRenderer(row, column, cellValue) {
-      // https://github.com/ElemeFE/element/issues/9977
-      let value = cellValue;
-      if (typeof row[column.property] === 'boolean') {
-        value = String(cellValue);
-      }
-      return value;
     },
     toLower(row, column, cellValue) {
       if (cellValue == null) {
@@ -141,20 +119,20 @@ export default {
       return cellValue.toLowerCase();
     },
     sortLanguage(a, b) {
-      if (a.Language == null) {
+      if (a == null) {
         return -1;
-      } if (b.Language == null) {
+      } if (b == null) {
         return 1;
       }
-      return a.Language.toLowerCase().localeCompare(b.Language.toLowerCase());
+      return a.toLowerCase().localeCompare(b.toLowerCase());
     },
     sortMinLanguageVersion(a, b) {
-      if (a.MinLanguageVersion == null) {
+      if (a == null) {
         return -1;
-      } if (b.MinLanguageVersion == null) {
+      } if (b == null) {
         return 1;
       }
-      return a.MinLanguageVersion.localeCompare(b.MinLanguageVersion, undefined, { numeric: true });
+      return a.localeCompare(b, undefined, { numeric: true });
     },
   },
 };

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import store from '@/store/index';
 import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
@@ -24,14 +25,34 @@ const routes = [
     component: () => import(/* webpackChunkName: "listeners" */ '../views/Listeners.vue'),
   },
   {
+    path: '/listeners/:id',
+    name: 'listenerEdit',
+    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
+  },
+  {
+    path: '/listeners/new',
+    name: 'listenerNew', // same component
+    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
+  },
+  {
     path: '/stagers',
     name: 'stagers',
     component: () => import(/* webpackChunkName: "stagers" */ '../views/Stagers.vue'),
   },
   {
+    path: '/stagers/new',
+    name: 'stagerNew',
+    component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
+  },
+  {
     path: '/agents',
     name: 'agents',
     component: () => import(/* webpackChunkName: "agents" */ '../views/Agents.vue'),
+  },
+  {
+    path: '/agents/:id',
+    name: 'agentEdit',
+    component: () => import(/* webpackChunkName: "agent-edit" */ '../views/AgentEdit.vue'),
   },
   {
     path: '/modules',
@@ -42,6 +63,19 @@ const routes = [
     path: '/users',
     name: 'users',
     component: () => import(/* webpackChunkName: "users" */ '../views/Users.vue'),
+  },
+  {
+    path: '/users/:id',
+    name: 'userEdit',
+    component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+    meta: {
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/users/new',
+    name: 'userNew',
+    component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
   },
   {
     path: '/credentials',
@@ -64,6 +98,28 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes,
+});
+
+function isAuthenticated() {
+  return store.getters['profile/token'].length > 0;
+}
+
+function isAdmin() {
+  return store.getters['profile/isAdmin'] === true;
+}
+
+// Auth
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'home' && !isAuthenticated()) {
+    next({ name: 'home' });
+  } else next();
+});
+
+// Admin
+router.beforeEach((to, from, next) => {
+  if (to.meta && to.meta.requiresAdmin && !isAdmin()) {
+    next({ name: 'listeners' });
+  } else next();
 });
 
 export default router;

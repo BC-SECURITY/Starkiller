@@ -1,10 +1,13 @@
 /* global __static */
-import { app, protocol, BrowserWindow } from 'electron';
+import {
+  app, protocol, BrowserWindow, shell,
+} from 'electron';
 import path from 'path';
 import {
   createProtocol,
   installVueDevtools,
 } from 'vue-cli-plugin-electron-builder/lib';
+
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -19,7 +22,7 @@ function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
     width: 1000,
-    height: 600,
+    height: 700,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
@@ -39,6 +42,16 @@ function createWindow() {
 
   win.on('closed', () => {
     win = null;
+  });
+
+  // don't allow new windows to spawn with center click.
+  // if its not an internal link, open with external browser.
+  win.webContents.on('new-window', (event, url) => {
+    event.preventDefault();
+
+    if (!url.includes('//localhost')) {
+      shell.openExternal(url);
+    }
   });
 }
 

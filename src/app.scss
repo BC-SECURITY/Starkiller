@@ -4,23 +4,5 @@
   justify-content: space-between;
   padding-left: 20px;
   padding-right: 20px;
-}
-
-.main-table {
-  width: 100%;
-}
-
-.el-table .warning-row {
-  background: #FFCCCC;
-}
-
-.route-container {
-  width: 100%;
-}
-
-// Message Box appears outside of #app so needs this applied separately
-.el-message-box {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  margin-bottom: 15px;
 }

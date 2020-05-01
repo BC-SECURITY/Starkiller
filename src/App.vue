@@ -1,36 +1,78 @@
 <template>
   <div id="app">
-    <side-nav v-if="isLoggedIn" />
-    <router-view
-      id="router-view"
-    />
+    <v-app :dark="isDarkMode">
+      <side-nav v-if="isLoggedIn" />
+      <confirm ref="confirm" />
+
+      <!-- Sizes your content based upon application components -->
+      <v-content>
+        <!-- Provides the application the proper gutter -->
+        <v-container fluid>
+          <!-- If using vue-router -->
+          <router-view />
+        </v-container>
+      </v-content>
+
+      <v-footer app>
+        <span class="mr-2">Copyright (c) 2020 BC Security |</span>
+        <a
+          class="mr-2"
+          target="_blank"
+          href="https://github.com/bc-security/starkiller"
+          @click.prevent="openExternalBrowser"
+        > Starkiller </a>
+        <span class="mr-2">|</span>
+        <a
+          target="_blank"
+          href="https://github.com/bc-security/empire"
+          @click.prevent="openExternalBrowser"
+        > Empire</a>
+      </v-footer>
+    </v-app>
   </div>
 </template>
 <script>
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { remote } from 'electron';
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
 import SideNav from '@/components/SideNav.vue';
+import Confirm from '@/components/Confirm.vue';
 
 export default {
   name: 'App',
   components: {
     SideNav,
+    Confirm,
   },
   computed: {
     ...mapGetters({
       isLoggedIn: 'profile/isLoggedIn',
+      isDarkMode: 'profile/isDarkMode',
     }),
     ...mapState({
       empireVersion: state => state.profile.empireVersion,
     }),
     isLoginPage() {
-      return this.$route.path === '/';
+      return this.$route.name === 'home';
     },
   },
   watch: {
+    isDarkMode: {
+      immediate: true,
+      handler(val) {
+        if (val === true) {
+          this.$vuetify.theme.dark = true;
+        } else {
+          this.$vuetify.theme.dark = false;
+        }
+      },
+    },
     isLoggedIn(val) {
-      if (val === false) {
-        this.$router.push({ path: '/' });
+      if (val === false && !this.isLoginPage) {
+        this.$router.push({ name: 'home' });
+      } else if (val === true && this.$route.name !== 'listeners') {
+        this.$router.push({ name: 'listeners' });
       }
     },
     empireVersion(val) {
@@ -46,9 +88,18 @@ export default {
     },
   },
   mounted() {
-    if (this.isLoggedIn === false) {
-      this.$router.push({ path: '/' });
+    this.$root.$confirm = this.$refs.confirm.open;
+
+    if (this.isLoggedIn === false && !this.isLoginPage) {
+      this.$router.push({ name: 'home' });
+    } else if (this.isLoggedIn === true && this.$route.name !== 'listeners') {
+      this.$router.push({ name: 'listeners' });
     }
+  },
+  methods: {
+    openExternalBrowser(e) {
+      remote.shell.openExternal(e.target.href);
+    },
   },
 };
 </script>
@@ -56,32 +107,7 @@ export default {
 @import 'app.scss';
 
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-
-  display: flex;
-  flex-direction: row;
-}
-
-#router-view {
-  display: flex;
-  flex-direction: column;
-  overflow-x: auto;
-}
-
-.nav {
-  padding: 10px 30px 0px 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
 }
 </style>

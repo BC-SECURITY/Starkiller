@@ -1,5 +1,9 @@
 <template>
   <div class="agent-command-viewer">
+    <v-icon
+      v-if="!initalized"
+      class="fa-3x fas fa-spinner fa-spin"
+    />
     <ul class="shell-body">
       <div
         v-for="result in agentResults"
@@ -15,14 +19,13 @@
 </template>
 
 <script>
-/* eslint-disable max-len */
 import * as agentApi from '@/api/agent-api';
 
 export default {
   props: {
-    viewObject: {
-      type: Object,
-      default: () => {},
+    name: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -30,6 +33,7 @@ export default {
       commands: [],
       results: [],
       interval: null,
+      initialized: false,
     };
   },
   computed: {
@@ -65,7 +69,8 @@ export default {
   },
   mounted() {
     this.interval = setInterval(async () => {
-      this.results = await agentApi.getResults(this.viewObject.name);
+      this.results = await agentApi.getResults(this.name);
+      this.initialized = true;
     }, 5000);
   },
   beforeDestroy() {
