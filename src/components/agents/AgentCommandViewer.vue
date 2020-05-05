@@ -1,7 +1,8 @@
 <template>
   <div class="agent-command-viewer">
     <v-icon
-      v-if="!initalized"
+      v-if="!initialized"
+      style="width: 50px;"
       class="fa-3x fas fa-spinner fa-spin"
     />
     <ul class="shell-body">
