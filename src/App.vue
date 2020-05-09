@@ -92,7 +92,7 @@ export default {
 
     if (this.isLoggedIn === false && !this.isLoginPage) {
       this.$router.push({ name: 'home' });
-    } else if (this.isLoggedIn === true && this.$route.name !== 'listeners') {
+    } else if (this.isLoggedIn === true && this.$route.name === 'home') {
       this.$router.push({ name: 'listeners' });
     }
   },

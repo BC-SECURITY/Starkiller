@@ -1,114 +1,116 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
     <div
-      class="mb-2"
-      style="display: flex; justify-content: flex-end;"
+      style="display: flex; justify-content: space-between;"
     >
-      <!-- TODO Wrap this into a component? -->
-      <v-dialog
-        ref="nameDialog"
-        v-model="dialog"
-        max-width="500px"
-      >
-        <v-card>
-          <v-card-title>
-            <span class="headline">Rename</span>
-          </v-card-title>
-          <v-card-text>
-            <v-form
-              ref="nameForm"
-            >
-              <v-container>
-                <v-row>
-                  <v-col
-                    cols="12"
-                  >
-                    <v-text-field
-                      v-model="nameForm.name"
-                      label="Name"
-                      :rules="nameRules['name']"
-                      outlined
-                      dense
-                      required
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-form>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
+      <v-breadcrumbs :items="breads" />
+      <div class="pt-2">
+        <!-- TODO Wrap this into a component? -->
+        <v-dialog
+          ref="nameDialog"
+          v-model="dialog"
+          max-width="500px"
+        >
+          <v-card>
+            <v-card-title>
+              <span class="headline">Rename</span>
+            </v-card-title>
+            <v-card-text>
+              <v-form
+                ref="nameForm"
+              >
+                <v-container>
+                  <v-row>
+                    <v-col
+                      cols="12"
+                    >
+                      <v-text-field
+                        v-model="nameForm.name"
+                        label="Name"
+                        :rules="nameRules['name']"
+                        outlined
+                        dense
+                        required
+                      />
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="dialog = false"
+              >
+                Close
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                :loading="nameLoading"
+                @click="renameAgent"
+              >
+                Save
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-tooltip
+          bottom
+        >
+          <template v-slot:activator="{ on }">
             <v-btn
-              color="blue darken-1"
-              text
-              @click="dialog = false"
+              color="primary"
+              class="mr-2"
+              fab
+              x-small
+              v-on="on"
+              @click="dialog = true"
             >
-              Close
+              <v-icon
+                style="padding-left: 4px"
+              >
+                fa-user-edit
+              </v-icon>
             </v-btn>
+          </template>
+          <span>Rename Agent</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
             <v-btn
-              color="blue darken-1"
-              text
-              :loading="nameLoading"
-              @click="renameAgent"
+              color="primary"
+              class="mr-2"
+              fab
+              x-small
+              v-on="on"
+              @click="clearQueue"
             >
-              Save
+              <v-icon>fa-calendar-times</v-icon>
             </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            color="primary"
-            class="mr-2"
-            fab
-            x-small
-            v-on="on"
-            @click="dialog = true"
-          >
-            <v-icon
-              style="padding-left: 4px"
+          </template>
+          <span>Clear Queued Tasks</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              color="error"
+              class="mr-2"
+              fab
+              x-small
+              v-on="on"
+              @click="killAgent"
             >
-              fa-user-edit
-            </v-icon>
-          </v-btn>
-        </template>
-        <span>Rename Agent</span>
-      </v-tooltip>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn
-            color="primary"
-            class="mr-2"
-            fab
-            x-small
-            v-on="on"
-            @click="clearQueue"
-          >
-            <v-icon>fa-calendar-times</v-icon>
-          </v-btn>
-        </template>
-        <span>Clear Queued Tasks</span>
-      </v-tooltip>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn
-            color="error"
-            fab
-            x-small
-            v-on="on"
-            @click="killAgent"
-          >
-            <v-icon>fa-trash-alt</v-icon>
-          </v-btn>
-        </template>
-        <span>Kill Agent</span>
-      </v-tooltip>
+              <v-icon>fa-trash-alt</v-icon>
+            </v-btn>
+          </template>
+          <span>Kill Agent</span>
+        </v-tooltip>
+      </div>
     </div>
-    <div class="split-view">
+    <div :style="splitPaneHeight()">
       <split-pane
         :min-percent="20"
         :default-percent="60"
@@ -238,6 +240,11 @@ export default {
     this.getAgent(this.$route.params.id);
   },
   methods: {
+    splitPaneHeight() {
+      /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
+     That's 94vh - height of breadcrumbs (57) - height of footer (36px) */
+      return 'height: calc(94vh - 57px - 36px';
+    },
     getAgent(id) {
       agentApi.getAgent(id)
         .then((data) => {
@@ -283,13 +290,6 @@ export default {
 </script>
 
 <style>
-.split-view {
-  /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
-     That's 94vh - height of breadcrumbs (57) - height of interact buttons (32px)
-     - height of footer (36px) */
-  height: calc(94vh - 57px - 32px - 36px);
-}
-
 .scrollable-pane {
   max-height: 100%;
   overflow: auto;
@@ -299,5 +299,6 @@ export default {
   background-color: white;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 </style>
