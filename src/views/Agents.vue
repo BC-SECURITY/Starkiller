@@ -102,7 +102,6 @@ export default {
     },
     async killAgent(item) {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
-        this.$store.dispatch('listener/killListener', item.name);
         this.$store.dispatch('agent/killAgent', { name: item.name });
         this.$toast.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
         this.getAgents();
