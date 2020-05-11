@@ -187,7 +187,7 @@ export default {
         map[field.name] = [];
         if (field.Required === true) {
           map[field.name].push(
-            v => (!!v && v !== 0) || `${field.name} is required`,
+            v => (!!v || v === 0) || `${field.name} is required`,
           );
         }
 
