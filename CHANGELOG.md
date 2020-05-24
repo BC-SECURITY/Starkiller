@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2020-05-24
+- Fix a bug that didn't allow 0 values when creating listeners, stagers
+- Updated agent tab ui to have centered tabs
+- Kill agent from the list view now works
+
 ## [1.2.2] - 2020-05-09
 - Gained a little vertical real estate by updating layout of the Agent page
 - Switched vue-router to hash mode
