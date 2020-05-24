@@ -120,8 +120,8 @@
           <v-tabs
             v-model="activeTab"
             class="scrollable-pane"
+            centered
             small
-            grow
           >
             <v-tab
               key="interact"
@@ -242,7 +242,7 @@ export default {
   methods: {
     splitPaneHeight() {
       /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
-     That's 94vh - height of breadcrumbs (57) - height of footer (36px) */
+     That's 96vh - height of breadcrumbs (57) - height of footer (36px) */
       return 'height: calc(96vh - 57px - 36px';
     },
     getAgent(id) {
