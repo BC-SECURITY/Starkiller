@@ -120,8 +120,8 @@
           <v-tabs
             v-model="activeTab"
             class="scrollable-pane"
+            centered
             small
-            grow
           >
             <v-tab
               key="interact"
