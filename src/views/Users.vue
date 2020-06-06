@@ -85,7 +85,7 @@ export default {
       users: state => state.user.users,
     }),
     ...mapGetters({
-      isAdmin: 'profile/isAdmin',
+      isAdmin: 'application/isAdmin',
     }),
   },
   mounted() {

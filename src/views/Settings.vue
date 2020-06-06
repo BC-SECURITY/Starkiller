@@ -112,8 +112,8 @@ export default {
   },
   computed: {
     ...mapState({
-      user: state => state.profile.user,
-      darkMode: state => state.profile.darkMode,
+      user: state => state.application.user,
+      darkMode: state => state.application.darkMode,
     }),
     apiToken() {
       return this.user.api_token;
@@ -123,7 +123,7 @@ export default {
     },
     darkModeSwitch: {
       set(val) {
-        this.$store.dispatch('profile/darkMode', val);
+        this.$store.dispatch('application/darkMode', val);
       },
       get() {
         return this.darkMode;
@@ -137,7 +137,7 @@ export default {
     },
     async logout() {
       if (await this.$root.$confirm('', 'Are you sure you want to logout?', { color: 'green' })) {
-        this.$store.dispatch('profile/logout');
+        this.$store.dispatch('application/logout');
       }
     },
     submit() {
