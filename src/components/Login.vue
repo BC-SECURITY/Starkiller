@@ -61,10 +61,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isLoggedIn: 'profile/isLoggedIn',
+      isLoggedIn: 'application/isLoggedIn',
     }),
     ...mapState({
-      loginError: state => state.profile.loginError,
+      loginError: state => state.application.loginError,
     }),
   },
   watch: {
@@ -93,7 +93,7 @@ export default {
         electronStore.delete('username');
       }
 
-      this.$store.dispatch('profile/login', this.form);
+      this.$store.dispatch('application/login', this.form);
     },
   },
 };

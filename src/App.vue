@@ -47,11 +47,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isLoggedIn: 'profile/isLoggedIn',
-      isDarkMode: 'profile/isDarkMode',
+      isLoggedIn: 'application/isLoggedIn',
+      isDarkMode: 'application/isDarkMode',
     }),
     ...mapState({
-      empireVersion: state => state.profile.empireVersion,
+      empireVersion: state => state.application.empireVersion,
     }),
     isLoginPage() {
       return this.$route.name === 'home';

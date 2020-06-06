@@ -101,11 +101,11 @@ const router = new VueRouter({
 });
 
 function isAuthenticated() {
-  return store.getters['profile/token'].length > 0;
+  return store.getters['application/token'].length > 0;
 }
 
 function isAdmin() {
-  return store.getters['profile/isAdmin'] === true;
+  return store.getters['application/isAdmin'] === true;
 }
 
 // Auth

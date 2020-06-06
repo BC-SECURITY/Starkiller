@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import Vue from 'vue';
 import Vuex from 'vuex';
 
@@ -11,7 +10,7 @@ import StagerModule from './StagerModule';
 import AgentModule from './AgentModule';
 import ModuleModule from './ModuleModule';
 import CredentialModule from './CredentialModule';
-import ProfileModule from './ProfileModule';
+import ApplicationModule from './ApplicationModule';
 
 
 Vue.use(Vuex);
@@ -30,13 +29,13 @@ export default new Vuex.Store({
     agent: AgentModule,
     module: ModuleModule,
     credential: CredentialModule,
-    profile: ProfileModule,
+    application: ApplicationModule,
   },
   plugins: [createPersistedState({
-    paths: ['profile'],
+    paths: ['application'],
     rehydrated: ({ state }) => { // todo handle code duplication here?
-      setInstance(state.profile.url, state.profile.token);
-      initNamespacedStore(state.profile.url);
+      setInstance(state.application.url, state.application.token);
+      initNamespacedStore(state.application.url);
     },
   })],
 });
