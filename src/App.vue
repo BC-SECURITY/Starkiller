@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <v-app :dark="isDarkMode">
-      <side-nav v-if="isLoggedIn" />
+      <side-nav
+        v-if="isLoggedIn && !hideSideBar"
+      />
       <confirm ref="confirm" />
       <socket-notifications v-if="isLoggedIn && versionSatisfies('>=3.5.0')" />
 
@@ -14,7 +16,10 @@
         </v-container>
       </v-main>
 
-      <v-footer app>
+      <v-footer
+        v-if="!hideSideBar"
+        app
+      >
         <span class="mr-2">Copyright (c) 2020 BC Security |</span>
         <a
           class="mr-2"
@@ -59,6 +64,9 @@ export default {
     }),
     isLoginPage() {
       return this.$route.name === 'home';
+    },
+    hideSideBar() {
+      return this.$route.query.hideSideBar;
     },
   },
   watch: {

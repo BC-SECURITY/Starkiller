@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import { axiosInstance as axios } from '@/api/axios-instance';
 
 /**

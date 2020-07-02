@@ -47,10 +47,17 @@
           <td> {{ item.working_hours }}</td>
           <td>
             <v-icon
+              class="mr-2"
               small
               @click.stop="killAgent(item)"
             >
               fa-trash-alt
+            </v-icon>
+            <v-icon
+              small
+              @click.stop="popout(item)"
+            >
+              fa-external-link-alt
             </v-icon>
           </td>
         </tr>
@@ -62,6 +69,9 @@
 <script>
 import moment from 'moment';
 import { mapState } from 'vuex';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ipcRenderer } from 'electron';
 
 export default {
   name: 'Agents',
@@ -112,6 +122,9 @@ export default {
         this.$toast.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
         this.getAgents();
       }
+    },
+    popout(item) {
+      ipcRenderer.send('agentWindowOpen', { id: item.name });
     },
     viewAgent(item) {
       this.$router.push({ name: 'agentEdit', params: { id: item.name } });
