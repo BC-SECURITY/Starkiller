@@ -13,7 +13,6 @@
         <v-list-item
           two-line
         >
-          <!-- TODO Remove reference to github -->
           <v-list-item-avatar>
             <img src="../../src/assets/icon.png">
           </v-list-item-avatar>
