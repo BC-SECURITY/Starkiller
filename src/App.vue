@@ -105,7 +105,9 @@ export default {
 </script>
 <style lang="scss">
 @import 'app.scss';
+
 @import 'assets/css/roboto.css';
+@import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
 
 #app {
   -webkit-font-smoothing: antialiased;

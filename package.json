@@ -19,6 +19,7 @@
   },
   "main": "background.js",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.1",
     "@mdi/font": "^5.3.45",
     "axios": "0.18.1",
     "chai-as-promised": "^7.1.1",
