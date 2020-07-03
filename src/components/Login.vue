@@ -84,7 +84,7 @@ export default {
     submit() {
       const cleanedUrl = (this.form.url.startsWith('http://') || this.form.url.startsWith('https://'))
         ? this.form.url
-        : `https://${url}`;
+        : `https://${this.form.url}`;
       this.loading = true;
       electronStore.set('rememberMe', this.rememberMe);
 
