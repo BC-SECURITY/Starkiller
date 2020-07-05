@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2020-07-04
+- Move external fonts (icons + google font) to internal dependencies to allow for offline use (https://github.com/BC-SECURITY/Starkiller/issues/34)
+- Change title of login url field
+- Make the use of http/https prefixes in the empire url optional. Will default to https if no prefix provided
+
 ## [1.2.3] - 2020-05-24
 - Fix a bug that didn't allow 0 values when creating listeners, stagers
 - Updated agent tab ui to have centered tabs
