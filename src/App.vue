@@ -106,6 +106,9 @@ export default {
 <style lang="scss">
 @import 'app.scss';
 
+@import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
+@import '../node_modules/typeface-roboto/index.css';
+
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

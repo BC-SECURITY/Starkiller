@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import 'vuetify/dist/vuetify.min.css';
 import colors from 'vuetify/lib/util/colors';
+import 'vuetify/dist/vuetify.min.css';
+import '@mdi/font/css/materialdesignicons.css';
 
 import VuetifyToast from 'vuetify-toast-snackbar';
 

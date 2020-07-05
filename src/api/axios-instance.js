@@ -10,7 +10,7 @@ export let axiosInstance = null;
 
 export function setInstance(url, token) {
   axiosInstance = axios.create({
-    baseURL: `https://${url}/api`,
+    baseURL: `${url}/api`,
     headers: { 'Content-Type': 'application/json' },
     params: {
       token,

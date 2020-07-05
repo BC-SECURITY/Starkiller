@@ -14,7 +14,7 @@
           two-line
         >
           <v-list-item-avatar>
-            <img src="https://raw.githubusercontent.com/BC-SECURITY/Starkiller/master/src/assets/icon.png">
+            <img src="../../src/assets/icon.png">
           </v-list-item-avatar>
 
           <v-list-item-content>
