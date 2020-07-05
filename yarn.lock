@@ -11286,10 +11286,10 @@ vuetify-toast-snackbar@^0.6.1:
   resolved "https://registry.yarnpkg.com/vuetify-toast-snackbar/-/vuetify-toast-snackbar-0.6.1.tgz#a90d93c5b1aae3411d7d297f5ee00934fa6952dc"
   integrity sha512-F2bLPMXiw7qQgX68adSu0zQrMTKODN5JAzCP8AP/HGhz/Bz1z24QbvYcX0fyHnG/yP6PAPkpMCXsLQSq6HV0Ag==
 
-vuetify@^2.2.22:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.3.3.tgz#b517e77c35f5f89d91b4d95b025131f1c5cdf35d"
-  integrity sha512-N9Rwx/cscIdHfBItHxiwkhmoxIVyZLBRWd/5LJJs4aVZIX6qkjQV6ThhxzqCYgFDb2jKMftavWX5hNQTxA9qEA==
+vuetify@2.2.34:
+  version "2.2.34"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.2.34.tgz#070458a9424a4aa48ca5769cd8837265c90766c3"
+  integrity sha512-YE2gMGs2QvY/HsnVfUtYGoA6Nq7Pt6W7MuToJgSNMFmSHvCcjApZW39mebGKfVY2llLDbmrnL8d2AvOmUk8hcg==
 
 vuex-persistedstate@^3.0.1:
   version "3.0.1"
