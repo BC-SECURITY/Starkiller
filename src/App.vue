@@ -47,11 +47,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isLoggedIn: 'profile/isLoggedIn',
-      isDarkMode: 'profile/isDarkMode',
+      isLoggedIn: 'application/isLoggedIn',
+      isDarkMode: 'application/isDarkMode',
     }),
     ...mapState({
-      empireVersion: state => state.profile.empireVersion,
+      empireVersion: state => state.application.empireVersion,
     }),
     isLoginPage() {
       return this.$route.name === 'home';
@@ -105,6 +105,9 @@ export default {
 </script>
 <style lang="scss">
 @import 'app.scss';
+
+@import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
+@import '../node_modules/typeface-roboto/index.css';
 
 #app {
   -webkit-font-smoothing: antialiased;

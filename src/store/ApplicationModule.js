@@ -40,12 +40,12 @@ export default {
     async login(context, { url, username, password }) {
       try {
         context.commit('setLoginError', '');
-        const token = await axios.post(`https://${url}/api/admin/login`,
+        const token = await axios.post(`${url}/api/admin/login`,
           { username, password },
           { headers: { 'Content-Type': 'application/json' } });
 
-        const user = await axios.get(`https://${url}/api/users/me?token=${token.data.token}`);
-        const version = await axios.get(`https://${url}/api/version?token=${token.data.token}`);
+        const user = await axios.get(`${url}/api/users/me?token=${token.data.token}`);
+        const version = await axios.get(`${url}/api/version?token=${token.data.token}`);
         context.commit('setApplicationState', {
           token: token.data.token, url, user: user.data, version: version.data.version,
         });
@@ -62,7 +62,7 @@ export default {
       }
     },
     async logout(context) {
-      axios.post(`https://${context.state.url}/api/admin/logout?token=${context.state.token}`);
+      axios.post(`${context.state.url}/api/admin/logout?token=${context.state.token}`);
       context.commit('setLogout');
     },
     darkMode(context, val) {

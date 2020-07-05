@@ -1,8 +1,11 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import 'vuetify/dist/vuetify.min.css';
 import colors from 'vuetify/lib/util/colors';
+import 'vuetify/dist/vuetify.min.css';
+import '@mdi/font/css/materialdesignicons.css';
 
+// Migrating to Vuetify 2.3 will require some modifications to this $toast helper.
+// https://github.com/eolant/vuetify-toast-snackbar/pull/44
 import VuetifyToast from 'vuetify-toast-snackbar';
 
 Vue.use(Vuetify);

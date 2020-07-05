@@ -3,7 +3,6 @@
 import axios from 'axios';
 
 // todo: I don't like this cyclic dependency, but struggling to find a better way atm.
-// eslint-disable-next-line import/no-cycle
 import store from '@/store/index';
 
 // eslint-disable-next-line import/no-mutable-exports
@@ -11,7 +10,7 @@ export let axiosInstance = null;
 
 export function setInstance(url, token) {
   axiosInstance = axios.create({
-    baseURL: `https://${url}/api`,
+    baseURL: `${url}/api`,
     headers: { 'Content-Type': 'application/json' },
     params: {
       token,
@@ -23,7 +22,7 @@ export function setInstance(url, token) {
     response => response,
     (err) => {
       if (err.response.status === 401) {
-        store.dispatch('profile/logout');
+        store.dispatch('application/logout');
       }
     },
   );

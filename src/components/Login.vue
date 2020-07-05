@@ -6,7 +6,7 @@
     >
       <v-text-field
         v-model="form.url"
-        label="Name"
+        label="Url"
         dense
         outlined
       />
@@ -61,10 +61,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isLoggedIn: 'profile/isLoggedIn',
+      isLoggedIn: 'application/isLoggedIn',
     }),
     ...mapState({
-      loginError: state => state.profile.loginError,
+      loginError: state => state.application.loginError,
     }),
   },
   watch: {
@@ -82,18 +82,21 @@ export default {
   },
   methods: {
     submit() {
+      const cleanedUrl = (this.form.url.startsWith('http://') || this.form.url.startsWith('https://'))
+        ? this.form.url
+        : `https://${this.form.url}`;
       this.loading = true;
       electronStore.set('rememberMe', this.rememberMe);
 
       if (this.rememberMe === true) {
-        electronStore.set('url', this.form.url);
+        electronStore.set('url', cleanedUrl);
         electronStore.set('username', this.form.username);
       } else {
         electronStore.delete('url');
         electronStore.delete('username');
       }
 
-      this.$store.dispatch('profile/login', this.form);
+      this.$store.dispatch('application/login', { url: cleanedUrl, username: this.form.username, password: this.form.password });
     },
   },
 };
