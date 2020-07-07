@@ -11,13 +11,28 @@
         style="max-width: 250px"
       />
     </div>
-    <!-- TODO if we refactor the way we fetch modules we can add a loading state to the table. -->
     <v-data-table
       :headers="headers"
       :items="filteredModules"
       item-key="Name"
       show-expand
     >
+      <template v-slot:item.Techniques="{ item }">
+        <div class="flex flex-row flex-wrap">
+          <v-chip
+            v-for="tech in item.Techniques"
+            :key="tech"
+            small
+            :href="`https://attack.mitre.org/techniques/${tech}`"
+            target="_blank"
+            color="green"
+            class="mr-1 mb-1"
+            @click.native="openExternalBrowser"
+          >
+            {{ tech }}
+          </v-chip>
+        </div>
+      </template>
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div class="d-flex flex-column">
@@ -39,9 +54,11 @@
 <script>
 import { mapState } from 'vuex';
 import debounce from 'lodash.debounce';
+import openExternalBrowser from '@/mixins/open-external';
 
 export default {
   name: 'Modules',
+  mixins: [openExternalBrowser],
   data() {
     return {
       headers: [
@@ -51,10 +68,13 @@ export default {
           value: 'Name',
         },
         { text: 'Language', value: 'Language', sort: this.sortLanguage },
-        { text: 'MinLanguageVersion', value: 'MinLanguageVersion', sort: this.sortMinLanguageVersion },
+        { text: 'Minimum Language Version', value: 'MinLanguageVersion', sort: this.sortMinLanguageVersion },
         { text: 'Needs Admin', value: 'NeedsAdmin' },
-        { text: 'OpsecSafe', value: 'OpsecSafe' },
+        { text: 'Opsec Safe', value: 'OpsecSafe' },
         { text: 'Background', value: 'Background' },
+        {
+          text: 'Techniques', value: 'Techniques', width: '175px', sortable: false,
+        },
       ],
       filter: '',
       filteredModules: [],
@@ -78,10 +98,10 @@ export default {
      */
     moduleSearch() {
       return this.modules.map(({
-        Author, Language, MinLanguageVersion, Name, Description,
+        Author, Language, MinLanguageVersion, Name, Description, Techniques = [],
       }) => ({
         name: Name,
-        search: `${Author} ${Language} ${MinLanguageVersion} ${Name} ${Description}`.toLowerCase(),
+        search: `${Author} ${Language} ${MinLanguageVersion} ${Name} ${Description} ${Techniques.join(' ')}`.toLowerCase(),
       }));
     },
   },
