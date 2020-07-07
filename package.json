@@ -50,7 +50,7 @@
     "babel-eslint": "^10.0.3",
     "chai": "^4.1.2",
     "deepmerge": "^4.2.2",
-    "electron": "^6.0.0",
+    "electron": "^7.2.4",
     "electron-icon-builder": "^1.0.2",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
