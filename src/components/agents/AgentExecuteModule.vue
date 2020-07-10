@@ -11,6 +11,24 @@
       ref="form"
       @submit.prevent.native="submit"
     >
+      <div
+        v-if="selectedItem.Techniques"
+        class="flex flex-row flex-wrap mb-2"
+      >
+        <span class="mr-2">Techniques:</span>
+        <v-chip
+          v-for="tech in selectedItem.Techniques"
+          :key="tech"
+          small
+          :href="`https://attack.mitre.org/techniques/${tech}`"
+          target="_blank"
+          color="green"
+          class="mr-1 mb-1"
+          @click.native="openExternalBrowser"
+        >
+          {{ tech }}
+        </v-chip>
+      </div>
       <v-autocomplete
         v-model="selectedModule"
         :items="selectOptions"
@@ -75,11 +93,13 @@ import Vue from 'vue';
 import { mapState } from 'vuex';
 import InfoViewer from '@/components/InfoViewer.vue';
 import * as moduleApi from '@/api/module-api';
+import openExternalBrowser from '@/mixins/open-external';
 
 export default {
   components: {
     InfoViewer,
   },
+  mixins: [openExternalBrowser],
   props: {
     agentName: {
       type: String,
@@ -159,7 +179,7 @@ export default {
      */
     fields: {
       immediate: true,
-      handler(arr) {
+      handler(arr = []) {
         const map2 = arr.reduce((map, obj) => {
           // eslint-disable-next-line no-param-reassign
           map[obj.name] = obj.Value;
@@ -178,8 +198,9 @@ export default {
   },
   methods: {
     async handleSelect(item) {
-      if (item === '') {
+      if (item === '' || item == null) {
         this.selectedItem = {};
+        return;
       }
       const results = await this.$store.getters['module/searchModuleNames'](item);
       // eslint-disable-next-line prefer-destructuring

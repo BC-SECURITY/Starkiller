@@ -29,10 +29,10 @@
 </template>
 
 <script>
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { remote } from 'electron';
+import openExternalBrowser from '@/mixins/open-external';
 
 export default {
+  mixins: [openExternalBrowser],
   data() {
     return {
       breads: [
@@ -45,9 +45,6 @@ export default {
     };
   },
   methods: {
-    openExternalBrowser(e) {
-      remote.shell.openExternal(e.target.href);
-    },
   },
 };
 </script>
