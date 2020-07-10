@@ -32,10 +32,10 @@
   </div>
 </template>
 <script>
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { remote } from 'electron';
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
+import openExternalBrowser from '@/mixins/open-external';
+
 import SideNav from '@/components/SideNav.vue';
 import Confirm from '@/components/Confirm.vue';
 
@@ -45,6 +45,7 @@ export default {
     SideNav,
     Confirm,
   },
+  mixins: [openExternalBrowser],
   computed: {
     ...mapGetters({
       isLoggedIn: 'application/isLoggedIn',
@@ -95,11 +96,6 @@ export default {
     } else if (this.isLoggedIn === true && this.$route.name === 'home') {
       this.$router.push({ name: 'listeners' });
     }
-  },
-  methods: {
-    openExternalBrowser(e) {
-      remote.shell.openExternal(e.target.href);
-    },
   },
 };
 </script>

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2020-07-09
+- Fixed a bug with clearing the autocomplete on the execute module page
+- Added MITRE techniques to the modules list page
+- Added MITRE techniques to the execute module page
+- Lots of dependency upgrades
+
 ## [1.2.4] - 2020-07-04
 - Move external fonts (icons + google font) to internal dependencies to allow for offline use (https://github.com/BC-SECURITY/Starkiller/issues/34)
 - Change title of login url field
