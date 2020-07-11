@@ -5,13 +5,13 @@
       <confirm ref="confirm" />
 
       <!-- Sizes your content based upon application components -->
-      <v-content>
+      <v-main>
         <!-- Provides the application the proper gutter -->
         <v-container fluid>
           <!-- If using vue-router -->
           <router-view />
         </v-container>
-      </v-content>
+      </v-main>
 
       <v-footer app>
         <span class="mr-2">Copyright (c) 2020 BC Security |</span>
