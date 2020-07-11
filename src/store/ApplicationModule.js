@@ -31,6 +31,7 @@ export default {
       state.token = '';
       state.url = '';
       state.user = {};
+      state.empireVersion = '';
     },
     setDarkMode(state, val) {
       state.darkMode = val;
