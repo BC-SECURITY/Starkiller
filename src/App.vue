@@ -5,13 +5,13 @@
       <confirm ref="confirm" />
 
       <!-- Sizes your content based upon application components -->
-      <v-content>
+      <v-main>
         <!-- Provides the application the proper gutter -->
         <v-container fluid>
           <!-- If using vue-router -->
           <router-view />
         </v-container>
-      </v-content>
+      </v-main>
 
       <v-footer app>
         <span class="mr-2">Copyright (c) 2020 BC Security |</span>
@@ -76,16 +76,19 @@ export default {
         this.$router.push({ name: 'listeners' });
       }
     },
-    empireVersion(val) {
-      if (val.length > 0) {
-        if (!semver.satisfies(val.split(' ')[0], '>=3.3.0')) {
-          this.$alert(
-            'Starkiller 1.3.x is recommended to be used with Empire 3.3.0 or greater.'
-            + ' You may continue, but some features may not work properly.',
-            'Incompatabile Empire Version',
-          );
+    empireVersion: {
+      handler(val) {
+        if (val.length > 0) {
+          if (!semver.satisfies(val.split(' ')[0], '>=3.3.0')) {
+            this.$toast.error(
+              'Starkiller 1.3.x is recommended to be used with Empire 3.3.0 or greater.'
+              + ' Some features may not work properly.',
+              { timeout: 8000 },
+            );
+          }
         }
-      }
+      },
+      immediate: true,
     },
   },
   mounted() {

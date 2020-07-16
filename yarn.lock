@@ -11281,15 +11281,15 @@ vue@^2.6.10:
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.11.tgz#76594d877d4b12234406e84e35275c6d514125c5"
   integrity sha512-VfPwgcGABbGAue9+sfrD4PuwFar7gPb1yl1UK1MwXoQPAw0BKSqWfoYCT/ThFrdEVWoI51dBuyCoiNU9bZDZxQ==
 
-vuetify-toast-snackbar@^0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/vuetify-toast-snackbar/-/vuetify-toast-snackbar-0.6.1.tgz#a90d93c5b1aae3411d7d297f5ee00934fa6952dc"
-  integrity sha512-F2bLPMXiw7qQgX68adSu0zQrMTKODN5JAzCP8AP/HGhz/Bz1z24QbvYcX0fyHnG/yP6PAPkpMCXsLQSq6HV0Ag==
+vuetify-toast-snackbar-ng@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/vuetify-toast-snackbar-ng/-/vuetify-toast-snackbar-ng-0.7.0.tgz#620ade0a01f65d1e38291c1b810d617582b2caa7"
+  integrity sha512-iksKMzpd4fmGEWQgCP463caTD8ZLjSYBtlYQKx9G+tYGOT5ETWI5S+KZzkOOjTAef4PnE8BeB+oge4P+CzGr5g==
 
-vuetify@2.2.34:
-  version "2.2.34"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.2.34.tgz#070458a9424a4aa48ca5769cd8837265c90766c3"
-  integrity sha512-YE2gMGs2QvY/HsnVfUtYGoA6Nq7Pt6W7MuToJgSNMFmSHvCcjApZW39mebGKfVY2llLDbmrnL8d2AvOmUk8hcg==
+vuetify@^2.3.0:
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.3.4.tgz#fdb03b3281d40a8420b0295ea865843abdc69792"
+  integrity sha512-vMtCNqv5BhrjfTfIhH2Lptoxx7z/Nu1NfBiZ2oCvI2QbTagMlhF5GMXgbnnyTGIjooFf/ozKznuMxk6tuI5cxw==
 
 vuex-persistedstate@^3.0.1:
   version "3.0.1"
