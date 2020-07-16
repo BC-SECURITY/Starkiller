@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package_manager: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    target-branch: "dev"
+
