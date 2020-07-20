@@ -4,6 +4,13 @@
 
     <div class="headers">
       <h3>Credentials</h3>
+      <v-btn
+        color="primary"
+        rounded
+        @click="create"
+      >
+        Add Credential
+      </v-btn>
     </div>
     <v-data-table
       :headers="headers"
@@ -30,7 +37,6 @@ export default {
       ],
       headers: [
         { text: 'id', value: 'ID' },
-        { text: 'Name', value: 'name' },
         { text: 'CredType', value: 'credtype' },
         { text: 'Domain', value: 'domain' },
         { text: 'Host', value: 'host' },
@@ -52,6 +58,9 @@ export default {
   methods: {
     getCredentials() {
       this.$store.dispatch('credential/getCredentials');
+    },
+    create() {
+      this.$router.push({ name: 'credentialNew' });
     },
   },
 };
