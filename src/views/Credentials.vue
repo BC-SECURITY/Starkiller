@@ -15,7 +15,24 @@
     <v-data-table
       :headers="headers"
       :items="credentials"
-    />
+    >
+      <template v-slot:item.username="{ item }">
+        <div
+          class="point"
+          @click="copyToClipboard(item.username)"
+        >
+          {{ item.username }}
+        </div>
+      </template>
+      <template v-slot:item.password="{ item }">
+        <div
+          class="point"
+          @click="copyToClipboard(item.password)"
+        >
+          {{ item.password }}
+        </div>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
@@ -23,7 +40,7 @@
 import { mapState } from 'vuex';
 
 export default {
-  name: 'Users',
+  name: 'Credentials',
   components: {
   },
   data() {
@@ -38,12 +55,12 @@ export default {
       headers: [
         { text: 'id', value: 'ID' },
         { text: 'CredType', value: 'credtype' },
+        { text: 'Username', value: 'username' },
+        { text: 'Password', value: 'password' },
         { text: 'Domain', value: 'domain' },
         { text: 'Host', value: 'host' },
         { text: 'Notes', value: 'notes' },
-        { text: 'Password', value: 'password' },
         { text: 'SID', value: 'sid' },
-        { text: 'Username', value: 'username' },
       ],
     };
   },
@@ -62,10 +79,16 @@ export default {
     create() {
       this.$router.push({ name: 'credentialNew' });
     },
+    async copyToClipboard(val) {
+      await navigator.clipboard.writeText(val);
+      this.$toast.success('Output copied to clipboard');
+    },
   },
 };
 </script>
 
 <style>
-
+.point:hover {
+  cursor: pointer;
+}
 </style>
