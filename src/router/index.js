@@ -83,6 +83,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "credentials" */ '../views/Credentials.vue'),
   },
   {
+    path: '/credentials/new',
+    name: 'credentialNew',
+    component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
+  },
+  {
     path: '/reporting',
     name: 'reporting',
     component: () => import(/* webpackChunkName: "reporting" */ '../views/Reporting.vue'),
