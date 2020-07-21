@@ -85,7 +85,7 @@ const routes = [
   {
     path: '/credentials/new',
     name: 'credentialNew',
-    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/CredentialEdit.vue'),
+    component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
   },
   {
     path: '/reporting',

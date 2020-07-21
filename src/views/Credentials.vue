@@ -22,6 +22,7 @@
           @click="copyToClipboard(item.username)"
         >
           {{ item.username }}
+          <i class="fa fa-paperclip center-icon" />
         </div>
       </template>
       <template v-slot:item.password="{ item }">
@@ -30,6 +31,7 @@
           @click="copyToClipboard(item.password)"
         >
           {{ item.password }}
+          <i class="fa fa-paperclip center-icon" />
         </div>
       </template>
     </v-data-table>
@@ -79,6 +81,10 @@ export default {
     create() {
       this.$router.push({ name: 'credentialNew' });
     },
+    // TODO: Add an endpoint to empire for getting and updating a single credential.
+    // viewCredential(item) {
+    //   this.$router.push({ name: 'credentialEdit', params: { id: item.id } });
+    // },
     async copyToClipboard(val) {
       await navigator.clipboard.writeText(val);
       this.$toast.success('Output copied to clipboard');
