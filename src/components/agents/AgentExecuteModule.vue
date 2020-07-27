@@ -39,15 +39,6 @@
         @change="handleSelect"
       />
       <v-text-field
-        v-if="fieldExists('Agent')"
-        v-model="form.Agent"
-        :rules="rules['Agent']"
-        label="Agent"
-        outlined
-        dense
-        disabled
-      />
-      <v-text-field
         v-for="field in requiredFields"
         :key="field.name"
         v-model="form[field.name]"
@@ -100,8 +91,16 @@ export default {
     InfoViewer,
   },
   mixins: [openExternalBrowser],
+  model: {
+    prop: 'moduleName',
+    event: 'modified',
+  },
   props: {
-    agentName: {
+    agents: {
+      type: Array,
+      default: () => [],
+    },
+    moduleName: {
       type: String,
       default: '',
     },
@@ -186,10 +185,17 @@ export default {
           return map;
         }, {});
 
-        if (map2.Agent != null) {
-          map2.Agent = this.agentName;
-        }
         Vue.set(this, 'form', map2);
+      },
+    },
+    selectedModule(newVal) {
+      this.emitModuleChange(newVal);
+    },
+    moduleName: {
+      immediate: true,
+      handler(newVal) {
+        this.selectedModule = newVal;
+        this.handleSelect(newVal);
       },
     },
   },
@@ -204,7 +210,7 @@ export default {
       }
       const results = await this.$store.getters['module/searchModuleNames'](item);
       // eslint-disable-next-line prefer-destructuring
-      this.selectedItem = results[0];
+      this.selectedItem = results[0] || {};
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;
@@ -222,20 +228,27 @@ export default {
 
       return 'string';
     },
+    emitModuleChange(newVal) {
+      this.$emit('modified', newVal);
+    },
     async submit() {
-      if (this.loading || !this.$refs.form.validate()) {
+      if (this.agents.length < 1 || this.loading || !this.$refs.form.validate()) {
+        this.$toast.success(this.agents);
         return;
       }
 
       this.loading = true;
-      try {
-        await moduleApi.executeModule(this.selectedModule, this.form);
-        this.$toast.success(`Module execution queued for ${this.agentName}`);
-        this.selectedItem = {};
-        this.selectedModule = '';
-      } catch (err) {
-        this.$toast.error(`Error: ${err}`);
-      }
+
+      this.agents.forEach(async (agent) => {
+        try {
+          await moduleApi.executeModule(this.selectedModule, { ...this.form, Agent: agent });
+          this.$toast.success(`Module execution queued for ${agent}`);
+          this.selectedItem = {};
+          this.selectedModule = '';
+        } catch (err) {
+          this.$toast.error(`Error: ${err}`);
+        }
+      });
 
       this.loading = false;
     },

@@ -145,7 +145,7 @@
               >
                 <agent-interact :agent="agent" />
                 <v-divider />
-                <agent-execute-module :agent-name="agent.name" />
+                <agent-execute-module :agents="[agent.name]" />
               </v-card>
             </v-tab-item>
             <v-tab-item
