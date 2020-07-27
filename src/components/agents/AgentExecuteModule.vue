@@ -67,6 +67,7 @@
           type="submit"
           color="primary"
           class="mt-4"
+          :disabled="agents.length < 1"
           :loading="loading"
         >
           Submit
@@ -230,7 +231,6 @@ export default {
     },
     async submit() {
       if (this.agents.length < 1 || this.loading || !this.$refs.form.validate()) {
-        this.$toast.success(this.agents);
         return;
       }
 
@@ -238,9 +238,8 @@ export default {
 
       // TODO Refactor to a single success toast.
       // Name if 1, count if more.
-      // Better error handling on "data" error.
 
-      // TODO Add validation feedback for when agents aren't selected
+      // TODO emit when done. Promise.allSettled?
       this.agents.forEach(async (agent) => {
         try {
           await moduleApi.executeModule(this.selectedModule, { ...this.form, Agent: agent });
