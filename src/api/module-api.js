@@ -16,6 +16,6 @@ export function getModules() {
  */
 export function executeModule(name, options) {
   return axios.post(`/modules/${name}`, options)
-    .then(({ data }) => data.modules)
+    .then(({ data }) => data.msg)
     .catch(error => Promise.reject(error.response.data.error));
 }

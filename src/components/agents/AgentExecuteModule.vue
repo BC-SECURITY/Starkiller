@@ -236,21 +236,21 @@ export default {
 
       this.loading = true;
 
-      // TODO Refactor to a single success toast.
-      // Name if 1, count if more.
+      const result = await Promise.allSettled(this.agents
+        .map(agent => moduleApi.executeModule(this.selectedModule,
+          { ...this.form, Agent: agent })));
 
-      // TODO emit when done. Promise.allSettled?
-      this.agents.forEach(async (agent) => {
-        try {
-          await moduleApi.executeModule(this.selectedModule, { ...this.form, Agent: agent });
-          this.$toast.success(`Module execution queued for ${agent}`);
-          this.selectedItem = {};
-          this.selectedModule = '';
-        } catch (err) {
-          this.$toast.error(`Error: ${err}`);
-        }
-      });
+      if (result.some(item => item.status === 'rejected')) {
+        // TODO useful error message.
+        // this.$toast.error(`Error: ${err}`);
+      } else {
+        const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
+        this.$toast.success(`Module execution queued for ${displayName}`);
+      }
 
+      // TODO emit when done? Go back to modules page if executing multiple?
+      this.selectedItem = {};
+      this.selectedModule = '';
       this.loading = false;
     },
   },
