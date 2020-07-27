@@ -17,5 +17,6 @@ export function getModules() {
 export function executeModule(name, options) {
   return axios.post(`/modules/${name}`, options)
     .then(({ data }) => data.msg)
-    .catch(error => Promise.reject(error.response.data.error));
+    // eslint-disable-next-line prefer-promise-reject-errors
+    .catch(error => Promise.reject({ agent: options.Agent, error: error.response.data.error }));
 }

@@ -241,7 +241,13 @@ export default {
           { ...this.form, Agent: agent })));
 
       if (result.some(item => item.status === 'rejected')) {
-        // TODO useful error message.
+        const split = result.reduce((acc, val) => {
+          acc[val.status].push(val);
+          return acc;
+        }, { rejected: [], fulfilled: [] });
+        console.log(split);
+        this.$toast.warning(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
+        // TODO Need a way to show the user which ones failed and the message if they want.
         // this.$toast.error(`Error: ${err}`);
       } else {
         const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
