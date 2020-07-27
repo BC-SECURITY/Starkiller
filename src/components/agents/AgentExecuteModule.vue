@@ -1,8 +1,5 @@
 <template>
-  <div style="padding: 10px">
-    <h4 style="margin-bottom: 10px;">
-      Execute Module
-    </h4>
+  <div style="padding: 0 10px 10px 10px">
     <info-viewer
       class="info-viewer"
       :info-array="moduleInfoArray"
@@ -239,6 +236,11 @@ export default {
 
       this.loading = true;
 
+      // TODO Refactor to a single success toast.
+      // Name if 1, count if more.
+      // Better error handling on "data" error.
+
+      // TODO Add validation feedback for when agents aren't selected
       this.agents.forEach(async (agent) => {
         try {
           await moduleApi.executeModule(this.selectedModule, { ...this.form, Agent: agent });

@@ -1,24 +1,27 @@
 <template>
-  <div>
-    <!-- TODO make agent-execute-module take an array DONE-->
-    <!-- TODO Allow  module name as a prop DONE -->
-    <!-- TODO Allow user to change module name DONE -->
+  <div class="p4">
+    <v-breadcrumbs :items="breads" />
     <!-- TODO Rename agent-execute-module and module-execute -->
+    <h4 class="pl-4 pb-4">
+      Execute Module
+    </h4>
     <v-autocomplete
       v-model="selectedAgents"
       dense
+      outlined
       chips
       multiple
-      outlined
+      placeholder="Agents"
       :items="agents"
       item-text="name"
       item-value="name"
     />
-    <agent-execute-module
-      v-model="moduleName"
-      :agents="selectedAgents"
-    />
-    <span> {{ moduleName }} </span>
+    <v-card>
+      <agent-execute-module
+        v-model="moduleName"
+        :agents="selectedAgents"
+      />
+    </v-card>
   </div>
 </template>
 
@@ -41,6 +44,21 @@ export default {
     ...mapState({
       agents: state => state.agent.agents,
     }),
+    breads() {
+      return [
+        {
+          text: 'Modules',
+          disabled: false,
+          to: '/modules',
+          exact: true,
+        },
+        {
+          text: `${this.moduleName}`,
+          disabled: true,
+          to: '/modules/execute',
+        },
+      ];
+    },
   },
   watch: {
     moduleName(newVal) {

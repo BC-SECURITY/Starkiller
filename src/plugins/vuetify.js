@@ -11,6 +11,7 @@ Vue.use(VuetifyToast, {
   x: 'right',
   y: 'top',
   color: 'accent',
+  queueable: true,
 });
 
 
