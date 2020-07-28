@@ -9,6 +9,7 @@
       :headers="headers"
       :items="agents"
     >
+      <!-- TODO Refactor with Vuetify 2.3 https://github.com/vuetifyjs/vuetify/pull/11254 -->
       <!-- Use item template to apply conditional row formatting -->
       <!-- Unfortunately breaks the default "mobile view" -->
       <template v-slot:item="{ item }">

@@ -74,6 +74,56 @@
         </v-btn>
       </div>
     </v-form>
+    <v-dialog
+      ref="nameDialog"
+      v-model="showDialog"
+      max-width="900px"
+    >
+      <v-card>
+        <v-card-title>
+          <span class="headline">Execution Result</span>
+        </v-card-title>
+        <v-card-text>
+          <v-data-table
+            dense
+            :items="results"
+            :headers="headers"
+            :item-class="rowClass"
+          >
+            <template v-slot:item.agent="{ item }">
+              <div>
+                <template v-if="item.status === 'rejected'">
+                  <span>{{ item.reason.agent }}</span>
+                </template>
+                <template v-else>
+                  <span>{{ item.value.agent }}</span>
+                </template>
+              </div>
+            </template>
+            <template v-slot:item.result="{ item }">
+              <div>
+                <template v-if="item.status === 'rejected'">
+                  <span>{{ item.reason.error }}</span>
+                </template>
+                <template v-else>
+                  <span>{{ item.value.message }}</span>
+                </template>
+              </div>
+            </template>
+          </v-data-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="showDialog = false"
+          >
+            Okay
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -109,6 +159,12 @@ export default {
       selectedModule: '',
       selectedItem: {},
       form: {},
+      results: [],
+      headers: [
+        { text: 'Agent', value: 'agent' },
+        { text: 'Result', value: 'result' },
+      ],
+      showDialog: false,
     };
   },
   computed: {
@@ -210,6 +266,10 @@ export default {
       // eslint-disable-next-line prefer-destructuring
       this.selectedItem = results[0] || {};
     },
+    rowClass(item) {
+      if (item.status === 'rejected') return 'red';
+      return '';
+    },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;
     },
@@ -245,16 +305,15 @@ export default {
           acc[val.status].push(val);
           return acc;
         }, { rejected: [], fulfilled: [] });
-        console.log(split);
         this.$toast.warning(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
-        // TODO Need a way to show the user which ones failed and the message if they want.
-        // this.$toast.error(`Error: ${err}`);
+
+        this.results = result;
+        this.showDialog = true;
       } else {
         const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
         this.$toast.success(`Module execution queued for ${displayName}`);
       }
 
-      // TODO emit when done? Go back to modules page if executing multiple?
       this.selectedItem = {};
       this.selectedModule = '';
       this.loading = false;
@@ -264,4 +323,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.red {
+  background-color: #bd4c4c;
+}
 </style>
