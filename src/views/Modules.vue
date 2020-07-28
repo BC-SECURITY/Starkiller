@@ -164,7 +164,6 @@ export default {
       return a.localeCompare(b, undefined, { numeric: true });
     },
     execute(item) {
-      this.$toast.success(`hey ${item.Name}`);
       this.$router.push({ name: 'moduleExecute', query: { module: item.Name } });
     },
   },

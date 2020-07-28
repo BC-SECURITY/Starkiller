@@ -139,6 +139,9 @@ export default {
     InfoViewer,
   },
   mixins: [openExternalBrowser],
+  /**
+   * can bind moduleName with v-model
+   */
   model: {
     prop: 'moduleName',
     event: 'modified',
@@ -305,10 +308,14 @@ export default {
           acc[val.status].push(val);
           return acc;
         }, { rejected: [], fulfilled: [] });
-        this.$toast.warning(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
 
-        this.results = result;
-        this.showDialog = true;
+        if (this.agents.length > 1) {
+          this.$toast.warning(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
+          this.results = result;
+          this.showDialog = true;
+        } else {
+          this.$toast.error(`Error: ${result[0].reason.error}`);
+        }
       } else {
         const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
         this.$toast.success(`Module execution queued for ${displayName}`);

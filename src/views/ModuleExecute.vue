@@ -1,7 +1,6 @@
 <template>
   <div class="p4">
     <v-breadcrumbs :items="breads" />
-    <!-- TODO Rename agent-execute-module and module-execute -->
     <h4 class="pl-4 pb-4">
       Execute Module
     </h4>
