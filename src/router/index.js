@@ -60,6 +60,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "modules" */ '../views/Modules.vue'),
   },
   {
+    path: '/modules/execute',
+    name: 'moduleExecute',
+    component: () => import(/* webpackChunkName: "modules" */ '../views/ModuleExecute.vue'),
+  },
+  {
     path: '/users',
     name: 'users',
     component: () => import(/* webpackChunkName: "users" */ '../views/Users.vue'),

@@ -33,6 +33,14 @@
           </v-chip>
         </div>
       </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          small
+          @click.stop="execute(item)"
+        >
+          fa-play
+        </v-icon>
+      </template>
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div class="d-flex flex-column">
@@ -75,6 +83,7 @@ export default {
         {
           text: 'Techniques', value: 'Techniques', width: '175px', sortable: false,
         },
+        { text: 'Actions', value: 'actions', sortable: false },
       ],
       filter: '',
       filteredModules: [],
@@ -153,6 +162,9 @@ export default {
         return 1;
       }
       return a.localeCompare(b, undefined, { numeric: true });
+    },
+    execute(item) {
+      this.$router.push({ name: 'moduleExecute', query: { module: item.Name } });
     },
   },
 };
