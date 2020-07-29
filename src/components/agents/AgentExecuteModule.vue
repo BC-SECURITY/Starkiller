@@ -35,6 +35,16 @@
         clearable
         @change="handleSelect"
       />
+      <v-autocomplete
+        v-if="fieldExists('Listener')"
+        v-model="form.Listener"
+        :rules="rules['Listener']"
+        label="Listener"
+        :items="listeners"
+        outlined
+        dense
+        required
+      />
       <v-text-field
         v-for="field in requiredFields"
         :key="field.name"
@@ -173,6 +183,7 @@ export default {
   computed: {
     ...mapState({
       selectOptions: state => state.module.modules.map(el => el.Name),
+      listeners: state => state.listener.listeners.map(el => el.name),
     }),
     fields() {
       if (Object.keys(this.selectedItem).length < 1) {
@@ -180,18 +191,18 @@ export default {
       }
 
       return Object.keys(this.selectedItem.options)
-        .filter(el => ['Agent'].indexOf(el.name) < 0)
+        .filter(el => ['Agent', 'Listener'].indexOf(el.name) < 0)
         .map(key => ({ name: key, ...this.selectedItem.options[key] }));
     },
     requiredFields() {
       return this.fields
-        .filter(el => ['Agent'].indexOf(el.name) < 0)
+        .filter(el => ['Agent', 'Listener'].indexOf(el.name) < 0)
         .filter(el => el.Required === true)
         .map(el => ({ ...el, type: this.fieldType(el) }));
     },
     optionalFields() {
       return this.fields
-        .filter(el => ['Agent'].indexOf(el.name) < 0)
+        .filter(el => ['Agent', 'Listener'].indexOf(el.name) < 0)
         .filter(el => el.Required === false)
         .map(el => ({ ...el, type: this.fieldType(el) }));
     },
@@ -258,6 +269,7 @@ export default {
   },
   async mounted() {
     this.$store.dispatch('module/getModules');
+    this.$store.dispatch('listener/getListeners');
   },
   methods: {
     async handleSelect(item) {
