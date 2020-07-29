@@ -181,6 +181,7 @@ export default {
   },
   computed: {
     ...mapState({
+      modules: state => state.module.modules,
       selectOptions: state => state.module.modules.map(el => el.Name),
       listeners: state => state.listener.listeners.map(el => el.name),
     }),
@@ -276,9 +277,8 @@ export default {
         this.selectedItem = {};
         return;
       }
-      const results = await this.$store.getters['module/searchModuleNames'](item);
-      // eslint-disable-next-line prefer-destructuring
-      this.selectedItem = results[0] || {};
+      const results = this.modules.find(el => el.Name === item);
+      this.selectedItem = results || {};
     },
     rowClass(item) {
       if (item.status === 'rejected') return 'red';

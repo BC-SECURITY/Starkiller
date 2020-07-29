@@ -17,6 +17,5 @@ export default {
     },
   },
   getters: {
-    searchModuleNames: state => name => state.modules.filter(el => el.Name.includes(name)),
   },
 };
