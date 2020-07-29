@@ -43,7 +43,6 @@
         :items="listeners"
         outlined
         dense
-        required
       />
       <v-text-field
         v-for="field in requiredFields"
