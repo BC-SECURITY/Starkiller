@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-breadcrumbs :items="breads" />
-    <h3>{{ id ? 'Edit' : 'New' }} User</h3>
+    <h3>{{ id ? 'Edit' : 'New' }} Credential</h3>
     <v-card style="padding: 10px">
       <v-form
         ref="form"
