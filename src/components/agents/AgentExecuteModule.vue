@@ -76,7 +76,7 @@
           type="submit"
           color="primary"
           class="mt-4"
-          :disabled="agents.length < 1"
+          :disabled="agents.length < 1 || selectedModule.length < 1"
           :loading="loading"
         >
           Submit
@@ -335,6 +335,9 @@ export default {
       this.selectedItem = {};
       this.selectedModule = '';
       this.loading = false;
+
+      // emit a submitted event so ModuleExecute can clear agents list.
+      this.$emit('submitted');
     },
   },
 };

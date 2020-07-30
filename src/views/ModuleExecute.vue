@@ -19,6 +19,7 @@
       <agent-execute-module
         v-model="moduleName"
         :agents="selectedAgents"
+        @submitted="clearAgents"
       />
     </v-card>
   </div>
@@ -76,6 +77,9 @@ export default {
   methods: {
     getAgents() {
       this.$store.dispatch('agent/getAgents');
+    },
+    clearAgents() {
+      this.selectedAgents = [];
     },
   },
 };
