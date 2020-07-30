@@ -24,6 +24,7 @@ export function setInstance(url, token) {
       if (err.response.status === 401) {
         store.dispatch('application/logout');
       }
+      return Promise.reject(err);
     },
   );
 }

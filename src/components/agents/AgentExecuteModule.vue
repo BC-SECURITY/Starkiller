@@ -1,8 +1,5 @@
 <template>
-  <div style="padding: 10px">
-    <h4 style="margin-bottom: 10px;">
-      Execute Module
-    </h4>
+  <div style="padding: 0 10px 10px 10px">
     <info-viewer
       class="info-viewer"
       :info-array="moduleInfoArray"
@@ -38,14 +35,14 @@
         clearable
         @change="handleSelect"
       />
-      <v-text-field
-        v-if="fieldExists('Agent')"
-        v-model="form.Agent"
-        :rules="rules['Agent']"
-        label="Agent"
+      <v-autocomplete
+        v-if="fieldExists('Listener')"
+        v-model="form.Listener"
+        :rules="rules['Listener']"
+        label="Listener"
+        :items="listeners"
         outlined
         dense
-        disabled
       />
       <v-text-field
         v-for="field in requiredFields"
@@ -79,12 +76,63 @@
           type="submit"
           color="primary"
           class="mt-4"
+          :disabled="agents.length < 1 || selectedModule.length < 1"
           :loading="loading"
         >
           Submit
         </v-btn>
       </div>
     </v-form>
+    <v-dialog
+      ref="nameDialog"
+      v-model="showDialog"
+      max-width="900px"
+    >
+      <v-card>
+        <v-card-title>
+          <span class="headline">Execution Result</span>
+        </v-card-title>
+        <v-card-text>
+          <v-data-table
+            dense
+            :items="results"
+            :headers="headers"
+            :item-class="rowClass"
+          >
+            <template v-slot:item.agent="{ item }">
+              <div>
+                <template v-if="item.status === 'rejected'">
+                  <span>{{ item.reason.agent }}</span>
+                </template>
+                <template v-else>
+                  <span>{{ item.value.agent }}</span>
+                </template>
+              </div>
+            </template>
+            <template v-slot:item.result="{ item }">
+              <div>
+                <template v-if="item.status === 'rejected'">
+                  <span>{{ item.reason.error }}</span>
+                </template>
+                <template v-else>
+                  <span>{{ item.value.message }}</span>
+                </template>
+              </div>
+            </template>
+          </v-data-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="showDialog = false"
+          >
+            Okay
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -100,8 +148,19 @@ export default {
     InfoViewer,
   },
   mixins: [openExternalBrowser],
+  /**
+   * can bind moduleName with v-model
+   */
+  model: {
+    prop: 'moduleName',
+    event: 'modified',
+  },
   props: {
-    agentName: {
+    agents: {
+      type: Array,
+      default: () => [],
+    },
+    moduleName: {
       type: String,
       default: '',
     },
@@ -112,11 +171,19 @@ export default {
       selectedModule: '',
       selectedItem: {},
       form: {},
+      results: [],
+      headers: [
+        { text: 'Agent', value: 'agent' },
+        { text: 'Result', value: 'result' },
+      ],
+      showDialog: false,
     };
   },
   computed: {
     ...mapState({
+      modules: state => state.module.modules,
       selectOptions: state => state.module.modules.map(el => el.Name),
+      listeners: state => state.listener.listeners.map(el => el.name),
     }),
     fields() {
       if (Object.keys(this.selectedItem).length < 1) {
@@ -124,18 +191,18 @@ export default {
       }
 
       return Object.keys(this.selectedItem.options)
-        .filter(el => ['Agent'].indexOf(el.name) < 0)
+        .filter(el => ['Agent', 'Listener'].indexOf(el.name) < 0)
         .map(key => ({ name: key, ...this.selectedItem.options[key] }));
     },
     requiredFields() {
       return this.fields
-        .filter(el => ['Agent'].indexOf(el.name) < 0)
+        .filter(el => ['Agent', 'Listener'].indexOf(el.name) < 0)
         .filter(el => el.Required === true)
         .map(el => ({ ...el, type: this.fieldType(el) }));
     },
     optionalFields() {
       return this.fields
-        .filter(el => ['Agent'].indexOf(el.name) < 0)
+        .filter(el => ['Agent', 'Listener'].indexOf(el.name) < 0)
         .filter(el => el.Required === false)
         .map(el => ({ ...el, type: this.fieldType(el) }));
     },
@@ -186,15 +253,23 @@ export default {
           return map;
         }, {});
 
-        if (map2.Agent != null) {
-          map2.Agent = this.agentName;
-        }
         Vue.set(this, 'form', map2);
+      },
+    },
+    selectedModule(newVal) {
+      this.emitModuleChange(newVal);
+    },
+    moduleName: {
+      immediate: true,
+      handler(newVal) {
+        this.selectedModule = newVal;
+        this.handleSelect(newVal);
       },
     },
   },
   async mounted() {
     this.$store.dispatch('module/getModules');
+    this.$store.dispatch('listener/getListeners');
   },
   methods: {
     async handleSelect(item) {
@@ -202,9 +277,12 @@ export default {
         this.selectedItem = {};
         return;
       }
-      const results = await this.$store.getters['module/searchModuleNames'](item);
-      // eslint-disable-next-line prefer-destructuring
-      this.selectedItem = results[0];
+      const results = this.modules.find(el => el.Name === item);
+      this.selectedItem = results || {};
+    },
+    rowClass(item) {
+      if (item.status === 'rejected') return 'red';
+      return '';
     },
     fieldExists(name) {
       return this.fields.filter(el => el.name === name).length > 0;
@@ -222,26 +300,51 @@ export default {
 
       return 'string';
     },
+    emitModuleChange(newVal) {
+      this.$emit('modified', newVal);
+    },
     async submit() {
-      if (this.loading || !this.$refs.form.validate()) {
+      if (this.agents.length < 1 || this.loading || !this.$refs.form.validate()) {
         return;
       }
 
       this.loading = true;
-      try {
-        await moduleApi.executeModule(this.selectedModule, this.form);
-        this.$toast.success(`Module execution queued for ${this.agentName}`);
-        this.selectedItem = {};
-        this.selectedModule = '';
-      } catch (err) {
-        this.$toast.error(`Error: ${err}`);
+
+      const result = await Promise.allSettled(this.agents
+        .map(agent => moduleApi.executeModule(this.selectedModule,
+          { ...this.form, Agent: agent })));
+
+      if (result.some(item => item.status === 'rejected')) {
+        const split = result.reduce((acc, val) => {
+          acc[val.status].push(val);
+          return acc;
+        }, { rejected: [], fulfilled: [] });
+
+        if (this.agents.length > 1) {
+          this.$toast.warning(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
+          this.results = result;
+          this.showDialog = true;
+        } else {
+          this.$toast.error(`Error: ${result[0].reason.error}`);
+        }
+      } else {
+        const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
+        this.$toast.success(`Module execution queued for ${displayName}`);
       }
 
+      this.selectedItem = {};
+      this.selectedModule = '';
       this.loading = false;
+
+      // emit a submitted event so ModuleExecute can clear agents list.
+      this.$emit('submitted');
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.red {
+  background-color: #bd4c4c;
+}
 </style>
