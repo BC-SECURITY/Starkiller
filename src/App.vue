@@ -4,6 +4,27 @@
       <side-nav v-if="isLoggedIn" />
       <confirm ref="confirm" />
 
+      <!-- socket notifications -->
+      <v-snackbar
+        v-model="socketNotification.enabled"
+        absolute
+        right
+        top
+      >
+        {{ socketNotification.text }}
+
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            color="orange darken-2"
+            text
+            v-bind="attrs"
+            @click="goToRoute"
+          >
+            View
+          </v-btn>
+        </template>
+      </v-snackbar>
+
       <!-- Sizes your content based upon application components -->
       <v-main>
         <!-- Provides the application the proper gutter -->
@@ -32,6 +53,8 @@
   </div>
 </template>
 <script>
+import io from 'socket.io-client';
+
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
 import openExternalBrowser from '@/mixins/open-external';
@@ -46,6 +69,16 @@ export default {
     Confirm,
   },
   mixins: [openExternalBrowser],
+  data() {
+    return {
+      socketNotification: {
+        enabled: false,
+        text: '',
+        route: '',
+        id: '',
+      },
+    };
+  },
   computed: {
     ...mapGetters({
       isLoggedIn: 'application/isLoggedIn',
@@ -93,12 +126,44 @@ export default {
   },
   mounted() {
     this.$root.$confirm = this.$refs.confirm.open;
-
+    this.socket = io('ws://localhost:5000');
+    window.socket = this.socket;
+    this.socket.on('listeners/new', (data) => {
+      this.socketNotification = {
+        id: data.name,
+        route: 'listenerEdit',
+        enabled: true,
+        text: `New Listener '${data.name}' started!`,
+      };
+    });
+    this.socket.on('agents/new', (data) => {
+      this.socketNotification = {
+        id: data.sessionID,
+        route: 'agentEdit',
+        enabled: true,
+        text: `New Agent '${data.sessionID}' callback!`,
+      };
+    });
+    // this.socket.on('credentials/new')
+    // this.socket.on('listeners', (data) => {
+    //   this.$toast.success(data);
+    // });
+    this.socket.on('Users', (data) => {
+      this.$toast.success(data);
+    });
     if (this.isLoggedIn === false && !this.isLoginPage) {
       this.$router.push({ name: 'home' });
     } else if (this.isLoggedIn === true && this.$route.name === 'home') {
       this.$router.push({ name: 'listeners' });
     }
+  },
+  methods: {
+    goToRoute() {
+      this.$router.push({
+        name: this.socketNotification.route,
+        params: { id: this.socketNotification.id },
+      });
+    },
   },
 };
 </script>
