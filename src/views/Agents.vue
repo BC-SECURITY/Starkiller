@@ -7,7 +7,7 @@
     </div>
     <v-data-table
       :headers="headers"
-      :items="agents"
+      :items="sortedAgents"
     >
       <!-- TODO Refactor with Vuetify 2.3 like AgentExecuteModule https://github.com/vuetifyjs/vuetify/pull/11254 -->
       <!-- Use item template to apply conditional row formatting -->
@@ -93,6 +93,11 @@ export default {
     ...mapState({
       agents: state => state.agent.agents,
     }),
+    sortedAgents() {
+      const sorted = this.agents.slice();
+      sorted.sort((a, b) => -a.checkin_time.localeCompare(b.checkin_time));
+      return sorted;
+    },
   },
   mounted() {
     this.getAgents();
