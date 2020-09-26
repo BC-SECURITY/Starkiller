@@ -16,6 +16,9 @@ export default {
     setListeners(state, listeners) {
       state.listeners = listeners;
     },
+    pushListener(state, listener) {
+      state.listeners.push(listener);
+    },
     setTypes(state, types) {
       state.types = types;
     },
@@ -32,6 +35,13 @@ export default {
     async killListener(context, name) {
       await listenerApi.killListener(name);
       context.dispatch('getListeners');
+    },
+    async addListener(context, listener) {
+      const found = context.state.listeners.find(el => el.ID === listener.ID);
+
+      if (!found) {
+        context.commit('pushListener', listener);
+      }
     },
   },
   getters: {

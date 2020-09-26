@@ -45,34 +45,36 @@ export default {
     },
   },
   mounted() {
-    this.socket = io(`wss://localhost:5000?token=${this.apiToken}`); // todo get from state. Needs to connect with credentials.
+    this.socket = io(`wss://localhost:5000?token=${this.apiToken}`, {
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 5000,
+    }); // todo get from state. Needs to connect with credentials.
     this.socket.on('listeners/new', (data) => {
-      this.socketNotification = { // todo this should push to the state if it receives a full object
+      this.socketNotification = {
         id: data.name,
         route: 'listenerEdit',
         enabled: true,
         text: `New Listener '${data.name}' started!`,
       };
+      this.$store.dispatch('listener/addListener', data);
     });
-    this.socket.on('agents/new', (data) => { // todo this should push to the state if it receives a full object
+    this.socket.on('agents/new', (data) => {
       this.socketNotification = {
-        id: data.sessionID,
+        id: data.session_id,
         route: 'agentEdit',
         enabled: true,
-        text: `New Agent '${data.sessionID}' callback!`,
+        text: `New Agent '${data.session_id}' callback!`,
       };
+      this.$store.dispatch('agent/addAgent', data);
     });
-    this.socket.on('agents/task', (data) => {
-      // const { sessionID, taskID, data } = data;
-      this.$store.dispatch('agent/addResult', { data });
+    this.socket.on('agents/stage2', (data) => {
+      this.$store.dispatch('agent/addAgent', data);
     });
-    // this.socket.on('credentials/new')
-    // this.socket.on('listeners', (data) => {
-    //   this.$toast.success(data);
+    // this.socket.on('agents/task', (data) => {
+    //   // const { sessionID, taskID, data } = data;
+    //   this.$store.dispatch('agent/addResult', { data });
     // });
-    this.socket.on('Users', (data) => {
-      this.$toast.success(data);
-    });
   },
   methods: {
     goToRoute() {
