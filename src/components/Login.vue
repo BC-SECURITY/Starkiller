@@ -97,7 +97,7 @@ export default {
             ? val
             : `https://${val}`;
           const url = new URL(cleanedUrl);
-          this.form.socketUrl = `${url.protocol}//${url.hostname}:5000`;
+          this.form.socketUrl = `wss://${url.hostname}:5000`;
         } catch (err) {
           // noop
         }
@@ -114,6 +114,14 @@ export default {
     this.form.url = electronStore.get('url', '');
     this.form.username = electronStore.get('username', '');
     this.rememberMe = electronStore.get('rememberMe', false);
+    this.$nextTick(() => {
+      // this is in nextTick to allow us to write a saved socketUrl
+      // after the 'form.url' watcher.
+      const socketUrl = electronStore.get('socketUrl', '');
+      if (socketUrl !== '') {
+        this.form.socketUrl = socketUrl;
+      }
+    });
   },
   methods: {
     submit() {
@@ -132,7 +140,12 @@ export default {
         electronStore.delete('username');
       }
 
-      this.$store.dispatch('application/login', { url: cleanedUrl, username: this.form.username, password: this.form.password });
+      this.$store.dispatch('application/login', {
+        url: cleanedUrl,
+        socketUrl: this.form.socketUrl,
+        username: this.form.username,
+        password: this.form.password,
+      });
     },
   },
 };

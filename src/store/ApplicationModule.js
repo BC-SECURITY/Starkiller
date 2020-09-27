@@ -15,10 +15,11 @@ export default {
   },
   mutations: {
     setApplicationState(state, {
-      token, url, user, version,
+      token, url, socketUrl, user, version,
     }) {
       state.token = token;
       state.url = url;
+      state.socketUrl = socketUrl;
       state.user = user;
       state.empireVersion = version;
       setInstance(url, token);
@@ -30,6 +31,7 @@ export default {
     setLogout(state) {
       state.token = '';
       state.url = '';
+      state.socketUrl = '';
       state.user = {};
       state.empireVersion = '';
     },
@@ -38,7 +40,9 @@ export default {
     },
   },
   actions: {
-    async login(context, { url, username, password }) {
+    async login(context, {
+      url, socketUrl, username, password,
+    }) {
       try {
         context.commit('setLoginError', '');
         const token = await axios.post(`${url}/api/admin/login`,
@@ -48,7 +52,7 @@ export default {
         const user = await axios.get(`${url}/api/users/me?token=${token.data.token}`);
         const version = await axios.get(`${url}/api/version?token=${token.data.token}`);
         context.commit('setApplicationState', {
-          token: token.data.token, url, user: user.data, version: version.data.version,
+          token: token.data.token, url, socketUrl, user: user.data, version: version.data.version,
         });
       } catch (err) {
         let message = '';
@@ -82,6 +86,9 @@ export default {
     },
     token(state) {
       return state.token;
+    },
+    socketUrl(state) {
+      return state.socketUrl;
     },
   },
 };

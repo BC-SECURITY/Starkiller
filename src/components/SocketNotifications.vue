@@ -22,12 +22,13 @@
 
 <script>
 import io from 'socket.io-client';
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'SocketNotifications',
   data() {
     return {
+      socket: null,
       socketNotification: {
         enabled: false,
         text: '',
@@ -40,43 +41,79 @@ export default {
     ...mapState({
       user: state => state.application.user,
     }),
+    ...mapGetters({
+      isLoggedIn: 'application/isLoggedIn',
+      socketUrl: 'application/socketUrl',
+    }),
     apiToken() {
       return this.user.api_token;
     },
   },
+  watch: {
+    socketUrl(val) {
+      if (this.isLoggedIn && !this.socket) {
+        this.socket = io(`${val}?token=${this.apiToken}`, {
+          reconnection: true,
+          reconnectionAttempts: 10,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 10000,
+        });
+        this.setHandlers();
+      } else {
+        console.log('Closing Socket');
+        this.socket.close();
+        this.socket = null;
+      }
+    },
+  },
   mounted() {
-    this.socket = io(`wss://localhost:5000?token=${this.apiToken}`, {
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 5000,
-    }); // todo get from state. Needs to connect with credentials.
-    this.socket.on('listeners/new', (data) => {
-      this.socketNotification = {
-        id: data.name,
-        route: 'listenerEdit',
-        enabled: true,
-        text: `New Listener '${data.name}' started!`,
-      };
-      this.$store.dispatch('listener/addListener', data);
-    });
-    this.socket.on('agents/new', (data) => {
-      this.socketNotification = {
-        id: data.session_id,
-        route: 'agentEdit',
-        enabled: true,
-        text: `New Agent '${data.session_id}' callback!`,
-      };
-      this.$store.dispatch('agent/addAgent', data);
-    });
-    this.socket.on('agents/stage2', (data) => {
-      this.$store.dispatch('agent/addAgent', data);
-    });
-    // this.socket.on('agents/task', (data) => {
-    //   // const { sessionID, taskID, data } = data;
-    //   this.$store.dispatch('agent/addResult', { data });
-    // });
+    if (!this.socket && this.socketUrl && this.isLoggedIn) {
+      this.socket = io(`${this.socketUrl}?token=${this.apiToken}`, {
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 10000,
+      });
+      this.setHandlers();
+    }
   },
   methods: {
+    setHandlers() {
+      this.socket.on('listeners/new', (data) => {
+        this.socketNotification = {
+          id: data.name,
+          route: 'listenerEdit',
+          enabled: true,
+          text: `New Listener '${data.name}' started!`,
+        };
+        this.$store.dispatch('listener/addListener', data);
+      });
+      this.socket.on('agents/new', (data) => {
+        this.socketNotification = {
+          id: data.session_id,
+          route: 'agentEdit',
+          enabled: true,
+          text: `New Agent '${data.session_id}' callback!`,
+        };
+        this.$store.dispatch('agent/addAgent', data);
+      });
+      this.socket.on('agents/stage2', (data) => {
+        this.$store.dispatch('agent/addAgent', data);
+      });
+      this.socket.on('reconnect_failed', () => {
+        console.log('Failed to connect to SocketIO');
+        this.$toast.error('Failed to connect to SocketIO');
+      });
+      this.socket.on('connect_error', () => {
+        console.log('SocketIO Connection Error, retrying.');
+        // a bit too noisy to popup on every reconnect attempt.
+        // this.$toast.warning('SocketIO Connection Error, retrying.');
+      });
+      // this.socket.on('agents/task', (data) => {
+      //   // const { sessionID, taskID, data } = data;
+      //   this.$store.dispatch('agent/addResult', { data });
+      // });
+    },
     goToRoute() {
       this.$router.push({
         name: this.socketNotification.route,
