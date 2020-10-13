@@ -60,10 +60,6 @@ export default {
       if (this.isLoggedIn && !this.socket) {
         this.connect();
         this.setHandlers();
-      } else {
-        console.log('Closing Socket');
-        this.socket.close();
-        this.socket = null;
       }
     },
   },
@@ -73,14 +69,23 @@ export default {
       this.setHandlers();
     }
   },
+  beforeDestroy() {
+    this.disconnect();
+  },
   methods: {
     connect() {
+      console.log('Opening Socket');
       this.socket = io(`${this.socketUrl}?token=${this.apiToken}`, {
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 10000,
       });
+    },
+    disconnect() {
+      console.log('Closing Socket');
+      this.socket.close();
+      this.socket = null;
     },
     setHandlers() {
       this.socket.on('listeners/new', (data) => {
