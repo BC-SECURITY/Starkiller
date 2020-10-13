@@ -1,6 +1,6 @@
 {
   "name": "starkiller",
-  "version": "1.4.0-RC2",
+  "version": "1.4.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
