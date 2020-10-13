@@ -21,6 +21,10 @@ export function setInstance(url, token) {
   axiosInstance.interceptors.response.use(
     response => response,
     (err) => {
+      if (!err.response) {
+        // check your connection
+        store.dispatch('application/logout');
+      }
       if (err.response.status === 401) {
         store.dispatch('application/logout');
       }

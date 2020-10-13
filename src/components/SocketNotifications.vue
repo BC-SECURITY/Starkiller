@@ -50,14 +50,15 @@ export default {
     },
   },
   watch: {
-    socketUrl(val) {
+    isLoggedIn(val) {
+      if (val === true && !this.socket) {
+        this.connect();
+        this.setHandlers();
+      }
+    },
+    socketUrl() {
       if (this.isLoggedIn && !this.socket) {
-        this.socket = io(`${val}?token=${this.apiToken}`, {
-          reconnection: true,
-          reconnectionAttempts: 10,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 10000,
-        });
+        this.connect();
         this.setHandlers();
       } else {
         console.log('Closing Socket');
@@ -68,16 +69,19 @@ export default {
   },
   mounted() {
     if (!this.socket && this.socketUrl && this.isLoggedIn) {
+      this.connect();
+      this.setHandlers();
+    }
+  },
+  methods: {
+    connect() {
       this.socket = io(`${this.socketUrl}?token=${this.apiToken}`, {
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 10000,
       });
-      this.setHandlers();
-    }
-  },
-  methods: {
+    },
     setHandlers() {
       this.socket.on('listeners/new', (data) => {
         this.socketNotification = {
