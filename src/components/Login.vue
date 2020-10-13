@@ -10,6 +10,26 @@
         dense
         outlined
       />
+      <div
+        v-if="!editSocket"
+        style="margin-top: -30px; margin-bottom: 20px;"
+      >
+        <span class="caption grey--text font-weight-light">SocketIO: {{ form.socketUrl }}</span>
+        <v-icon
+          class="point"
+          small
+          @click="editSocket = true"
+        >
+          mdi-pencil
+        </v-icon>
+      </div>
+      <v-text-field
+        v-else
+        v-model="form.socketUrl"
+        label="SocketIO Url"
+        dense
+        outlined
+      />
       <v-text-field
         v-model="form.username"
         label="Username"
@@ -52,10 +72,12 @@ export default {
       loading: false,
       showPassword: false,
       rememberMe: false,
+      editSocket: false,
       form: {
         url: '',
         username: '',
         password: '',
+        socketUrl: '',
       },
     };
   },
@@ -68,6 +90,19 @@ export default {
     }),
   },
   watch: {
+    'form.url': {
+      handler(val) {
+        try {
+          const cleanedUrl = (val.startsWith('http://') || val.startsWith('https://'))
+            ? val
+            : `https://${val}`;
+          const url = new URL(cleanedUrl);
+          this.form.socketUrl = `wss://${url.hostname}:5000`;
+        } catch (err) {
+          // noop
+        }
+      },
+    },
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;
@@ -79,6 +114,14 @@ export default {
     this.form.url = electronStore.get('url', '');
     this.form.username = electronStore.get('username', '');
     this.rememberMe = electronStore.get('rememberMe', false);
+    this.$nextTick(() => {
+      // this is in nextTick to allow us to write a saved socketUrl
+      // after the 'form.url' watcher.
+      const socketUrl = electronStore.get('socketUrl', '');
+      if (socketUrl !== '') {
+        this.form.socketUrl = socketUrl;
+      }
+    });
   },
   methods: {
     submit() {
@@ -90,13 +133,19 @@ export default {
 
       if (this.rememberMe === true) {
         electronStore.set('url', cleanedUrl);
+        electronStore.set('socketUrl', this.form.socketUrl);
         electronStore.set('username', this.form.username);
       } else {
         electronStore.delete('url');
         electronStore.delete('username');
       }
 
-      this.$store.dispatch('application/login', { url: cleanedUrl, username: this.form.username, password: this.form.password });
+      this.$store.dispatch('application/login', {
+        url: cleanedUrl,
+        socketUrl: this.form.socketUrl,
+        username: this.form.username,
+        password: this.form.password,
+      });
     },
   },
 };

@@ -11,7 +11,6 @@
         v-model="form[field.name]"
         :rules="rules[field.name]"
         :label="field.name"
-        :type="field.type === 'string' ? 'text' : 'number'"
         outlined
         dense
         required

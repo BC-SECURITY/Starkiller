@@ -3,6 +3,7 @@
     <v-app :dark="isDarkMode">
       <side-nav v-if="isLoggedIn" />
       <confirm ref="confirm" />
+      <socket-notifications v-if="isLoggedIn && versionSatisfies('>=3.5.0')" />
 
       <!-- Sizes your content based upon application components -->
       <v-main>
@@ -38,12 +39,14 @@ import openExternalBrowser from '@/mixins/open-external';
 
 import SideNav from '@/components/SideNav.vue';
 import Confirm from '@/components/Confirm.vue';
+import SocketNotifications from '@/components/SocketNotifications.vue';
 
 export default {
   name: 'App',
   components: {
     SideNav,
     Confirm,
+    SocketNotifications,
   },
   mixins: [openExternalBrowser],
   computed: {
@@ -79,9 +82,9 @@ export default {
     empireVersion: {
       handler(val) {
         if (val.length > 0) {
-          if (!semver.satisfies(val.split(' ')[0], '>=3.3.0')) {
+          if (!semver.satisfies(val.split(' ')[0], '>=3.5.0')) {
             this.$toast.error(
-              'Starkiller 1.3.x is recommended to be used with Empire 3.3.0 or greater.'
+              'Starkiller 1.4.x is recommended to be used with Empire 3.5.0 or greater.'
               + ' Some features may not work properly.',
               { timeout: 8000 },
             );
@@ -93,12 +96,16 @@ export default {
   },
   mounted() {
     this.$root.$confirm = this.$refs.confirm.open;
-
     if (this.isLoggedIn === false && !this.isLoginPage) {
       this.$router.push({ name: 'home' });
     } else if (this.isLoggedIn === true && this.$route.name === 'home') {
       this.$router.push({ name: 'listeners' });
     }
+  },
+  methods: {
+    versionSatisfies(version) {
+      return semver.satisfies(this.empireVersion.split(' ')[0], version);
+    },
   },
 };
 </script>

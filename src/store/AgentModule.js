@@ -9,6 +9,9 @@ export default {
     setAgents(state, agents) {
       state.agents = agents;
     },
+    pushAgent(state, agent) {
+      state.agents.push(agent);
+    },
   },
   actions: {
     async getAgents(context) {
@@ -47,6 +50,17 @@ export default {
 
       await agentApi.removeAgent(name);
       context.commit('setAgents', agents);
+    },
+    async addAgent(context, agent) {
+      const { agents } = context.state;
+      const foundIndex = agents.findIndex(el => el.id === agent.id); // todo ID?
+
+      if (foundIndex >= 0) {
+        agents.splice(foundIndex, 1, agent);
+        context.commit('setAgents', agents);
+      } else {
+        context.commit('pushAgent', agent);
+      }
     },
     clearQueue(context, { name }) {
       agentApi.clearQueue(name);
