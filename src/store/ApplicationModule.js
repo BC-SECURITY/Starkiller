@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-cycle
 import { setInstance } from '@/api/axios-instance';
 import axios from 'axios';
 import { initNamespacedStore } from '@/store/electron-store';
