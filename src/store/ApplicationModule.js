@@ -1,7 +1,9 @@
-import axios from 'axios';
 import { setInstance } from '@/api/axios-instance';
+import axios from 'axios';
 import { initNamespacedStore } from '@/store/electron-store';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ipcRenderer } from 'electron';
 
 export default {
   namespaced: true,
@@ -68,6 +70,7 @@ export default {
     },
     async logout(context) {
       axios.post(`${context.state.url}/api/admin/logout?token=${context.state.token}`);
+      ipcRenderer.send('closeAllAgentWindows');
       context.commit('setLogout');
     },
     darkMode(context, val) {
