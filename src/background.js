@@ -1,6 +1,6 @@
 /* global __static */
 import {
-  app, protocol, BrowserWindow, shell,
+  app, protocol, BrowserWindow, shell, ipcMain,
 } from 'electron';
 import path from 'path';
 import {
@@ -54,6 +54,51 @@ function createWindow() {
     }
   });
 }
+
+const agentWindows = {};
+ipcMain.on('agentWindowOpen', (e, data) => {
+  if (agentWindows[data.id]) {
+    return;
+  }
+
+  let spawnedWin = new BrowserWindow({
+    x: win.getPosition()[0] + 50,
+    y: win.getPosition()[1] + 50,
+    width: 600,
+    height: 600,
+    frameless: true,
+    webPreferences: {
+      nodeIntegration: true,
+      webSecurity: false,
+      icon: path.join(__static, 'icon.png'),
+    },
+  });
+
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    // Load the url of the dev server if in development mode
+    spawnedWin.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}#/agents/${data.id}?hideSideBar=true`);
+  } else {
+    createProtocol('app');
+    // Load the index.html when not in development
+    spawnedWin.loadURL(`app://./index.html#/agents/${data.id}?hideSideBar=true`);
+  }
+  spawnedWin.setTitle(`Agent ${data.id}`);
+
+  spawnedWin.on('page-title-updated', (evt) => {
+    evt.preventDefault();
+  });
+
+  spawnedWin.on('closed', () => {
+    spawnedWin = null;
+    delete agentWindows[data.id];
+  });
+
+  agentWindows[data.id] = spawnedWin;
+});
+
+ipcMain.on('closeAllAgentWindows', () => {
+  Object.values(agentWindows).forEach(window => window.close());
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

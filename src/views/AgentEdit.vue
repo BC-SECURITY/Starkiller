@@ -108,6 +108,22 @@
           </template>
           <span>Kill Agent</span>
         </v-tooltip>
+        <v-tooltip
+          v-if="!isChild"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              fab
+              x-small
+              v-on="on"
+              @click="popout"
+            >
+              <v-icon>fa-external-link-alt</v-icon>
+            </v-btn>
+          </template>
+          <span>New Window</span>
+        </v-tooltip>
       </div>
     </div>
     <div :style="splitPaneHeight()">
@@ -188,6 +204,9 @@ import AgentCommandViewer from '@/components/agents/AgentCommandViewer.vue';
 import SplitPane from 'vue-splitpane';
 import * as agentApi from '@/api/agent-api';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ipcRenderer } from 'electron';
+
 export default {
   name: 'AgentEdit',
   components: {
@@ -217,7 +236,7 @@ export default {
       return [
         {
           text: 'Agents',
-          disabled: false,
+          disabled: this.isChild,
           to: '/agents',
           exact: true,
         },
@@ -230,6 +249,9 @@ export default {
     },
     id() {
       return this.$route.params.id;
+    },
+    isChild() {
+      return !!this.$route.query.hideSideBar;
     },
   },
   watch: {
@@ -246,7 +268,11 @@ export default {
     splitPaneHeight() {
       /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
      That's 96vh - height of breadcrumbs (57) - height of footer (36px) */
-      return 'height: calc(96vh - 57px - 36px';
+      return `height: calc(96vh - 57px ${this.isChild ? '' : '- 36px'})`;
+    },
+    popout() {
+      ipcRenderer.send('agentWindowOpen', { id: this.$route.params.id });
+      this.$router.push({ name: 'agents' });
     },
     getAgent(id) {
       agentApi.getAgent(id)
