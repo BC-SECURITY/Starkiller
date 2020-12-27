@@ -5,7 +5,7 @@
         v-if="isLoggedIn && !hideSideBar"
       />
       <confirm ref="confirm" />
-      <socket-notifications v-if="isLoggedIn && versionSatisfies('>=3.5.0')" />
+      <socket-notifications v-if="isLoggedIn && versionSatisfies('>=3.5.0') && !hideSideBar" />
 
       <!-- Sizes your content based upon application components -->
       <v-main>
