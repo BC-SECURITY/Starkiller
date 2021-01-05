@@ -12,7 +12,7 @@
         <!-- Provides the application the proper gutter -->
         <v-container fluid>
           <!-- If using vue-router -->
-          <router-view />
+          <router-view :class="hideSideBar ? '' : 'ml-8'" />
         </v-container>
       </v-main>
 

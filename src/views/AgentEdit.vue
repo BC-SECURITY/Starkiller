@@ -130,20 +130,25 @@
       <split-pane
         :min-percent="20"
         :default-percent="60"
-        split="horizontal"
+        split="vertical"
       >
         <template slot="paneL">
           <v-tabs
             v-model="activeTab"
             class="scrollable-pane"
-            centered
-            small
+            fixed-tabs
           >
             <v-tab
               key="interact"
               href="#tab-interact"
             >
               Interact
+            </v-tab>
+            <v-tab
+              key="tasks"
+              href="#tab-tasks"
+            >
+              Tasks
             </v-tab>
             <v-tab
               key="view"
@@ -168,6 +173,20 @@
               </v-card>
             </v-tab-item>
             <v-tab-item
+              key="tasks"
+              :value="'tab-tasks'"
+            >
+              <v-card
+                class="scrollable-pane"
+                flat
+              >
+                <agent-command-history
+                  :agent-name="agent.name"
+                  :task-results="taskResults"
+                />
+              </v-card>
+            </v-tab-item>
+            <v-tab-item
               key="view"
               :value="'tab-view'"
             >
@@ -183,10 +202,12 @@
         <template slot="paneR">
           <div
             ref="bottomScrollable"
-            class="bottom-pane"
+            class="right-pane"
           >
             <agent-command-viewer
               :name="this.$route.params.id"
+              :task-results="taskResults"
+              :initialized="initialized"
               @new-results="scrollResults"
             />
           </div>
@@ -199,6 +220,7 @@
 <script>
 import AgentForm from '@/components/agents/AgentForm.vue';
 import AgentInteract from '@/components/agents/AgentInteract.vue';
+import AgentCommandHistory from '@/components/agents/AgentCommandHistory.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentCommandViewer from '@/components/agents/AgentCommandViewer.vue';
 import SplitPane from 'vue-splitpane';
@@ -214,6 +236,7 @@ export default {
     AgentInteract,
     AgentExecuteModule,
     AgentCommandViewer,
+    AgentCommandHistory,
     SplitPane,
   },
   data() {
@@ -229,6 +252,9 @@ export default {
       nameForm: {},
       activeTab: 'View',
       dialog: false,
+      interval: null,
+      taskResults: [],
+      initialized: false,
     };
   },
   computed: {
@@ -264,6 +290,9 @@ export default {
   mounted() {
     this.getAgent(this.$route.params.id);
   },
+  beforeDestroy() {
+    clearInterval(this.interval);
+  },
   methods: {
     splitPaneHeight() {
       /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
@@ -278,6 +307,14 @@ export default {
       agentApi.getAgent(id)
         .then((data) => {
           this.agent = data;
+          if (this.interval !== null) {
+            clearInterval(this.interval);
+            this.interval = null;
+          }
+          this.interval = setInterval(async () => {
+            this.taskResults = await agentApi.getResults(this.agent.name);
+            this.initialized = true;
+          }, 5000);
         });
     },
     async killAgent() {
@@ -324,7 +361,7 @@ export default {
   overflow: auto;
 }
 
-.bottom-pane {
+.right-pane {
   background-color: white;
   height: 100%;
   overflow-y: auto;

@@ -50,6 +50,16 @@ export function removeAgent(name) {
 }
 
 /**
+ * Get a single task
+ * @param {string} name agent name
+ */
+export function getTask(name, taskId) {
+  return axios.get(`/agents/${name}/task/${taskId}`)
+    .then(({ data }) => data)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
  * Get tasking results for an agent.
  * @param {string} name agent name
  */
