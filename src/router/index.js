@@ -98,6 +98,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "reporting" */ '../views/Reporting.vue'),
   },
   {
+    path: '/plugins',
+    name: 'plugins',
+    component: () => import(/* webpackChunkName: "plugins" */ '../views/Plugins.vue'),
+  },
+  {
+    path: '/plugins/:id',
+    name: 'pluginExecute',
+    component: () => import(/* webpackChunkName: "plugin-execute" */ '../views/PluginExecute.vue'),
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import(/* webpackChunkName: "settings" */ '../views/Settings.vue'),

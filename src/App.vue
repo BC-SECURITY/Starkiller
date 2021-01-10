@@ -29,10 +29,18 @@
         > Starkiller </a>
         <span class="mr-2">|</span>
         <a
+          class="mr-2"
           target="_blank"
           href="https://github.com/bc-security/empire"
           @click.prevent="openExternalBrowser"
         > Empire</a>
+        <span class="mr-2">|</span>
+        <a
+          class="mr-2"
+          target="_blank"
+          href="https://github.com/sponsors/BC-SECURITY"
+          @click.prevent="openExternalBrowser"
+        > Sponsor for extra features</a>
       </v-footer>
     </v-app>
   </div>

@@ -89,3 +89,21 @@ export function clearQueue(name) {
     .then(({ data }) => data.success)
     .catch(error => Promise.reject(error.response.data.error));
 }
+
+/**
+ * Task agent to receive file upload.
+ */
+export function uploadFile(name, base64File, pathToFile) {
+  return axios.post(`/agents/${name}/upload`, { filename: pathToFile, data: base64File })
+    .then(({ data }) => data.taskID)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
+ * Task agent to send file to Empire.
+ */
+export function downloadFile(name, pathToFile) {
+  return axios.post(`/agents/${name}/download`, { filename: pathToFile })
+    .then(({ data }) => data.taskID)
+    .catch(error => Promise.reject(error.response.data.error));
+}
