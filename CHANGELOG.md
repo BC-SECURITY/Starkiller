@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added upload/download functionality to the agent page
 - Converted agents page to be left-right instead of top-bottom
 - Lots of code refactoring on agents
+
 ## [1.5.1] - 2020-12-26
 - Removed socket notifications from popout windows.
 - Minor dependency changes.
