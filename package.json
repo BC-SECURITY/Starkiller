@@ -1,6 +1,6 @@
 {
   "name": "starkiller",
-  "version": "1.6.0-RC1-Kali",
+  "version": "1.6.0-Kali",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

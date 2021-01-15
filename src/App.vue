@@ -98,9 +98,9 @@ export default {
     empireVersion: {
       handler(val) {
         if (val.length > 0) {
-          if (!semver.satisfies(val.split(' ')[0], '>=3.5.0')) {
+          if (!semver.satisfies(val.split(' ')[0], '>=3.7.0')) {
             this.$toast.error(
-              'Starkiller 1.4.x is recommended to be used with Empire 3.5.0 or greater.'
+              'Starkiller 1.6.x is recommended to be used with Empire 3.7.0 or greater.'
               + ' Some features may not work properly.',
               { timeout: 8000 },
             );
