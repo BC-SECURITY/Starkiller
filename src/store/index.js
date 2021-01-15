@@ -10,6 +10,7 @@ import StagerModule from './StagerModule';
 import AgentModule from './AgentModule';
 import ModuleModule from './ModuleModule';
 import CredentialModule from './CredentialModule';
+import PluginModule from './PluginModule';
 import ApplicationModule from './ApplicationModule';
 
 
@@ -29,6 +30,7 @@ export default new Vuex.Store({
     agent: AgentModule,
     module: ModuleModule,
     credential: CredentialModule,
+    plugin: PluginModule,
     application: ApplicationModule,
   },
   plugins: [createPersistedState({

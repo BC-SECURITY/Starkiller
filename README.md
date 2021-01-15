@@ -3,9 +3,13 @@
 # Starkiller
 Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/Empire/). It is an Electron application written in VueJS. If you'd like to contribute please follow the [Contribution guide](/CONTRIBUTING.md). If you'd like to request a feature or report a bug, please follow the [Issue template](/.github/ISSUE_TEMPLATE.md).
 
+## Sponsors
+[<img src="https://user-images.githubusercontent.com/20302208/104083160-41552780-51f1-11eb-8428-3b8cfaf76861.png" width="300"/>](https://www.kali.org/)
+
 # Getting Started
 * To run Starkiller, you can download the installers for Mac, Linux, and Windows on the [Releases](https://github.com/BC-SECURITY/Starkiller/releases) page.
   * For more info on running AppImage builds in Linux [check out their website](https://appimage.org/)
+* Starkiller is also available via `apt` on [Kali](https://www.kali.org/). Kali releases are 30 days ahead of the public release.
 * If you want to build from source or run in development mode, instructions are below.
 
 ## Install
@@ -40,7 +44,8 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.1.x              | 3.1.5         | 3.1.5 updated the reporting endpoint to have the same result as running it in the CLI. Starkiller 1.1.x uses that reporting endpoint for the reporting tab |
 | 1.2.x              | 3.2.0         | 3.2.0 added an endpoint for users that is needed for the UI updates introduced in Starkiller 1.2.0
 | 1.3.x              | 3.3.0         | 3.3.0 categorized all of the modules in Empire with corresponding [MITRE techniques](https://attack.mitre.org/techniques/enterprise/)
-| 1.4.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
+| 1.4.x, 1.5.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
+| 1.6.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 
 ## Changelog
 

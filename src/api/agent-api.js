@@ -50,6 +50,16 @@ export function removeAgent(name) {
 }
 
 /**
+ * Get a single task
+ * @param {string} name agent name
+ */
+export function getTask(name, taskId) {
+  return axios.get(`/agents/${name}/task/${taskId}`)
+    .then(({ data }) => data)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
  * Get tasking results for an agent.
  * @param {string} name agent name
  */
@@ -77,5 +87,23 @@ export function shell(name, command) {
 export function clearQueue(name) {
   return axios.get(`/agents/${name}/clear`)
     .then(({ data }) => data.success)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
+ * Task agent to receive file upload.
+ */
+export function uploadFile(name, base64File, pathToFile) {
+  return axios.post(`/agents/${name}/upload`, { filename: pathToFile, data: base64File })
+    .then(({ data }) => data.taskID)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
+ * Task agent to send file to Empire.
+ */
+export function downloadFile(name, pathToFile) {
+  return axios.post(`/agents/${name}/download`, { filename: pathToFile })
+    .then(({ data }) => data.taskID)
     .catch(error => Promise.reject(error.response.data.error));
 }

@@ -12,7 +12,7 @@
         <!-- Provides the application the proper gutter -->
         <v-container fluid>
           <!-- If using vue-router -->
-          <router-view />
+          <router-view :class="hideSideBar ? '' : 'ml-8'" />
         </v-container>
       </v-main>
 
@@ -29,10 +29,18 @@
         > Starkiller </a>
         <span class="mr-2">|</span>
         <a
+          class="mr-2"
           target="_blank"
           href="https://github.com/bc-security/empire"
           @click.prevent="openExternalBrowser"
         > Empire</a>
+        <span class="mr-2">|</span>
+        <a
+          class="mr-2"
+          target="_blank"
+          href="https://github.com/sponsors/BC-SECURITY"
+          @click.prevent="openExternalBrowser"
+        > Sponsor for extra features</a>
       </v-footer>
     </v-app>
   </div>
@@ -90,9 +98,9 @@ export default {
     empireVersion: {
       handler(val) {
         if (val.length > 0) {
-          if (!semver.satisfies(val.split(' ')[0], '>=3.5.0')) {
+          if (!semver.satisfies(val.split(' ')[0], '>=3.7.0')) {
             this.$toast.error(
-              'Starkiller 1.4.x is recommended to be used with Empire 3.5.0 or greater.'
+              'Starkiller 1.6.x is recommended to be used with Empire 3.7.0 or greater.'
               + ' Some features may not work properly.',
               { timeout: 8000 },
             );

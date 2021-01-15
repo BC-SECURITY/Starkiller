@@ -20,27 +20,30 @@
 </template>
 
 <script>
-import * as agentApi from '@/api/agent-api';
-
 export default {
   props: {
     name: {
       type: String,
       required: true,
     },
+    taskResults: {
+      type: Array,
+      default: () => [],
+    },
+    initialized: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      commands: [],
-      results: [],
       interval: null,
-      initialized: false,
     };
   },
   computed: {
     agentResults() {
-      return this.results.length > 0
-        ? this.results[0].AgentResults.map(res => ({
+      return this.taskResults.length > 0
+        ? this.taskResults[0].AgentResults.map(res => ({
           taskID: res.taskID,
           command: res.command,
           results: res.results ? res.results.split('\\n') : '',
@@ -67,15 +70,6 @@ export default {
         });
       }
     },
-  },
-  mounted() {
-    this.interval = setInterval(async () => {
-      this.results = await agentApi.getResults(this.name);
-      this.initialized = true;
-    }, 5000);
-  },
-  beforeDestroy() {
-    clearInterval(this.interval);
   },
 };
 </script>

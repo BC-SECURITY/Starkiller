@@ -55,9 +55,9 @@ export default {
       reporting: [],
       breads: [
         {
-          text: 'Credentials',
+          text: 'Reporting',
           disabled: true,
-          href: '/credentials',
+          href: '/reporting',
         },
       ],
       headers: [

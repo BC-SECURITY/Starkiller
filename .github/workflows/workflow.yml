@@ -7,6 +7,7 @@ name: Upload Release Asset
 jobs:
   mac:
     name: Upload Release Asset Mac
+    if: github.event_name == 'release' && !contains(github.ref, 'kali')
     runs-on: macos-latest
     steps:
       - name: Trim release name
@@ -31,6 +32,7 @@ jobs:
           asset_content_type: application/octet-stream
   linux:
     name: Upload Release Asset Linux
+    if: github.event_name == 'release' && !contains(github.ref, 'kali')
     runs-on: ubuntu-latest
     steps:
       - name: Trim release name
@@ -55,6 +57,7 @@ jobs:
           asset_content_type: application/octet-stream
   windows:
     name: Upload Release Asset Windows
+    if: github.event_name == 'release' && !contains(github.ref, 'kali')
     runs-on: windows-latest
     steps:
       - name: Trim release name
