@@ -3,9 +3,13 @@
 # Starkiller
 Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/Empire/). It is an Electron application written in VueJS. If you'd like to contribute please follow the [Contribution guide](/CONTRIBUTING.md). If you'd like to request a feature or report a bug, please follow the [Issue template](/.github/ISSUE_TEMPLATE.md).
 
+## Sponsors
+[<img src="https://user-images.githubusercontent.com/20302208/104083160-41552780-51f1-11eb-8428-3b8cfaf76861.png" width="300"/>](https://www.kali.org/)
+
 # Getting Started
 * To run Starkiller, you can download the installers for Mac, Linux, and Windows on the [Releases](https://github.com/BC-SECURITY/Starkiller/releases) page.
   * For more info on running AppImage builds in Linux [check out their website](https://appimage.org/)
+* Starkiller is also available via `apt` on [Kali](https://www.kali.org/). Kali releases are 30 days ahead of the public release.
 * If you want to build from source or run in development mode, instructions are below.
 
 ## Install
