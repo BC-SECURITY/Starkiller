@@ -9,7 +9,7 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 # Getting Started
 * To run Starkiller, you can download the installers for Mac, Linux, and Windows on the [Releases](https://github.com/BC-SECURITY/Starkiller/releases) page.
   * For more info on running AppImage builds in Linux [check out their website](https://appimage.org/)
-* Starkiller is also available via `apt` on [Kali](https://www.kali.org/). Kali releases are 30 days ahead of the public release.
+* Starkiller is also available via `apt install starkiller` on [Kali](https://www.kali.org/). Kali releases are 30 days ahead of the public release.
 * If you want to build from source or run in development mode, instructions are below.
 
 ## Install
