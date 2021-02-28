@@ -5,62 +5,57 @@
     <div class="headers">
       <h3>Agents</h3>
     </div>
+    <v-checkbox
+      v-model="hideStaleAgentsCheckbox"
+      label="Hide Stale Agents"
+    />
     <v-data-table
+      dense
+      :item-class="rowClass"
       :headers="headers"
       :items="sortedAgents"
+      @click:row="viewAgent"
     >
-      <!-- TODO Refactor with Vuetify 2.3 like AgentExecuteModule https://github.com/vuetifyjs/vuetify/pull/11254 -->
-      <!-- Use item template to apply conditional row formatting -->
-      <!-- Unfortunately breaks the default "mobile view" -->
-      <template v-slot:item="{ item }">
-        <tr
-          :class="{'warning-row': item.stale}"
-          @click="viewAgent(item)"
+      <template v-slot:item.name="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-icon
+              v-if="item.high_integrity === 1"
+              small
+              v-on="on"
+            >
+              fa-user-cog
+            </v-icon>
+          </template>
+          <span>Elevated Process</span>
+        </v-tooltip>
+        <span>{{ item.name }}</span>
+      </template>
+      <template v-slot:item.checkin_time="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.checkin_time).format('lll') }}</span>
+        </v-tooltip>
+      </template>
+      <template v-slot:item.process_name="{ item }">
+        <span>{{ truncateMessage(item.process_name) }}</span>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon
+          class="mr-2"
+          small
+          @click.stop="killAgent(item)"
         >
-          <td>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-icon
-                  v-if="item.high_integrity === 1"
-                  small
-                  v-on="on"
-                >
-                  fa-user-cog
-                </v-icon>
-              </template>
-              <span>Elevated Process</span>
-            </v-tooltip>
-            <span>{{ item.name }}</span>
-          </td>
-          <td>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
-              </template>
-              <span>{{ moment(item.checkin_time).format('lll') }}</span>
-            </v-tooltip>
-          </td>
-          <td> {{ item.hostname }}</td>
-          <td><span>{{ truncateMessage(item.process_name) }}</span></td>
-          <td> {{ item.language }}</td>
-          <td> {{ item.username }}</td>
-          <td> {{ item.working_hours }}</td>
-          <td>
-            <v-icon
-              class="mr-2"
-              small
-              @click.stop="killAgent(item)"
-            >
-              fa-trash-alt
-            </v-icon>
-            <v-icon
-              small
-              @click.stop="popout(item)"
-            >
-              fa-external-link-alt
-            </v-icon>
-          </td>
-        </tr>
+          fa-trash-alt
+        </v-icon>
+        <v-icon
+          small
+          @click.stop="popout(item)"
+        >
+          fa-external-link-alt
+        </v-icon>
       </template>
     </v-data-table>
   </div>
@@ -97,16 +92,29 @@ export default {
         { text: 'Actions', value: 'actions' },
       ],
       moment,
+      hideStale: false,
     };
   },
   computed: {
     ...mapState({
       agents: state => state.agent.agents,
+      hideStaleAgents: state => state.application.hideStaleAgents,
     }),
     sortedAgents() {
       const sorted = this.agents.slice();
       sorted.sort((a, b) => -a.checkin_time.localeCompare(b.checkin_time));
+      if (this.hideStaleAgents) {
+        return sorted.filter(agent => !agent.stale);
+      }
       return sorted;
+    },
+    hideStaleAgentsCheckbox: {
+      set(val) {
+        this.$store.dispatch('application/hideStaleAgents', val);
+      },
+      get() {
+        return this.hideStaleAgents;
+      },
     },
   },
   mounted() {
@@ -136,17 +144,21 @@ export default {
 
       return '';
     },
+    rowClass(item) {
+      if (item.stale) return 'warning-row';
+      return '';
+    },
   },
 };
 </script>
 
-<style scoped style="scss">
+<style style="scss">
 .warning-row {
-  background: #FFCCCC;
+  background-color: #FFCCCC;
 }
 
 .v-data-table.theme--dark
   .warning-row {
-    background: #bd4c4c;
+    background-color: #bd4c4c;
   }
 </style>

@@ -14,6 +14,7 @@ export default {
     loginError: '',
     empireVersion: '',
     darkMode: true,
+    hideStaleAgents: false,
   },
   mutations: {
     setApplicationState(state, {
@@ -39,6 +40,9 @@ export default {
     },
     setDarkMode(state, val) {
       state.darkMode = val;
+    },
+    setHideStaleAgents(state, val) {
+      state.hideStaleAgents = val;
     },
   },
   actions: {
@@ -75,6 +79,9 @@ export default {
     },
     darkMode(context, val) {
       context.commit('setDarkMode', val);
+    },
+    hideStaleAgents(context, val) {
+      context.commit('setHideStaleAgents', val);
     },
   },
   getters: {
