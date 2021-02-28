@@ -45,7 +45,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.2.x              | 3.2.0         | 3.2.0 added an endpoint for users that is needed for the UI updates introduced in Starkiller 1.2.0
 | 1.3.x              | 3.3.0         | 3.3.0 categorized all of the modules in Empire with corresponding [MITRE techniques](https://attack.mitre.org/techniques/enterprise/)
 | 1.4.x, 1.5.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
-| 1.6.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
+| 1.6.x, 1.7.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 
 ## Changelog
 
