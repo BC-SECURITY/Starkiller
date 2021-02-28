@@ -290,9 +290,9 @@ export default {
 
       this.nameLoading = true;
       try {
-        await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: name });
+        const response = await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: name });
         this.$toast.success(`Agent ${this.agent.name} tasked to change name.`);
-        this.$router.push({ name: 'agents' });
+        this.$router.push({ name: 'agentEdit', params: { id: response } });
       } catch (err) {
         this.$toast.error(`Error: ${err}`);
       }
