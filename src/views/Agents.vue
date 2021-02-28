@@ -10,7 +10,6 @@
       label="Hide Stale Agents"
     />
     <v-data-table
-      dense
       :item-class="rowClass"
       :headers="headers"
       :items="sortedAgents"
