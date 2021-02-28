@@ -76,6 +76,12 @@
               Interact
             </v-tab>
             <v-tab
+              key="file-browser"
+              href="#tab-file-browser"
+            >
+              File Browser
+            </v-tab>
+            <v-tab
               key="tasks"
               href="#tab-tasks"
             >
@@ -101,6 +107,17 @@
                   Execute Module
                 </h4>
                 <agent-execute-module :agents="[agent.name]" />
+              </v-card>
+            </v-tab-item>
+            <v-tab-item
+              key="browser"
+              :value="'tab-file-browser'"
+            >
+              <v-card
+                class="scrollable-pane"
+                flat
+              >
+                <agent-file-browser :agent-name="agent.name" />
               </v-card>
             </v-tab-item>
             <v-tab-item
@@ -154,6 +171,7 @@ import AgentInteract from '@/components/agents/AgentInteract.vue';
 import AgentCommandHistory from '@/components/agents/AgentCommandHistory.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentCommandViewer from '@/components/agents/AgentCommandViewer.vue';
+import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
 import AgentNameDialog from '@/components/agents/AgentNameDialog.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
@@ -171,6 +189,7 @@ export default {
     AgentInteract,
     AgentExecuteModule,
     AgentCommandViewer,
+    AgentFileBrowser,
     AgentCommandHistory,
     AgentNameDialog,
     AgentUploadDialog,
