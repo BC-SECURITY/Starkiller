@@ -21,7 +21,7 @@
       <v-form
         ref="form"
         v-model="valid"
-        style="max-width: 500px"
+        style="max-width: 800px"
         @submit.prevent.native="submit"
       >
         <v-autocomplete
@@ -32,66 +32,110 @@
           label="Type"
           :readonly="!canEdit"
         />
-        <v-text-field
-          v-if="fieldExists('Name')"
-          v-model="form.Name"
-          :rules="rules['Name']"
-          label="Name"
-          outlined
-          dense
-          required
-          :readonly="!canEdit"
-        />
-        <v-text-field
-          v-if="fieldExists('Host')"
-          v-model="form.Host"
-          :rules="rules['Host']"
-          label="Host"
-          outlined
-          dense
-          required
-          :readonly="!canEdit"
-        />
-        <v-text-field
-          v-if="fieldExists('Port')"
-          v-model="form.Port"
-          :rules="rules['Port']"
-          label="Port"
-          outlined
-          dense
-          required
-          type="number"
-          :readonly="!canEdit"
-        />
 
-        <v-text-field
+        <v-row
+          v-if="fieldExists('Name')"
+        >
+          <v-col cols="8">
+            <v-text-field
+              v-if="fieldExists('Name')"
+              v-model="form.Name"
+              :rules="rules['Name']"
+              label="Name"
+              outlined
+              dense
+              required
+              :readonly="!canEdit"
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-subheader> {{ fieldExists('Name').Description }} </v-subheader>
+          </v-col>
+        </v-row>
+
+        <v-row
+          v-if="fieldExists('Host')"
+        >
+          <v-col cols="8">
+            <v-text-field
+              v-model="form.Host"
+              :rules="rules['Host']"
+              label="Host"
+              outlined
+              dense
+              required
+              :readonly="!canEdit"
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-subheader> {{ fieldExists('Host').Description }} </v-subheader>
+          </v-col>
+        </v-row>
+
+        <v-row
+          v-if="fieldExists('Port')"
+        >
+          <v-col cols="8">
+            <v-text-field
+              v-model="form.Port"
+              :rules="rules['Port']"
+              label="Port"
+              outlined
+              dense
+              required
+              type="number"
+              :readonly="!canEdit"
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-subheader> {{ fieldExists('Port').Description }} </v-subheader>
+          </v-col>
+        </v-row>
+
+        <v-row
           v-for="field in requiredFields"
           :key="field.name"
-          v-model="form[field.name]"
-          :rules="rules[field.name]"
-          :label="field.name"
-          :type="field.type === 'string' ? 'text' : 'number'"
-          outlined
-          dense
-          required
-          :readonly="!canEdit"
-        />
+        >
+          <v-col cols="8">
+            <v-text-field
+              v-model="form[field.name]"
+              :rules="rules[field.name]"
+              :label="field.name"
+              :type="field.type === 'string' ? 'text' : 'number'"
+              outlined
+              dense
+              required
+              :readonly="!canEdit"
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-subheader> {{ field.Description }} </v-subheader>
+          </v-col>
+        </v-row>
 
         <v-expansion-panels>
           <v-expansion-panel>
             <v-expansion-panel-header>Optional Fields</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <v-text-field
+              <v-row
                 v-for="field in optionalFields"
                 :key="field.name"
-                v-model="form[field.name]"
-                :rules="rules[field.name]"
-                :label="field.name"
-                :type="field.type === 'string' ? 'text' : 'number'"
-                outlined
-                dense
-                :readonly="!canEdit"
-              />
+              >
+                <v-col cols="8">
+                  <v-text-field
+                    v-model="form[field.name]"
+                    :rules="rules[field.name]"
+                    :label="field.name"
+                    :type="field.type === 'string' ? 'text' : 'number'"
+                    outlined
+                    dense
+                    :readonly="!canEdit"
+                  />
+                </v-col>
+                <v-col cols="4">
+                  <v-subheader> {{ field.Description }} </v-subheader>
+                </v-col>
+              </v-row>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -272,7 +316,7 @@ export default {
         });
     },
     fieldExists(name) {
-      return this.fields.filter(el => el.name === name).length > 0;
+      return this.fields.find(el => el.name === name);
     },
     fieldType(el) {
       if (typeof el.Value === 'number') {

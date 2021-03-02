@@ -76,6 +76,12 @@
               Interact
             </v-tab>
             <v-tab
+              key="file-browser"
+              href="#tab-file-browser"
+            >
+              File Browser
+            </v-tab>
+            <v-tab
               key="tasks"
               href="#tab-tasks"
             >
@@ -101,6 +107,23 @@
                   Execute Module
                 </h4>
                 <agent-execute-module :agents="[agent.name]" />
+              </v-card>
+            </v-tab-item>
+            <v-tab-item
+              key="browser"
+              :value="'tab-file-browser'"
+            >
+              <v-card
+                class="scrollable-pane"
+                flat
+              >
+                <!-- TODO While most agent endpoints will accept name or session_id,
+                the file browser endpoints only use session_id.
+                So if the agent gets renamed, the file browser references break.
+                In a future release, all agent endpoints should just use session_id by default,
+                since it is an immutable field. The API will probably be updated to only
+                look up by session_id -->
+                <agent-file-browser :agent-name="agent.session_id" />
               </v-card>
             </v-tab-item>
             <v-tab-item
@@ -154,6 +177,7 @@ import AgentInteract from '@/components/agents/AgentInteract.vue';
 import AgentCommandHistory from '@/components/agents/AgentCommandHistory.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentCommandViewer from '@/components/agents/AgentCommandViewer.vue';
+import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
 import AgentNameDialog from '@/components/agents/AgentNameDialog.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
@@ -171,6 +195,7 @@ export default {
     AgentInteract,
     AgentExecuteModule,
     AgentCommandViewer,
+    AgentFileBrowser,
     AgentCommandHistory,
     AgentNameDialog,
     AgentUploadDialog,
@@ -271,9 +296,9 @@ export default {
 
       this.nameLoading = true;
       try {
-        await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: name });
+        const response = await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: name });
         this.$toast.success(`Agent ${this.agent.name} tasked to change name.`);
-        this.$router.push({ name: 'agents' });
+        this.$router.push({ name: 'agentEdit', params: { id: response } });
       } catch (err) {
         this.$toast.error(`Error: ${err}`);
       }

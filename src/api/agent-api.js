@@ -69,6 +69,26 @@ export function getResults(name) {
     .catch(error => Promise.reject(error.response.data.error));
 }
 
+/**
+ * Get directory's files.
+ * @param {string} name agent name
+ */
+export function getDirectory(name, directory) {
+  return axios.get(`/agents/${name}/directory?directory=${directory}`)
+    .then(({ data }) => data.items)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
+/**
+ * Task an agent to scrape a directory.
+ * @param {string} name agent name
+ */
+export function scrapeDirectory(name, directory) {
+  return axios.post(`/agents/${name}/directory?directory=${directory}`)
+    .then(({ data }) => data)
+    .catch(error => Promise.reject(error.response.data.error));
+}
+
 
 /**
  * Task an agent to run a shell command.

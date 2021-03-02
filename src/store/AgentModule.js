@@ -22,12 +22,13 @@ export default {
       const { agents } = context.state;
       const agent = agents.find(el => el.name === oldName);
 
+      await agentApi.renameAgent(oldName, newName);
       if (agent != null) {
         agent.name = newName;
       }
 
-      await agentApi.renameAgent(oldName, newName);
       context.commit('setAgents', agents);
+      return agent.name;
     },
     async killAgent(context, { name }) {
       const { agents } = context.state;

@@ -10,7 +10,7 @@
       <v-form
         ref="form"
         v-model="valid"
-        style="max-width: 500px"
+        style="max-width: 800px"
         @submit.prevent.native="submit"
       >
         <v-autocomplete
@@ -21,42 +21,68 @@
           label="Type"
         />
 
-        <v-autocomplete
+        <v-row
           v-if="fieldExists('Listener')"
-          v-model="form.Listener"
-          :rules="rules['Listener']"
-          :items="listeners"
-          dense
-          outlined
-          label="Listener"
-        />
+        >
+          <v-col cols="8">
+            <v-autocomplete
 
-        <v-text-field
+              v-model="form.Listener"
+              :rules="rules['Listener']"
+              :items="listeners"
+              dense
+              outlined
+              label="Listener"
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-subheader> {{ fieldExists('Listener').Description }} </v-subheader>
+          </v-col>
+        </v-row>
+
+        <v-row
           v-for="field in requiredFields"
           :key="field.name"
-          v-model="form[field.name]"
-          :rules="rules[field.name]"
-          :label="field.name"
-          :type="field.type === 'string' ? 'text' : 'number'"
-          outlined
-          dense
-          required
-        />
+        >
+          <v-col cols="8">
+            <v-text-field
+              v-model="form[field.name]"
+              :rules="rules[field.name]"
+              :label="field.name"
+              :type="field.type === 'string' ? 'text' : 'number'"
+              outlined
+              dense
+              required
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-subheader> {{ field.Description }} </v-subheader>
+          </v-col>
+        </v-row>
+
 
         <v-expansion-panels>
           <v-expansion-panel>
             <v-expansion-panel-header>Optional Fields</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <v-text-field
+              <v-row
                 v-for="field in optionalFields"
                 :key="field.name"
-                v-model="form[field.name]"
-                :rules="rules[field.name]"
-                :label="field.name"
-                :type="field.type === 'string' ? 'text' : 'number'"
-                outlined
-                dense
-              />
+              >
+                <v-col cols="8">
+                  <v-text-field
+                    v-model="form[field.name]"
+                    :rules="rules[field.name]"
+                    :label="field.name"
+                    :type="field.type === 'string' ? 'text' : 'number'"
+                    outlined
+                    dense
+                  />
+                </v-col>
+                <v-col cols="4">
+                  <v-subheader> {{ field.Description }} </v-subheader>
+                </v-col>
+              </v-row>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -237,7 +263,7 @@ export default {
         });
     },
     fieldExists(name) {
-      return this.fields.filter(el => el.name === name).length > 0;
+      return this.fields.find(el => el.name === name);
     },
     fieldType(el) {
       if (typeof el.Value === 'number') {
