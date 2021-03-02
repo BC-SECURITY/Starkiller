@@ -7,7 +7,7 @@
     <div class="about">
       <img
         alt="Starkiller"
-        width="180px"
+        width="200px"
         style="padding-bottom: 20px;"
         src="../assets/icon.png"
       >
@@ -16,26 +16,13 @@
           href="https://bc-security.org/blog"
           target="_blank"
           @click.prevent="openExternalBrowser"
-        >BC Security</a>.</span>
+        >BC-Security</a>.</span>
       <span>If you would like to contribute please visit our
         <a
           href="https://github.com/BC-SECURITY/Starkiller"
           target="_blank"
           @click.prevent="openExternalBrowser"
         >GitHub</a>.
-      </span>
-      <img
-        alt="Kali"
-        width="200px"
-        style="padding: 20px 0;"
-        src="../assets/kali.png"
-      >
-      <span>This build was released exclusively for
-        <a
-          href="https://kali.org"
-          target="_blank"
-          @click.prevent="openExternalBrowser"
-        >Kali Linux</a>.
       </span>
     </div>
   </div>
