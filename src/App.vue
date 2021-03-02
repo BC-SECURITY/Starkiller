@@ -41,6 +41,13 @@
           href="https://github.com/sponsors/BC-SECURITY"
           @click.prevent="openExternalBrowser"
         > Sponsor for extra features</a>
+        <span class="mr-2">|</span>
+        <a
+          class="mr-2"
+          target="_blank"
+          href="https://kali.org"
+          @click.prevent="openExternalBrowser"
+        > Exclusively released for Kali Linux</a>
       </v-footer>
     </v-app>
   </div>
