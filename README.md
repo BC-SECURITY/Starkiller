@@ -8,11 +8,21 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 
 # Getting Started
 * To run Starkiller, you can download the installers for Mac, Linux, and Windows on the [Releases](https://github.com/BC-SECURITY/Starkiller/releases) page.
-  * For more info on running AppImage builds in Linux [check out their website](https://appimage.org/)
+  * For Mac and Windows - run the installer how you would any other .exe or .dmg
+  * For Linux - Change the permissions `chmod a+x starkiller-<version>.AppImage`, then execute `./starkiller-<version>.AppImage --no-sandbox`
 * Starkiller is also available via `apt install starkiller` on [Kali](https://www.kali.org/). Kali releases are 30 days ahead of the public release.
 * If you want to build from source or run in development mode, instructions are below.
 
-## Install
+# Sponsorship and extra features
+[Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
+At the moment, the extra sponsorship features include:
+  - Chat widget
+![](https://user-images.githubusercontent.com/9831420/104983786-b3382880-59ca-11eb-9ce0-d4c2f06310d2.png)
+  - Interactive agent shell
+![](https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif)
+Thanks to our sponsors for helping reach previous goals, the File Browser and the Agent Popout Windows have been moved from the sponsorship repository to the public/Kali builds.
+
+## Build and run from source
 Prerequisites:
 * [Node.js](http://nodejs.org/) 10+.
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
