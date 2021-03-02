@@ -17,9 +17,9 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
 At the moment, the extra sponsorship features include:
   - Chat widget
-  <div align="center"><img width="400" src="https://user-images.githubusercontent.com/9831420/104983786-b3382880-59ca-11eb-9ce0-d4c2f06310d2.png"></div>
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983786-b3382880-59ca-11eb-9ce0-d4c2f06310d2.png"></div>
   - Interactive agent shell
-  <div align="center"><img width="400" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
 
 Thanks to our sponsors for helping reach previous goals, the File Browser and the Agent Popout Windows have been moved from the sponsorship repository to the public/Kali builds.
 
