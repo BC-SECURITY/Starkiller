@@ -4,13 +4,23 @@
 
     <div class="headers">
       <h3>Stagers</h3>
-      <v-btn
-        color="primary"
-        rounded
-        @click="create"
-      >
-        Generate Stager
-      </v-btn>
+      <div>
+        <v-btn
+          :disabled="stagers.length === 0"
+          text
+          class="pr-4"
+          @click="deleteAllStagers"
+        >
+          Delete All
+        </v-btn>
+        <v-btn
+          color="primary"
+          rounded
+          @click="create"
+        >
+          Generate Stager
+        </v-btn>
+      </div>
     </div>
     <v-data-table
       :headers="headers"
@@ -108,6 +118,12 @@ export default {
     },
     getStagers() {
       this.stagers = electronStore.get('generatedStagers');
+    },
+    async deleteAllStagers() {
+      if (await this.$root.$confirm('Delete', 'Are you sure you want to delete all stagers?', { color: 'red' })) {
+        this.stagers = [];
+        electronStore.set('generatedStagers', []);
+      }
     },
   },
 };

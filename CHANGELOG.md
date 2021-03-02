@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Listeners, stagers, and module forms now have descriptions next to each field where applicable
 - Checkbox on agents list page to hide stale agents. Persists through refreshes and page chages
 - Agent list page refactoring to make the page more responsive to smaller widths.
+- Add a button to the stagers page to delete all stagers.
 
 ## [1.6.0] - 2021-01-18
 - Added a plugin list page and a plugin execution page
