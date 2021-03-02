@@ -117,7 +117,13 @@
                 class="scrollable-pane"
                 flat
               >
-                <agent-file-browser :agent-name="agent.name" />
+                <!-- TODO While most agent endpoints will accept name or session_id,
+                the file browser endpoints only use session_id.
+                So if the agent gets renamed, the file browser references break.
+                In a future release, all agent endpoints should just use session_id by default,
+                since it is an immutable field. The API will probably be updated to only
+                look up by session_id -->
+                <agent-file-browser :agent-name="agent.session_id" />
               </v-card>
             </v-tab-item>
             <v-tab-item
