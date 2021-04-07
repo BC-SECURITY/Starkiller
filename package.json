@@ -12,7 +12,8 @@
     "electron:build": "yarn run electron:generate-icons && vue-cli-service electron:build",
     "electron:build:mac": "yarn run electron:generate-icons && vue-cli-service electron:build --mac",
     "electron:build:win": "yarn run electron:generate-icons && vue-cli-service electron:build --windows",
-    "electron:build:lin": "yarn run electron:generate-icons && vue-cli-service electron:build --linux",
+    "electron:build:lin": "yarn run electron:generate-icons && vue-cli-service electron:build --linux --x64 --arm64 --armv7l",
+    "_Linux": "--x64 --arm64 --armv7l adds arm64/arm7 and etc arches ",
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
