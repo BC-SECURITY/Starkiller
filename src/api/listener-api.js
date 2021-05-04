@@ -24,7 +24,7 @@ export function getListeners() {
  */
 export function getListenerOptions(type) {
   return axios.get(`/listeners/options/${type}`)
-    .then(({ data }) => data.listeneroptions)
+    .then(({ data }) => ({ info: data.listenerinfo, options: data.listeneroptions }))
     .catch(error => Promise.reject(error.response.data.error));
 }
 

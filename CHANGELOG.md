@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2021-xx-xx
+- Refactor all forms pages for new 4.0 features
+- Autosuggestions for fields with `suggestedValues` and `strict`
+- Switches for "boolean" fields
+- New input type for `Bypasses` field
+
+
 ## [1.7.0] - 2021-03-01
 - Thank you to our generous sponsors! The file browser is now available to the Kali/Public builds of Starkiller.
 - Renaming an agent no longer redirects the user to the list page

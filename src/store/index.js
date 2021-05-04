@@ -12,6 +12,8 @@ import ModuleModule from './ModuleModule';
 import CredentialModule from './CredentialModule';
 import PluginModule from './PluginModule';
 import ApplicationModule from './ApplicationModule';
+import BypassModule from './BypassModule';
+import MalleableModule from './MalleableModule';
 
 
 Vue.use(Vuex);
@@ -30,6 +32,8 @@ export default new Vuex.Store({
     agent: AgentModule,
     module: ModuleModule,
     credential: CredentialModule,
+    bypass: BypassModule,
+    malleable: MalleableModule,
     plugin: PluginModule,
     application: ApplicationModule,
   },
