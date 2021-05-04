@@ -30,12 +30,12 @@
         </v-tooltip>
         <span>{{ item.name }}</span>
       </template>
-      <template v-slot:item.checkin_time="{ item }">
+      <template v-slot:item.lastseen_time="{ item }">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
+            <span v-on="on">{{ moment(item.lastseen_time).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.checkin_time).format('lll') }}</span>
+          <span>{{ moment(item.lastseen_time).format('lll') }}</span>
         </v-tooltip>
       </template>
       <template v-slot:item.process_name="{ item }">
@@ -82,7 +82,7 @@ export default {
       ],
       headers: [
         { text: 'Name', value: 'name' },
-        { text: 'Check-in Time', value: 'checkin_time' },
+        { text: 'Last Seen', value: 'lastseen_time' },
         { text: 'Hostname', value: 'hostname' },
         { text: 'Process', value: 'process_name' },
         { text: 'Language', value: 'language' },

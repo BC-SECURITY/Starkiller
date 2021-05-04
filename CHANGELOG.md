@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Autosuggestions for fields with `suggestedValues` and `strict`
 - Switches for "boolean" fields
 - New input type for `Bypasses` field
+- Use last seen time instead of check in time on agents list page
 
 
 ## [1.7.0] - 2021-03-01
