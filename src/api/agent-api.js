@@ -3,7 +3,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 /**
  * Returns a single agent.
  */
-export function getAgent(name) { // api should throw 404 if not found. COME ON!
+export function getAgent(name) {
   return axios.get(`/agents/${name}`)
     .then(({ data }) => data.agents[0])
     .catch(error => Promise.reject(error.response.data.error));

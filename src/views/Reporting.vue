@@ -1,10 +1,8 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
-
-    <div class="headers">
-      <h3>Reporting</h3>
-    </div>
+    <list-page-top
+      :breads="breads"
+    />
     <v-data-table
       :headers="headers"
       :items="reporting"
@@ -44,10 +42,12 @@
 <script>
 import moment from 'moment';
 import * as reportingApi from '@/api/reporting-api';
+import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
   name: 'Reporting',
   components: {
+    ListPageTop,
   },
   data() {
     return {

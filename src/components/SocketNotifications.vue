@@ -1,9 +1,9 @@
 <template>
   <v-snackbar
     v-model="socketNotification.enabled"
-    absolute
     right
     top
+    app
   >
     {{ socketNotification.text }}
 
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+// TODO Might be able to merge the snackbar and just let this handle receiving messages.
 import io from 'socket.io-client';
 import { mapState, mapGetters } from 'vuex';
 
@@ -111,12 +112,12 @@ export default {
       });
       this.socket.on('reconnect_failed', () => {
         console.log('Failed to connect to SocketIO');
-        this.$toast.error('Failed to connect to SocketIO');
+        this.$snack.error('Failed to connect to SocketIO');
       });
       this.socket.on('connect_error', () => {
         console.log('SocketIO Connection Error, retrying.');
         // a bit too noisy to popup on every reconnect attempt.
-        // this.$toast.warning('SocketIO Connection Error, retrying.');
+        // this.$snack.warn('SocketIO Connection Error, retrying.');
       });
       // this.socket.on('agents/task', (data) => {
       //   // const { sessionID, taskID, data } = data;

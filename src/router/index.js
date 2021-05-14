@@ -45,6 +45,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
   },
   {
+    path: '/stagers/:id',
+    name: 'stagerEdit',
+    component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
+  },
+  {
     path: '/agents',
     name: 'agents',
     component: () => import(/* webpackChunkName: "agents" */ '../views/Agents.vue'),
@@ -81,6 +86,9 @@ const routes = [
     path: '/users/new',
     name: 'userNew',
     component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+    meta: {
+      requiresAdmin: true,
+    },
   },
   {
     path: '/credentials',
@@ -90,6 +98,11 @@ const routes = [
   {
     path: '/credentials/new',
     name: 'credentialNew',
+    component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
+  },
+  {
+    path: '/credentials/:id',
+    name: 'credentialEdit',
     component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
   },
   {
@@ -138,7 +151,7 @@ router.beforeEach((to, from, next) => {
 // Admin
 router.beforeEach((to, from, next) => {
   if (to.meta && to.meta.requiresAdmin && !isAdmin()) {
-    next({ name: 'listeners' });
+    next(false);
   } else next();
 });
 

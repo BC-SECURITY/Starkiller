@@ -1,6 +1,13 @@
 <template>
   <div class="p4">
-    <v-breadcrumbs :items="breads" />
+    <edit-page-top
+      :breads="breads"
+      :show-submit="true"
+      :show-copy="false"
+      :show-delete="false"
+      :submit-loading="loading"
+      @submit="submit"
+    />
     <h4 class="pl-4 pb-4">
       Execute Plugin
     </h4>
@@ -9,29 +16,12 @@
         class="info-viewer"
         :info-array="pluginInfoArray"
       />
-      <div
-        v-if="plugin.Techniques"
-        class="flex flex-row flex-wrap mb-2"
-      >
-        <span class="mr-2">Techniques:</span>
-        <v-chip
-          v-for="tech in plugin.Techniques.filter(t => t !== '')"
-          :key="tech"
-          small
-          :href="`https://attack.mitre.org/techniques/${tech}`"
-          target="_blank"
-          color="green"
-          class="mr-1 mb-1"
-          @click.native="openExternalBrowser"
-        >
-          {{ tech }}
-        </v-chip>
-      </div>
+      <technique-chips :techniques="plugin.TechniqueChips" />
       <general-form
         v-if="reset"
+        ref="generalform"
+        v-model="form"
         :options="plugin.options"
-        :loading="loading"
-        @submit="submit"
       />
     </v-card>
   </div>
@@ -42,17 +32,22 @@ import { mapState } from 'vuex';
 import GeneralForm from '@/components/GeneralForm.vue';
 import InfoViewer from '@/components/InfoViewer.vue';
 import * as pluginApi from '@/api/plugin-api';
+import TechniqueChips from '@/components/TechniqueChips.vue';
+import EditPageTop from '@/components/EditPageTop.vue';
 
 export default {
   name: 'PluginExecute',
   components: {
     InfoViewer,
     GeneralForm,
+    TechniqueChips,
+    EditPageTop,
   },
   data() {
     return {
       reset: true,
       loading: false,
+      form: {},
     };
   },
   computed: {
@@ -92,8 +87,8 @@ export default {
     }
   },
   methods: {
-    async submit(form) {
-      if (this.loading) {
+    async submit() {
+      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
       }
 
@@ -102,9 +97,9 @@ export default {
       // todo currently this endpoint just returns null on success.
       // next version of this api should have better messaging.
       try {
-        await pluginApi.executePlugin(this.plugin.Name, form);
+        await pluginApi.executePlugin(this.plugin.Name, this.form);
       } catch (err) {
-        this.$toast.error(`Error: ${err}`);
+        this.$snack.error(`Error: ${err}`);
       }
 
       this.loading = false;

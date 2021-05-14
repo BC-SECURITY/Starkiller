@@ -1,172 +1,201 @@
 <template>
   <div>
-    <div
-      style="display: flex; justify-content: space-between;"
-    >
-      <v-breadcrumbs :items="breads" />
-      <div class="pt-2">
-        <agent-name-dialog
-          v-model="nameDialog"
-          :loading="nameLoading"
-          @submit="renameAgent"
-        />
-        <agent-upload-dialog
-          v-model="uploadDialog"
-          :language="agent.language"
-          :loading="uploadLoading"
-          @submit="doUpload"
-        />
-        <agent-download-dialog
-          v-model="downloadDialog"
-          :loading="downloadLoading"
-          @submit="doDownload"
-        />
-        <agent-tooltip-button
-          icon="fa-user-edit"
-          text="Rename Agent"
-          color="primary"
-          :pad-left="4"
-          @click="nameDialog = true"
-        />
-        <agent-tooltip-button
-          icon="fa-calendar-times"
-          text="Clear Queued Tasks"
-          color="primary"
-          @click="clearQueue"
-        />
-        <agent-tooltip-button
-          icon="fa-upload"
-          text="Upload"
-          @click="uploadDialog = true"
-        />
-        <agent-tooltip-button
-          icon="fa-download"
-          text="Download"
-          @click="downloadDialog = true"
-        />
-        <agent-tooltip-button
-          icon="fa-external-link-alt"
-          text="New Window"
-          @click="popout"
-        />
-        <agent-tooltip-button
-          icon="fa-trash-alt"
-          text="Kill Agent"
-          color="error"
-          @click="killAgent"
-        />
-      </div>
-    </div>
-    <div :style="splitPaneHeight()">
-      <split-pane
-        :min-percent="20"
-        :default-percent="60"
-        split="vertical"
+    <div>
+      <portal
+        to="app-bar-extension"
       >
-        <template slot="paneL">
-          <v-tabs
-            v-model="activeTab"
-            class="scrollable-pane"
-            fixed-tabs
+        <v-tabs
+          v-model="activeTab"
+          align-with-title
+          class="scrollable-pane"
+        >
+          <v-tab
+            key="interact"
+            href="#tab-interact"
           >
-            <v-tab
-              key="interact"
-              href="#tab-interact"
+            Interact
+          </v-tab>
+          <v-tab
+            key="file-browser"
+            href="#tab-file-browser"
+          >
+            File Browser
+          </v-tab>
+          <v-tab
+            key="tasks"
+            href="#tab-tasks"
+          >
+            Tasks
+          </v-tab>
+          <v-tab
+            key="view"
+            href="#tab-view"
+          >
+            View
+          </v-tab>
+        </v-tabs>
+      </portal>
+      <portal
+        to="app-bar"
+      >
+        <div
+          class="v-toolbar__content"
+          style="width:100%"
+        >
+          <v-breadcrumbs :items="breads" />
+          <v-spacer />
+          <div
+            v-if="!errorState"
+            class="pt-2"
+          >
+            <agent-name-dialog
+              v-model="nameDialog"
+              :loading="nameLoading"
+              @submit="renameAgent"
+            />
+            <agent-upload-dialog
+              v-model="uploadDialog"
+              :language="agent.language"
+              :loading="uploadLoading"
+              @submit="doUpload"
+            />
+            <agent-download-dialog
+              v-model="downloadDialog"
+              :loading="downloadLoading"
+              @submit="doDownload"
+            />
+            <agent-tooltip-button
+              icon="fa-user-edit"
+              text="Rename Agent"
+              color="primary"
+              :pad-left="4"
+              @click="nameDialog = true"
+            />
+            <agent-tooltip-button
+              icon="fa-calendar-times"
+              text="Clear Queued Tasks"
+              color="primary"
+              @click="clearQueue"
+            />
+            <agent-tooltip-button
+              icon="fa-upload"
+              text="Upload"
+              @click="uploadDialog = true"
+            />
+            <agent-tooltip-button
+              icon="fa-download"
+              text="Download"
+              @click="downloadDialog = true"
+            />
+            <agent-tooltip-button
+              icon="fa-external-link-alt"
+              text="New Window"
+              @click="popout"
+            />
+            <agent-tooltip-button
+              icon="fa-trash-alt"
+              text="Kill Agent"
+              color="error"
+              @click="killAgent"
+            />
+          </div>
+        </div>
+      </portal>
+      <error-state-alert
+        v-if="errorState"
+        :resource-id="id"
+        resource-type="agent"
+      />
+      <div
+        v-if="!errorState"
+        :style="splitPaneHeight()"
+      >
+        <split-pane
+          :min-percent="20"
+          :default-percent="60"
+          split="vertical"
+        >
+          <template slot="paneL">
+            <v-tabs
+              v-model="activeTab"
+              class="scrollable-pane"
+              fixed-tabs
             >
-              Interact
-            </v-tab>
-            <v-tab
-              key="file-browser"
-              href="#tab-file-browser"
-            >
-              File Browser
-            </v-tab>
-            <v-tab
-              key="tasks"
-              href="#tab-tasks"
-            >
-              Tasks
-            </v-tab>
-            <v-tab
-              key="view"
-              href="#tab-view"
-            >
-              View
-            </v-tab>
-            <v-tab-item
-              key="interact"
-              :value="'tab-interact'"
-            >
-              <v-card
-                class="scrollable-pane"
-                flat
+              <v-tab-item
+                key="interact"
+                :value="'tab-interact'"
               >
-                <agent-interact :agent="agent" />
-                <v-divider />
-                <h4 class="pl-4">
-                  Execute Module
-                </h4>
-                <agent-execute-module :agents="[agent.name]" />
-              </v-card>
-            </v-tab-item>
-            <v-tab-item
-              key="browser"
-              :value="'tab-file-browser'"
-            >
-              <v-card
-                class="scrollable-pane"
-                flat
+                <v-card
+                  class="scrollable-pane"
+                  flat
+                >
+                  <agent-interact :agent="agent" />
+                  <v-divider />
+                  <h4 class="pl-4">
+                    Execute Module
+                  </h4>
+                  <agent-execute-module :agents="[agent.name]" />
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
+                key="browser"
+                :value="'tab-file-browser'"
               >
-                <!-- TODO While most agent endpoints will accept name or session_id,
+                <v-card
+                  class="scrollable-pane"
+                  flat
+                >
+                  <!-- TODO While most agent endpoints will accept name or session_id,
                 the file browser endpoints only use session_id.
                 So if the agent gets renamed, the file browser references break.
                 In a future release, all agent endpoints should just use session_id by default,
                 since it is an immutable field. The API will probably be updated to only
                 look up by session_id -->
-                <agent-file-browser :agent-name="agent.session_id" />
-              </v-card>
-            </v-tab-item>
-            <v-tab-item
-              key="tasks"
-              :value="'tab-tasks'"
-            >
-              <v-card
-                class="scrollable-pane"
-                flat
+                  <agent-file-browser :agent-name="agent.session_id" />
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
+                key="tasks"
+                :value="'tab-tasks'"
               >
-                <agent-command-history
-                  :agent-name="agent.name"
-                  :task-results="taskResults"
-                />
-              </v-card>
-            </v-tab-item>
-            <v-tab-item
-              key="view"
-              :value="'tab-view'"
-            >
-              <v-card
-                class="scrollable-pane"
-                flat
+                <v-card
+                  class="scrollable-pane"
+                  flat
+                >
+                  <agent-command-history
+                    :agent-name="agent.name"
+                    :task-results="taskResults"
+                  />
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
+                key="view"
+                :value="'tab-view'"
               >
-                <agent-form :agent="agent" />
-              </v-card>
-            </v-tab-item>
-          </v-tabs>
-        </template>
-        <template slot="paneR">
-          <div
-            ref="bottomScrollable"
-            class="right-pane"
-          >
-            <agent-command-viewer
-              :name="this.$route.params.id"
-              :task-results="taskResults"
-              :initialized="initialized"
-              @new-results="scrollResults"
-            />
-          </div>
-        </template>
-      </split-pane>
+                <v-card
+                  class="scrollable-pane"
+                  flat
+                >
+                  <agent-form :agent="agent" />
+                </v-card>
+              </v-tab-item>
+            </v-tabs>
+          </template>
+          <template slot="paneR">
+            <div
+              ref="bottomScrollable"
+              class="right-pane"
+            >
+              <agent-command-viewer
+                :name="$route.params.id"
+                :task-results="taskResults"
+                :initialized="initialized"
+                @new-results="scrollResults"
+              />
+            </div>
+          </template>
+        </split-pane>
+      </div>
     </div>
   </div>
 </template>
@@ -182,6 +211,8 @@ import AgentNameDialog from '@/components/agents/AgentNameDialog.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import AgentTooltipButton from '@/components/agents/AgentTooltipButton.vue';
+import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
+
 import SplitPane from 'vue-splitpane';
 import * as agentApi from '@/api/agent-api';
 
@@ -202,6 +233,7 @@ export default {
     AgentDownloadDialog,
     AgentTooltipButton,
     SplitPane,
+    ErrorStateAlert,
   },
   data() {
     return {
@@ -216,6 +248,7 @@ export default {
       interval: null,
       taskResults: [],
       initialized: false,
+      errorState: false,
     };
   },
   computed: {
@@ -276,19 +309,22 @@ export default {
             this.taskResults = await agentApi.getResults(this.agent.name);
             this.initialized = true;
           }, 5000);
+        })
+        .catch(() => {
+          this.errorState = true;
         });
     },
     async killAgent() {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
         this.$store.dispatch('agent/killAgent', { name: this.agent.name });
-        this.$toast.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
+        this.$snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
         this.$router.push({ name: 'agents' });
       }
     },
     async clearQueue() {
       if (await this.$root.$confirm('', 'Do you want to clear queue?', { color: 'red' })) {
         this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
-        this.$toast.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
+        this.$snack.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
       }
     },
     async renameAgent({ name }) {
@@ -297,10 +333,10 @@ export default {
       this.nameLoading = true;
       try {
         const response = await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: name });
-        this.$toast.success(`Agent ${this.agent.name} tasked to change name.`);
+        this.$snack.success(`Agent ${this.agent.name} tasked to change name.`);
         this.$router.push({ name: 'agentEdit', params: { id: response } });
       } catch (err) {
-        this.$toast.error(`Error: ${err}`);
+        this.$snack.error(`Error: ${err}`);
       }
 
       this.nameLoading = false;
@@ -313,7 +349,7 @@ export default {
       try {
         await agentApi.uploadFile(this.agent.name, file, pathToFile);
       } catch (err) {
-        this.$toast.error(`Error: ${err}`);
+        this.$snack.error(`Error: ${err}`);
       }
 
       this.uploadLoading = false;
@@ -326,7 +362,7 @@ export default {
       try {
         await agentApi.downloadFile(this.agent.name, pathToFile);
       } catch (err) {
-        this.$toast.error(`Error: ${err}`);
+        this.$snack.error(`Error: ${err}`);
       }
 
       this.downloadLoading = false;

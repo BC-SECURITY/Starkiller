@@ -1,19 +1,12 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import colors from 'vuetify/lib/util/colors';
+import PortalVue from 'portal-vue';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 
-import VuetifyToast from 'vuetify-toast-snackbar-ng';
-
+Vue.use(PortalVue);
 Vue.use(Vuetify);
-Vue.use(VuetifyToast, {
-  x: 'right',
-  y: 'top',
-  color: 'accent',
-  queueable: true,
-});
-
 
 export default new Vuetify({
   theme: {

@@ -5,14 +5,34 @@
         v-if="isLoggedIn && !hideSideBar"
       />
       <confirm ref="confirm" />
-      <socket-notifications v-if="isLoggedIn && versionSatisfies('>=3.5.0') && !hideSideBar" />
-
+      <socket-notifications v-if="isLoggedIn && versionSatisfies('>=4.0') && !hideSideBar" />
+      <starkiller-snackbar ref="snack" />
+      <v-app-bar
+        v-if="isLoggedIn"
+        elevate-on-scroll
+        app
+      >
+        <template
+          v-if="$route.name === 'agentEdit'"
+          v-slot:extension
+        >
+          <portal-target
+            name="app-bar-extension"
+            slim
+          />
+        </template>
+        <portal-target
+          name="app-bar"
+          multiple
+          slim
+        />
+      </v-app-bar>
       <!-- Sizes your content based upon application components -->
       <v-main>
         <!-- Provides the application the proper gutter -->
         <v-container fluid>
           <!-- If using vue-router -->
-          <router-view :class="hideSideBar ? '' : 'ml-8'" />
+          <router-view />
         </v-container>
       </v-main>
 
@@ -20,7 +40,7 @@
         v-if="!hideSideBar"
         app
       >
-        <span class="mr-2">Copyright (c) 2020 BC Security |</span>
+        <span class="mr-2">Copyright (c) 2021 BC Security |</span>
         <a
           class="mr-2"
           target="_blank"
@@ -46,6 +66,7 @@
   </div>
 </template>
 <script>
+import Vue from 'vue';
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
 import openExternalBrowser from '@/mixins/open-external';
@@ -53,6 +74,7 @@ import openExternalBrowser from '@/mixins/open-external';
 import SideNav from '@/components/SideNav.vue';
 import Confirm from '@/components/Confirm.vue';
 import SocketNotifications from '@/components/SocketNotifications.vue';
+import StarkillerSnackbar from '@/components/StarkillerSnackbar.vue';
 
 export default {
   name: 'App',
@@ -60,6 +82,7 @@ export default {
     SideNav,
     Confirm,
     SocketNotifications,
+    StarkillerSnackbar,
   },
   mixins: [openExternalBrowser],
   computed: {
@@ -96,13 +119,13 @@ export default {
       }
     },
     empireVersion: {
-      handler(val) {
+      async handler(val) {
         if (val.length > 0) {
-          if (!semver.satisfies(val.split(' ')[0], '>=3.7.0')) {
-            this.$toast.error(
-              'Starkiller 1.7.x is recommended to be used with Empire 3.7.0 or greater.'
+          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<4.0')) {
+            await this.$nextTick();
+            this.$snack.warn(
+              'Starkiller 1.8.x is recommended to be used with Empire 4.0 or greater.'
               + ' Some features may not work properly.',
-              { timeout: 8000 },
             );
           }
         }
@@ -117,10 +140,13 @@ export default {
     } else if (this.isLoggedIn === true && this.$route.name === 'home') {
       this.$router.push({ name: 'listeners' });
     }
+
+    // register global snackbar
+    Vue.prototype.$snack = this.$refs.snack;
   },
   methods: {
     versionSatisfies(version) {
-      return semver.satisfies(this.empireVersion.split(' ')[0], version);
+      return semver.satisfies(this.empireVersion.split(' ')[0].split('-')[0], version);
     },
   },
 };

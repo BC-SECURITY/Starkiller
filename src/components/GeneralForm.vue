@@ -49,14 +49,6 @@
         <v-subheader> {{ field.Description }} </v-subheader>
       </v-col>
     </v-row>
-    <v-btn
-      v-if="!readonly"
-      type="submit"
-      class="mt-4 primary"
-      :loading="loading"
-    >
-      {{ submitText }}
-    </v-btn>
   </v-form>
 </template>
 
@@ -74,10 +66,6 @@ export default {
       type: Object,
       required: true,
     },
-    loading: {
-      type: Boolean,
-      required: true,
-    },
     readonly: {
       type: Boolean,
       default: false,
@@ -85,10 +73,6 @@ export default {
     priority: {
       type: Array,
       default: () => [],
-    },
-    submitText: {
-      type: String,
-      default: 'submit',
     },
   },
   data() {
@@ -157,6 +141,16 @@ export default {
     },
   },
   watch: {
+    form: {
+      handler(val) {
+        const form2 = { ...val };
+        if (form2.Bypasses) {
+          form2.Bypasses = form2.Bypasses.join(' ');
+        }
+        this.$emit('input', form2);
+      },
+      deep: true,
+    },
     /**
      * When the fields change, we update the form map and set it for reactivity to take place.
      */
@@ -164,7 +158,7 @@ export default {
       immediate: true,
       handler(arr) {
         const map2 = arr.reduce((map, obj) => {
-          if (obj.name === 'Bypasses') {
+          if (obj.name === 'Bypasses' && !Array.isArray(obj.Value)) {
             // eslint-disable-next-line no-param-reassign
             map[obj.name] = obj.Value.split(' ') || [];
           } else {
@@ -184,16 +178,6 @@ export default {
     this.$store.dispatch('credential/getCredentials');
   },
   methods: {
-    async submit() {
-      if (this.loading || !this.$refs.form.validate()) {
-        return;
-      }
-      const form2 = { ...this.form };
-      if (form2.Bypasses) {
-        form2.Bypasses = form2.Bypasses.join(' ');
-      }
-      this.$emit('submit', form2);
-    },
     suggestedValuesForField(field) {
       if (field.name === 'Listener') {
         return this.listeners;

@@ -15,6 +15,7 @@ export default {
     empireVersion: '',
     darkMode: true,
     hideStaleAgents: false,
+    agentHeaders: [],
   },
   mutations: {
     setApplicationState(state, {
@@ -38,11 +39,24 @@ export default {
       state.user = {};
       state.empireVersion = '';
     },
+    clearState(state) {
+      state.token = '';
+      state.url = '';
+      state.user = {};
+      state.loginError = '';
+      state.empireVersion = '';
+      state.darkMode = true;
+      state.hideStaleAgents = false;
+      state.agentHeaders = [];
+    },
     setDarkMode(state, val) {
       state.darkMode = val;
     },
     setHideStaleAgents(state, val) {
       state.hideStaleAgents = val;
+    },
+    setAgentHeaders(state, val) {
+      state.agentHeaders = val;
     },
   },
   actions: {
@@ -77,11 +91,17 @@ export default {
       ipcRenderer.send('closeAllAgentWindows');
       context.commit('setLogout');
     },
+    clear(context) {
+      context.commit('clearState');
+    },
     darkMode(context, val) {
       context.commit('setDarkMode', val);
     },
     hideStaleAgents(context, val) {
       context.commit('setHideStaleAgents', val);
+    },
+    agentHeaders(context, val) {
+      context.commit('setAgentHeaders', val);
     },
   },
   getters: {

@@ -1,9 +1,8 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
-    <div class="headers">
-      <h3>Settings</h3>
-    </div>
+    <list-page-top
+      :breads="breads"
+    />
     <div class="page">
       <div class="first-part">
         <span>{{ user.username }}</span>
@@ -64,14 +63,27 @@
       </v-form>
       <v-divider />
       <div class="headers pl-0 mt-2">
-        <h4> Api Token </h4>
+        <div>
+          <h4> Clear Application State </h4>
+          <span> This will clear UI preferences and locally stored stagers.</span>
+        </div>
+        <v-btn
+          color="error"
+          @click="clearState"
+        >
+          Clear
+        </v-btn>
       </div>
-      <div
-        class="point"
-        @click="copyTokenToClipboard"
-      >
-        <span>{{ apiToken }}</span>
-        <i class="fa fa-paperclip center-icon" />
+      <v-divider />
+      <div class="headers pl-0 mt-2">
+        <h4> Api Token </h4>
+        <div
+          class="point"
+          @click="copyTokenToClipboard"
+        >
+          <span>{{ apiToken }}</span>
+          <i class="fa fa-paperclip center-icon" />
+        </div>
       </div>
     </div>
   </div>
@@ -80,9 +92,11 @@
 <script>
 import * as userApi from '@/api/user-api';
 import { mapState } from 'vuex';
+import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
   components: {
+    ListPageTop,
   },
   data() {
     return {
@@ -133,12 +147,16 @@ export default {
   methods: {
     async copyTokenToClipboard() {
       await navigator.clipboard.writeText(this.apiToken);
-      this.$toast.success('Output copied to clipboard');
+      this.$snack.success('Output copied to clipboard');
     },
     async logout() {
       if (await this.$root.$confirm('', 'Are you sure you want to logout?', { color: 'green' })) {
         this.$store.dispatch('application/logout');
       }
+    },
+    clearState() {
+      this.$store.dispatch('stager/clear');
+      this.$store.dispatch('application/clear');
     },
     submit() {
       if (this.loading || !this.$refs.form.validate()) {
@@ -148,13 +166,13 @@ export default {
       this.loading = true;
       userApi.updatePassword(this.user.id, this.form.password)
         .then(() => {
-          this.$toast.success('Password updated');
+          this.$snack.success('Password updated');
           this.form = {};
           this.$refs.form.resetValidation();
           this.loading = false;
         })
         .catch((err) => {
-          this.$toast.error(`Error: ${err}`);
+          this.$snack.error(`Error: ${err}`);
           this.loading = false;
         });
     },

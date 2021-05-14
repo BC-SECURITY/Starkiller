@@ -4,24 +4,7 @@
       class="info-viewer"
       :info-array="moduleInfoArray"
     />
-    <div
-      v-if="selectedItem.Techniques"
-      class="flex flex-row flex-wrap mb-2"
-    >
-      <span class="mr-2">Techniques:</span>
-      <v-chip
-        v-for="tech in selectedItem.Techniques"
-        :key="tech"
-        small
-        :href="`https://attack.mitre.org/techniques/${tech}`"
-        target="_blank"
-        color="green"
-        class="mr-1 mb-1"
-        @click.native="openExternalBrowser"
-      >
-        {{ tech }}
-      </v-chip>
-    </div>
+    <technique-chips :techniques="selectedItem.Techniques" />
     <v-autocomplete
       v-model="selectedModule"
       :items="selectOptions"
@@ -34,10 +17,17 @@
     />
     <general-form
       v-if="reset"
+      ref="generalform"
+      v-model="form"
       :options="moduleOptions"
-      :loading="loading"
-      @submit="create"
     />
+    <v-btn
+      v-if="showSubmit"
+      color="primary"
+      @click="create"
+    >
+      Submit
+    </v-btn>
     <v-dialog
       ref="nameDialog"
       v-model="showDialog"
@@ -97,24 +87,23 @@ import InfoViewer from '@/components/InfoViewer.vue';
 import * as moduleApi from '@/api/module-api';
 import openExternalBrowser from '@/mixins/open-external';
 import GeneralForm from '../GeneralForm.vue';
+import TechniqueChips from '../TechniqueChips.vue';
 
 export default {
   components: {
     InfoViewer,
     GeneralForm,
+    TechniqueChips,
   },
   mixins: [openExternalBrowser],
-  /**
-   * can bind moduleName with v-model
-   */
-  model: {
-    prop: 'moduleName',
-    event: 'modified',
-  },
   props: {
     agents: {
       type: Array,
       default: () => [],
+    },
+    showSubmit: {
+      type: Boolean,
+      default: true,
     },
     moduleName: {
       type: String,
@@ -133,6 +122,7 @@ export default {
         { text: 'Result', value: 'result' },
       ],
       showDialog: false,
+      form: {},
     };
   },
   computed: {
@@ -199,10 +189,10 @@ export default {
       return '';
     },
     emitModuleChange(newVal) {
-      this.$emit('modified', newVal);
+      this.$emit('moduleChange', newVal);
     },
-    async create(form) {
-      if (this.agents.length < 1 || this.loading) {
+    async create() {
+      if (this.agents.length < 1 || this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
       }
 
@@ -210,7 +200,7 @@ export default {
 
       const result = await Promise.allSettled(this.agents
         .map(agent => moduleApi.executeModule(this.selectedModule,
-          { ...form, Agent: agent })));
+          { ...this.form, Agent: agent })));
 
       if (result.some(item => item.status === 'rejected')) {
         const split = result.reduce((acc, val) => {
@@ -219,15 +209,15 @@ export default {
         }, { rejected: [], fulfilled: [] });
 
         if (this.agents.length > 1) {
-          this.$toast.warning(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
+          this.$snack.warn(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
           this.results = result;
           this.showDialog = true;
         } else {
-          this.$toast.error(`Error: ${result[0].reason.error}`);
+          this.$snack.error(`Error: ${result[0].reason.error}`);
         }
       } else {
         const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
-        this.$toast.success(`Module execution queued for ${displayName}`);
+        this.$snack.info(`Module execution queued for ${displayName}`);
       }
 
       this.selectedItem = {};

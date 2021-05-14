@@ -1,10 +1,27 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
+    <edit-page-top
+      :breads="breads"
+      :show-submit="canEdit"
+      :show-copy="!canEdit"
+      :show-delete="!canEdit"
+      :submit-loading="loading"
+      :copy-link="copyLink"
+      @submit="submit"
+      @delete="kill"
+    />
     <div class="headers">
       <h3>{{ mode }} Listener</h3>
     </div>
-    <v-card style="padding: 10px">
+    <error-state-alert
+      v-if="errorState"
+      :resource-id="id"
+      resource-type="listener"
+    />
+    <v-card
+      v-else
+      style="padding: 10px"
+    >
       <info-viewer
         class="info-viewer"
         :info-array="listenerInfoArray"
@@ -20,11 +37,11 @@
       />
       <general-form
         v-if="reset"
+        ref="generalform"
+        v-model="form"
         :options="listenerOptions"
         :priority="formPriorities"
-        :loading="loading"
         :readonly="!canEdit"
-        @submit="submit"
       />
     </v-card>
   </div>
@@ -35,20 +52,27 @@ import * as listenerApi from '@/api/listener-api';
 import { mapState } from 'vuex';
 import GeneralForm from '@/components/GeneralForm.vue';
 import InfoViewer from '@/components/InfoViewer.vue';
+import EditPageTop from '@/components/EditPageTop.vue';
+import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
 
 export default {
   name: 'ListenerEdit',
   components: {
     InfoViewer,
     GeneralForm,
+    ErrorStateAlert,
+    EditPageTop,
   },
   data() {
     return {
       listener: { options: {} },
       listenerType: '',
+      form: {},
       reset: true,
       loading: false,
       formPriorities: ['Name', 'Host', 'Port'],
+      initialLoad: true,
+      errorState: false,
     };
   },
   computed: {
@@ -58,7 +82,11 @@ export default {
     isNew() {
       return this.$route.name === 'listenerNew';
     },
+    isCopy() {
+      return this.$route.params.copy === true;
+    },
     mode() {
+      if (this.isCopy) return 'Copy';
       if (this.isNew) return 'New';
       return 'View';
     },
@@ -67,6 +95,10 @@ export default {
     },
     id() {
       return this.$route.params.id;
+    },
+    copyLink() {
+      if (!this.canEdit) return { name: 'listenerNew', params: { copy: true, id: this.id } };
+      return {};
     },
     listenerInfoArray() {
       const a = this.listener.info || {};
@@ -90,7 +122,7 @@ export default {
           exact: true,
         },
         {
-          text: this.id ? `${this.id}` : 'New',
+          text: this.id && !this.isCopy ? `${this.id}` : 'New',
           disabled: true,
           to: '/listeners-edit',
         },
@@ -100,8 +132,15 @@ export default {
   watch: {
     listenerType: {
       async handler(val) {
+        // if its not new OR its a copy, then we want to let mounted call for the listener
+        // we are viewing.
+        if (!this.isNew || this.isCopy) {
+          if (this.initialLoad) {
+            return;
+          }
+        }
         const a = await listenerApi.getListenerOptions(val)
-          .catch(err => this.$toast.error(`Error: ${err}`));
+          .catch(err => this.$snack.error(`Error: ${err}`));
         if (a) {
           this.reset = false;
 
@@ -119,33 +158,46 @@ export default {
   mounted() {
     this.$store.dispatch('listener/getListenerTypes');
 
-    if (!this.isNew) {
+    if (!this.isNew || this.isCopy) {
       this.getListener(this.id);
     }
   },
   methods: {
-    async submit(form) {
-      if (this.loading) {
+    async submit() {
+      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
       }
 
       this.loading = true;
-      await this.create(form);
+      await this.create();
       this.loading = false;
     },
-    create(form) {
-      return listenerApi.createListener(this.listenerType, form)
+    create() {
+      return listenerApi.createListener(this.listenerType, this.form)
         .then(() => {
-          console.log('VR HEY');
-          this.$router.push({ name: 'listenerEdit', params: { id: form.Name } });
+          this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } });
         })
-        .catch(err => this.$toast.error(`Error: ${err}`));
+        .catch(err => this.$snack.error(`Error: ${err}`));
+    },
+    async kill() {
+      if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${this.form.Name}?`, { color: 'red' })) {
+        try {
+          await this.$store.dispatch('listener/killListener', this.form.Name);
+          this.$router.push({ name: 'listeners' });
+        } catch (err) {
+          this.$snack.error(`Error: ${err}`);
+        }
+      }
     },
     getListener(id) {
       listenerApi.getListener(id)
         .then((data) => {
           this.listener = data;
           this.listenerType = data.module;
+          setTimeout(() => { this.initialLoad = false; }, 500);
+        })
+        .catch(() => {
+          this.errorState = true;
         });
     },
   },

@@ -39,7 +39,7 @@ export default new Vuex.Store({
   },
   plugins: [createPersistedState({
     paths: ['application'],
-    rehydrated: ({ state }) => { // todo handle code duplication here?
+    rehydrated: ({ state }) => {
       setInstance(state.application.url, state.application.token);
       initNamespacedStore(state.application.url);
     },

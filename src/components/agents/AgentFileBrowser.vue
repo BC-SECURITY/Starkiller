@@ -195,7 +195,7 @@ export default {
       }
 
       if (!complete) {
-        this.$toast.error('Agent didn\'t respond in time. Please try again later.');
+        this.$snack.error('Agent didn\'t respond in time. Please try again later.');
       }
 
       this.tree = (await agentApi.getDirectory(this.agentName, '/')).map(el => this.transform(el));
@@ -222,7 +222,7 @@ export default {
         this.open.push(this.selected.id);
       } else if (action === 'download') {
         agentApi.downloadFile(this.agentName, this.selected.path);
-        this.$toast.success(`Tasked ${this.agentName} for download ${this.selected.path}`);
+        this.$snack.success(`Tasked ${this.agentName} for download ${this.selected.path}`);
       } else {
         // do nothing
       }
@@ -259,7 +259,7 @@ export default {
         a.children = files.map(el => this.transform(el));
         return Promise.resolve();
       } if (!stopTrying) {
-        this.$toast.success(`Attempting to retrieve directory: ${a.path}`);
+        this.$snack.success(`Attempting to retrieve directory: ${a.path}`);
         const task = await this.scrapeDirectory(a.path);
 
         let i = 0;
@@ -277,7 +277,7 @@ export default {
         }
 
         if (!complete) {
-          this.$toast.error('Agent didn\'t respond in time. Please try again later.');
+          this.$snack.error('Agent didn\'t respond in time. Please try again later.');
         }
 
         this.removeFromForce(a.id);

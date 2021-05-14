@@ -13,11 +13,21 @@ export default {
     setCredentials(state, credentials) {
       state.credentials = credentials;
     },
+    removeCredential(state, id) {
+      const find = state.credentials.findIndex(c => c.ID === id);
+      if (find > -1) {
+        state.credentials.splice(find, 1);
+      }
+    },
   },
   actions: {
     async getCredentials(context) {
       const credentials = await credentialApi.getCredentials();
       context.commit('setCredentials', credentials);
+    },
+    async deleteCredential(context, id) {
+      await credentialApi.deleteCredential(id);
+      context.commit('removeCredential', id);
     },
   },
   getters: {

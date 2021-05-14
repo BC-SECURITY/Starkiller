@@ -6,8 +6,8 @@
         && suggestedValues.includes('True')
         && suggestedValues.includes('False')"
       v-model="internalValue"
-      false-value="True"
-      true-value="False"
+      false-value="False"
+      true-value="True"
       :label="name"
     />
 
