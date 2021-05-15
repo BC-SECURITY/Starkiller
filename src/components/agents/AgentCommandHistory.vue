@@ -67,7 +67,7 @@ export default {
     // todo need timestamps. newest first.
     agentResults() {
       return this.taskResults.length > 0
-        ? this.taskResults[0].AgentResults : [];
+        ? this.taskResults : [];
     },
   },
   methods: {

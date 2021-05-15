@@ -164,7 +164,7 @@
                 >
                   <agent-command-history
                     :agent-name="agent.name"
-                    :task-results="taskResults"
+                    :task-results="taskResultsDeduped"
                   />
                 </v-card>
               </v-tab-item>
@@ -188,7 +188,7 @@
             >
               <agent-command-viewer
                 :name="$route.params.id"
-                :task-results="taskResults"
+                :task-results="taskResultsDeduped"
                 :initialized="initialized"
                 @new-results="scrollResults"
               />
@@ -273,6 +273,25 @@ export default {
     isChild() {
       return !!this.$route.query.hideSideBar;
     },
+    newestTaskingTime() {
+      if (this.taskResults?.length > 0) {
+        const temp = [...this.taskResults]
+          .map(t => t.updated_at)
+          .map(t => t.split('.')[0]);
+        temp.sort((a, b) => b.localeCompare(a));
+        return temp[0];
+      }
+      return '';
+    },
+    taskResultsDeduped() {
+      let temp = [...this.taskResults];
+      temp.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      temp = temp
+        .reduce((unique, item) => (unique.some(t => t.taskID === item.taskID)
+          ? unique
+          : [...unique, item]), []);
+      return temp.reverse();
+    },
   },
   watch: {
     id(val) {
@@ -290,8 +309,8 @@ export default {
   methods: {
     splitPaneHeight() {
       /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
-     That's 96vh - height of breadcrumbs (57) - height of footer (36px) */
-      return `height: calc(96vh - 57px ${this.isChild ? '' : '- 36px'})`;
+     That's 96vh - height of top bar (104) - height of footer (36px) */
+      return `height: calc(96vh - 104px ${this.isChild ? '' : '- 36px'})`;
     },
     popout() {
       ipcRenderer.send('agentWindowOpen', { id: this.$route.params.id });
@@ -306,9 +325,11 @@ export default {
             this.interval = null;
           }
           this.interval = setInterval(async () => {
-            this.taskResults = await agentApi.getResults(this.agent.name);
+            let temp = await agentApi.getResults(this.agent.name, this.newestTaskingTime);
+            temp = temp[0]?.AgentResults || [];
+            this.taskResults = [...this.taskResults, ...temp];
             this.initialized = true;
-          }, 5000);
+          }, 7000);
         })
         .catch(() => {
           this.errorState = true;

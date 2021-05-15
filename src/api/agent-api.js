@@ -63,8 +63,10 @@ export function getTask(name, taskId) {
  * Get tasking results for an agent.
  * @param {string} name agent name
  */
-export function getResults(name) {
-  return axios.get(`/agents/${name}/results`)
+export function getResults(name, since) {
+  const query = (since && since.length > 0) ? { updated_since: since } : {};
+
+  return axios.get(`/agents/${name}/results`, { params: query })
     .then(({ data }) => data.results)
     .catch(error => Promise.reject(error.response.data.error));
 }

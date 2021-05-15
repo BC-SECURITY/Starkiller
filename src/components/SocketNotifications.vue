@@ -1,27 +1,8 @@
 <template>
-  <v-snackbar
-    v-model="socketNotification.enabled"
-    right
-    top
-    app
-  >
-    {{ socketNotification.text }}
-
-    <template v-slot:action="{ attrs }">
-      <v-btn
-        color="orange darken-2"
-        text
-        v-bind="attrs"
-        @click="goToRoute"
-      >
-        View
-      </v-btn>
-    </template>
-  </v-snackbar>
+  <div style="display: none;" />
 </template>
 
 <script>
-// TODO Might be able to merge the snackbar and just let this handle receiving messages.
 import io from 'socket.io-client';
 import { mapState, mapGetters } from 'vuex';
 
@@ -30,17 +11,12 @@ export default {
   data() {
     return {
       socket: null,
-      socketNotification: {
-        enabled: false,
-        text: '',
-        route: '',
-        id: '',
-      },
     };
   },
   computed: {
     ...mapState({
       user: state => state.application.user,
+      plugins: state => state.plugin.plugins,
     }),
     ...mapGetters({
       isLoggedIn: 'application/isLoggedIn',
@@ -90,25 +66,42 @@ export default {
     },
     setHandlers() {
       this.socket.on('listeners/new', (data) => {
-        this.socketNotification = {
-          id: data.name,
-          route: 'listenerEdit',
-          enabled: true,
+        this.$snack.info({
           text: `New Listener '${data.name}' started!`,
-        };
+          buttonText: 'View',
+          showButton: true,
+          buttonAction: () => this.$router.push({
+            name: 'listenerEdit',
+            params: { id: data.name },
+          }),
+          dismissable: true,
+        });
         this.$store.dispatch('listener/addListener', data);
       });
       this.socket.on('agents/new', (data) => {
-        this.socketNotification = {
-          id: data.session_id,
-          route: 'agentEdit',
-          enabled: true,
+        this.$snack.info({
           text: `New Agent '${data.session_id}' callback!`,
-        };
+          buttonText: 'View',
+          showButton: true,
+          buttonAction: () => this.$router.push({
+            name: 'agentEdit',
+            params: { id: data.session_id },
+          }),
+          dismissable: true,
+        });
         this.$store.dispatch('agent/addAgent', data);
       });
       this.socket.on('agents/stage2', (data) => {
         this.$store.dispatch('agent/addAgent', data);
+      });
+      this.plugins.forEach((plugin) => {
+        // todo can we make this plural to match?
+        this.socket.on(`plugin/${plugin.Name}/notifications`, (data) => {
+          this.$snack.info({
+            text: `${data.plugin_name}: ${data.message}`,
+            color: this.getColorForPluginMessage(data.message),
+          });
+        });
       });
       this.socket.on('reconnect_failed', () => {
         console.log('Failed to connect to SocketIO');
@@ -124,11 +117,17 @@ export default {
       //   this.$store.dispatch('agent/addResult', { data });
       // });
     },
-    goToRoute() {
-      this.$router.push({
-        name: this.socketNotification.route,
-        params: { id: this.socketNotification.id },
-      });
+    getColorForPluginMessage(message) {
+      if (message.startsWith('[!]')) {
+        return 'error';
+      } if (message.startsWith('[*]')) {
+        return '';
+      } if (message.startsWith('[>]')) {
+        return 'warning';
+      } if (message.startsWith('[+]')) {
+        return 'success';
+      }
+      return '';
     },
   },
 };
