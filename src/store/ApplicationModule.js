@@ -16,6 +16,7 @@ export default {
     darkMode: true,
     hideStaleAgents: false,
     agentHeaders: [],
+    connectionError: 0,
   },
   mutations: {
     setApplicationState(state, {
@@ -31,6 +32,9 @@ export default {
     },
     setLoginError(state, error) {
       state.loginError = error;
+    },
+    setConnectionError(state) {
+      state.connectionError += 1;
     },
     setLogout(state) {
       state.token = '';
@@ -85,6 +89,9 @@ export default {
         }
         context.commit('setLoginError', message);
       }
+    },
+    connectionError(context) {
+      context.commit('setConnectionError');
     },
     async logout(context) {
       axios.post(`${context.state.url}/api/admin/logout?token=${context.state.token}`);

@@ -92,6 +92,7 @@ export default {
     }),
     ...mapState({
       empireVersion: state => state.application.empireVersion,
+      connectionError: state => state.application.connectionError,
     }),
     isLoginPage() {
       return this.$route.name === 'home';
@@ -131,6 +132,11 @@ export default {
         }
       },
       immediate: true,
+    },
+    connectionError(val) {
+      if (val > 0) {
+        this.$snack.error('Could not reach Empire server');
+      }
     },
   },
   mounted() {

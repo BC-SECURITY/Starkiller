@@ -25,13 +25,13 @@ const routes = [
     component: () => import(/* webpackChunkName: "listeners" */ '../views/Listeners.vue'),
   },
   {
-    path: '/listeners/:id',
-    name: 'listenerEdit',
+    path: '/listeners/new',
+    name: 'listenerNew',
     component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
   },
   {
-    path: '/listeners/new',
-    name: 'listenerNew', // same component
+    path: '/listeners/:id',
+    name: 'listenerEdit',
     component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
   },
   {
@@ -75,16 +75,16 @@ const routes = [
     component: () => import(/* webpackChunkName: "users" */ '../views/Users.vue'),
   },
   {
-    path: '/users/:id',
-    name: 'userEdit',
+    path: '/users/new',
+    name: 'userNew',
     component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
     meta: {
       requiresAdmin: true,
     },
   },
   {
-    path: '/users/new',
-    name: 'userNew',
+    path: '/users/:id',
+    name: 'userEdit',
     component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
     meta: {
       requiresAdmin: true,

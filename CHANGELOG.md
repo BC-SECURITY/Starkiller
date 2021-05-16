@@ -6,11 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.0] - 2021-xx-xx
 - Refactor all forms pages for new 4.0 features
-- Autosuggestions for fields with `suggestedValues` and `strict`
-- Switches for "boolean" fields
-- New input type for `Bypasses` field
+  - Autosuggestions for fields with `suggestedValues` and `strict`
+  - Switches for "boolean" fields
+  - A multi-select for `bypasses` field where relevant
+  - On listeners page, a dropdown select for malleable listeners
 - Use last seen time instead of check in time on agents list page
-
+- Dynamic columns on the agents list page
+- New 'Copy' feature for Listeners, Stagers, and Credentials
+- Edit and Delete Credentials
+- Better table formatting on all list pages
+- Links to listeners from agents and stagers pages
+- Better error handling for routing to resources that have been deleted and server connection errors
+- Add a 'StarkillerName' field on stagers for better identification
+- Remove dependency on "toast" library, better control over formatting
+- "getResults" for agents utilizes a 4.0 query parameter for better performance by only retrieving what has been recently updated and appending to the page
+- Added a UI "pulse" when a new result shows up on the agents page
+- Default size of the Starkiller window is now maximum
+- Add default localhost URL for brand new installs
+- Use the new socketio topic for async plugin notifications
+- Add a feature to settings for clearing local storage
+- New top bar to show action buttons and better utilize screen real estate
+- New component abstractions to eliminate duplicate code
 
 ## [1.7.0] - 2021-03-01
 - Thank you to our generous sponsors! The file browser is now available to the Kali/Public builds of Starkiller.

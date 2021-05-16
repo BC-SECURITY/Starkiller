@@ -36,12 +36,6 @@
           {{ item.Listener.Value }}
         </router-link>
       </template>
-      <template v-slot:item.SafeChecks.Value="{ item }">
-        <v-simple-checkbox
-          :value="item.SafeChecks.Value === 'True'"
-          disabled
-        />
-      </template>
       <template v-slot:item.createdAt="{ item }">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -142,7 +136,6 @@ export default {
         { text: 'Listener', value: 'Listener.Value' },
         { text: 'Type', value: 'name' },
         { text: 'Language', value: 'Language.Value' },
-        { text: 'SafeChecks', value: 'SafeChecks.Value' },
         { text: 'Created At', value: 'createdAt' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],

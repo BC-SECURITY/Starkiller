@@ -29,6 +29,14 @@
           {{ item.name }}
         </router-link>
       </template>
+      <template v-slot:item.created_at="{ item }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.created_at).format('lll') }}</span>
+        </v-tooltip>
+      </template>
       <template v-slot:item.actions="{ item }">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -89,6 +97,7 @@
 <script>
 import { mapState } from 'vuex';
 import ListPageTop from '@/components/ListPageTop.vue';
+import moment from 'moment';
 
 export default {
   name: 'Listeners',
@@ -97,6 +106,7 @@ export default {
   },
   data() {
     return {
+      moment,
       breads: [
         {
           text: 'Listeners',
@@ -115,6 +125,7 @@ export default {
         { text: 'Module', value: 'module' },
         { text: 'Host', value: 'options.Host.Value' },
         { text: 'Port', value: 'options.Port.Value' },
+        { text: 'Created At', value: 'created_at' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
       selected: [],

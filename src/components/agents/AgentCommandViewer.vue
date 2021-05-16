@@ -49,7 +49,7 @@ export default {
           ogResults: res.results ? res.results.split('\\n').join('\n') : '',
           username: res.username ? res.username : 'unknown',
           updatedAt: res.updated_at,
-        }))
+        })).slice(-10)
         : [];
     },
     totalLength() {
