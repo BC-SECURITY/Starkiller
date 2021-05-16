@@ -163,7 +163,7 @@ export default {
             map[obj.name] = obj.Value.split(' ') || [];
           } else {
             // eslint-disable-next-line no-param-reassign
-            map[obj.name] = obj.Value || '';
+            map[obj.name] = obj.Value == null ? '' : obj.Value;
           }
           return map;
         }, {});
