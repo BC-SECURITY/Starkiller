@@ -39,6 +39,9 @@ export default {
         this.setHandlers();
       }
     },
+    plugins() {
+      this.setHandlers();
+    },
   },
   mounted() {
     if (!this.socket && this.socketUrl && this.isLoggedIn) {
