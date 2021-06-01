@@ -1,13 +1,22 @@
 <template>
-  <div style="display: none;" />
+  <div>
+    <chat
+      v-if="socket && isChatWidget"
+      :socket="socket"
+    />
+  </div>
 </template>
 
 <script>
 import io from 'socket.io-client';
 import { mapState, mapGetters } from 'vuex';
+import Chat from '@/components/Chat.vue';
 
 export default {
   name: 'SocketNotifications',
+  components: {
+    Chat,
+  },
   data() {
     return {
       socket: null,
@@ -20,6 +29,7 @@ export default {
     }),
     ...mapGetters({
       isLoggedIn: 'application/isLoggedIn',
+      isChatWidget: 'application/isChatWidget',
       socketUrl: 'application/socketUrl',
     }),
     apiToken() {

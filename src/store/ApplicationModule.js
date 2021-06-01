@@ -14,6 +14,7 @@ export default {
     loginError: '',
     empireVersion: '',
     darkMode: true,
+    chatWidget: true,
     hideStaleAgents: false,
     agentHeaders: [],
     connectionError: 0,
@@ -50,11 +51,15 @@ export default {
       state.loginError = '';
       state.empireVersion = '';
       state.darkMode = true;
+      state.chatWidget = true;
       state.hideStaleAgents = false;
       state.agentHeaders = [];
     },
     setDarkMode(state, val) {
       state.darkMode = val;
+    },
+    setChatWidget(state, val) {
+      state.chatWidget = val;
     },
     setHideStaleAgents(state, val) {
       state.hideStaleAgents = val;
@@ -104,6 +109,9 @@ export default {
     darkMode(context, val) {
       context.commit('setDarkMode', val);
     },
+    chatWidget(context, val) {
+      context.commit('setChatWidget', val);
+    },
     hideStaleAgents(context, val) {
       context.commit('setHideStaleAgents', val);
     },
@@ -120,6 +128,9 @@ export default {
     },
     isDarkMode(state) {
       return state.darkMode;
+    },
+    isChatWidget(state) {
+      return state.chatWidget;
     },
     token(state) {
       return state.token;

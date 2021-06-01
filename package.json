@@ -1,6 +1,6 @@
 {
   "name": "starkiller",
-  "version": "1.8.0-Kali-alpha.1",
+  "version": "1.8.0-Kali-beta.1",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -33,6 +33,7 @@
     "typeface-roboto": "^0.0.75",
     "uuid": "^8.3.2",
     "vue": "^2.6.12",
+    "vue-beautiful-chat": "^2.5.0",
     "vue-router": "^3.5.1",
     "vue-splitpane": "^1.0.6",
     "vuetify": "^2.4.9",

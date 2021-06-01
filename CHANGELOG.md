@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a feature to settings for clearing local storage
 - New top bar to show action buttons and better utilize screen real estate
 - New component abstractions to eliminate duplicate code
+- Add chat widget from the sponsors version (15 sponsor goal)
 
 ## [1.7.0] - 2021-03-01
 - Thank you to our generous sponsors! The file browser is now available to the Kali/Public builds of Starkiller.

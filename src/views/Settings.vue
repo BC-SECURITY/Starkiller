@@ -15,10 +15,17 @@
         </v-btn>
       </div>
       <v-divider />
-      <v-switch
-        v-model="darkModeSwitch"
-        :label="`Dark Mode`"
-      />
+      <div style="display: flex; flex-direction: row;">
+        <v-switch
+          v-model="darkModeSwitch"
+          :label="`Dark Mode`"
+        />
+        <v-switch
+          v-model="chatWidgetSwitch"
+          class="pl-8"
+          :label="`Chat Widget`"
+        />
+      </div>
       <v-divider />
       <div class="headers pl-0 mt-2">
         <h4>Update Password</h4>
@@ -128,6 +135,7 @@ export default {
     ...mapState({
       user: state => state.application.user,
       darkMode: state => state.application.darkMode,
+      chatWidget: state => state.application.chatWidget,
     }),
     apiToken() {
       return this.user.api_token;
@@ -141,6 +149,14 @@ export default {
       },
       get() {
         return this.darkMode;
+      },
+    },
+    chatWidgetSwitch: {
+      set(val) {
+        this.$store.dispatch('application/chatWidget', val);
+      },
+      get() {
+        return this.chatWidget;
       },
     },
   },
