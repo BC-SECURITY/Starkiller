@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     ...mapState({
-      agents: state => state.agent.agents,
+      agents: (state) => state.agent.agents,
     }),
     breads() {
       return [

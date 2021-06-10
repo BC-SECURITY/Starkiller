@@ -23,7 +23,7 @@ export default {
       state.types = types;
     },
     removeListener(state, name) {
-      const find = state.listeners.findIndex(l => l.name === name);
+      const find = state.listeners.findIndex((l) => l.name === name);
       if (find > -1) {
         state.listeners.splice(find, 1);
       }
@@ -43,7 +43,7 @@ export default {
       context.commit('removeListener', name);
     },
     async addListener(context, listener) {
-      const found = context.state.listeners.find(el => el.ID === listener.ID);
+      const found = context.state.listeners.find((el) => el.ID === listener.ID);
 
       if (!found) {
         context.commit('pushListener', listener);
@@ -51,6 +51,6 @@ export default {
     },
   },
   getters: {
-    listenerNames: state => state.listeners.map(el => el.name),
+    listenerNames: (state) => state.listeners.map((el) => el.name),
   },
 };

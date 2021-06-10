@@ -15,7 +15,6 @@ import ApplicationModule from './ApplicationModule';
 import BypassModule from './BypassModule';
 import MalleableModule from './MalleableModule';
 
-
 Vue.use(Vuex);
 
 export default new Vuex.Store({

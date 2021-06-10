@@ -44,7 +44,7 @@
             :headers="headers"
             :item-class="rowClass"
           >
-            <template v-slot:item.agent="{ item }">
+            <template #item.agent="{ item }">
               <div>
                 <template v-if="item.status === 'rejected'">
                   <span>{{ item.reason.agent }}</span>
@@ -54,7 +54,7 @@
                 </template>
               </div>
             </template>
-            <template v-slot:item.result="{ item }">
+            <template #item.result="{ item }">
               <div>
                 <template v-if="item.status === 'rejected'">
                   <span>{{ item.reason.error }}</span>
@@ -85,7 +85,6 @@
 import { mapState } from 'vuex';
 import InfoViewer from '@/components/InfoViewer.vue';
 import * as moduleApi from '@/api/module-api';
-import openExternalBrowser from '@/mixins/open-external';
 import GeneralForm from '../GeneralForm.vue';
 import TechniqueChips from '../TechniqueChips.vue';
 
@@ -95,7 +94,6 @@ export default {
     GeneralForm,
     TechniqueChips,
   },
-  mixins: [openExternalBrowser],
   props: {
     agents: {
       type: Array,
@@ -127,8 +125,8 @@ export default {
   },
   computed: {
     ...mapState({
-      modules: state => state.module.modules,
-      selectOptions: state => state.module.modules.map(el => el.Name),
+      modules: (state) => state.module.modules,
+      selectOptions: (state) => state.module.modules.map((el) => el.Name),
     }),
     moduleOptions() {
       let { options } = this.selectedItem;
@@ -179,7 +177,7 @@ export default {
         setTimeout(() => { this.reset = true; }, 500);
         return;
       }
-      const results = this.modules.find(el => el.Name === item);
+      const results = this.modules.find((el) => el.Name === item);
       this.reset = false;
       this.selectedItem = results || {};
       setTimeout(() => { this.reset = true; }, 500);
@@ -199,10 +197,10 @@ export default {
       this.loading = true;
 
       const result = await Promise.allSettled(this.agents
-        .map(agent => moduleApi.executeModule(this.selectedModule,
+        .map((agent) => moduleApi.executeModule(this.selectedModule,
           { ...this.form, Agent: agent })));
 
-      if (result.some(item => item.status === 'rejected')) {
+      if (result.some((item) => item.status === 'rejected')) {
         const split = result.reduce((acc, val) => {
           acc[val.status].push(val);
           return acc;

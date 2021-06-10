@@ -29,7 +29,7 @@
       show-expand
       dense
     >
-      <template v-slot:item.Name="{ item }">
+      <template #item.Name="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'moduleExecute', query: { module: item.Name } }"
@@ -37,31 +37,31 @@
           {{ item.Name }}
         </router-link>
       </template>
-      <template v-slot:item.Techniques="{ item }">
+      <template #item.Techniques="{ item }">
         <technique-chips
           :techniques="item.Techniques"
           :show-title="false"
         />
       </template>
-      <template v-slot:item.NeedsAdmin="{ item }">
+      <template #item.NeedsAdmin="{ item }">
         <v-simple-checkbox
           v-model="item.NeedsAdmin"
           disabled
         />
       </template>
-      <template v-slot:item.OpsecSafe="{ item }">
+      <template #item.OpsecSafe="{ item }">
         <v-simple-checkbox
           v-model="item.OpsecSafe"
           disabled
         />
       </template>
-      <template v-slot:item.Background="{ item }">
+      <template #item.Background="{ item }">
         <v-simple-checkbox
           v-model="item.Background"
           disabled
         />
       </template>
-      <template v-slot:expanded-item="{ headers, item }">
+      <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div class="d-flex flex-column">
             <b>Author:</b>
@@ -81,7 +81,6 @@
 
 <script>
 import { mapState } from 'vuex';
-import openExternalBrowser from '@/mixins/open-external';
 import TechniqueChips from '@/components/TechniqueChips.vue';
 
 export default {
@@ -89,7 +88,6 @@ export default {
   components: {
     TechniqueChips,
   },
-  mixins: [openExternalBrowser],
   data() {
     return {
       headers: [
@@ -120,7 +118,7 @@ export default {
   },
   computed: {
     ...mapState({
-      modules: state => state.module.modules,
+      modules: (state) => state.module.modules,
     }),
   },
   mounted() {

@@ -10,7 +10,7 @@
       :items="plugins"
       dense
     >
-      <template v-slot:item.Name="{ item }">
+      <template #item.Name="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'pluginExecute', params: { id: item.Name } }"
@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     ...mapState({
-      plugins: state => state.plugin.plugins,
+      plugins: (state) => state.plugin.plugins,
     }),
   },
   mounted() {

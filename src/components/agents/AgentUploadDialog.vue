@@ -75,11 +75,11 @@ export default {
       pathToFile: '',
       rules: {
         pathToFile: [
-          v => !!v || 'PathToFile is required',
+          (v) => !!v || 'PathToFile is required',
         ],
         fileInput: [
-          v => !!v || 'File required',
-          v => (!!v && v.size < MAX_BYTES) || `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
+          (v) => !!v || 'File required',
+          (v) => (!!v && v.size < MAX_BYTES) || `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
         ],
       },
     };
@@ -125,7 +125,7 @@ export default {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result.split(',').pop());
-        reader.onerror = error => reject(error);
+        reader.onerror = (error) => reject(error);
       });
     },
   },

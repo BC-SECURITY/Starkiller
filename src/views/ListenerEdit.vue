@@ -77,7 +77,7 @@ export default {
   },
   computed: {
     ...mapState({
-      listenerTypes: state => state.listener.types,
+      listenerTypes: (state) => state.listener.types,
     }),
     isNew() {
       return this.$route.name === 'listenerNew';
@@ -140,7 +140,7 @@ export default {
           }
         }
         const a = await listenerApi.getListenerOptions(val)
-          .catch(err => this.$snack.error(`Error: ${err}`));
+          .catch((err) => this.$snack.error(`Error: ${err}`));
         if (a) {
           this.reset = false;
 
@@ -177,7 +177,7 @@ export default {
         .then(() => {
           this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } });
         })
-        .catch(err => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     async kill() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${this.form.Name}?`, { color: 'red' })) {

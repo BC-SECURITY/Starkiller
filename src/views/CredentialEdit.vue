@@ -134,12 +134,12 @@ export default {
     create() {
       return credentialApi.createCredential(this.form)
         .then(() => this.$router.push({ name: 'credentials' }))
-        .catch(err => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     update() {
       return credentialApi.updateCredential(this.id, this.form)
         .then(() => this.$router.push({ name: 'credentials' }))
-        .catch(err => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     async deleteCredential() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${this.id}?`, { color: 'red' })) {

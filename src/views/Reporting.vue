@@ -9,7 +9,7 @@
       item-key="id"
       show-expand
     >
-      <template v-slot:expanded-item="{ headers, item }">
+      <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div>
             <p><b>Agent:</b> {{ item.agent_name }}</p>
@@ -24,12 +24,12 @@
           </div>
         </td>
       </template>
-      <template v-slot:item.task="{ item }">
+      <template #item.task="{ item }">
         <span>{{ truncateMessage(item.task) }}</span>
       </template>
-      <template v-slot:item.timestamp="{ item }">
+      <template #item.timestamp="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <span v-on="on">{{ moment(item.timestamp).fromNow() }}</span>
           </template>
           <span>{{ moment(item.timestamp).format('lll') }}</span>
@@ -79,7 +79,7 @@ export default {
 
       // add unique ids for the expandable rows to work.
       let i = 1;
-      this.reporting = arr.map(el => ({ ...el, id: i++ }));
+      this.reporting = arr.map((el) => ({ ...el, id: i++ }));
     },
     truncateMessage(task) {
       if (task) {

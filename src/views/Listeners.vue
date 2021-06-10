@@ -21,7 +21,7 @@
       dense
       show-select
     >
-      <template v-slot:item.name="{ item }">
+      <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'listenerEdit', params: { id: item.name }}"
@@ -29,17 +29,17 @@
           {{ item.name }}
         </router-link>
       </template>
-      <template v-slot:item.created_at="{ item }">
+      <template #item.created_at="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
           </template>
           <span>{{ moment(item.created_at).format('lll') }}</span>
         </v-tooltip>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               text
               icon
@@ -133,7 +133,7 @@ export default {
   },
   computed: {
     ...mapState({
-      listeners: state => state.listener.listeners,
+      listeners: (state) => state.listener.listeners,
     }),
     showDelete() {
       return this.selected.length > 0;

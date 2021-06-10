@@ -21,7 +21,7 @@
       :disable-user-list-toggle="false"
       :message-styling="messageStyling"
     >
-      <template v-slot:user-avatar="{ message, user }">
+      <template #user-avatar="{ message, user }">
         <div
           v-if="message.type !== 'system' && user && user.name !== 'me'"
           v-tooltip="user.name"
@@ -63,9 +63,9 @@ export default {
   },
   computed: {
     ...mapState({
-      me: state => state.application.user.username,
-      allUsers: state => state.user.users,
-      darkMode: state => state.application.darkMode,
+      me: (state) => state.application.user.username,
+      allUsers: (state) => state.user.users,
+      darkMode: (state) => state.application.darkMode,
     }),
     colors() {
       if (this.darkMode) {
@@ -95,7 +95,7 @@ export default {
         // convert it to a a participant
         const user2 = this.mapUser(user);
         // if it exists in the rawParticipants array then they are online
-        user2.online = this.rawParticipants.find(p => p.username === user2.name) !== undefined;
+        user2.online = this.rawParticipants.find((p) => p.username === user2.name) !== undefined;
         return user2;
       });
       return temp;
@@ -148,11 +148,11 @@ export default {
       // leverage pagination for loading another page of messages
     },
     addUser(user) {
-      if (this.rawParticipants.find(u => u.username === user.username)) return;
+      if (this.rawParticipants.find((u) => u.username === user.username)) return;
       this.rawParticipants.push(user);
     },
     removeUser(user) {
-      const index = this.rawParticipants.findIndex(u => u.username === user.username);
+      const index = this.rawParticipants.findIndex((u) => u.username === user.username);
       if (index > -1) {
         this.rawParticipants.splice(index, 1);
         this.rawParticipants = [...this.rawParticipants];

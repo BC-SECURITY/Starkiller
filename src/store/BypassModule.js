@@ -1,6 +1,5 @@
 import * as bypassApi from '@/api/bypass-api';
 
-
 export default {
   namespaced: true,
   state: {
@@ -21,6 +20,6 @@ export default {
     },
   },
   getters: {
-    bypassNames: state => state.bypasses.map(el => el.name),
+    bypassNames: (state) => state.bypasses.map((el) => el.name),
   },
 };

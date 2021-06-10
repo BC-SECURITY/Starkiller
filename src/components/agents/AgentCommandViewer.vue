@@ -42,7 +42,7 @@ export default {
   computed: {
     agentResults() {
       return this.taskResults.length > 0
-        ? this.taskResults.map(res => ({
+        ? this.taskResults.map((res) => ({
           taskID: res.taskID,
           command: res.command,
           results: res.results ? res.results.split('\\n') : '',
@@ -54,8 +54,8 @@ export default {
     },
     totalLength() {
       return [
-        ...this.agentResults.map(el => el.command).filter(command => command.length > 0),
-        ...this.agentResults.map(el => el.results).filter(result => result.length > 0),
+        ...this.agentResults.map((el) => el.command).filter((command) => command.length > 0),
+        ...this.agentResults.map((el) => el.results).filter((result) => result.length > 0),
       ];
     },
   },

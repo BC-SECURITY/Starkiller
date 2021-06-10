@@ -7,5 +7,5 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getBypasses() {
   return axios.get('/bypasses')
     .then(({ data }) => data.bypasses)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }

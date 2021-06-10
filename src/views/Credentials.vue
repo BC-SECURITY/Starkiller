@@ -17,7 +17,7 @@
       dense
       show-select
     >
-      <template v-slot:item.ID="{ item }">
+      <template #item.ID="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'credentialEdit', params: { id: item.ID }}"
@@ -25,7 +25,7 @@
           {{ item.ID }}
         </router-link>
       </template>
-      <template v-slot:item.username="{ item }">
+      <template #item.username="{ item }">
         <div
           class="point"
           @click="copyToClipboard(item.username)"
@@ -34,7 +34,7 @@
           <i class="fa fa-paperclip center-icon" />
         </div>
       </template>
-      <template v-slot:item.password="{ item }">
+      <template #item.password="{ item }">
         <div
           class="point"
           @click="copyToClipboard(item.password)"
@@ -43,9 +43,9 @@
           <i class="fa fa-paperclip center-icon" />
         </div>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               text
               icon
@@ -137,7 +137,7 @@ export default {
   },
   computed: {
     ...mapState({
-      credentials: state => state.credential.credentials,
+      credentials: (state) => state.credential.credentials,
     }),
     showDelete() {
       return this.selected.length > 0;

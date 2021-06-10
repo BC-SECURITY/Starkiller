@@ -48,7 +48,7 @@ export default {
       // stale comes back as a boolean, while no other property does and el-input
       // doesn't accept booleans so this will do.
       return Object.keys(this.agent)
-        .map(key => ({
+        .map((key) => ({
           name: key,
           Value: typeof this.agent[key] === 'boolean' ? `${this.agent[key]}` : this.agent[key],
         }));
@@ -59,7 +59,7 @@ export default {
      */
     requiredFields() {
       return this.fields
-        .filter(el => ['name'].indexOf(el.name) < 0);
+        .filter((el) => ['name'].indexOf(el.name) < 0);
     },
   },
   watch: {
@@ -88,7 +88,7 @@ export default {
       // We may want to come back in the future to add the ability to edit working hours, etc.
     },
     fieldExists(name) {
-      return this.fields.filter(el => el.name === name).length > 0;
+      return this.fields.filter((el) => el.name === name).length > 0;
     },
   },
 };

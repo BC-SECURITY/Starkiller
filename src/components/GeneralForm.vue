@@ -93,16 +93,16 @@ export default {
      */
     optionalFields() {
       return this.fields
-        .filter(el => el.Required === false)
-        .map(el => ({ ...el, type: this.fieldType(el) }));
+        .filter((el) => el.Required === false)
+        .map((el) => ({ ...el, type: this.fieldType(el) }));
     },
     /**
      * All the fields that are marked required by the API
      */
     requiredFields() {
       return this.fields
-        .filter(el => el.Required === true)
-        .map(el => ({ ...el, type: this.fieldType(el) }));
+        .filter((el) => el.Required === true)
+        .map((el) => ({ ...el, type: this.fieldType(el) }));
     },
     /**
      * The fields from the API to dynamically generate the form.
@@ -111,10 +111,10 @@ export default {
      */
     fields() {
       const fields = Object.keys(this.options)
-        .map(key => ({ name: key, ...this.options[key] }));
+        .map((key) => ({ name: key, ...this.options[key] }));
 
       this.priority.slice().reverse().forEach((item) => {
-        const index = fields.findIndex(f => f.name === item);
+        const index = fields.findIndex((f) => f.name === item);
         if (index > -1) {
           const fItem = fields.splice(index, 1)[0];
           fields.unshift(fItem);
@@ -132,7 +132,7 @@ export default {
         map[field.name] = [];
         if (field.Required === true) {
           map[field.name].push(
-            v => (!!v || v === 0) || `${field.name} is required`,
+            (v) => (!!v || v === 0) || `${field.name} is required`,
           );
         }
 
@@ -203,7 +203,7 @@ export default {
       return field.Strict;
     },
     fieldExists(name) {
-      return this.fields.find(el => el.name === name);
+      return this.fields.find((el) => el.name === name);
     },
     fieldType(el) {
       if (typeof el.Value === 'number') {

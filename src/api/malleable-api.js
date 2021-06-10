@@ -7,5 +7,5 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getMalleableProfiles() {
   return axios.get('/malleable-profiles')
     .then(({ data }) => data.profiles)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }

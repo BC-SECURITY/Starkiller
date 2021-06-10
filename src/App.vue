@@ -14,7 +14,7 @@
       >
         <template
           v-if="$route.name === 'agentEdit'"
-          v-slot:extension
+          #extension
         >
           <portal-target
             name="app-bar-extension"
@@ -45,21 +45,18 @@
           class="mr-2"
           target="_blank"
           href="https://github.com/bc-security/starkiller"
-          @click.prevent="openExternalBrowser"
         > Starkiller </a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
           href="https://github.com/bc-security/empire"
-          @click.prevent="openExternalBrowser"
         > Empire</a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
           href="https://github.com/sponsors/BC-SECURITY"
-          @click.prevent="openExternalBrowser"
         > Sponsor for extra features</a>
       </v-footer>
     </v-app>
@@ -69,7 +66,6 @@
 import Vue from 'vue';
 import semver from 'semver';
 import { mapGetters, mapState } from 'vuex';
-import openExternalBrowser from '@/mixins/open-external';
 
 import SideNav from '@/components/SideNav.vue';
 import Confirm from '@/components/Confirm.vue';
@@ -84,15 +80,14 @@ export default {
     SocketNotifications,
     StarkillerSnackbar,
   },
-  mixins: [openExternalBrowser],
   computed: {
     ...mapGetters({
       isLoggedIn: 'application/isLoggedIn',
       isDarkMode: 'application/isDarkMode',
     }),
     ...mapState({
-      empireVersion: state => state.application.empireVersion,
-      connectionError: state => state.application.connectionError,
+      empireVersion: (state) => state.application.empireVersion,
+      connectionError: (state) => state.application.connectionError,
     }),
     isLoginPage() {
       return this.$route.name === 'home';
@@ -161,7 +156,6 @@ export default {
 @import 'app.scss';
 
 @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
-@import '../node_modules/typeface-roboto/index.css';
 
 #app {
   -webkit-font-smoothing: antialiased;

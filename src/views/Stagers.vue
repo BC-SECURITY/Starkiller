@@ -20,7 +20,7 @@
       dense
       show-select
     >
-      <template v-slot:item.StarkillerName.Value="{ item }">
+      <template #item.StarkillerName.Value="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'stagerEdit', params: { id: item.id }}"
@@ -28,7 +28,7 @@
           {{ item.StarkillerName.Value }}
         </router-link>
       </template>
-      <template v-slot:item.Listener.Value="{ item }">
+      <template #item.Listener.Value="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'listenerEdit', params: { id: item.Listener.Value }}"
@@ -36,17 +36,17 @@
           {{ item.Listener.Value }}
         </router-link>
       </template>
-      <template v-slot:item.createdAt="{ item }">
+      <template #item.createdAt="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <span v-on="on">{{ moment(item.createdAt).fromNow() }}</span>
           </template>
           <span>{{ moment(item.createdAt).format('lll') }}</span>
         </v-tooltip>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               text
               icon
@@ -144,7 +144,7 @@ export default {
   },
   computed: {
     ...mapState({
-      stagers: state => state.stager.stagers,
+      stagers: (state) => state.stager.stagers,
     }),
     showDelete() {
       return this.selected.length > 0;

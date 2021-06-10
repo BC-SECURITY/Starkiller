@@ -24,8 +24,8 @@ export default {
   },
   computed: {
     ...mapState({
-      user: state => state.application.user,
-      plugins: state => state.plugin.plugins,
+      user: (state) => state.application.user,
+      plugins: (state) => state.plugin.plugins,
     }),
     ...mapGetters({
       isLoggedIn: 'application/isLoggedIn',

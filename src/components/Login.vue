@@ -86,7 +86,7 @@ export default {
       isLoggedIn: 'application/isLoggedIn',
     }),
     ...mapState({
-      loginError: state => state.application.loginError,
+      loginError: (state) => state.application.loginError,
     }),
   },
   watch: {

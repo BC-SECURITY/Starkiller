@@ -158,7 +158,7 @@ export default {
           }
         }
         const a = await stagerApi.getStagerByName(val)
-          .catch(err => this.$snack.error(`Error: ${err}`));
+          .catch((err) => this.$snack.error(`Error: ${err}`));
         if (a) {
           this.reset = false;
 
@@ -226,7 +226,7 @@ export default {
     },
     getStager(id) {
       const arr = namespacedElectronStore.get('generatedStagers', []);
-      const found = arr.find(s => s.id === id);
+      const found = arr.find((s) => s.id === id);
 
       if (!found) this.errorState = true;
 

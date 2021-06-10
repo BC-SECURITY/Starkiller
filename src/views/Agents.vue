@@ -22,7 +22,7 @@
         offset-y
         :close-on-content-click="false"
       >
-        <template v-slot:activator="{ on, attrs }">
+        <template #activator="{ on, attrs }">
           <v-btn
             text
             icon
@@ -86,9 +86,9 @@
       dense
       show-select
     >
-      <template v-slot:item.name="{ item }">
+      <template #item.name="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <v-icon
               v-if="item.high_integrity === 1"
               small
@@ -106,15 +106,15 @@
           {{ item.name }}
         </router-link>
       </template>
-      <template v-slot:item.lastseen_time="{ item }">
+      <template #item.lastseen_time="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <span v-on="on">{{ moment(item.lastseen_time).fromNow() }}</span>
           </template>
           <span>{{ moment(item.lastseen_time).format('lll') }}</span>
         </v-tooltip>
       </template>
-      <template v-slot:item.listener="{ item }">
+      <template #item.listener="{ item }">
         <router-link
           style="color: inherit;"
           :to="{ name: 'listenerEdit', params: { id: item.listener }}"
@@ -122,12 +122,12 @@
           {{ item.listener }}
         </router-link>
       </template>
-      <template v-slot:item.process_name="{ item }">
+      <template #item.process_name="{ item }">
         <span>{{ truncateMessage(item.process_name) }}</span>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               text
               icon
@@ -251,9 +251,9 @@ export default {
   },
   computed: {
     ...mapState({
-      agents: state => state.agent.agents,
-      hideStaleAgents: state => state.application.hideStaleAgents,
-      selectedHeadersState: state => state.application.agentHeaders,
+      agents: (state) => state.agent.agents,
+      hideStaleAgents: (state) => state.application.hideStaleAgents,
+      selectedHeadersState: (state) => state.application.agentHeaders,
     }),
     selectedAll: {
       set(val) {
@@ -270,22 +270,22 @@ export default {
     },
     headers() {
       return this.headersFull
-        .filter(h => this.selectedHeaders.findIndex(h2 => h2.text === h.text) > -1)
+        .filter((h) => this.selectedHeaders.findIndex((h2) => h2.text === h.text) > -1)
         .sort((a, b) => a.order - b.order);
     },
     selectableHeaders() {
       return this.headersFull
-        .filter(h => !h.alwaysShow);
+        .filter((h) => !h.alwaysShow);
     },
     staticHeaders() {
       return this.headersFull
-        .filter(h => h.alwaysShow);
+        .filter((h) => h.alwaysShow);
     },
     sortedAgents() {
       const sorted = this.agents.slice();
       sorted.sort((a, b) => -a.checkin_time.localeCompare(b.checkin_time));
       if (this.hideStaleAgents) {
-        return sorted.filter(agent => !agent.stale);
+        return sorted.filter((agent) => !agent.stale);
       }
       return sorted;
     },
@@ -312,7 +312,7 @@ export default {
   mounted() {
     this.getAgents();
     if (this.selectedHeaders.length === 0) {
-      this.selectedHeaders = this.headersFull.filter(h => h.defaultHeader === true);
+      this.selectedHeaders = this.headersFull.filter((h) => h.defaultHeader === true);
     }
     this.selectedHeadersTemp = [...this.selectedHeaders];
   },

@@ -7,7 +7,7 @@
     :sort-desc.sync="sortDesc"
     show-expand
   >
-    <template v-slot:expanded-item="{ headers, item }">
+    <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
         <div>
           <p><b>Task Command:</b></p>
@@ -21,7 +21,7 @@
         </div>
       </td>
     </template>
-    <template v-slot:item.task="{ item }">
+    <template #item.task="{ item }">
       <span>{{ truncateMessage(item.command) }}</span>
     </template>
     <!-- <template v-slot:item.timestamp="{ item }">

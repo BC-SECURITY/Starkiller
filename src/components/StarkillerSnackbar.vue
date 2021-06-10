@@ -9,7 +9,7 @@
   >
     {{ notification.text }}
 
-    <template v-slot:action="{ attrs }">
+    <template #action="{ attrs }">
       <v-btn
         v-if="notification.showButton"
         :color="notification.color === 'error'

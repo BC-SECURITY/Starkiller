@@ -13,7 +13,7 @@
       :items="users"
       dense
     >
-      <template v-slot:item.username="{ item }">
+      <template #item.username="{ item }">
         <router-link
           v-if="isAdmin"
           style="color: inherit;"
@@ -23,21 +23,21 @@
         </router-link>
         <span v-else>{{ item.username }}</span>
       </template>
-      <template v-slot:item.last_logon_time="{ item }">
+      <template #item.last_logon_time="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <span v-on="on">{{ moment(item.last_logon_time).fromNow() }}</span>
           </template>
           <span>{{ moment(item.last_logon_time).format('lll') }}</span>
         </v-tooltip>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <v-tooltip
           v-if="isAdmin"
           :disabled="!item.admin"
           top
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <div
               style="max-width: 120px"
               v-on="on"
@@ -89,7 +89,7 @@ export default {
   },
   computed: {
     ...mapState({
-      users: state => state.user.users,
+      users: (state) => state.user.users,
     }),
     ...mapGetters({
       isAdmin: 'application/isAdmin',

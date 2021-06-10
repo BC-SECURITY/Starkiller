@@ -16,7 +16,7 @@ export default {
       state.stagers = stagers;
     },
     removeStager(state, id) {
-      const find = state.stagers.findIndex(s => s.id === id);
+      const find = state.stagers.findIndex((s) => s.id === id);
       if (find > -1) {
         state.stagers.splice(find, 1);
       }
@@ -45,7 +45,7 @@ export default {
     },
     async deleteStager(context, id) {
       const arr = namespacedElectronStore.get('generatedStagers', []);
-      const find = arr.findIndex(s => s.id === id);
+      const find = arr.findIndex((s) => s.id === id);
       if (find > -1) {
         arr.splice(find, 1);
       }
@@ -67,6 +67,6 @@ export default {
     },
   },
   getters: {
-    stagerTypes: state => state.stagerTemplates.map(el => el.Name).sort(),
+    stagerTypes: (state) => state.stagerTemplates.map((el) => el.Name).sort(),
   },
 };

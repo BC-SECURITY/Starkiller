@@ -52,7 +52,7 @@ export default {
   },
   computed: {
     ...mapState({
-      plugins: state => state.plugin.plugins,
+      plugins: (state) => state.plugin.plugins,
     }),
     breads() {
       return [
@@ -70,7 +70,7 @@ export default {
       ];
     },
     plugin() {
-      return this.plugins.find(p => p.Name === this.$route.params.id) || {};
+      return this.plugins.find((p) => p.Name === this.$route.params.id) || {};
     },
     pluginInfoArray() {
       if (Object.keys(this.plugin).length < 1) return [];

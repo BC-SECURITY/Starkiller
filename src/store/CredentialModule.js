@@ -1,6 +1,5 @@
 import * as credentialApi from '@/api/credential-api';
 
-
 export default {
   namespaced: true,
   state: {
@@ -14,7 +13,7 @@ export default {
       state.credentials = credentials;
     },
     removeCredential(state, id) {
-      const find = state.credentials.findIndex(c => c.ID === id);
+      const find = state.credentials.findIndex((c) => c.ID === id);
       if (find > -1) {
         state.credentials.splice(find, 1);
       }
@@ -31,6 +30,6 @@ export default {
     },
   },
   getters: {
-    credentialIds: state => state.credentials.map(c => c.ID),
+    credentialIds: (state) => state.credentials.map((c) => c.ID),
   },
 };

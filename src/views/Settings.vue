@@ -110,12 +110,12 @@ export default {
       form: {},
       rules: {
         password: [
-          v => !!v || 'Password is required',
-          v => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
+          (v) => !!v || 'Password is required',
+          (v) => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
         ],
         confirmPassword: [
-          v => !!v || 'Confirmation is required',
-          v => v === this.form.password || 'Password must match',
+          (v) => !!v || 'Confirmation is required',
+          (v) => v === this.form.password || 'Password must match',
         ],
       },
       showPassword: false,
@@ -133,9 +133,9 @@ export default {
   },
   computed: {
     ...mapState({
-      user: state => state.application.user,
-      darkMode: state => state.application.darkMode,
-      chatWidget: state => state.application.chatWidget,
+      user: (state) => state.application.user,
+      darkMode: (state) => state.application.darkMode,
+      chatWidget: (state) => state.application.chatWidget,
     }),
     apiToken() {
       return this.user.api_token;

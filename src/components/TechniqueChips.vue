@@ -15,7 +15,6 @@
       target="_blank"
       color="green"
       class="mr-1 mb-1"
-      @click.native="openExternalBrowser"
     >
       {{ tech }}
     </v-chip>

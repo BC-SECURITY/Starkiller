@@ -79,16 +79,16 @@ export default {
       form: {},
       rules: {
         name: [
-          v => !!v || 'Name is required',
-          v => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
+          (v) => !!v || 'Name is required',
+          (v) => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
         ],
         password: [
-          v => !!v || 'Password is required',
-          v => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
+          (v) => !!v || 'Password is required',
+          (v) => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
         ],
         confirmPassword: [
-          v => !!v || 'Confirmation is required',
-          v => v === this.form.password || 'Password must match',
+          (v) => !!v || 'Confirmation is required',
+          (v) => v === this.form.password || 'Password must match',
         ],
       },
       user: {},
@@ -149,12 +149,12 @@ export default {
     create() {
       return userApi.createUser(this.form.username, this.form.password)
         .then(() => this.$router.push({ name: 'users' }))
-        .catch(err => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     updatePassword() {
       return userApi.updatePassword(this.id, this.form.password)
         .then(() => this.$router.push({ name: 'users' }))
-        .catch(err => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     getUser(id) {
       userApi.getUser(id)

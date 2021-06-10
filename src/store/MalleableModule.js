@@ -1,6 +1,5 @@
 import * as malleableApi from '@/api/malleable-api';
 
-
 export default {
   namespaced: true,
   state: {
@@ -21,6 +20,6 @@ export default {
     },
   },
   getters: {
-    profileNames: state => state.malleableProfiles.map(el => el.name),
+    profileNames: (state) => state.malleableProfiles.map((el) => el.name),
   },
 };

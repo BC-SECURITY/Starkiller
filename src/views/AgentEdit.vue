@@ -276,8 +276,8 @@ export default {
     newestTaskingTime() {
       if (this.taskResults?.length > 0) {
         const temp = [...this.taskResults]
-          .map(t => t.updated_at)
-          .map(t => t.split('.')[0]);
+          .map((t) => t.updated_at)
+          .map((t) => t.split('.')[0]);
         temp.sort((a, b) => b.localeCompare(a));
         return temp[0];
       }
@@ -287,7 +287,7 @@ export default {
       let temp = [...this.taskResults];
       temp.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
       temp = temp
-        .reduce((unique, item) => (unique.some(t => t.taskID === item.taskID)
+        .reduce((unique, item) => (unique.some((t) => t.taskID === item.taskID)
           ? unique
           : [...unique, item]), []);
       return temp.reverse();
