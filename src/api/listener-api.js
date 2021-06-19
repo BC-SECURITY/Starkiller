@@ -3,7 +3,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 /**
  * Returns a single listener.
  */
-export function getListener(id) { // api should throw 404 if not found. COME ON!
+export function getListener(id) {
   return axios.get(`/listeners/${id}`)
     .then(({ data }) => data.listeners[0])
     .catch((error) => Promise.reject(error.response.data.error));

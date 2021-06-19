@@ -49,12 +49,14 @@ function createWindow() {
 
   // don't allow new windows to spawn with center click.
   // if its not an internal link, open with external browser.
-  win.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-
-    if (!url.includes('//localhost')) {
-      shell.openExternal(url);
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    // config.fileProtocol is my custom file protocol
+    if (url.startsWith('//localhost')) {
+      return { action: 'allow' };
     }
+    // open url in a browser and prevent default
+    shell.openExternal(url);
+    return { action: 'deny' };
   });
 }
 
@@ -95,6 +97,18 @@ ipcMain.on('agentWindowOpen', (e, data) => {
   spawnedWin.on('closed', () => {
     spawnedWin = null;
     delete agentWindows[data.id];
+  });
+
+  // don't allow new windows to spawn with center click.
+  // if its not an internal link, open with external browser.
+  spawnedWin.webContents.setWindowOpenHandler(({ url }) => {
+    // config.fileProtocol is my custom file protocol
+    if (url.startsWith('//localhost')) {
+      return { action: 'allow' };
+    }
+    // open url in a browser and prevent default
+    shell.openExternal(url);
+    return { action: 'deny' };
   });
 
   agentWindows[data.id] = spawnedWin;
