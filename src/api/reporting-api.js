@@ -7,5 +7,5 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getReporting() {
   return axios.get('/reporting')
     .then(({ data }) => data.reporting)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }

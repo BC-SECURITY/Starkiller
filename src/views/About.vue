@@ -1,9 +1,8 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
-    <div class="headers">
-      <h3>About</h3>
-    </div>
+    <list-page-top
+      :breads="breads"
+    />
     <div class="about">
       <img
         alt="Starkiller"
@@ -15,13 +14,11 @@
         <a
           href="https://bc-security.org/blog"
           target="_blank"
-          @click.prevent="openExternalBrowser"
         >BC-Security</a>.</span>
       <span>If you would like to contribute please visit our
         <a
           href="https://github.com/BC-SECURITY/Starkiller"
           target="_blank"
-          @click.prevent="openExternalBrowser"
         >GitHub</a>.
       </span>
     </div>
@@ -29,10 +26,10 @@
 </template>
 
 <script>
-import openExternalBrowser from '@/mixins/open-external';
+import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
-  mixins: [openExternalBrowser],
+  components: { ListPageTop },
   data() {
     return {
       breads: [

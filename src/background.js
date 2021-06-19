@@ -5,9 +5,12 @@ import {
 import path from 'path';
 import {
   createProtocol,
-  installVueDevtools,
 } from 'vue-cli-plugin-electron-builder/lib';
+import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 
+const Store = require('electron-store');
+
+Store.initRenderer();
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -21,14 +24,14 @@ protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: tru
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 1200,
-    height: 700,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      contextIsolation: false,
       webSecurity: false,
       icon: path.join(__static, 'icon.png'),
     },
   });
+  win.maximize();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -46,12 +49,14 @@ function createWindow() {
 
   // don't allow new windows to spawn with center click.
   // if its not an internal link, open with external browser.
-  win.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-
-    if (!url.includes('//localhost')) {
-      shell.openExternal(url);
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    // config.fileProtocol is my custom file protocol
+    if (url.startsWith('//localhost')) {
+      return { action: 'allow' };
     }
+    // open url in a browser and prevent default
+    shell.openExternal(url);
+    return { action: 'deny' };
   });
 }
 
@@ -68,7 +73,8 @@ ipcMain.on('agentWindowOpen', (e, data) => {
     height: 600,
     frameless: true,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      contextIsolation: false,
       webSecurity: false,
       icon: path.join(__static, 'icon.png'),
     },
@@ -93,11 +99,23 @@ ipcMain.on('agentWindowOpen', (e, data) => {
     delete agentWindows[data.id];
   });
 
+  // don't allow new windows to spawn with center click.
+  // if its not an internal link, open with external browser.
+  spawnedWin.webContents.setWindowOpenHandler(({ url }) => {
+    // config.fileProtocol is my custom file protocol
+    if (url.startsWith('//localhost')) {
+      return { action: 'allow' };
+    }
+    // open url in a browser and prevent default
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   agentWindows[data.id] = spawnedWin;
 });
 
 ipcMain.on('closeAllAgentWindows', () => {
-  Object.values(agentWindows).forEach(window => window.close());
+  Object.values(agentWindows).forEach((window) => window.close());
 });
 
 // Quit when all windows are closed.
@@ -129,7 +147,7 @@ app.on('ready', async () => {
     // If you are not using Windows 10 dark mode, you may uncomment these lines
     // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
     try {
-      await installVueDevtools();
+      await installExtension(VUEJS_DEVTOOLS);
     } catch (e) {
       console.error('Vue Devtools failed to install:', e.toString());
     }

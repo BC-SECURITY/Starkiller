@@ -25,13 +25,13 @@ const routes = [
     component: () => import(/* webpackChunkName: "listeners" */ '../views/Listeners.vue'),
   },
   {
-    path: '/listeners/:id',
-    name: 'listenerEdit',
+    path: '/listeners/new',
+    name: 'listenerNew',
     component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
   },
   {
-    path: '/listeners/new',
-    name: 'listenerNew', // same component
+    path: '/listeners/:id',
+    name: 'listenerEdit',
     component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
   },
   {
@@ -42,6 +42,11 @@ const routes = [
   {
     path: '/stagers/new',
     name: 'stagerNew',
+    component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
+  },
+  {
+    path: '/stagers/:id',
+    name: 'stagerEdit',
     component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
   },
   {
@@ -70,17 +75,20 @@ const routes = [
     component: () => import(/* webpackChunkName: "users" */ '../views/Users.vue'),
   },
   {
-    path: '/users/:id',
-    name: 'userEdit',
+    path: '/users/new',
+    name: 'userNew',
     component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
     meta: {
       requiresAdmin: true,
     },
   },
   {
-    path: '/users/new',
-    name: 'userNew',
+    path: '/users/:id',
+    name: 'userEdit',
     component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+    meta: {
+      requiresAdmin: true,
+    },
   },
   {
     path: '/credentials',
@@ -90,6 +98,11 @@ const routes = [
   {
     path: '/credentials/new',
     name: 'credentialNew',
+    component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
+  },
+  {
+    path: '/credentials/:id',
+    name: 'credentialEdit',
     component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
   },
   {
@@ -138,7 +151,7 @@ router.beforeEach((to, from, next) => {
 // Admin
 router.beforeEach((to, from, next) => {
   if (to.meta && to.meta.requiresAdmin && !isAdmin()) {
-    next({ name: 'listeners' });
+    next(false);
   } else next();
 });
 

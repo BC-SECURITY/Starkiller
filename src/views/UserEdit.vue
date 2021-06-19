@@ -1,8 +1,23 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
+    <edit-page-top
+      :breads="breads"
+      :show-submit="true"
+      :show-copy="false"
+      :show-delete="false"
+      :submit-loading="loading"
+      @submit="create"
+    />
     <h3>{{ id ? 'Edit' : 'New' }} User</h3>
-    <v-card style="padding: 10px">
+    <error-state-alert
+      v-if="errorState"
+      :resource-id="id"
+      resource-type="user"
+    />
+    <v-card
+      v-else
+      style="padding: 10px"
+    >
       <v-form
         ref="form"
         v-model="valid"
@@ -42,13 +57,6 @@
           required
           @click:append="showConfirm = !showConfirm"
         />
-        <v-btn
-          type="submit"
-          class="mt-4 primary"
-          :loading="loading"
-        >
-          submit
-        </v-btn>
       </v-form>
     </v-card>
   </div>
@@ -57,24 +65,30 @@
 <script>
 import Vue from 'vue';
 import * as userApi from '@/api/user-api';
+import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
+import EditPageTop from '@/components/EditPageTop.vue';
 
 export default {
   name: 'UserEdit',
+  components: {
+    ErrorStateAlert,
+    EditPageTop,
+  },
   data() {
     return {
       form: {},
       rules: {
         name: [
-          v => !!v || 'Name is required',
-          v => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
+          (v) => !!v || 'Name is required',
+          (v) => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
         ],
         password: [
-          v => !!v || 'Password is required',
-          v => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
+          (v) => !!v || 'Password is required',
+          (v) => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
         ],
         confirmPassword: [
-          v => !!v || 'Confirmation is required',
-          v => v === this.form.password || 'Password must match',
+          (v) => !!v || 'Confirmation is required',
+          (v) => v === this.form.password || 'Password must match',
         ],
       },
       user: {},
@@ -82,6 +96,7 @@ export default {
       loading: false,
       showPassword: false,
       showConfirm: false,
+      errorState: false,
     };
   },
   computed: {
@@ -94,11 +109,16 @@ export default {
           exact: true,
         },
         {
-          text: this.id ? `${this.id}` : 'New',
+          text: this.breadcrumbName,
           disabled: true,
           to: '/users-edit',
         },
       ];
+    },
+    breadcrumbName() {
+      if (this.user.username) return this.user.username;
+      if (this.id) return this.id;
+      return 'New';
     },
     isNew() {
       return this.$route.name === 'userNew';
@@ -129,18 +149,21 @@ export default {
     create() {
       return userApi.createUser(this.form.username, this.form.password)
         .then(() => this.$router.push({ name: 'users' }))
-        .catch(err => this.$toast.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     updatePassword() {
       return userApi.updatePassword(this.id, this.form.password)
         .then(() => this.$router.push({ name: 'users' }))
-        .catch(err => this.$toast.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     getUser(id) {
       userApi.getUser(id)
         .then((data) => {
           this.user = data;
           Vue.set(this.form, 'username', data.username);
+        })
+        .catch(() => {
+          this.errorState = true;
         });
     },
   },

@@ -20,7 +20,7 @@ export default {
     },
     async rename(context, { oldName, newName }) {
       const { agents } = context.state;
-      const agent = agents.find(el => el.name === oldName);
+      const agent = agents.find((el) => el.name === oldName);
 
       await agentApi.renameAgent(oldName, newName);
       if (agent != null) {
@@ -32,7 +32,7 @@ export default {
     },
     async killAgent(context, { name }) {
       const { agents } = context.state;
-      const agent = agents.find(el => el.name === name);
+      const agent = agents.find((el) => el.name === name);
 
       if (agent == null) {
         return;
@@ -43,7 +43,7 @@ export default {
     },
     async removeAgent(context, { name }) {
       const { agents } = context.state;
-      const agent = agents.find(el => el.name === name);
+      const agent = agents.find((el) => el.name === name);
 
       if (agent == null) {
         return;
@@ -54,7 +54,7 @@ export default {
     },
     async addAgent(context, agent) {
       const { agents } = context.state;
-      const foundIndex = agents.findIndex(el => el.id === agent.id); // todo ID?
+      const foundIndex = agents.findIndex((el) => el.id === agent.id); // todo ID?
 
       if (foundIndex >= 0) {
         agents.splice(foundIndex, 1, agent);

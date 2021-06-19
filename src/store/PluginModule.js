@@ -1,6 +1,5 @@
 import * as pluginApi from '@/api/plugin-api';
 
-
 export default {
   namespaced: true,
   state: {

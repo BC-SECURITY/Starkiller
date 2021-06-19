@@ -62,8 +62,8 @@ export default {
       name: '',
       nameRules: {
         name: [
-          v => !!v || 'Name is required',
-          v => (!!v && v.length > 4) || 'Name must be at least 5 characters',
+          (v) => !!v || 'Name is required',
+          (v) => (!!v && v.length > 4) || 'Name must be at least 5 characters',
         ],
       },
     };

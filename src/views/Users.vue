@@ -1,38 +1,43 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
-
-    <div class="headers">
-      <h3>Users</h3>
-      <v-btn
-        v-if="isAdmin"
-        color="primary"
-        rounded
-        @click="create"
-      >
-        Create User
-      </v-btn>
-    </div>
+    <list-page-top
+      :breads="breads"
+      :show-create="isAdmin"
+      :show-refresh="true"
+      :show-delete="false"
+      @create="create"
+      @refresh="getUsers"
+    />
     <v-data-table
       :headers="headers"
       :items="users"
-      @click:row="viewUser"
+      dense
     >
-      <template v-slot:item.last_logon_time="{ item }">
+      <template #item.username="{ item }">
+        <router-link
+          v-if="isAdmin"
+          style="color: inherit;"
+          :to="{ name: 'userEdit', params: { id: item.ID } }"
+        >
+          {{ item.username }}
+        </router-link>
+        <span v-else>{{ item.username }}</span>
+      </template>
+      <template #item.last_logon_time="{ item }">
         <v-tooltip top>
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <span v-on="on">{{ moment(item.last_logon_time).fromNow() }}</span>
           </template>
           <span>{{ moment(item.last_logon_time).format('lll') }}</span>
         </v-tooltip>
       </template>
-      <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <v-tooltip
           v-if="isAdmin"
           :disabled="!item.admin"
           top
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <div
               style="max-width: 120px"
               v-on="on"
@@ -57,10 +62,12 @@
 import { mapState, mapGetters } from 'vuex';
 import * as userApi from '@/api/user-api';
 import moment from 'moment';
+import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
   name: 'Users',
   components: {
+    ListPageTop,
   },
   data() {
     return {
@@ -82,7 +89,7 @@ export default {
   },
   computed: {
     ...mapState({
-      users: state => state.user.users,
+      users: (state) => state.user.users,
     }),
     ...mapGetters({
       isAdmin: 'application/isAdmin',
@@ -101,14 +108,9 @@ export default {
 
       userApi.disableUser(item.ID, !item.enabled)
         .catch((err) => {
-          this.$toast.error(`Error: ${err}`);
+          this.$snack.error(`Error: ${err}`);
           item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
         });
-    },
-    viewUser(item) {
-      if (this.isAdmin === true) {
-        this.$router.push({ name: 'userEdit', params: { id: item.ID } });
-      }
     },
     getUsers() {
       this.$store.dispatch('user/getUsers');

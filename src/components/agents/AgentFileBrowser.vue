@@ -15,7 +15,7 @@
       :open.sync="open"
       :items="tree"
     >
-      <template v-slot:label="{ item, open }">
+      <template #label="{ item, open }">
         <v-btn
           style="margin-left: -15px; width: 100%;"
           class="text-left"
@@ -158,11 +158,11 @@ export default {
         return el.folderOption === true;
       }).filter((el) => {
         if (el.id === 'open') {
-          if (this.open.find(id => id === this.selected.id)) {
+          if (this.open.find((id) => id === this.selected.id)) {
             return false;
           }
         } else if (el.id === 'close' || el.id === 'refresh') {
-          if (!this.open.find(id => id === this.selected.id)) {
+          if (!this.open.find((id) => id === this.selected.id)) {
             return false;
           }
         }
@@ -177,7 +177,7 @@ export default {
     this.loading = true;
     try {
       const items = await agentApi.getDirectory(this.agentName, '/');
-      this.tree = items.map(el => this.transform(el));
+      this.tree = items.map((el) => this.transform(el));
     } catch (err) { // directory not found.
       const task = await this.scrapeDirectory('/');
 
@@ -195,10 +195,10 @@ export default {
       }
 
       if (!complete) {
-        this.$toast.error('Agent didn\'t respond in time. Please try again later.');
+        this.$snack.error('Agent didn\'t respond in time. Please try again later.');
       }
 
-      this.tree = (await agentApi.getDirectory(this.agentName, '/')).map(el => this.transform(el));
+      this.tree = (await agentApi.getDirectory(this.agentName, '/')).map((el) => this.transform(el));
     }
     this.loading = false;
   },
@@ -207,13 +207,13 @@ export default {
       if (action === 'open') {
         this.open.push(this.selected.id);
       } else if (action === 'close') {
-        this.open.splice(this.open.findIndex(id => id === this.selected.id), 1);
+        this.open.splice(this.open.findIndex((id) => id === this.selected.id), 1);
       } else if (action === 'refresh') {
         // Hackiness to get refreshes to work properly. Have to force the node to think it hasn't
         // been loaded.
         this.selected.children = [];
-        const vueObj = this.$refs.treeview.$children.filter(el => el.key === this.selected.id);
-        this.open.splice(this.open.findIndex(id => id === this.selected.id), 1);
+        const vueObj = this.$refs.treeview.$children.filter((el) => el.key === this.selected.id);
+        this.open.splice(this.open.findIndex((id) => id === this.selected.id), 1);
 
         await Vue.nextTick();
 
@@ -222,7 +222,7 @@ export default {
         this.open.push(this.selected.id);
       } else if (action === 'download') {
         agentApi.downloadFile(this.agentName, this.selected.path);
-        this.$toast.success(`Tasked ${this.agentName} for download ${this.selected.path}`);
+        this.$snack.success(`Tasked ${this.agentName} for download ${this.selected.path}`);
       } else {
         // do nothing
       }
@@ -246,7 +246,7 @@ export default {
       };
     },
     pause(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      return new Promise((resolve) => setTimeout(resolve, ms));
     },
     async loadChildren(a, { stopTrying } = {}) {
       if (this.currentlyLoading[a.id]) return Promise.resolve();
@@ -256,10 +256,10 @@ export default {
       if (!this.force[a.id] && files.length > 0) {
         this.removeFromCurrentlyLoading(a.id);
         // eslint-disable-next-line no-param-reassign
-        a.children = files.map(el => this.transform(el));
+        a.children = files.map((el) => this.transform(el));
         return Promise.resolve();
       } if (!stopTrying) {
-        this.$toast.success(`Attempting to retrieve directory: ${a.path}`);
+        this.$snack.success(`Attempting to retrieve directory: ${a.path}`);
         const task = await this.scrapeDirectory(a.path);
 
         let i = 0;
@@ -277,7 +277,7 @@ export default {
         }
 
         if (!complete) {
-          this.$toast.error('Agent didn\'t respond in time. Please try again later.');
+          this.$snack.error('Agent didn\'t respond in time. Please try again later.');
         }
 
         this.removeFromForce(a.id);

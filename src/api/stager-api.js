@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getStagers() {
   return axios.get('/stagers')
     .then(({ data }) => data.stagers)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -16,7 +16,7 @@ export function getStagers() {
 export function generateStager(options) {
   return axios.post('/stagers', options)
     .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -26,5 +26,5 @@ export function generateStager(options) {
 export function getStagerByName(name) {
   return axios.get(`/stagers/${name}`)
     .then(({ data }) => data.stagers[0])
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }

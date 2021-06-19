@@ -1,6 +1,10 @@
 <template>
   <div class="p4">
-    <v-breadcrumbs :items="breads" />
+    <edit-page-top
+      :breads="breads"
+      :show-submit="true"
+      @submit="submit"
+    />
     <h4 class="pl-4 pb-4">
       Execute Module
     </h4>
@@ -17,8 +21,11 @@
     />
     <v-card>
       <agent-execute-module
-        v-model="moduleName"
+        ref="executeform"
+        :module-name="moduleName"
         :agents="selectedAgents"
+        :show-submit="false"
+        @moduleChange="moduleChange"
         @submitted="clearAgents"
       />
     </v-card>
@@ -28,11 +35,13 @@
 <script>
 import { mapState } from 'vuex';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
+import EditPageTop from '@/components/EditPageTop.vue';
 
 export default {
   name: 'ModuleExecute',
   components: {
     AgentExecuteModule,
+    EditPageTop,
   },
   data() {
     return {
@@ -42,7 +51,7 @@ export default {
   },
   computed: {
     ...mapState({
-      agents: state => state.agent.agents,
+      agents: (state) => state.agent.agents,
     }),
     breads() {
       return [
@@ -60,21 +69,19 @@ export default {
       ];
     },
   },
-  watch: {
-    moduleName(newVal) {
-      this.$route.query.module = newVal;
-    },
-    '$route.query.module': {
-      immediate: true,
-      handler(newVal) {
-        this.moduleName = newVal;
-      },
-    },
-  },
   mounted() {
     this.getAgents();
+    this.moduleName = this.$route.query.module;
   },
   methods: {
+    submit() {
+      // I don't love this but it works.
+      this.$refs.executeform.create();
+    },
+    moduleChange(val) {
+      this.moduleName = val;
+      this.$route.query.module = val;
+    },
     getAgents() {
       this.$store.dispatch('agent/getAgents');
     },
