@@ -6,6 +6,7 @@
     >
       <v-breadcrumbs :items="breads" />
       <v-spacer />
+      <slot name="extra-stuff" />
       <div>
         <v-btn
           v-if="showDelete"

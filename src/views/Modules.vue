@@ -1,22 +1,22 @@
 <template>
   <div>
-    <portal to="app-bar">
-      <div
-        class="v-toolbar__content"
-        style="width:100%"
-      >
-        <v-breadcrumbs :items="breads" />
-        <v-spacer />
+    <list-page-top
+      :breads="breads"
+      :show-create="false"
+      :show-refresh="false"
+      :show-delete="false"
+    >
+      <template slot="extra-stuff">
         <v-text-field
           v-model="filter"
           append-icon="mdi-magnify"
           outlined
           dense
           label="Search"
-          style="max-width: 250px; padding-top: 20px;"
+          style="max-width: 250px; padding-top: 25px;"
         />
-      </div>
-    </portal>
+      </template>
+    </list-page-top>
     <v-data-table
       :headers="headers"
       :items="modules"
@@ -82,11 +82,13 @@
 <script>
 import { mapState } from 'vuex';
 import TechniqueChips from '@/components/TechniqueChips.vue';
+import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
   name: 'Modules',
   components: {
     TechniqueChips,
+    ListPageTop,
   },
   data() {
     return {
