@@ -23,8 +23,10 @@ At the moment, the extra Starkiller sponsorship features include:
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686145-9cd60900-d1c4-11eb-8a74-e98a09c967cd.gif"></div>
   - Bypass management
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686275-0c4bf880-d1c5-11eb-9ed9-399e0360a9f7.gif"></div>
+  - Enable/Disable modules
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
 
-There is also a collection of Empire plugin available via sponsorship.
+There is also a collection of Empire plugins available via sponsorship.
 
 Thanks to our sponsors for helping reach previous goals, the file browser, the agent popout windows, and the chat widget have all been moved from the sponsorship repository to the public/Kali builds.
 
