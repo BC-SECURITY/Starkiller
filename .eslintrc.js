@@ -13,7 +13,7 @@ module.exports = {
     'no-plusplus': 'off',
     'import/no-cycle': 'off',
     'vue/valid-v-slot': ['error', {
-      allowModifiers: false,
+      allowModifiers: true,
     }],
   },
   parserOptions: {

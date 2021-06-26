@@ -99,7 +99,6 @@ export default {
           value: 'Name',
         },
         { text: 'Language', value: 'Language', sort: this.sortLanguage },
-        { text: 'Minimum Language Version', value: 'MinLanguageVersion', sort: this.sortMinLanguageVersion },
         { text: 'Needs Admin', value: 'NeedsAdmin' },
         { text: 'Opsec Safe', value: 'OpsecSafe' },
         { text: 'Background', value: 'Background' },

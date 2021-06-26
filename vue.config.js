@@ -4,7 +4,7 @@ module.exports = {
   // to avoid the overlay yelling at you to lint.
   devServer: {
     overlay: {
-      warnings: true,
+      warnings: false,
       errors: true,
     },
   },
