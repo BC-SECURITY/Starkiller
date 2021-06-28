@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.0] - 2021-xx-xx
+## [1.8.0] - 2021-06-28
 - Refactor all forms pages for new 4.0 features
   - Autosuggestions for fields with `suggestedValues` and `strict`
   - Switches for "boolean" fields
