@@ -1,79 +1,56 @@
 <template>
   <div>
-    <v-breadcrumbs :items="breads" />
-    <h3>{{ id ? 'Edit' : 'New' }} Credential</h3>
-    <v-card style="padding: 10px">
-      <v-form
-        ref="form"
-        v-model="valid"
-        style="max-width: 500px"
-        @submit.prevent.native="submit"
-      >
-        <v-select
-          v-model="form.credtype"
-          :items="credentialTypes"
-          label="Credential Type"
-          outlined
-          dense
-          required
-        />
-        <v-text-field
-          v-for="field in requiredFields"
-          :key="field"
-          v-model="form[field]"
-          :rules="rules[field]"
-          :label="field"
-          outlined
-          dense
-          required
-          :disabled="!isNew"
-        />
-        <v-expansion-panels>
-          <v-expansion-panel>
-            <v-expansion-panel-header>Optional Fields</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-text-field
-                v-for="field in optionalFields"
-                :key="field"
-                v-model="form[field]"
-                :rules="rules[field]"
-                :label="field"
-                outlined
-                dense
-              />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-        <v-btn
-          type="submit"
-          class="mt-4 primary"
-          :loading="loading"
-        >
-          submit
-        </v-btn>
-      </v-form>
+    <edit-page-top
+      :breads="breads"
+      :show-submit="true"
+      :show-copy="false"
+      :show-delete="!!id"
+      :submit-loading="loading"
+      @submit="submit"
+      @delete="deleteCredential"
+    />
+    <h3>{{ mode }} Credential</h3>
+    <error-state-alert
+      v-if="errorState"
+      :resource-id="id"
+      resource-type="credential"
+    />
+    <v-card
+      v-else
+      style="padding: 10px"
+    >
+      <general-form
+        v-if="reset"
+        ref="generalform"
+        v-model="form"
+        :options="options"
+        :readonly="!canEdit"
+      />
     </v-card>
   </div>
 </template>
 
 <script>
 import * as credentialApi from '@/api/credential-api';
+import GeneralForm from '@/components/GeneralForm.vue';
+import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
+import EditPageTop from '@/components/EditPageTop.vue';
 
 export default {
   name: 'CredentialEdit',
+  components: {
+    GeneralForm,
+    ErrorStateAlert,
+    EditPageTop,
+  },
   data() {
     return {
-      form: {
-        credtype: 'hash',
-      },
-      requiredFields: ['domain', 'username', 'password', 'host'],
-      optionalFields: ['os', 'sid', 'notes'],
-      credentialTypes: ['plaintext', 'hash'],
-      user: {},
-      valid: true,
+      reset: true,
       loading: false,
-      showPassword: false,
-      showConfirm: false,
+      initialLoad: true,
+      credential: {},
+      form: {},
+      errorState: false,
     };
   },
   computed: {
@@ -86,45 +63,106 @@ export default {
           exact: true,
         },
         {
-          text: this.id ? `${this.id}` : 'New',
+          text: this.id && !this.isCopy ? `${this.id}` : 'New',
           disabled: true,
           to: '/credential-edit',
         },
       ];
     },
-    rules() {
-      return this.requiredFields.reduce((map, field) => {
-        // eslint-disable-next-line no-param-reassign
-        map[field] = [];
-        map[field].push(
-          v => (!!v || v === 0) || `${field} is required`,
-        );
-        return map;
-      }, {});
-    },
     isNew() {
       return this.$route.name === 'credentialNew';
+    },
+    isCopy() {
+      return this.$route.params.copy === true;
+    },
+    mode() {
+      if (this.isCopy) return 'Copy';
+      if (this.isNew) return 'New';
+      return 'Edit';
+    },
+    canEdit() {
+      // if we want to introduce separate view/edit modes, we can do that here.
+      return true;
     },
     id() {
       return this.$route.params.id;
     },
+    options() {
+      const op = {
+        credtype: {
+          Required: true,
+          Strict: true,
+          SuggestedValues: [
+            'plaintext', 'hash',
+          ],
+        },
+        domain: { Required: true },
+        username: { Required: true },
+        password: { Required: true },
+        host: { Required: true },
+        os: { Required: false },
+        sid: { Required: false },
+        notes: { Required: false },
+      };
+      Object.keys(this.credential).forEach((field) => {
+        if (field !== 'ID') {
+          op[field].Value = this.credential[field];
+        }
+      });
+      return op;
+    },
+  },
+  mounted() {
+    if (!this.isNew || this.isCopy) {
+      this.getCredential(this.id);
+    }
   },
   methods: {
     async submit() {
-      if (this.loading || !this.$refs.form.validate()) {
+      if (this.loading) {
         return;
       }
 
       this.loading = true;
       if (this.isNew) {
         await this.create();
+      } else {
+        await this.update();
       }
       this.loading = false;
     },
     create() {
-      return credentialApi.createCredential({ credentials: [this.form] })
+      return credentialApi.createCredential(this.form)
         .then(() => this.$router.push({ name: 'credentials' }))
-        .catch(err => this.$toast.error(`Error: ${err}`));
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    update() {
+      return credentialApi.updateCredential(this.id, this.form)
+        .then(() => this.$router.push({ name: 'credentials' }))
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    async deleteCredential() {
+      if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${this.id}?`, { color: 'red' })) {
+        try {
+          this.$store.dispatch('credential/deleteCredential', this.id);
+          this.$router.push({ name: 'credentials' });
+        } catch (err) {
+          this.$snack.error(`Error: ${err}`);
+        }
+      }
+    },
+    getCredential(id) {
+      credentialApi.getCredential(id)
+        .then((data) => {
+          this.reset = false;
+
+          this.credential = data;
+          this.initialLoad = false;
+          setTimeout(() => { this.reset = true; }, 500);
+        })
+        .catch(() => {
+          this.errorState = true;
+        });
     },
   },
 };

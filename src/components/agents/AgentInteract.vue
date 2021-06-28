@@ -64,7 +64,7 @@ export default {
       await agentApi.shell(this.agent.name, this.form.command);
       this.form.command = '';
       this.loading = false;
-      this.$toast.success(`Shell Command queued for ${this.agent.name}`);
+      this.$snack.success(`Shell Command queued for ${this.agent.name}`);
     },
   },
 };

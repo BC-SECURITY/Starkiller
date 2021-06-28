@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getUser(id) {
   return axios.get(`/users/${id}`)
     .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -15,7 +15,7 @@ export function getUser(id) {
 export function getUsers() {
   return axios.get('/users')
     .then(({ data }) => data.users)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -26,7 +26,7 @@ export function getUsers() {
 export function createUser(username, password) {
   return axios.post('/users', { username, password })
     .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -37,7 +37,7 @@ export function createUser(username, password) {
 export function disableUser(id, disable) {
   return axios.put(`/users/${id}/disable`, { disable })
     .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -48,5 +48,5 @@ export function disableUser(id, disable) {
 export function updatePassword(id, password) {
   return axios.put(`/users/${id}/updatepassword`, { password })
     .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }

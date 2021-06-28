@@ -1,5 +1,3 @@
-// axios 0.19 killed the params in create. Locked at 0.18 for now.
-// https://github.com/axios/axios/issues/2190
 import axios from 'axios';
 
 // todo: I don't like this cyclic dependency, but struggling to find a better way atm.
@@ -19,8 +17,11 @@ export function setInstance(url, token) {
 
   // if our token is invalid, logout.
   axiosInstance.interceptors.response.use(
-    response => response,
+    (response) => response,
     (err) => {
+      if (!err.response) {
+        store.dispatch('application/connectionError');
+      }
       if (err.response.status === 401) {
         store.dispatch('application/logout');
       }

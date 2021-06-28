@@ -3,10 +3,10 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 /**
  * Returns a single listener.
  */
-export function getListener(id) { // api should throw 404 if not found. COME ON!
+export function getListener(id) {
   return axios.get(`/listeners/${id}`)
     .then(({ data }) => data.listeners[0])
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -15,7 +15,7 @@ export function getListener(id) { // api should throw 404 if not found. COME ON!
 export function getListeners() {
   return axios.get('/listeners')
     .then(({ data }) => data.listeners)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -24,8 +24,8 @@ export function getListeners() {
  */
 export function getListenerOptions(type) {
   return axios.get(`/listeners/options/${type}`)
-    .then(({ data }) => data.listeneroptions)
-    .catch(error => Promise.reject(error.response.data.error));
+    .then(({ data }) => ({ info: data.listenerinfo, options: data.listeneroptions }))
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -39,7 +39,7 @@ export function createListener(type, options) {
       if (data.error) return Promise.reject(data.error);
       return data;
     })
-    .catch(error => Promise.reject(error.response ? error.response.data.error : error));
+    .catch((error) => Promise.reject(error.response ? error.response.data.error : error));
 }
 
 /**
@@ -48,7 +48,7 @@ export function createListener(type, options) {
 export function getListenerTypes() {
   return axios.get('/listeners/types')
     .then(({ data }) => data.types)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
@@ -58,5 +58,5 @@ export function getListenerTypes() {
 export function killListener(name) {
   return axios.delete(`/listeners/${name}`)
     .then(({ data }) => data)
-    .catch(error => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.error));
 }

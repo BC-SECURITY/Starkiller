@@ -6,7 +6,7 @@ export default {
      */
     async copyStager(output) {
       await navigator.clipboard.writeText(output);
-      this.$toast.success('Output copied to clipboard');
+      this.$snack.success('Output copied to clipboard');
     },
   },
 };

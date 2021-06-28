@@ -6,21 +6,20 @@
       class="fa-3x fas fa-spinner fa-spin"
     />
     <ul class="shell-body">
-      <div
+      <agent-command-viewer-entry
         v-for="result in agentResults"
         :key="result.taskID"
-      >
-        <li>
-          <span class="username">({{ result.username }})</span>&nbsp;{{ result.command }}
-        </li>
-        <li> {{ result.ogResults }}</li>
-      </div>
+        :result="result"
+      />
     </ul>
   </div>
 </template>
 
 <script>
+import AgentCommandViewerEntry from './AgentCommandViewerEntry.vue';
+
 export default {
+  components: { AgentCommandViewerEntry },
   props: {
     name: {
       type: String,
@@ -43,19 +42,20 @@ export default {
   computed: {
     agentResults() {
       return this.taskResults.length > 0
-        ? this.taskResults[0].AgentResults.map(res => ({
+        ? this.taskResults.map((res) => ({
           taskID: res.taskID,
           command: res.command,
           results: res.results ? res.results.split('\\n') : '',
           ogResults: res.results ? res.results.split('\\n').join('\n') : '',
           username: res.username ? res.username : 'unknown',
-        }))
+          updatedAt: res.updated_at,
+        })).slice(-10)
         : [];
     },
     totalLength() {
       return [
-        ...this.agentResults.map(el => el.command).filter(command => command.length > 0),
-        ...this.agentResults.map(el => el.results).filter(result => result.length > 0),
+        ...this.agentResults.map((el) => el.command).filter((command) => command.length > 0),
+        ...this.agentResults.map((el) => el.results).filter((result) => result.length > 0),
       ];
     },
   },
@@ -98,25 +98,5 @@ export default {
   -moz-border-radius-bottomleft: 3px;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
-}
-
-.shell-body li .username {
-  color: yellow;
-}
-
-.shell-body li:first-child:before {
-  content: '>';
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.shell-body li {
-  word-wrap: break-word;
-  position: relative;
-  padding: 0 0 0 15px;
-  text-align: left;
-
-  white-space: pre-wrap;
 }
 </style>

@@ -62,7 +62,7 @@ export default {
       pathToFile: '',
       rules: {
         pathToFile: [
-          v => !!v || 'PathToFile is required',
+          (v) => !!v || 'PathToFile is required',
         ],
       },
     };

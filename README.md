@@ -16,13 +16,19 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 
 # Sponsorship and extra features
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
-At the moment, the extra sponsorship features include:
-  - Chat widget
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983786-b3382880-59ca-11eb-9ce0-d4c2f06310d2.png"></div>
+At the moment, the extra Starkiller sponsorship features include:
   - Interactive agent shell
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
+  - Malleable profile management
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686145-9cd60900-d1c4-11eb-8a74-e98a09c967cd.gif"></div>
+  - Bypass management
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686275-0c4bf880-d1c5-11eb-9ed9-399e0360a9f7.gif"></div>
+  - Enable/Disable modules
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
 
-Thanks to our sponsors for helping reach previous goals, the File Browser and the Agent Popout Windows have been moved from the sponsorship repository to the public/Kali builds.
+There is also a collection of Empire plugins available via sponsorship.
+
+Thanks to our sponsors for helping reach previous goals, the file browser, the agent popout windows, and the chat widget have all been moved from the sponsorship repository to the public/Kali builds.
 
 ## Build and run from source
 Prerequisites:
@@ -48,6 +54,19 @@ yarn electron:build:win
 yarn electron:build:mac
 ```
 
+
+Starkiller's build tool, [electron-builder](https://www.electron.build), is not meant to target multiple platforms in a single build. It is also recommended to compile on your target platform. 
+For example, to build for amd64 (on an amd64 machine) with an AppImage, the command would be:
+```
+yarn electron:build --arm64 --linux AppImage
+```
+
+**Note:** To regenerate the icons
+```
+npm install -g electron-icon-builder
+yarn electron:generate-icons
+```
+
 ## Compatability Table
 Starkiller’s new features occasionally depend on new functionality within Empire. Therefore, it is recommended that you follow this release table for syncing up your Starkiller and Empire versions. If you are using an older version of Empire, Starkiller will warn you when logging in, but will allow you to continue. If a there is a new minimum version of Empire required to get all the features out of Starkiller, we will do a minor version bump to Starkiller.
 | Starkiller Release | Minimum Empire Version | Notes  |
@@ -58,6 +77,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.3.x              | 3.3.0         | 3.3.0 categorized all of the modules in Empire with corresponding [MITRE techniques](https://attack.mitre.org/techniques/enterprise/)
 | 1.4.x, 1.5.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
 | 1.6.x, 1.7.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
+| 1.8.x             | 4.0.0         | 
 
 ## Changelog
 
@@ -72,4 +92,4 @@ Detailed changes for each release are documented in the [release notes](https://
 
 [MIT](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2020 BC Security
+Copyright (c) 2021 BC Security

@@ -86,7 +86,7 @@ export default {
       isLoggedIn: 'application/isLoggedIn',
     }),
     ...mapState({
-      loginError: state => state.application.loginError,
+      loginError: (state) => state.application.loginError,
     }),
   },
   watch: {
@@ -106,12 +106,12 @@ export default {
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;
-        this.$toast.error(`Error Logging In: ${val}`);
+        this.$snack.error(`Error Logging In: ${val}`);
       }
     },
   },
   mounted() {
-    this.form.url = electronStore.get('url', '');
+    this.form.url = electronStore.get('url', 'https://localhost:1337');
     this.form.username = electronStore.get('username', '');
     this.rememberMe = electronStore.get('rememberMe', false);
     this.$nextTick(() => {

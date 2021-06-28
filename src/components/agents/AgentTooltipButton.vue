@@ -2,7 +2,7 @@
   <v-tooltip
     bottom
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-btn
         :color="color"
         class="mr-2"
