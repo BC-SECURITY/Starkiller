@@ -18,6 +18,10 @@ export default {
       const agents = await agentApi.getAgents();
       context.commit('setAgents', agents);
     },
+    async getAgent(context, { sessionId }) {
+      const agent = (await agentApi.getAgent(sessionId))[0];
+      context.dispatch('addAgent', agent);
+    },
     async rename(context, { oldName, newName }) {
       const { agents } = context.state;
       const agent = agents.find((el) => el.name === oldName);

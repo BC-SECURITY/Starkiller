@@ -7,6 +7,7 @@
       :show-delete="showDelete"
       delete-text="Kill"
       @delete="killAgents"
+      @refresh="getAgents"
     />
     <div
       class="ml-3 mr-3 align-center"
@@ -114,6 +115,14 @@
           <span>{{ moment(item.lastseen_time).format('lll') }}</span>
         </v-tooltip>
       </template>
+      <template #item.checkin_time="{ item }">
+        <v-tooltip top>
+          <template #activator="{ on }">
+            <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.checkin_time).format('lll') }}</span>
+        </v-tooltip>
+      </template>
       <template #item.listener="{ item }">
         <router-link
           style="color: inherit;"
@@ -212,34 +221,37 @@ export default {
           text: 'Last Seen', value: 'lastseen_time', defaultHeader: true, alwaysShow: true, order: 2,
         },
         {
-          text: 'Listener', value: 'listener', order: 3,
+          text: 'First Seen', value: 'checkin_time', defaultHeader: true, alwaysShow: true, order: 3,
         },
         {
-          text: 'Hostname', value: 'hostname', defaultHeader: true, order: 4,
+          text: 'Listener', value: 'listener', order: 4,
         },
         {
-          text: 'Process', value: 'process_name', defaultHeader: true, order: 5,
-        },
-        { text: 'Process ID', value: 'process_id', order: 6 },
-        {
-          text: 'Architecture', value: 'architecture', defaultHeader: true, order: 7,
+          text: 'Hostname', value: 'hostname', defaultHeader: true, order: 5,
         },
         {
-          text: 'Language', value: 'language', defaultHeader: true, order: 8,
+          text: 'Process', value: 'process_name', defaultHeader: true, order: 6,
         },
-        { text: 'Language Version', value: 'language_version', order: 9 },
+        { text: 'Process ID', value: 'process_id', order: 7 },
         {
-          text: 'Username', value: 'username', defaultHeader: true, order: 10,
+          text: 'Architecture', value: 'architecture', defaultHeader: true, order: 8,
         },
-        { text: 'Working Hours', value: 'working_hours', order: 11 },
-        { text: 'Exteneral IP', value: 'external_ip', order: 12 },
         {
-          text: 'Internal IP', value: 'internal_ip', defaultHeader: true, order: 13,
+          text: 'Language', value: 'language', defaultHeader: true, order: 9,
         },
-        { text: 'Delay', value: 'delay', order: 14 },
-        { text: 'Jitter', value: 'jitter', order: 15 },
+        { text: 'Language Version', value: 'language_version', order: 10 },
         {
-          text: 'Actions', value: 'actions', defaultHeader: true, alwaysShow: true, order: 16,
+          text: 'Username', value: 'username', defaultHeader: true, order: 11,
+        },
+        { text: 'Working Hours', value: 'working_hours', order: 12 },
+        { text: 'Exteneral IP', value: 'external_ip', order: 13 },
+        {
+          text: 'Internal IP', value: 'internal_ip', defaultHeader: true, order: 14,
+        },
+        { text: 'Delay', value: 'delay', order: 15 },
+        { text: 'Jitter', value: 'jitter', order: 16 },
+        {
+          text: 'Actions', value: 'actions', defaultHeader: true, alwaysShow: true, order: 17,
         },
       ],
       selectedHeadersTemp: [],

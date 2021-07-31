@@ -78,6 +78,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.4.x, 1.5.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
 | 1.6.x, 1.7.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 | 1.8.x             | 4.0.0         | 
+| 1.9.x             | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
 
 ## Changelog
 

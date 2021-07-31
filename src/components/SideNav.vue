@@ -3,7 +3,8 @@
     <v-navigation-drawer
       app
       permanent
-      expand-on-hover
+      :expand-on-hover="expandOnHover"
+      :mini-variant="mini"
     >
       <v-list
         dense
@@ -44,6 +45,16 @@
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <!-- <v-list-item>
+            <v-list-item-icon>
+              <v-btn
+                icon
+                @click.stop="toggle"
+              >
+                <v-icon>mdi-page-last</v-icon>
+              </v-btn>
+            </v-list-item-icon>
+          </v-list-item> -->
         </v-list>
       </v-list>
     </v-navigation-drawer>
@@ -57,7 +68,8 @@ export default {
   data() {
     return {
       version,
-      miniVariant: false,
+      mini: true,
+      // expandOnHover: true,
       items: [
         { title: 'Listeners', pathName: 'listeners', icon: 'fa-headphones' },
         {
@@ -73,6 +85,18 @@ export default {
         { title: 'About', pathName: 'about', icon: 'fa-info-circle' },
       ],
     };
+  },
+  // TODO https://github.com/vuetifyjs/vuetify/issues/13309
+  // Once this issue is resolved, we can add the toggle functionality.
+  computed: {
+    expandOnHover() {
+      return this.mini;
+    },
+  },
+  methods: {
+    toggle() {
+      this.mini = !this.mini;
+    },
   },
 };
 </script>

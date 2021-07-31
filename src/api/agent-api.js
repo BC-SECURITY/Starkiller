@@ -128,3 +128,28 @@ export function downloadFile(name, pathToFile) {
     .then(({ data }) => data.taskID)
     .catch((error) => Promise.reject(error.response.data.error));
 }
+
+// In a v2 API these could all run through the same PATCH endpoint.
+export function updateComms(name, listener) {
+  return axios.put(`/agents/${name}/update_comms`, { listener })
+    .then(({ data }) => data.success)
+    .catch((error) => Promise.reject(error.response.data.error));
+}
+
+export function updateKillDate(name, killDate) {
+  return axios.put(`/agents/${name}/killdate`, { kill_date: killDate })
+    .then(({ data }) => data.success)
+    .catch((error) => Promise.reject(error.response.data.error));
+}
+
+export function updateWorkingHours(name, workingHours) {
+  return axios.put(`/agents/${name}/workinghours`, { working_hours: workingHours })
+    .then(({ data }) => data.success)
+    .catch((error) => Promise.reject(error.response.data.error));
+}
+
+export function updateSleep(name, delay, jitter) {
+  return axios.put(`/agents/${name}/sleep`, { delay, jitter })
+    .then(({ data }) => data.success)
+    .catch((error) => Promise.reject(error.response.data.error));
+}
