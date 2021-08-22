@@ -1,5 +1,11 @@
 <template>
   <div>
+    <execute-module-dialog
+      v-model="executeDialog"
+      :agent="agent.session_id"
+      :module-name="moduleName"
+      :module-option-defaults="moduleOptionDefaults"
+    />
     <v-icon
       v-if="loading"
       style="width: 50px;"
@@ -59,11 +65,15 @@
 import Vue from 'vue';
 import * as agentApi from '@/api/agent-api';
 import debounce from 'lodash.debounce';
+import ExecuteModuleDialog from './ExecuteModuleDialog.vue';
 
 export default {
+  components: {
+    ExecuteModuleDialog,
+  },
   props: {
-    agentName: {
-      type: String,
+    agent: {
+      type: Object,
       required: true,
     },
   },
@@ -127,6 +137,9 @@ export default {
        * with the debounce and caches.
        */
       debouncedLoadChildren: null,
+      executeDialog: false,
+      moduleName: '',
+      moduleOptionDefaults: {},
     };
   },
   computed: {
@@ -151,11 +164,28 @@ export default {
         name: 'Download to Empire',
         fileOption: true,
         folderOption: false,
+      }, {
+        id: 'zip',
+        name: 'Zip Folder',
+        fileOption: false,
+        folderOption: true,
+      }, {
+        id: 'upload',
+        name: 'Upload',
+        folderOption: true,
+        fileOption: false,
       }].filter((el) => {
         if (this.selected.file) {
           return el.fileOption === true;
         }
         return el.folderOption === true;
+      }).filter((el) => {
+        if (el.id === 'zip') {
+          if (this.agent.language !== 'powershell') {
+            return false;
+          }
+        }
+        return true;
       }).filter((el) => {
         if (el.id === 'open') {
           if (this.open.find((id) => id === this.selected.id)) {
@@ -176,7 +206,7 @@ export default {
 
     this.loading = true;
     try {
-      const items = await agentApi.getDirectory(this.agentName, '/');
+      const items = await agentApi.getDirectory(this.agent.session_id, '/');
       this.tree = items.map((el) => this.transform(el));
     } catch (err) { // directory not found.
       const task = await this.scrapeDirectory('/');
@@ -198,7 +228,7 @@ export default {
         this.$snack.error('Agent didn\'t respond in time. Please try again later.');
       }
 
-      this.tree = (await agentApi.getDirectory(this.agentName, '/')).map((el) => this.transform(el));
+      this.tree = (await agentApi.getDirectory(this.agent.session_id, '/')).map((el) => this.transform(el));
     }
     this.loading = false;
   },
@@ -210,22 +240,40 @@ export default {
         this.open.splice(this.open.findIndex((id) => id === this.selected.id), 1);
       } else if (action === 'refresh') {
         // Hackiness to get refreshes to work properly. Have to force the node to think it hasn't
-        // been loaded.
+        // been loaded. https://github.com/vuetifyjs/vuetify/issues/10587
         this.selected.children = [];
-        const vueObj = this.$refs.treeview.$children.filter((el) => el.key === this.selected.id);
+
+        const vueObj = this.$refs.treeview.nodes[this.selected.id];
         this.open.splice(this.open.findIndex((id) => id === this.selected.id), 1);
 
         await Vue.nextTick();
 
-        vueObj[0].hasLoaded = false;
+        vueObj.vnode.hasLoaded = false;
         this.force[this.selected.id] = true;
+
+        await Vue.nextTick();
+
         this.open.push(this.selected.id);
       } else if (action === 'download') {
-        agentApi.downloadFile(this.agentName, this.selected.path);
-        this.$snack.success(`Tasked ${this.agentName} for download ${this.selected.path}`);
+        agentApi.downloadFile(this.agent.session_id, this.selected.path);
+        this.$snack.success(`Tasked ${this.agent.session_id} for download ${this.selected.path}`);
+      } else if (action === 'zip') {
+        this.prepareZip();
+      } else if (action === 'upload') {
+        this.$emit('openUploadDialog', { pathToFile: this.selected.path });
       } else {
         // do nothing
       }
+    },
+    prepareZip() {
+      const options = {
+        agent: this.agent.session_id,
+        Folder: this.selected.path,
+        ZipFileName: `${this.selected.path}\\${this.selected.path.split('\\').pop()}.zip`,
+      };
+      this.moduleName = 'powershell/management/zipfolder';
+      this.moduleOptionDefaults = options;
+      this.executeDialog = true;
     },
     show(item, e) {
       e.preventDefault();
@@ -252,7 +300,7 @@ export default {
       if (this.currentlyLoading[a.id]) return Promise.resolve();
 
       this.currentlyLoading[a.id] = true;
-      const files = await agentApi.getDirectory(this.agentName, a.path);
+      const files = await agentApi.getDirectory(this.agent.session_id, a.path);
       if (!this.force[a.id] && files.length > 0) {
         this.removeFromCurrentlyLoading(a.id);
         // eslint-disable-next-line no-param-reassign
@@ -295,11 +343,11 @@ export default {
       if (this.currentlyLoading[id]) delete this.currentlyLoading[id];
     },
     async scrapeDirectory(path) {
-      return agentApi.scrapeDirectory(this.agentName, path);
+      return agentApi.scrapeDirectory(this.agent.session_id, path);
     },
     async checkTaskComplete(taskId) {
       try {
-        const task = await agentApi.getTask(this.agentName, taskId);
+        const task = await agentApi.getTask(this.agent.session_id, taskId);
         if (task.results) {
           return true;
         }

@@ -29,6 +29,20 @@ export function getListenerOptions(type) {
 }
 
 /**
+ * Validates the listener options. And returns any errors.
+ * @param {object} options the listener options
+ * @param {string} type the type of listener
+ */
+export function validateListener(type, options) {
+  return axios.post(`/listeners/${type}/validate`, options)
+    .then(({ data }) => {
+      if (data.error) return data.error;
+      return data;
+    })
+    .catch((error) => Promise.reject(error.response ? error.response.data.error : error));
+}
+
+/**
  * Create a listener.
  * This returns a 200 for some errors. Usually when trying to start on a busy port :(
  * @param {Object} options the options needed for creating a listener.

@@ -121,6 +121,10 @@ export default {
       type: String,
       default: '',
     },
+    moduleOptionDefaults: {
+      type: Object,
+      default: () => {},
+    },
   },
   data() {
     return {
@@ -152,6 +156,13 @@ export default {
       if (options && options.Agent) {
         delete options.Agent;
       }
+
+      Object.keys(this.moduleOptionDefaults || {}).forEach((key) => {
+        if (options[key]) {
+          options[key].Value = this.moduleOptionDefaults[key];
+        }
+      });
+
       return options;
     },
     moduleInfoArray() {
@@ -213,8 +224,11 @@ export default {
     emitModuleChange(newVal) {
       this.$emit('moduleChange', newVal);
     },
+    validate() {
+      return this.$refs.generalform.$refs.form.validate();
+    },
     async create() {
-      if (this.agents.length < 1 || this.loading || !this.$refs.generalform.$refs.form.validate()) {
+      if (this.agents.length < 1 || this.loading || !this.validate()) {
         return;
       }
 

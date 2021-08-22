@@ -81,6 +81,7 @@
               v-model="uploadDialog"
               :language="agent.language"
               :loading="uploadLoading"
+              :path-to-file="pathToFile"
               @submit="doUpload"
             />
             <agent-download-dialog
@@ -175,7 +176,10 @@
                 In a future release, all agent endpoints should just use session_id by default,
                 since it is an immutable field. The API will probably be updated to only
                 look up by session_id -->
-                  <agent-file-browser :agent-name="agent.session_id" />
+                  <agent-file-browser
+                    :agent="agent"
+                    @openUploadDialog="openUploadDialogPrefilled"
+                  />
                 </v-card>
               </v-tab-item>
               <v-tab-item
@@ -280,6 +284,7 @@ export default {
       errorState: false,
       paneSize: 100,
       rightPaneInitialized: false,
+      pathToFile: '',
     };
   },
   computed: {
@@ -396,6 +401,10 @@ export default {
         this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
         this.$snack.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
       }
+    },
+    openUploadDialogPrefilled({ pathToFile }) {
+      this.uploadDialog = true;
+      this.pathToFile = pathToFile;
     },
     async doUpload({ file, pathToFile }) {
       if (this.uploadLoading || file == null || pathToFile == null || pathToFile.length < 1) return;

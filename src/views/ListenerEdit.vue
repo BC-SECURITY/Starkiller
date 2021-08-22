@@ -35,6 +35,20 @@
         label="Type"
         :readonly="!canEdit"
       />
+      <v-alert
+        v-if="validationMessage"
+        prominent
+        type="warning"
+      >
+        <v-row align="center">
+          <v-col
+            class="grow"
+            style="word-wrap: word-break; width: 500px"
+          >
+            {{ validationMessage }}
+          </v-col>
+        </v-row>
+      </v-alert>
       <general-form
         v-if="reset"
         ref="generalform"
@@ -73,6 +87,7 @@ export default {
       formPriorities: ['Name', 'Host', 'Port'],
       initialLoad: true,
       errorState: false,
+      validationMessage: null,
     };
   },
   computed: {
@@ -111,7 +126,13 @@ export default {
       ];
     },
     listenerOptions() {
-      return this.listener.options;
+      const { options } = this.listener;
+      if (this.listenerType === 'onedrive' && options) {
+        // If this is required, we wouldn't be able to submit.
+        // It technically is required, but we need it blank to do the validation step.
+        options.AuthCode.Required = false;
+      }
+      return options;
     },
     breads() {
       return [
@@ -172,12 +193,19 @@ export default {
       await this.create();
       this.loading = false;
     },
-    create() {
-      return listenerApi.createListener(this.listenerType, this.form)
-        .then(() => {
-          this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } });
-        })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+    async create() {
+      const resp = await listenerApi.validateListener(this.listenerType, this.form);
+      if (!resp.success) {
+        this.validationMessage = resp;
+        return;
+      }
+
+      try {
+        await listenerApi.createListener(this.listenerType, this.form);
+        this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } });
+      } catch (err) {
+        this.$snack.error(`Error: ${err}`);
+      }
     },
     async kill() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${this.form.Name}?`, { color: 'red' })) {
