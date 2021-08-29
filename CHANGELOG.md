@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2021-08-29
+- Reimplement splitpanes on agent page with a new library
+- Fix broken refresh button on agent list page
+- Update "View" tab on agents page to display agent properties in a more readable manner and allow for updating fields like name, sleep, kill date, etc
+- Add a "validate" step to listener creation so that 2-step listeners like onedrive will work
+- CredID Autocomplete shows previews of the creds instead of just the numeric ids
+- Zip folders from the file browser menu for Powershell agents
+- Upload files from the file browser menu
+
 ## [1.8.0] - 2021-06-28
 - Refactor all forms pages for new 4.0 features
   - Autosuggestions for fields with `suggestedValues` and `strict`

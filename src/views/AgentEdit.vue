@@ -4,36 +4,51 @@
       <portal
         to="app-bar-extension"
       >
-        <v-tabs
-          v-model="activeTab"
-          align-with-title
-          class="scrollable-pane"
-        >
-          <v-tab
-            key="interact"
-            href="#tab-interact"
+        <div style="display: flex; flex-direction: row; width:100%">
+          <v-tabs
+            v-model="activeTab"
+            align-with-title
+            class="scrollable-pane"
           >
-            Interact
-          </v-tab>
-          <v-tab
-            key="file-browser"
-            href="#tab-file-browser"
-          >
-            File Browser
-          </v-tab>
-          <v-tab
-            key="tasks"
-            href="#tab-tasks"
-          >
-            Tasks
-          </v-tab>
-          <v-tab
-            key="view"
-            href="#tab-view"
-          >
-            View
-          </v-tab>
-        </v-tabs>
+            <v-tab
+              key="interact"
+              href="#tab-interact"
+            >
+              Interact
+            </v-tab>
+            <v-tab
+              key="file-browser"
+              href="#tab-file-browser"
+            >
+              File Browser
+            </v-tab>
+            <v-tab
+              key="tasks"
+              href="#tab-tasks"
+            >
+              Tasks
+            </v-tab>
+            <v-tab
+              key="view"
+              href="#tab-view"
+            >
+              View
+            </v-tab>
+          </v-tabs>
+          <div style="display: flex; flex-direction: row;">
+            <v-btn
+              icon
+              @click="toggleCollapsePane()"
+            >
+              <v-icon v-if="paneSize > 95">
+                fa-chevron-left
+              </v-icon>
+              <v-icon v-else>
+                fa-chevron-right
+              </v-icon>
+            </v-btn>
+          </div>
+        </div>
       </portal>
       <portal
         to="app-bar"
@@ -43,20 +58,30 @@
           style="width:100%"
         >
           <v-breadcrumbs :items="breads" />
+          <v-tooltip
+            v-if="agent.high_integrity === 1"
+            bottom
+          >
+            <template #activator="{ on }">
+              <v-icon
+                small
+                v-on="on"
+              >
+                fa-user-cog
+              </v-icon>
+            </template>
+            <span>Elevated Process</span>
+          </v-tooltip>
           <v-spacer />
           <div
             v-if="!errorState"
             class="pt-2"
           >
-            <agent-name-dialog
-              v-model="nameDialog"
-              :loading="nameLoading"
-              @submit="renameAgent"
-            />
             <agent-upload-dialog
               v-model="uploadDialog"
               :language="agent.language"
               :loading="uploadLoading"
+              :path-to-file="pathToFile"
               @submit="doUpload"
             />
             <agent-download-dialog
@@ -65,16 +90,10 @@
               @submit="doDownload"
             />
             <agent-tooltip-button
-              icon="fa-user-edit"
-              text="Rename Agent"
-              color="primary"
-              :pad-left="4"
-              @click="nameDialog = true"
-            />
-            <agent-tooltip-button
               icon="fa-calendar-times"
               text="Clear Queued Tasks"
               color="primary"
+              flat
               @click="clearQueue"
             />
             <agent-tooltip-button
@@ -88,8 +107,9 @@
               @click="downloadDialog = true"
             />
             <agent-tooltip-button
+              v-if="!hideSideBar"
               icon="fa-external-link-alt"
-              text="New Window"
+              text="Popout"
               @click="popout"
             />
             <agent-tooltip-button
@@ -110,12 +130,13 @@
         v-if="!errorState"
         :style="splitPaneHeight()"
       >
-        <split-pane
-          :min-percent="20"
-          :default-percent="60"
-          split="vertical"
+        <splitpanes
+          @resize="paneSize = $event[0].size"
         >
-          <template slot="paneL">
+          <pane
+            min-size="30"
+            :size="paneSize"
+          >
             <v-tabs
               v-model="activeTab"
               class="scrollable-pane"
@@ -124,6 +145,8 @@
               <v-tab-item
                 key="interact"
                 :value="'tab-interact'"
+                :transition="false"
+                :reverse-transition="false"
               >
                 <v-card
                   class="scrollable-pane"
@@ -131,7 +154,7 @@
                 >
                   <agent-interact :agent="agent" />
                   <v-divider />
-                  <h4 class="pl-4">
+                  <h4 class="pl-4 pt-2">
                     Execute Module
                   </h4>
                   <agent-execute-module :agents="[agent.name]" />
@@ -140,6 +163,8 @@
               <v-tab-item
                 key="browser"
                 :value="'tab-file-browser'"
+                :transition="false"
+                :reverse-transition="false"
               >
                 <v-card
                   class="scrollable-pane"
@@ -151,12 +176,17 @@
                 In a future release, all agent endpoints should just use session_id by default,
                 since it is an immutable field. The API will probably be updated to only
                 look up by session_id -->
-                  <agent-file-browser :agent-name="agent.session_id" />
+                  <agent-file-browser
+                    :agent="agent"
+                    @openUploadDialog="openUploadDialogPrefilled"
+                  />
                 </v-card>
               </v-tab-item>
               <v-tab-item
                 key="tasks"
                 :value="'tab-tasks'"
+                :transition="false"
+                :reverse-transition="false"
               >
                 <v-card
                   class="scrollable-pane"
@@ -171,6 +201,8 @@
               <v-tab-item
                 key="view"
                 :value="'tab-view'"
+                :transition="false"
+                :reverse-transition="false"
               >
                 <v-card
                   class="scrollable-pane"
@@ -180,9 +212,10 @@
                 </v-card>
               </v-tab-item>
             </v-tabs>
-          </template>
-          <template slot="paneR">
+          </pane>
+          <pane :size="100 - paneSize">
             <div
+              v-if="rightPaneInitialized"
               ref="bottomScrollable"
               class="right-pane"
             >
@@ -193,8 +226,8 @@
                 @new-results="scrollResults"
               />
             </div>
-          </template>
-        </split-pane>
+          </pane>
+        </splitpanes>
       </div>
     </div>
   </div>
@@ -207,17 +240,17 @@ import AgentCommandHistory from '@/components/agents/AgentCommandHistory.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentCommandViewer from '@/components/agents/AgentCommandViewer.vue';
 import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
-import AgentNameDialog from '@/components/agents/AgentNameDialog.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import AgentTooltipButton from '@/components/agents/AgentTooltipButton.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-
-import SplitPane from 'vue-splitpane';
+import { Splitpanes, Pane } from 'splitpanes';
 import * as agentApi from '@/api/agent-api';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ipcRenderer } from 'electron';
+
+import 'splitpanes/dist/splitpanes.css';
 
 export default {
   name: 'AgentEdit',
@@ -228,12 +261,12 @@ export default {
     AgentCommandViewer,
     AgentFileBrowser,
     AgentCommandHistory,
-    AgentNameDialog,
     AgentUploadDialog,
     AgentDownloadDialog,
     AgentTooltipButton,
-    SplitPane,
     ErrorStateAlert,
+    Splitpanes,
+    Pane,
   },
   data() {
     return {
@@ -249,6 +282,9 @@ export default {
       taskResults: [],
       initialized: false,
       errorState: false,
+      paneSize: 100,
+      rightPaneInitialized: false,
+      pathToFile: '',
     };
   },
   computed: {
@@ -292,11 +328,22 @@ export default {
           : [...unique, item]), []);
       return temp.reverse();
     },
+    hideSideBar() {
+      return this.$route.query.hideSideBar;
+    },
   },
   watch: {
     id(val) {
       if (val) {
         this.getAgent(val);
+      }
+    },
+    paneSize(val) {
+      if (this.rightPaneInitialized) {
+        return;
+      }
+      if (val < 99) {
+        this.rightPaneInitialized = true;
       }
     },
   },
@@ -307,6 +354,13 @@ export default {
     clearInterval(this.interval);
   },
   methods: {
+    toggleCollapsePane() {
+      if (this.paneSize > 95) {
+        this.paneSize = 50;
+      } else {
+        this.paneSize = 100;
+      }
+    },
     splitPaneHeight() {
       /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
      That's 96vh - height of top bar (104) - height of footer (36px) */
@@ -348,20 +402,9 @@ export default {
         this.$snack.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
       }
     },
-    async renameAgent({ name }) {
-      if (this.nameLoading || name == null || name.length < 5) { return; }
-
-      this.nameLoading = true;
-      try {
-        const response = await this.$store.dispatch('agent/rename', { oldName: this.agent.name, newName: name });
-        this.$snack.success(`Agent ${this.agent.name} tasked to change name.`);
-        this.$router.push({ name: 'agentEdit', params: { id: response } });
-      } catch (err) {
-        this.$snack.error(`Error: ${err}`);
-      }
-
-      this.nameLoading = false;
-      this.nameDialog = false;
+    openUploadDialogPrefilled({ pathToFile }) {
+      this.uploadDialog = true;
+      this.pathToFile = pathToFile;
     },
     async doUpload({ file, pathToFile }) {
       if (this.uploadLoading || file == null || pathToFile == null || pathToFile.length < 1) return;
@@ -399,7 +442,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .scrollable-pane {
   max-height: 100%;
   overflow: auto;
@@ -411,4 +454,58 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+// Overrides vuetify.css
+// Because we moved the tabs into a div, which made the color funky.
+.v-toolbar__content > div > .v-tabs > .v-slide-group.v-tabs-bar,
+.v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
+  background-color: inherit;
+}
+
+  .splitpanes__splitter {
+    background-color: #fff;
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0;
+    &:before, &:after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background-color: rgba(0, 0, 0, .15);
+      transition: background-color 0.3s;
+    }
+    &:hover:before, &:hover:after {background-color: rgba(0, 0, 0, .25);}
+    &:first-child {cursor: auto;}
+  }
+  .splitpanes .splitpanes .splitpanes__splitter {
+    z-index: 1;
+  }
+  .splitpanes--vertical > .splitpanes__splitter,
+  .splitpanes--vertical > .splitpanes__splitter {
+    width: 7px;
+    border-left: 1px solid #eee;
+    margin-left: -1px;
+    &:before, &:after {
+      transform: translateY(-50%);
+      width: 1px;
+      height: 30px;
+    }
+    &:before {margin-left: -2px;}
+    &:after {margin-left: 1px;}
+  }
+  .splitpanes--horizontal > .splitpanes__splitter,
+  .splitpanes--horizontal > .splitpanes__splitter {
+    height: 7px;
+    border-top: 1px solid #eee;
+    margin-top: -1px;
+    &:before,
+    &:after {
+      transform: translateX(-50%);
+      width: 30px;
+      height: 1px;
+    }
+    &:before {margin-top: -2px;}
+    &:after {margin-top: 1px;}
+  }
 </style>

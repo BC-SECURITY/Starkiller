@@ -4,10 +4,10 @@
   >
     <template #activator="{ on }">
       <v-btn
-        :color="color"
-        class="mr-2"
-        fab
-        x-small
+        :color="flat ? '' : color"
+        class="mr-5"
+        icon
+        small
         v-on="on"
         @click="$emit('click')"
       >
@@ -41,6 +41,10 @@ export default {
     color: {
       type: String,
       default: '',
+    },
+    flat: {
+      type: Boolean,
+      default: false,
     },
   },
 };

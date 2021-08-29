@@ -20,7 +20,7 @@
                   :rules="rules['fileInput']"
                 />
                 <v-text-field
-                  v-model="pathToFile"
+                  v-model="internalPathToFile"
                   label="path/to/file"
                   :rules="rules['pathToFile']"
                   outlined
@@ -68,11 +68,15 @@ export default {
       type: Boolean,
       default: false,
     },
+    pathToFile: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
+      internalPathToFile: this.pathToFile,
       file: null,
-      pathToFile: '',
       rules: {
         pathToFile: [
           (v) => !!v || 'PathToFile is required',
@@ -98,6 +102,9 @@ export default {
     },
   },
   watch: {
+    pathToFile(val) {
+      this.internalPathToFile = val;
+    },
     value(val) {
       if (val === false) {
         this.$refs.form.reset();
@@ -106,9 +113,21 @@ export default {
     file(val) {
       if (val) {
         if (this.language === 'python') {
-          this.pathToFile = `/tmp/${val.name}`;
+          if (this.internalPathToFile.length === 0) {
+            this.internalPathToFile = `/tmp/${val.name}`;
+          } else if (this.internalPathToFile.endsWith('/')) {
+            this.internalPathToFile += this.fileName;
+          } else {
+            this.internalPathToFile += `/${this.fileName}`;
+          }
         } else if (this.language === 'powershell') {
-          this.pathToFile = `C:\\tmp\\${val.name}`;
+          if (this.internalPathToFile.length === 0) {
+            this.internalPathToFile = `C:\\tmp\\${val.name}`;
+          } else if (this.internalPathToFile.endsWith('/') || this.internalPathToFile.endsWith('\\')) {
+            this.internalPathToFile += this.fileName;
+          } else {
+            this.internalPathToFile += `\\${this.fileName}`;
+          }
         }
       }
     },
@@ -117,7 +136,7 @@ export default {
     async submit() {
       if (!this.$refs.form.validate()) { return; }
 
-      this.$emit('submit', { file: await this.toBase64(this.file), pathToFile: this.pathToFile });
+      this.$emit('submit', { file: await this.toBase64(this.file), pathToFile: this.internalPathToFile });
     },
     // https://stackoverflow.com/a/57272491
     toBase64(file) {

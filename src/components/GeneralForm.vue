@@ -86,7 +86,7 @@ export default {
       listeners: 'listener/listenerNames',
       bypasses: 'bypass/bypassNames',
       malleableProfiles: 'malleable/profileNames',
-      credentials: 'credential/credentialIds',
+      credentials: 'credential/credentials',
     }),
     /**
      * Fields that go in the "Optional" section

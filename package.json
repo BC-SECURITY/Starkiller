@@ -31,11 +31,11 @@
     "portal-vue": "^2.1.7",
     "semver": "^7.3.5",
     "socket.io-client": "^4.1.2",
+    "splitpanes": "^2.3.8",
     "uuid": "^8.3.2",
     "vue": "^2.6.13",
     "vue-beautiful-chat": "^2.5.0",
     "vue-router": "^3.5.1",
-    "vue-splitpane": "^1.0.6",
     "vuetify": "^2.4.11",
     "vuex": "^3.6.2",
     "vuex-persistedstate": "^3.0.1"

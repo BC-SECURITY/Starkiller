@@ -31,5 +31,6 @@ export default {
   },
   getters: {
     credentialIds: (state) => state.credentials.map((c) => c.ID),
+    credentials: (state) => state.credentials,
   },
 };

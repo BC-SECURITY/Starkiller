@@ -117,10 +117,10 @@ export default {
     empireVersion: {
       async handler(val) {
         if (val.length > 0) {
-          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<4.0')) {
+          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<4.1')) {
             await this.$nextTick();
             this.$snack.warn(
-              'Starkiller 1.8.x is recommended to be used with Empire 4.0 or greater.'
+              'Starkiller 1.9.x is recommended to be used with Empire 4.1 or greater.'
               + ' Some features may not work properly.',
             );
           }

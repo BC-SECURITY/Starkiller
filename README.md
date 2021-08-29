@@ -25,6 +25,8 @@ At the moment, the extra Starkiller sponsorship features include:
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686275-0c4bf880-d1c5-11eb-9ed9-399e0360a9f7.gif"></div>
   - Enable/Disable modules
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
+  - Process Browser
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/131264080-0264558d-59c4-44d9-8dae-7b518c47a9cb.gif"></div>
 
 There is also a collection of Empire plugins available via sponsorship.
 
@@ -78,6 +80,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.4.x, 1.5.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
 | 1.6.x, 1.7.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 | 1.8.x             | 4.0.0         | 
+| 1.9.x             | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
 
 ## Changelog
 
