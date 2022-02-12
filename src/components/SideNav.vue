@@ -81,6 +81,7 @@ export default {
         { title: 'Reporting', pathName: 'reporting', icon: 'fa-sticky-note' },
         { title: 'Users', pathName: 'users', icon: 'fa-user' },
         { title: 'Plugins', pathName: 'plugins', icon: 'fa-plug' },
+        { title: 'Bypasses', pathName: 'bypasses', icon: 'fa-shield-virus' },
         { title: 'Settings', pathName: 'settings', icon: 'fa-cog' },
         { title: 'About', pathName: 'about', icon: 'fa-info-circle' },
       ],

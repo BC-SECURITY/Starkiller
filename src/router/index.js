@@ -106,6 +106,21 @@ const routes = [
     component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
   },
   {
+    path: '/bypasses',
+    name: 'bypasses',
+    component: () => import(/* webpackChunkName: "bypasses" */ '../views/Bypasses.vue'),
+  },
+  {
+    path: '/bypasses/new',
+    name: 'bypassNew',
+    component: () => import(/* webpackChunkName: "bypass-edit" */ '../views/BypassEdit.vue'),
+  },
+  {
+    path: '/bypasses/:id',
+    name: 'bypassEdit',
+    component: () => import(/* webpackChunkName: "bypass-edit" */ '../views/BypassEdit.vue'),
+  },
+  {
     path: '/reporting',
     name: 'reporting',
     component: () => import(/* webpackChunkName: "reporting" */ '../views/Reporting.vue'),
