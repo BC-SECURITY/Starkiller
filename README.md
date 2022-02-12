@@ -17,15 +17,20 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 # Sponsorship and extra features
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
 At the moment, the extra Starkiller sponsorship features include:
-  - Interactive agent shell
+
+  ## Interactive agent shell
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
-  - Malleable profile management
+  
+  ## Malleable profile management
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686145-9cd60900-d1c4-11eb-8a74-e98a09c967cd.gif"></div>
-  - Bypass management
+  
+  ## Bypass management
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686275-0c4bf880-d1c5-11eb-9ed9-399e0360a9f7.gif"></div>
-  - Enable/Disable modules
+  
+  ## Enable/Disable modules
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
-  - Process Browser
+  
+  ## Process Browser
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/131264080-0264558d-59c4-44d9-8dae-7b518c47a9cb.gif"></div>
 
 There is also a collection of Empire plugins available via sponsorship.
