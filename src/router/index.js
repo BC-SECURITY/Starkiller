@@ -106,6 +106,21 @@ const routes = [
     component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
   },
   {
+    path: '/malleable-profiles',
+    name: 'malleableProfiles',
+    component: () => import(/* webpackChunkName: "malleable-profiles" */ '../views/MalleableProfiles.vue'),
+  },
+  {
+    path: '/malleable-profiles/new',
+    name: 'malleableProfileNew',
+    component: () => import(/* webpackChunkName: "malleable-profile-edit" */ '../views/MalleableProfileEdit.vue'),
+  },
+  {
+    path: '/malleable-profiles/:id',
+    name: 'malleableProfileEdit',
+    component: () => import(/* webpackChunkName: "malleable-profile-edit" */ '../views/MalleableProfileEdit.vue'),
+  },
+  {
     path: '/bypasses',
     name: 'bypasses',
     component: () => import(/* webpackChunkName: "bypasses" */ '../views/Bypasses.vue'),
