@@ -1,0 +1,181 @@
+<template>
+  <div>
+    <list-page-top
+      :breads="breads"
+      :show-create="true"
+      :show-refresh="true"
+      :show-delete="showDelete"
+      @create="create"
+      @delete="deleteMalleableProfiles"
+      @refresh="getMalleableProfiles"
+    >
+      <template slot="extra-stuff">
+        <v-text-field
+          v-model="filter"
+          append-icon="mdi-magnify"
+          outlined
+          dense
+          label="Search"
+          style="max-width: 250px; padding-top: 25px;"
+        />
+      </template>
+    </list-page-top>
+    <v-data-table
+      v-model="selected"
+      :headers="headers"
+      :items="malleableProfiles"
+      :footer-props="{
+        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
+      }"
+      :items-per-page="15"
+      item-key="name"
+      :search="filter"
+      dense
+      show-select
+      :sort-by.sync="sortBy"
+      :sort-desc.sync="sortDesc"
+    >
+      <template #item.name="{ item }">
+        <router-link
+          style="color: inherit;"
+          :to="{ name: 'malleableProfileEdit', params: { id: item.name }}"
+        >
+          {{ item.name }}
+        </router-link>
+      </template>
+      <template #item.updated_at="{ item }">
+        <v-tooltip top>
+          <template #activator="{ on }">
+            <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
+          </template>
+          <span>{{ moment(item.updated_at).format('lll') }}</span>
+        </v-tooltip>
+      </template>
+      <template #item.actions="{ item }">
+        <v-menu offset-y>
+          <template #activator="{ on, attrs }">
+            <v-btn
+              text
+              icon
+              x-small
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>fa-ellipsis-v</v-icon>
+            </v-btn>
+          </template>
+          <v-list class="ml-2 mr-2">
+            <v-list-item
+              key="view"
+              link
+            >
+              <router-link
+                class="text-decoration-none"
+                style="color: inherit;"
+                :to="{ name: 'malleableProfileEdit', params: { id: item.name }}"
+              >
+                <v-list-item-title>
+                  <v-icon>fa-binoculars</v-icon>
+                  View
+                </v-list-item-title>
+              </router-link>
+            </v-list-item>
+            <v-list-item
+              key="copy"
+              :to="{ name: 'malleableProfileNew', params: { copy: true, id: item.name } }"
+              link
+            >
+              <v-list-item-title>
+                <v-icon>fa-clone</v-icon>
+                Copy
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider class="pb-4" />
+            <v-list-item
+              key="delete"
+              link
+              @click="deleteMalleableProfile(item)"
+            >
+              <v-list-item-title>
+                <v-icon>fa-trash-alt</v-icon>
+                Delete
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+    </v-data-table>
+  </div>
+</template>
+
+<script>
+import moment from 'moment';
+import ListPageTop from '@/components/ListPageTop.vue';
+import { mapState } from 'vuex';
+
+export default {
+  name: 'MalleableProfiles',
+  components: {
+    ListPageTop,
+  },
+  data() {
+    return {
+      breads: [
+        {
+          text: 'Malleable Profiles',
+          disabled: true,
+          href: '/malleable-profiles',
+        },
+      ],
+      headers: [
+        { text: 'Name', value: 'name' },
+        { text: 'Category', value: 'category' },
+        { text: 'Updated At', value: 'updated_at' },
+        { text: 'Actions', value: 'actions', sortable: false },
+      ],
+      sortBy: 'name',
+      sortDesc: false,
+      moment,
+      filter: '',
+      selected: [],
+    };
+  },
+  computed: {
+    ...mapState({
+      malleableProfiles: (state) => state.malleable.malleableProfiles,
+    }),
+    showDelete() {
+      return this.selected.length > 0;
+    },
+  },
+  mounted() {
+    this.getMalleableProfiles();
+  },
+  methods: {
+    getMalleableProfiles() {
+      this.$store.dispatch('malleable/getMalleableProfiles');
+    },
+    create() {
+      this.$router.push({ name: 'malleableProfileNew' });
+    },
+    view(item) {
+      this.$router.push({ name: 'malleableProfileEdit', params: { id: item.name } });
+    },
+    async deleteMalleableProfile(item) {
+      if (await this.$root.$confirm('Delete', `Are you sure you want to delete profile ${item.name}?`, { color: 'red' })) {
+        this.$store.dispatch('malleable/deleteMalleableProfile', item.name);
+      }
+    },
+    async deleteMalleableProfiles() {
+      if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} profiles?`, { color: 'red' })) {
+        this.selected.forEach((profile) => {
+          this.$store.dispatch('malleable/deleteMalleableProfile', profile.name);
+        });
+      }
+    },
+  },
+};
+</script>
+
+<style>
+</style>
