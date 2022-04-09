@@ -65,7 +65,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "modules" */ '../views/Modules.vue'),
   },
   {
-    path: '/modules/execute',
+    path: '/modules/:id',
     name: 'moduleExecute',
     component: () => import(/* webpackChunkName: "modules" */ '../views/ModuleExecute.vue'),
   },
@@ -104,6 +104,26 @@ const routes = [
     path: '/credentials/:id',
     name: 'credentialEdit',
     component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
+  },
+  {
+    path: '/bypasses',
+    name: 'bypasses',
+    component: () => import(/* webpackChunkName: "bypasses" */ '../views/Bypasses.vue'),
+  },
+  {
+    path: '/bypasses/new',
+    name: 'bypassNew',
+    component: () => import(/* webpackChunkName: "bypass-edit" */ '../views/BypassEdit.vue'),
+  },
+  {
+    path: '/bypasses/:id',
+    name: 'bypassEdit',
+    component: () => import(/* webpackChunkName: "bypass-edit" */ '../views/BypassEdit.vue'),
+  },
+  {
+    path: '/downloads',
+    name: 'downloads',
+    component: () => import(/* webpackChunkName: "downloads" */ '../views/Downloads.vue'),
   },
   {
     path: '/reporting',

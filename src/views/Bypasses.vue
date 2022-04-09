@@ -1,47 +1,42 @@
 <template>
-  <div class>
+  <div>
     <list-page-top
       :breads="breads"
       :show-create="true"
       :show-refresh="true"
-      :refresh-loading="listenersStatus === 'loading'"
       :show-delete="showDelete"
       @create="create"
-      @delete="killListeners"
-      @refresh="getListeners"
+      @delete="deleteBypasses"
+      @refresh="getBypasses"
     />
     <v-data-table
       v-model="selected"
       :headers="headers"
-      :items="listeners"
+      :items="bypasses"
       :footer-props="{
         itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
       }"
       :items-per-page="15"
-      item-key="id"
+      item-key="name"
       dense
       show-select
+      :sort-by.sync="sortBy"
+      :sort-desc.sync="sortDesc"
     >
-      <template #item.enabled="{ item }">
-        <v-badge
-          dot
-          :color="item.enabled === true ? 'green' : 'red'"
-        />
-      </template>
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'listenerEdit', params: { id: item.id }}"
+          :to="{ name: 'bypassEdit', params: { id: item.id }}"
         >
           {{ item.name }}
         </router-link>
       </template>
-      <template #item.created_at="{ item }">
+      <template #item.updated_at="{ item }">
         <v-tooltip top>
           <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
+            <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.created_at).format('lll') }}</span>
+          <span>{{ moment(item.updated_at).format('lll') }}</span>
         </v-tooltip>
       </template>
       <template #item.actions="{ item }">
@@ -65,7 +60,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'listenerEdit', params: { id: item.id }}"
+                :to="{ name: 'bypassEdit', params: { id: item.id }}"
               >
                 <v-list-item-title>
                   <v-icon>fa-binoculars</v-icon>
@@ -75,7 +70,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'listenerNew', params: { copy: true, id: item.id } }"
+              :to="{ name: 'bypassNew', params: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>
@@ -87,7 +82,7 @@
             <v-list-item
               key="delete"
               link
-              @click="killListener(item)"
+              @click="deleteBypass(item)"
             >
               <v-list-item-title>
                 <v-icon>fa-trash-alt</v-icon>
@@ -102,70 +97,66 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import ListPageTop from '@/components/ListPageTop.vue';
 import moment from 'moment';
-
+import ListPageTop from '@/components/ListPageTop.vue';
+import { mapState } from 'vuex';
 export default {
-  name: 'Listeners',
+  name: 'Bypasses',
   components: {
     ListPageTop,
   },
   data() {
     return {
-      moment,
       breads: [
         {
-          text: 'Listeners',
+          text: 'Bypasses',
           disabled: true,
-          href: '/listeners',
+          href: '/bypasses',
         },
       ],
       headers: [
-        {
-          text: '', align: 'start', sortable: false, width: '5px', value: 'enabled',
-        },
         { text: 'Name', value: 'name' },
-        { text: 'Template', value: 'template' },
-        { text: 'Host', value: 'options.Host' },
-        { text: 'Port', value: 'options.Port' },
-        { text: 'Created At', value: 'created_at' },
+        { text: 'Updated At', value: 'updated_at' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
+      sortBy: 'name',
+      sortDesc: false,
+      moment,
       selected: [],
     };
   },
   computed: {
     ...mapState({
-      listeners: (state) => state.listener.listeners,
-      listenersStatus: (state) => state.listener.status,
+      bypasses: (state) => state.bypass.bypasses,
     }),
     showDelete() {
       return this.selected.length > 0;
     },
   },
   mounted() {
-    this.getListeners();
+    this.getBypasses();
   },
   methods: {
+    getBypasses() {
+      this.$store.dispatch('bypass/getBypasses');
+    },
     create() {
-      this.$router.push({ name: 'listenerNew' });
+      this.$router.push({ name: 'bypassNew' });
     },
-    async killListener(item) {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('listener/killListener', item.id);
+    view(item) {
+      this.$router.push({ name: 'bypassEdit', params: { id: item.id } });
+    },
+    async deleteBypass(item) {
+      if (await this.$root.$confirm('Delete', `Are you sure you want to delete bypass ${item.name}?`, { color: 'red' })) {
+        this.$store.dispatch('bypass/deleteBypass', item.id);
       }
     },
-    async killListeners() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to kill ${this.selected.length} listeners?`, { color: 'red' })) {
-        this.selected.forEach((listener) => {
-          this.$store.dispatch('listener/killListener', listener.id);
+    async deleteBypasses() {
+      if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} bypasses?`, { color: 'red' })) {
+        this.selected.forEach((bypass) => {
+          this.$store.dispatch('bypass/deleteBypass', bypass.id);
         });
-        this.selected = [];
       }
-    },
-    getListeners() {
-      this.$store.dispatch('listener/getListeners');
     },
   },
 };

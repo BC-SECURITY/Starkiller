@@ -5,7 +5,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
  */
 // eslint-disable-next-line import/prefer-default-export
 export function getReporting() {
-  return axios.get('/reporting')
-    .then(({ data }) => data.reporting)
-    .catch((error) => Promise.reject(error.response.data.error));
+  return axios.get('/agents/tasks')
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }

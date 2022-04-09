@@ -24,6 +24,7 @@
         </v-btn>
         <v-btn
           v-if="showRefresh"
+          :disabled="refreshLoading"
           color="primary"
           text
           class="mr-2"
@@ -33,7 +34,7 @@
           <v-icon
             right
           >
-            fa-redo
+            fa-redo {{ refreshLoading ? 'fa-spin' : '' }}
           </v-icon>
         </v-btn>
         <v-btn
@@ -80,6 +81,10 @@ export default {
       default: false,
     },
     showCreate: {
+      type: Boolean,
+      default: false,
+    },
+    refreshLoading: {
       type: Boolean,
       default: false,
     },

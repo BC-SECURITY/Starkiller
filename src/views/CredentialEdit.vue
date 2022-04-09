@@ -3,9 +3,12 @@
     <edit-page-top
       :breads="breads"
       :show-submit="true"
-      :show-copy="false"
+      :show-copy="!!id"
       :show-delete="!!id"
       :submit-loading="loading"
+      :copy-link="copyLink"
+      :small-copy="true"
+      :small-delete="true"
       @submit="submit"
       @delete="deleteCredential"
     />
@@ -87,26 +90,30 @@ export default {
     id() {
       return this.$route.params.id;
     },
+    copyLink() {
+      if (this.id > 0) return { name: 'credentialNew', params: { copy: true, id: this.id } };
+      return {};
+    },
     options() {
       const op = {
         credtype: {
-          Required: true,
-          Strict: true,
-          SuggestedValues: [
+          required: true,
+          strict: true,
+          suggested_values: [
             'plaintext', 'hash',
           ],
         },
-        domain: { Required: true },
-        username: { Required: true },
-        password: { Required: true },
-        host: { Required: true },
-        os: { Required: false },
-        sid: { Required: false },
-        notes: { Required: false },
+        domain: { required: true },
+        username: { required: true },
+        password: { required: true },
+        host: { required: true },
+        os: { required: false },
+        sid: { required: false },
+        notes: { required: false },
       };
       Object.keys(this.credential).forEach((field) => {
-        if (field !== 'ID') {
-          op[field].Value = this.credential[field];
+        if (field !== 'id' && op[field]) {
+          op[field].value = this.credential[field];
         }
       });
       return op;
@@ -118,28 +125,33 @@ export default {
     }
   },
   methods: {
-    async submit() {
-      if (this.loading) {
+    submit() {
+      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
       }
 
       this.loading = true;
       if (this.isNew) {
-        await this.create();
+        credentialApi.createCredential(this.form)
+          .then(({ id }) => {
+            this.loading = false;
+            this.$router.push({ name: 'credentialEdit', params: { id } });
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       } else {
-        await this.update();
+        credentialApi.updateCredential(this.id, this.form)
+          .then(() => {
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       }
       this.loading = false;
-    },
-    create() {
-      return credentialApi.createCredential(this.form)
-        .then(() => this.$router.push({ name: 'credentials' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    update() {
-      return credentialApi.updateCredential(this.id, this.form)
-        .then(() => this.$router.push({ name: 'credentials' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     async deleteCredential() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${this.id}?`, { color: 'red' })) {

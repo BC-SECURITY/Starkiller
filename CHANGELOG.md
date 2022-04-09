@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2022-xx-yy
+- Remove Electron. Starkiller is now a plain old web app!
+- Upgrade Dependencies
+- Update all -api files to use v2 api
+- General UI changes
+- Reporting page has a sidebar for filtering on agents and users
+- Reporting page and agent task page more performant utilizing server-side pagination and sorting provided by the v2 api. Option to expand input, download inputs, outputs, joined downloads, and view images
+- Add warning on agent page for modules that are not opsec safe
+- Added options for ignoring the check for elevated permissions and the agent language version when executing a module
+- All agent tabs have a read-only view for viewing archived (deleted) agents
+- Upgrade stager storage to utilize server side storage with the new v2 api
+- Remove agent command viewer sidebar in favor of the tasks tab
+- Added the ability to turn listeners on and off
+- Added the ability to modify listener options
+- Added a button the Listener View top bar that prefills a stager form with the listener's id
+- Removed API Token from settings, since the v2 api uses JWT
+- Add a downloads page
+- sort file browser correctly
+
+
+## [1.10.0] - 2022-02-14
+- Added bypass management pages (Thank you to our Sponsors!)
+  - Create, delete, edit, and view bypasses
+
 ## [1.9.0] - 2021-08-29
 - Reimplement splitpanes on agent page with a new library
 - Fix broken refresh button on agent list page

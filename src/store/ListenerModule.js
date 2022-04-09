@@ -8,22 +8,30 @@ export default {
      */
     listeners: [],
     /**
-     * String[] of listener types
+     * The status of the listeners request. This can be used to determine if the
+     * request is still in progress.
      */
-    types: [],
+    status: 'success',
+    /**
+     * Full array of listener template objects
+     */
+    templates: [],
   },
   mutations: {
     setListeners(state, listeners) {
       state.listeners = listeners;
     },
+    setStatus(state, status) {
+      state.status = status;
+    },
     pushListener(state, listener) {
       state.listeners.push(listener);
     },
-    setTypes(state, types) {
-      state.types = types;
+    setTemplates(state, templates) {
+      state.templates = templates;
     },
-    removeListener(state, name) {
-      const find = state.listeners.findIndex((l) => l.name === name);
+    removeListener(state, id) {
+      const find = state.listeners.findIndex((l) => l.id === id);
       if (find > -1) {
         state.listeners.splice(find, 1);
       }
@@ -31,19 +39,21 @@ export default {
   },
   actions: {
     async getListeners(context) {
+      context.commit('setStatus', 'loading');
       const listeners = await listenerApi.getListeners();
       context.commit('setListeners', listeners);
+      context.commit('setStatus', 'success');
     },
-    async getListenerTypes(context) {
-      const types = await listenerApi.getListenerTypes();
-      context.commit('setTypes', types.sort());
+    async getListenerTemplates(context) {
+      const templates = await listenerApi.getListenerTemplates();
+      context.commit('setTemplates', templates);
     },
-    async killListener(context, name) {
-      await listenerApi.killListener(name);
-      context.commit('removeListener', name);
+    async killListener(context, id) {
+      await listenerApi.killListener(id);
+      context.commit('removeListener', id);
     },
     async addListener(context, listener) {
-      const found = context.state.listeners.find((el) => el.ID === listener.ID);
+      const found = context.state.listeners.find((el) => el.id === listener.id);
 
       if (!found) {
         context.commit('pushListener', listener);
@@ -52,5 +62,6 @@ export default {
   },
   getters: {
     listenerNames: (state) => state.listeners.map((el) => el.name),
+    templateIds: (state) => [...state.templates.map((el) => el.id)].sort(),
   },
 };

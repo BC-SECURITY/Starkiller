@@ -15,7 +15,7 @@ export default {
   },
   actions: {
     async getAgents(context) {
-      const agents = await agentApi.getAgents();
+      const agents = await agentApi.getAgents(true);
       context.commit('setAgents', agents);
     },
     async getAgent(context, { sessionId }) {
@@ -36,13 +36,14 @@ export default {
     },
     async killAgent(context, { name }) {
       const { agents } = context.state;
-      const agent = agents.find((el) => el.name === name);
+      const agent = agents.find((el) => el.session_id === name);
 
       if (agent == null) {
         return;
       }
 
       await agentApi.killAgent(name);
+      agent.archived = true;
       context.commit('setAgents', agents);
     },
     async removeAgent(context, { name }) {
@@ -67,8 +68,10 @@ export default {
         context.commit('pushAgent', agent);
       }
     },
-    clearQueue(context, { name }) {
-      agentApi.clearQueue(name);
+    clearQueue(context, { name, tasks }) {
+      tasks.forEach((task) => {
+        agentApi.deleteTask(name, task);
+      });
     },
   },
 };

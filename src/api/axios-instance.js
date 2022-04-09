@@ -8,11 +8,8 @@ export let axiosInstance = null;
 
 export function setInstance(url, token) {
   axiosInstance = axios.create({
-    baseURL: `${url}/api`,
-    headers: { 'Content-Type': 'application/json' },
-    params: {
-      token,
-    },
+    baseURL: `${url}/api/v2beta`,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
   });
 
   // if our token is invalid, logout.

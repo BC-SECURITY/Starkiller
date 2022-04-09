@@ -15,13 +15,14 @@
         style="margin-top: -30px; margin-bottom: 20px;"
       >
         <span class="caption grey--text font-weight-light">SocketIO: {{ form.socketUrl }}</span>
-        <v-icon
+        <!-- TODO I don't think this needs to be editable anymore -->
+        <!-- <v-icon
           class="point"
           small
           @click="editSocket = true"
         >
           mdi-pencil
-        </v-icon>
+        </v-icon> -->
       </div>
       <v-text-field
         v-else
@@ -63,7 +64,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import electronStore from '@/store/electron-store';
 
 export default {
   name: 'Login',
@@ -97,7 +97,11 @@ export default {
             ? val
             : `https://${val}`;
           const url = new URL(cleanedUrl);
-          this.form.socketUrl = `wss://${url.hostname}:5000`;
+          if (cleanedUrl.startsWith('http://')) {
+            this.form.socketUrl = `ws://${url.hostname}:1337`;
+          } else {
+            this.form.socketUrl = `wss://${url.hostname}:1337`;
+          }
         } catch (err) {
           // noop
         }
@@ -111,13 +115,13 @@ export default {
     },
   },
   mounted() {
-    this.form.url = electronStore.get('url', 'https://localhost:1337');
-    this.form.username = electronStore.get('username', '');
-    this.rememberMe = electronStore.get('rememberMe', false);
+    this.form.url = localStorage.getItem('loginUrl') || 'http://localhost:1337';
+    this.form.username = localStorage.getItem('loginUsername') || '';
+    this.rememberMe = localStorage.getItem('loginRememberMe') === 'true';
     this.$nextTick(() => {
       // this is in nextTick to allow us to write a saved socketUrl
       // after the 'form.url' watcher.
-      const socketUrl = electronStore.get('socketUrl', '');
+      const socketUrl = localStorage.getItem('socketUrl') || '';
       if (socketUrl !== '') {
         this.form.socketUrl = socketUrl;
       }
@@ -129,15 +133,15 @@ export default {
         ? this.form.url
         : `https://${this.form.url}`;
       this.loading = true;
-      electronStore.set('rememberMe', this.rememberMe);
+      localStorage.setItem('loginRememberMe', this.rememberMe);
 
       if (this.rememberMe === true) {
-        electronStore.set('url', cleanedUrl);
-        electronStore.set('socketUrl', this.form.socketUrl);
-        electronStore.set('username', this.form.username);
+        localStorage.setItem('loginUrl', cleanedUrl);
+        localStorage.setItem('socketUrl', this.form.socketUrl);
+        localStorage.setItem('loginUsername', this.form.username);
       } else {
-        electronStore.delete('url');
-        electronStore.delete('username');
+        localStorage.removeItem('loginUrl');
+        localStorage.removeItem('loginUsername');
       }
 
       this.$store.dispatch('application/login', {

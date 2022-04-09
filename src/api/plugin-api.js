@@ -4,9 +4,9 @@ import { axiosInstance as axios } from '@/api/axios-instance';
  * Returns a full list of plugins.
  */
 export function getPlugins() {
-  return axios.get('/plugins/active')
-    .then(({ data }) => data.plugins)
-    .catch((error) => Promise.reject(error.response.data.error));
+  return axios.get('/plugins')
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
@@ -16,14 +16,14 @@ export function getPlugins() {
 export function getPlugin(name) {
   return axios.get(`/plugins/${name}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
  * Execute a plugin command.
  */
 export function executePlugin(name, options) {
-  return axios.post(`/plugins/${name}`, options)
+  return axios.post(`/plugins/${name}/execute`, { options })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.detail));
 }

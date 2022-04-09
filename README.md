@@ -17,20 +17,26 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 # Sponsorship and extra features
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
 At the moment, the extra Starkiller sponsorship features include:
-  - Interactive agent shell
+
+  ## Interactive agent shell
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
-  - Malleable profile management
+  
+  ## Malleable profile management
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686145-9cd60900-d1c4-11eb-8a74-e98a09c967cd.gif"></div>
-  - Bypass management
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686275-0c4bf880-d1c5-11eb-9ed9-399e0360a9f7.gif"></div>
-  - Enable/Disable modules
+  
+  ## Enable/Disable modules
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
-  - Process Browser
+  
+  ## Process Browser
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/131264080-0264558d-59c4-44d9-8dae-7b518c47a9cb.gif"></div>
 
 There is also a collection of Empire plugins available via sponsorship.
 
-Thanks to our sponsors for helping reach previous goals, the file browser, the agent popout windows, and the chat widget have all been moved from the sponsorship repository to the public/Kali builds.
+Thanks to our sponsors the following features which started as sponsor features have been moved to the public and kali builds.
+- File browser
+- Popout windows
+- Chat widget
+- Bypass management
 
 ## Build and run from source
 Prerequisites:
@@ -77,10 +83,10 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.1.x              | 3.1.5         | 3.1.5 updated the reporting endpoint to have the same result as running it in the CLI. Starkiller 1.1.x uses that reporting endpoint for the reporting tab |
 | 1.2.x              | 3.2.0         | 3.2.0 added an endpoint for users that is needed for the UI updates introduced in Starkiller 1.2.0
 | 1.3.x              | 3.3.0         | 3.3.0 categorized all of the modules in Empire with corresponding [MITRE techniques](https://attack.mitre.org/techniques/enterprise/)
-| 1.4.x, 1.5.x              | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
-| 1.6.x, 1.7.x              | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
-| 1.8.x             | 4.0.0         | 
-| 1.9.x             | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
+| 1.4.x, 1.5.x       | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
+| 1.6.x, 1.7.x       | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
+| 1.8.x              | 4.0.0         | 
+| 1.9.x, 1.10.x      | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
 
 ## Changelog
 

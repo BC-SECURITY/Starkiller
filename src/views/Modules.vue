@@ -25,53 +25,53 @@
       }"
       :items-per-page="15"
       :search="filter"
-      item-key="Name"
+      item-key="name"
       show-expand
       dense
     >
-      <template #item.Name="{ item }">
+      <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'moduleExecute', query: { module: item.Name } }"
+          :to="{ name: 'moduleExecute', params: { id: item.id } }"
         >
-          {{ item.Name }}
+          {{ item.name }}
         </router-link>
       </template>
-      <template #item.Techniques="{ item }">
+      <template #item.techniques="{ item }">
         <technique-chips
-          :techniques="item.Techniques"
+          :techniques="item.techniques"
           :show-title="false"
         />
       </template>
-      <template #item.NeedsAdmin="{ item }">
+      <template #item.needs_admin="{ item }">
         <v-simple-checkbox
-          v-model="item.NeedsAdmin"
+          v-model="item.needs_admin"
           disabled
         />
       </template>
-      <template #item.OpsecSafe="{ item }">
+      <template #item.opsec_safe="{ item }">
         <v-simple-checkbox
-          v-model="item.OpsecSafe"
+          v-model="item.opsec_safe"
           disabled
         />
       </template>
-      <template #item.Background="{ item }">
+      <template #item.background="{ item }">
         <v-simple-checkbox
-          v-model="item.Background"
+          v-model="item.background"
           disabled
         />
       </template>
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div class="d-flex flex-column">
-            <b>Author:</b>
-            {{ item.Author ? item.Author.join(', ') : '' }}
+            <b>Authors:</b>
+            {{ item.authors ? item.authors.join(', ') : '' }}
 
             <b>Description:</b>
-            {{ item.Description }}
+            {{ item.description }}
 
             <b>Comments:</b>
-            {{ item.Comments ? item.Comments.join('\n ') : '' }}
+            {{ item.comments ? item.comments.join('\n ') : '' }}
           </div>
         </td>
       </template>
@@ -96,14 +96,14 @@ export default {
         {
           text: 'Name',
           align: 'start',
-          value: 'Name',
+          value: 'name',
         },
-        { text: 'Language', value: 'Language', sort: this.sortLanguage },
-        { text: 'Needs Admin', value: 'NeedsAdmin' },
-        { text: 'Opsec Safe', value: 'OpsecSafe' },
-        { text: 'Background', value: 'Background' },
+        { text: 'Language', value: 'language', sort: this.sortLanguage },
+        { text: 'Needs Admin', value: 'needs_admin', width: '75px' },
+        { text: 'Opsec Safe', value: 'opsec_safe', width: '75px' },
+        { text: 'Background', value: 'background', width: '75px' },
         {
-          text: 'Techniques', value: 'Techniques', width: '175px', sortable: false,
+          text: 'Techniques', value: 'techniques', width: '300px', sortable: false,
         },
       ],
       filter: '',

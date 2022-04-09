@@ -1,6 +1,7 @@
 <template>
   <div style="padding: 10px">
     <v-form
+      v-if="agent.session_id"
       ref="form"
       v-model="valid"
       style="overflow-y: hidden;"
@@ -14,6 +15,7 @@
         v-model="form.name"
         label="Name"
         :rules="nameRules"
+        :editable="!readOnly"
         @update="updateName"
       />
       <click-to-edit
@@ -42,18 +44,21 @@
         data-type="string"
         :suggested-values="listeners"
         :strict="true"
+        :editable="!readOnly"
         @update="updateListener"
       />
       <click-to-edit
         v-model="form.kill_date"
         label="Kill Date"
         data-type="date"
+        :editable="!readOnly"
         @update="updateKillDate"
       />
       <click-to-edit
         v-model="form.working_hours"
         label="Working Hours"
         :rules="workingHoursRules"
+        :editable="!readOnly"
         @update="updateWorkingHours"
       />
       <click-to-edit
@@ -71,6 +76,7 @@
         label="Delay"
         data-type="number"
         :rules="delayRules"
+        :editable="!readOnly"
         @update="updateDelay"
       />
       <click-to-edit
@@ -78,6 +84,7 @@
         label="Jitter"
         data-type="number"
         :rules="jitterRules"
+        :editable="!readOnly"
         @update="updateJitter"
       />
       <click-to-edit
@@ -141,6 +148,10 @@ export default {
     agent: {
       type: Object,
       required: true,
+    },
+    readOnly: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -225,13 +236,13 @@ export default {
       if (this.agent.name === this.form.name) return;
 
       try {
-        await agentApi.renameAgent(this.agent.name, this.form.name);
+        await agentApi.renameAgent(this.agent, this.form.name);
       } catch (err) {
         this.$snack.error(`Update agent listener failed: ${err}`);
         return;
       }
+      // todo need to propogate this to the store or the page.
       this.$snack.info(`Agent ${this.agent.name} name updated`);
-      this.$router.push({ name: 'agentEdit', params: { id: this.form.name } });
     },
     async updateListener() {
       if (this.agent.listener === this.form.listener) return;

@@ -1,32 +1,33 @@
 import { axiosInstance as axios } from '@/api/axios-instance';
+import qs from 'qs';
 
 /**
  * Returns a single agent.
  */
 export function getAgent(name) {
   return axios.get(`/agents/${name}`)
-    .then(({ data }) => data.agents[0])
+    .then(({ data }) => data)
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
  * Returns a full list of agents.
  */
-export function getAgents() {
-  return axios.get('/agents')
-    .then(({ data }) => data.agents)
-    .catch((error) => Promise.reject(error.response.data.error));
+export function getAgents(includeArchived = false) {
+  return axios.get('/agents', { params: { include_archived: includeArchived } })
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
+// todo name should be session id on all these endpoints.
+// or even just id if we remove the numeric ids.
 /**
  * Rename an agent.
- * @param {string} oldName
- * @param {string} newName
  */
-export function renameAgent(oldName, newName) {
-  return axios.post(`/agents/${oldName}/rename`, { newname: newName })
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+export function renameAgent(agent, newName) {
+  return axios.put(`/agents/${agent.session_id}`, { ...agent, name: newName })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
@@ -34,9 +35,10 @@ export function renameAgent(oldName, newName) {
  * @param {string} name agent name
  */
 export function killAgent(name) {
-  return axios.post(`/agents/${name}/kill`)
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+  console.log('killAgent', name);
+  return axios.post(`/agents/${name}/tasks/exit`, {})
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
@@ -45,7 +47,6 @@ export function killAgent(name) {
  */
 export function removeAgent(name) {
   return axios.delete(`/agents/${name}`)
-    .then(({ data }) => data.success)
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
@@ -54,20 +55,50 @@ export function removeAgent(name) {
  * @param {string} name agent name
  */
 export function getTask(name, taskId) {
-  return axios.get(`/agents/${name}/task/${taskId}`)
+  return axios.get(`/agents/${name}/tasks/${taskId}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
  * Get tasking results for an agent.
- * @param {string} name agent name
+ * @param {string} agentId agent's session_id. Can also be an array of session_ids.
  */
-export function getResults(name, since) {
-  const query = (since && since.length > 0) ? { updated_since: since } : {};
+export function getTasks(agentId, {
+  since = null,
+  limit = 50,
+  page = 1,
+  sortBy = 'id',
+  sortOrder = 'desc',
+  status = null,
+  users = null,
+}) {
+  const params = {
+    since,
+    limit,
+    page,
+    order_by: sortBy,
+    order_direction: sortOrder,
+    status,
+    users,
+  };
 
-  return axios.get(`/agents/${name}/results`, { params: query })
-    .then(({ data }) => data.results)
+  if (Array.isArray(agentId)) {
+    params.agents = agentId;
+  }
+
+  let url = '';
+  if (agentId == null || Array.isArray(agentId)) {
+    url = '/agents/tasks';
+  } else {
+    url = `/agents/${agentId}/tasks`;
+  }
+
+  return axios.get(url, {
+    params,
+    paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat', skipNulls: true }),
+  })
+    .then(({ data }) => data)
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
@@ -76,9 +107,13 @@ export function getResults(name, since) {
  * @param {string} name agent name
  */
 export function getDirectory(name, directory) {
-  return axios.get(`/agents/${name}/directory?directory=${directory}`)
-    .then(({ data }) => data.items)
-    .catch((error) => Promise.reject(error.response.data.error));
+  let uri = `/agents/${name}/files/${directory}`;
+  if (directory === '/') {
+    uri = `/agents/${name}/files/root`;
+  }
+  return axios.get(uri)
+    .then(({ data }) => data.children)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
@@ -86,9 +121,9 @@ export function getDirectory(name, directory) {
  * @param {string} name agent name
  */
 export function scrapeDirectory(name, directory) {
-  return axios.post(`/agents/${name}/directory?directory=${directory}`)
+  return axios.post(`/agents/${name}/tasks/directory_list`, { path: directory })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
@@ -96,40 +131,38 @@ export function scrapeDirectory(name, directory) {
  * @param {string} name agent name
  */
 export function shell(name, command) {
-  return axios.post(`/agents/${name}/shell`, { command })
+  return axios.post(`/agents/${name}/tasks/shell`, { command })
     .then(({ data }) => data.taskID)
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
 /**
- * Clear the queued tasks for an agent.
+ * Delete a queued task.
  * @param {string} name agent name
  */
-export function clearQueue(name) {
-  return axios.get(`/agents/${name}/clear`)
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+export function deleteTask(name, taskId) {
+  return axios.delete(`/agents/${name}/tasks/${taskId}`)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
  * Task agent to receive file upload.
  */
-export function uploadFile(name, base64File, pathToFile) {
-  return axios.post(`/agents/${name}/upload`, { filename: pathToFile, data: base64File })
-    .then(({ data }) => data.taskID)
-    .catch((error) => Promise.reject(error.response.data.error));
+export function uploadFile(name, fileId, pathToFile) {
+  return axios.post(`/agents/${name}/tasks/upload`, { path_to_file: pathToFile, file_id: fileId })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 /**
  * Task agent to send file to Empire.
  */
 export function downloadFile(name, pathToFile) {
-  return axios.post(`/agents/${name}/download`, { filename: pathToFile })
-    .then(({ data }) => data.taskID)
-    .catch((error) => Promise.reject(error.response.data.error));
+  return axios.post(`/agents/${name}/tasks/download`, { path_to_file: pathToFile })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
-// In a v2 API these could all run through the same PATCH endpoint.
 export function updateComms(name, listener) {
   return axios.put(`/agents/${name}/update_comms`, { listener })
     .then(({ data }) => data.success)
@@ -137,19 +170,19 @@ export function updateComms(name, listener) {
 }
 
 export function updateKillDate(name, killDate) {
-  return axios.put(`/agents/${name}/killdate`, { kill_date: killDate })
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+  return axios.post(`/agents/${name}/tasks/kill_date`, { kill_date: killDate })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 export function updateWorkingHours(name, workingHours) {
-  return axios.put(`/agents/${name}/workinghours`, { working_hours: workingHours })
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+  return axios.post(`/agents/${name}/tasks/working_hours`, { working_hours: workingHours })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
 export function updateSleep(name, delay, jitter) {
-  return axios.put(`/agents/${name}/sleep`, { delay, jitter })
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+  return axios.post(`/agents/${name}/tasks/sleep`, { delay, jitter })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(error.response.data.detail));
 }

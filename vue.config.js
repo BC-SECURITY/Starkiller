@@ -8,10 +8,4 @@ module.exports = {
       errors: true,
     },
   },
-  pluginOptions: {
-    electronBuilder: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  },
 };

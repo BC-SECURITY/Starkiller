@@ -9,7 +9,10 @@
         <span class="headline">Download</span>
       </v-card-title>
       <v-card-text>
-        <v-form ref="form">
+        <v-form
+          ref="form"
+          @submit.prevent
+        >
           <v-container>
             <v-row>
               <v-col cols="12">

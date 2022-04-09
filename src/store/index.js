@@ -3,7 +3,6 @@ import Vuex from 'vuex';
 
 import createPersistedState from 'vuex-persistedstate';
 import { setInstance } from '@/api/axios-instance';
-import { initNamespacedStore } from '@/store/electron-store';
 import UserModule from './UserModule';
 import ListenerModule from './ListenerModule';
 import StagerModule from './StagerModule';
@@ -40,7 +39,6 @@ export default new Vuex.Store({
     paths: ['application'],
     rehydrated: ({ state }) => {
       setInstance(state.application.url, state.application.token);
-      initNamespacedStore(state.application.url);
     },
   })],
 });

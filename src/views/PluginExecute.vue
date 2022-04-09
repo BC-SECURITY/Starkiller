@@ -63,21 +63,23 @@ export default {
           exact: true,
         },
         {
-          text: `${this.plugin.Name}`,
+          text: `${this.plugin.name}`,
           disabled: true,
           to: '/plugins/execute',
         },
       ];
     },
+    // todo refactor this to work like other pages where we can call
+    // the /api/plugin/:id/ endpoint instead of the list endpoint.
     plugin() {
-      return this.plugins.find((p) => p.Name === this.$route.params.id) || {};
+      return this.plugins.find((p) => p.id === this.$route.params.id) || {};
     },
     pluginInfoArray() {
       if (Object.keys(this.plugin).length < 1) return [];
       return [
-        { key: 'Author', value: this.plugin.Author.join(', ') },
-        { key: 'Comments', value: this.plugin.Comments.join('\n') },
-        { key: 'Description', value: this.plugin.Description },
+        { key: 'Authors', value: this.plugin.authors.join(', ') },
+        { key: 'Comments', value: this.plugin.comments.join('\n') },
+        { key: 'Description', value: this.plugin.description },
       ];
     },
   },
@@ -97,7 +99,7 @@ export default {
       // todo currently this endpoint just returns null on success.
       // next version of this api should have better messaging.
       try {
-        await pluginApi.executePlugin(this.plugin.Name, this.form);
+        await pluginApi.executePlugin(this.plugin.name, this.form);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }

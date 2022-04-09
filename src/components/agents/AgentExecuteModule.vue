@@ -14,7 +14,7 @@
         class="info-viewer"
         :info-array="moduleInfoArray"
       />
-      <technique-chips :techniques="selectedItem.Techniques" />
+      <technique-chips :techniques="selectedItem.techniques" />
       <v-autocomplete
         v-model="selectedModule"
         :items="selectOptions"
@@ -25,6 +25,34 @@
         clearable
         @change="handleSelect"
       />
+      <v-alert
+        v-if="selectedItem.opsec_safe === false"
+        type="warning"
+      >
+        <v-row align="center">
+          <v-col
+            class="grow"
+            style="word-wrap: word-break; width: 500px"
+          >
+            This module is not opsec safe.
+          </v-col>
+        </v-row>
+      </v-alert>
+      <div style="display: flex; flex-direction: row;">
+        <v-checkbox
+          v-model="ignoreAdminCheck"
+          class="pa-1"
+          label="Ignore Admin Check"
+          color="primary"
+          v-on="on"
+        />
+        <v-checkbox
+          v-model="ignoreLanguageCheck"
+          class="pa-1"
+          label="Ignore Language Version Check"
+          color="primary"
+        />
+      </div>
       <general-form
         v-if="reset"
         ref="generalform"
@@ -140,15 +168,17 @@ export default {
       showDialog: false,
       form: {},
       errorState: false,
+      ignoreAdminCheck: false,
+      ignoreLanguageCheck: false,
     };
   },
   computed: {
     ...mapState({
       modules: (state) => state.module.modules
-        .filter((el) => el.Enabled === true),
+        .filter((el) => el.enabled === true),
       selectOptions: (state) => state.module.modules
-        .filter((el) => el.Enabled === true)
-        .map((el) => el.Name),
+        .filter((el) => el.enabled === true)
+        .map((el) => el.id),
     }),
     moduleOptions() {
       let { options } = this.selectedItem;
@@ -171,15 +201,15 @@ export default {
       }
 
       return [
-        { key: 'Author', value: this.selectedItem.Author.join(', ') },
-        { key: 'Comments', value: this.selectedItem.Comments.join('\n') },
-        { key: 'Description', value: this.selectedItem.Description },
-        { key: 'Language', value: this.selectedItem.Language },
-        { key: 'MinLanguageVersion', value: this.selectedItem.MinLanguageVersion },
-        { key: 'Background', value: this.selectedItem.Background },
-        { key: 'OpsecSafe', value: this.selectedItem.OpsecSafe },
-        { key: 'NeedsAdmin', value: this.selectedItem.NeedsAdmin },
-        { key: 'OutputExtensions', value: this.selectedItem.OutputExtensions },
+        { key: 'Authors', value: this.selectedItem.authors.join(', ') },
+        { key: 'Comments', value: this.selectedItem.comments.join('\n') },
+        { key: 'Description', value: this.selectedItem.description },
+        { key: 'Language', value: this.selectedItem.language },
+        { key: 'MinLanguageVersion', value: this.selectedItem.min_language_version },
+        { key: 'Background', value: this.selectedItem.background },
+        { key: 'OpsecSafe', value: this.selectedItem.opsec_safe },
+        { key: 'NeedsAdmin', value: this.selectedItem.needs_admin },
+        { key: 'OutputExtensions', value: this.selectedItem.output_extensions },
       ];
     },
     errorStateMessage() {
@@ -209,7 +239,7 @@ export default {
         setTimeout(() => { this.reset = true; }, 500);
         return;
       }
-      const results = this.modules.find((el) => el.Name === item);
+      const results = this.modules.find((el) => el.id === item);
       this.reset = false;
       this.selectedItem = results || {};
       if (Object.keys(this.selectedItem).length === 0) {
@@ -236,7 +266,12 @@ export default {
 
       const result = await Promise.allSettled(this.agents
         .map((agent) => moduleApi.executeModule(this.selectedModule,
-          { ...this.form, Agent: agent })));
+          {
+            ...this.form,
+            Agent: agent,
+          },
+          this.ignoreAdminCheck,
+          this.ignoreLanguageCheck)));
 
       if (result.some((item) => item.status === 'rejected')) {
         const split = result.reduce((acc, val) => {
@@ -254,14 +289,13 @@ export default {
       } else {
         const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
         this.$snack.info(`Module execution queued for ${displayName}`);
+        this.selectedItem = {};
+        this.selectedModule = '';
+        // emit a submitted event so ModuleExecute can clear agents list.
+        this.$emit('submitted');
       }
 
-      this.selectedItem = {};
-      this.selectedModule = '';
       this.loading = false;
-
-      // emit a submitted event so ModuleExecute can clear agents list.
-      this.$emit('submitted');
     },
   },
 };

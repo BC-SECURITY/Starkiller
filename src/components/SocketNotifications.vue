@@ -31,10 +31,8 @@ export default {
       isLoggedIn: 'application/isLoggedIn',
       isChatWidget: 'application/isChatWidget',
       socketUrl: 'application/socketUrl',
+      token: 'application/token',
     }),
-    apiToken() {
-      return this.user.api_token;
-    },
   },
   watch: {
     isLoggedIn(val) {
@@ -65,11 +63,14 @@ export default {
   methods: {
     connect() {
       console.log('Opening Socket');
-      this.socket = io(`${this.socketUrl}?token=${this.apiToken}`, {
+      this.socket = io(`${this.socketUrl}`, {
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 10000,
+        auth: {
+          token: `${this.token}`,
+        },
       });
     },
     disconnect() {
@@ -78,6 +79,7 @@ export default {
       this.socket = null;
     },
     setHandlers() {
+      console.warn('setting handlers');
       this.socket.on('listeners/new', (data) => {
         this.$snack.info({
           text: `New Listener '${data.name}' started!`,
@@ -102,9 +104,6 @@ export default {
           }),
           dismissable: true,
         });
-        this.$store.dispatch('agent/addAgent', data);
-      });
-      this.socket.on('agents/stage2', (data) => {
         this.$store.dispatch('agent/addAgent', data);
       });
       this.plugins.forEach((plugin) => {
