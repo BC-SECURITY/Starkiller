@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a downloads page
 - sort file browser correctly
 
+## [1.11.0] - 2022-03-15
+- Added malleable profile management pages (Thank you to our Sponsors!)
+  - Create, delete, edit, and view malleable profiles
 
 ## [1.10.0] - 2022-02-14
 - Added bypass management pages (Thank you to our Sponsors!)
