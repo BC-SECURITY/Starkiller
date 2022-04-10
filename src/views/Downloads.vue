@@ -89,7 +89,7 @@
               <template #activator="{ on }">
                 <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
               </template>
-              <span>{{ moment(item.updated_at).format('lll') }}</span>
+              <span>{{ moment(item.updated_at).format('MMM D YYYY, h:mm:ss a') }}</span>
             </v-tooltip>
           </template>
           <template #item.created_at="{ item }">
@@ -97,7 +97,7 @@
               <template #activator="{ on }">
                 <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
               </template>
-              <span>{{ moment(item.created_at).format('lll') }}</span>
+              <span>{{ moment(item.created_at).format('MMM D YYYY, h:mm:ss a') }}</span>
             </v-tooltip>
           </template>
           <template #item.size="{ item }">

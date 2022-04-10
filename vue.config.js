@@ -1,5 +1,19 @@
+// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const webpack = require('webpack');
+
 module.exports = {
+  configureWebpack: {
+    plugins: [
+      // new BundleAnalyzerPlugin(),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/,
+      }),
+    ],
+  },
+
   lintOnSave: true,
+
   // change these to false while developing
   // to avoid the overlay yelling at you to lint.
   devServer: {
@@ -8,4 +22,8 @@ module.exports = {
       errors: true,
     },
   },
+
+  transpileDependencies: [
+    'vuetify',
+  ],
 };

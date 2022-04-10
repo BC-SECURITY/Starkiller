@@ -117,7 +117,7 @@
           <template #activator="{ on }">
             <span v-on="on">{{ moment(item.lastseen_time).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.lastseen_time).format('lll') }}</span>
+          <span>{{ moment(item.lastseen_time).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
       <template #item.checkin_time="{ item }">
@@ -125,7 +125,7 @@
           <template #activator="{ on }">
             <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.checkin_time).format('lll') }}</span>
+          <span>{{ moment(item.checkin_time).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
       <template #item.listener="{ item }">

@@ -155,8 +155,6 @@ export default {
 <style lang="scss">
 @import 'app.scss';
 
-@import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
-
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
