@@ -8,6 +8,7 @@ import ListenerModule from './ListenerModule';
 import StagerModule from './StagerModule';
 import AgentModule from './AgentModule';
 import ModuleModule from './ModuleModule';
+import ObfuscationModule from './ObfuscationModule';
 import CredentialModule from './CredentialModule';
 import PluginModule from './PluginModule';
 import ApplicationModule from './ApplicationModule';
@@ -29,6 +30,7 @@ export default new Vuex.Store({
     stager: StagerModule,
     agent: AgentModule,
     module: ModuleModule,
+    obfuscation: ObfuscationModule,
     credential: CredentialModule,
     bypass: BypassModule,
     malleable: MalleableModule,

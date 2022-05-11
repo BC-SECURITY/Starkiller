@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed API Token from settings, since the v2 api uses JWT
 - Add a downloads page
 - sort file browser correctly
+- Add an obfuscation page to manage keyword obfuscation and global obfuscation
 
 ## [1.11.0] - 2022-03-15
 - Added malleable profile management pages (Thank you to our Sponsors!)

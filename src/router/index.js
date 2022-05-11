@@ -160,6 +160,11 @@ const routes = [
     name: 'settings',
     component: () => import(/* webpackChunkName: "settings" */ '../views/Settings.vue'),
   },
+  {
+    path: '/obfuscation',
+    name: 'obfuscation',
+    component: () => import(/* webpackChunkName: "obfuscation" */ '../views/Obfuscation.vue'),
+  },
 ];
 
 const router = new VueRouter({
