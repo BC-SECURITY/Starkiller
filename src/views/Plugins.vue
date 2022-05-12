@@ -4,6 +4,8 @@
       :breads="breads"
       :show-create="false"
       :show-delete="false"
+      :show-refresh="true"
+      @refresh="getPlugins"
     />
     <v-data-table
       :headers="headers"
@@ -43,7 +45,6 @@ export default {
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Description', value: 'description' },
-        { text: 'Authors', value: 'authors' },
       ],
     };
   },

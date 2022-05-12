@@ -44,7 +44,7 @@
     >
       <info-viewer
         class="info-viewer"
-        :info-array="stagerInfoArray"
+        :info="stagerInfo"
       />
       <v-autocomplete
         v-model="selectedTemplate"
@@ -140,15 +140,10 @@ export default {
       if (this.id > 0) return { name: 'stagerNew', params: { copy: true, id: this.id } };
       return {};
     },
-    stagerInfoArray() {
-      const a = this.stagerTemplate || {};
-      if (Object.keys(a).length === 0) return [];
-
-      return [
-        { key: 'Authors', value: a.authors ? a.authors.join(', ') : '' },
-        { key: 'Comments', value: a.comments ? a.comments.join('\n') : '' },
-        { key: 'Description', value: a.description },
-      ];
+    stagerInfo() {
+      if (!this.stagerTemplate) return {};
+      const a = this.stagerTemplate;
+      return { authors: a.authors, description: a.description, comments: a.comments };
     },
     stagerOptions() {
       if (!this.isNew) {

@@ -78,7 +78,7 @@
     >
       <info-viewer
         class="info-viewer"
-        :info-array="listenerInfoArray"
+        :info="listenerInfo"
       />
       <v-autocomplete
         v-model="selectedTemplate"
@@ -178,15 +178,10 @@ export default {
       if (this.id > 0) return { name: 'listenerNew', params: { copy: true, id: this.id } };
       return {};
     },
-    listenerInfoArray() {
-      const a = this.listenerTemplate || {};
-      if (Object.keys(a).length === 0) return [];
-
-      return [
-        { key: 'Authors', value: a.authors ? a.authors.join(', ') : '' },
-        { key: 'Comments', value: a.comments ? a.comments.join('\n') : '' },
-        { key: 'Description', value: a.description },
-      ];
+    listenerInfo() {
+      if (!this.listenerTemplate) return {};
+      const a = this.listenerTemplate;
+      return { authors: a.authors, description: a.description, comments: a.comments };
     },
     listenerOptions() {
       if (!this.isNew) {

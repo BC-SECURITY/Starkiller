@@ -12,7 +12,7 @@
     >
       <info-viewer
         class="info-viewer"
-        :info-array="moduleInfoArray"
+        :info="moduleInfo"
       />
       <technique-chips :techniques="selectedItem.techniques" />
       <v-autocomplete
@@ -195,22 +195,24 @@ export default {
 
       return options;
     },
-    moduleInfoArray() {
+    moduleInfo() {
       if (Object.keys(this.selectedItem).length === 0) {
-        return [];
+        return {};
       }
 
-      return [
-        { key: 'Authors', value: this.selectedItem.authors.join(', ') },
-        { key: 'Comments', value: this.selectedItem.comments.join('\n') },
-        { key: 'Description', value: this.selectedItem.description },
-        { key: 'Language', value: this.selectedItem.language },
-        { key: 'MinLanguageVersion', value: this.selectedItem.min_language_version },
-        { key: 'Background', value: this.selectedItem.background },
-        { key: 'OpsecSafe', value: this.selectedItem.opsec_safe },
-        { key: 'NeedsAdmin', value: this.selectedItem.needs_admin },
-        { key: 'OutputExtensions', value: this.selectedItem.output_extensions },
-      ];
+      return {
+        authors: this.selectedItem.authors,
+        description: this.selectedItem.description,
+        comments: this.selectedItem.comments,
+        extraDetails: [
+          { key: 'Language', value: this.selectedItem.language },
+          { key: 'MinLanguageVersion', value: this.selectedItem.min_language_version },
+          { key: 'Background', value: this.selectedItem.background },
+          { key: 'OpsecSafe', value: this.selectedItem.opsec_safe },
+          { key: 'NeedsAdmin', value: this.selectedItem.needs_admin },
+          { key: 'OutputExtensions', value: this.selectedItem.output_extensions },
+        ],
+      };
     },
     errorStateMessage() {
       return `The resource 'module/${this.moduleName}' Not Found or is Disabled.`;

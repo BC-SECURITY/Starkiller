@@ -14,7 +14,7 @@
     <v-card style="padding: 10px">
       <info-viewer
         class="info-viewer"
-        :info-array="pluginInfoArray"
+        :info="pluginInfo"
       />
       <technique-chips :techniques="plugin.TechniqueChips" />
       <general-form
@@ -74,13 +74,13 @@ export default {
     plugin() {
       return this.plugins.find((p) => p.id === this.$route.params.id) || {};
     },
-    pluginInfoArray() {
-      if (Object.keys(this.plugin).length < 1) return [];
-      return [
-        { key: 'Authors', value: this.plugin.authors.join(', ') },
-        { key: 'Comments', value: this.plugin.comments.join('\n') },
-        { key: 'Description', value: this.plugin.description },
-      ];
+    pluginInfo() {
+      if (Object.keys(this.plugin).length < 1) return {};
+      return {
+        authors: this.plugin.authors,
+        description: this.plugin.description,
+        comments: this.plugin.comments,
+      };
     },
   },
   mounted() {
