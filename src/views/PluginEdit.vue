@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import GeneralForm from '@/components/GeneralForm.vue';
 import InfoViewer from '@/components/InfoViewer.vue';
 import * as pluginApi from '@/api/plugin-api';
@@ -36,7 +35,7 @@ import TechniqueChips from '@/components/TechniqueChips.vue';
 import EditPageTop from '@/components/EditPageTop.vue';
 
 export default {
-  name: 'PluginExecute',
+  name: 'PluginEdit',
   components: {
     InfoViewer,
     GeneralForm,
@@ -48,12 +47,10 @@ export default {
       reset: true,
       loading: false,
       form: {},
+      plugin: {},
     };
   },
   computed: {
-    ...mapState({
-      plugins: (state) => state.plugin.plugins,
-    }),
     breads() {
       return [
         {
@@ -63,16 +60,16 @@ export default {
           exact: true,
         },
         {
-          text: `${this.plugin.name}`,
+          text: this.breadcrumbName,
           disabled: true,
-          to: '/plugins/execute',
+          to: '/plugins/edit',
         },
       ];
     },
-    // todo refactor this to work like other pages where we can call
-    // the /api/plugin/:id/ endpoint instead of the list endpoint.
-    plugin() {
-      return this.plugins.find((p) => p.id === this.$route.params.id) || {};
+    breadcrumbName() {
+      if (this.plugin.name) return this.plugin.name;
+      if (this.id) return this.id;
+      return '';
     },
     pluginInfo() {
       if (Object.keys(this.plugin).length < 1) return {};
@@ -82,11 +79,18 @@ export default {
         comments: this.plugin.comments,
       };
     },
+    pluginOptions() {
+      const { options } = this.plugin;
+      if (!options) return {};
+
+      return options;
+    },
+    id() {
+      return this.$route.params.id;
+    },
   },
   mounted() {
-    if (this.plugins.length === 0) {
-      this.$store.dispatch('plugin/getPlugins');
-    }
+    this.getPlugin(this.id);
   },
   methods: {
     async submit() {
@@ -105,6 +109,18 @@ export default {
       }
 
       this.loading = false;
+    },
+    getPlugin(id) {
+      pluginApi.getPlugin(id)
+        .then((data) => {
+          this.reset = false;
+
+          this.plugin = data;
+          setTimeout(() => { this.reset = true; }, 500);
+        })
+        .catch(() => {
+          this.errorState = true;
+        });
     },
   },
 };

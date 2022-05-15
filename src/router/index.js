@@ -152,8 +152,8 @@ const routes = [
   },
   {
     path: '/plugins/:id',
-    name: 'pluginExecute',
-    component: () => import(/* webpackChunkName: "plugin-execute" */ '../views/PluginExecute.vue'),
+    name: 'pluginEdit',
+    component: () => import(/* webpackChunkName: "plugin-edit" */ '../views/PluginEdit.vue'),
   },
   {
     path: '/settings',

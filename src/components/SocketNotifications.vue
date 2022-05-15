@@ -107,7 +107,7 @@ export default {
         this.$store.dispatch('agent/addAgent', data);
       });
       this.plugins.forEach((plugin) => {
-        this.socket.on(`plugins/${plugin.Name}/notifications`, (data) => {
+        this.socket.on(`plugins/${plugin.name}/notifications`, (data) => {
           this.$snack.info({
             text: `${data.plugin_name}: ${data.message}`,
             color: this.getColorForPluginMessage(data.message),

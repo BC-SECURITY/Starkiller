@@ -15,7 +15,7 @@
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'pluginExecute', params: { id: item.id } }"
+          :to="{ name: 'pluginEdit', params: { id: item.id } }"
         >
           {{ item.name }}
         </router-link>
