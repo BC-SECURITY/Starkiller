@@ -172,20 +172,20 @@ export default {
     file(val) {
       if (val) {
         if (this.language === 'python') {
-          if (this.internalPathToFile.length === 0) {
+          if (!this.internalPathToFile || this.internalPathToFile.length === 0) {
             this.internalPathToFile = `/tmp/${val.name}`;
           } else if (this.internalPathToFile.endsWith('/')) {
-            this.internalPathToFile += this.fileName;
+            this.internalPathToFile += val.name;
           } else {
-            this.internalPathToFile += `/${this.fileName}`;
+            this.internalPathToFile = `/tmp/${val.name}`;
           }
         } else if (this.language === 'powershell') {
-          if (this.internalPathToFile.length === 0) {
+          if (!this.internalPathToFile || this.internalPathToFile.length === 0) {
             this.internalPathToFile = `C:\\tmp\\${val.name}`;
           } else if (this.internalPathToFile.endsWith('/') || this.internalPathToFile.endsWith('\\')) {
-            this.internalPathToFile += this.fileName;
+            this.internalPathToFile += val.name;
           } else {
-            this.internalPathToFile += `\\${this.fileName}`;
+            this.internalPathToFile = `C:\\tmp\\${val.name}`;
           }
         }
       }
@@ -194,20 +194,20 @@ export default {
       if (val) {
         const { filename } = val;
         if (this.language === 'python') {
-          if (this.internalPathToFile.length === 0) {
-            this.internalPathToFile = `/tmp/${val.name}`;
+          if (!this.internalPathToFile || this.internalPathToFile.length === 0) {
+            this.internalPathToFile = `/tmp/${filename}`;
           } else if (this.internalPathToFile.endsWith('/')) {
             this.internalPathToFile += filename;
           } else {
-            this.internalPathToFile += `/${filename}`;
+            this.internalPathToFile = `/tmp/${filename}`;
           }
         } else if (this.language === 'powershell') {
-          if (this.internalPathToFile.length === 0) {
-            this.internalPathToFile = `C:\\tmp\\${val.name}`;
+          if (!this.internalPathToFile || this.internalPathToFile.length === 0) {
+            this.internalPathToFile = `C:\\tmp\\${filename}`;
           } else if (this.internalPathToFile.endsWith('/') || this.internalPathToFile.endsWith('\\')) {
             this.internalPathToFile += filename;
           } else {
-            this.internalPathToFile += `\\${filename}`;
+            this.internalPathToFile = `C:\\tmp\\${filename}`;
           }
         }
       }

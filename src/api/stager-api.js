@@ -42,8 +42,8 @@ export function createStager(template, name, options) {
  * Update a stager.
  * @param {Object} options the options needed for creating a stager.
  */
-export function updateStager(stager) {
-  return axios.put(`/stagers/${stager.id}`, stager)
+export function updateStager(id, options) {
+  return axios.put(`/stagers/${id}`, options)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(error.response ? error.response.data.detail : error));
 }

@@ -198,6 +198,7 @@ export default {
           value: 'stager',
         },
       ],
+      debouncedSearch: debounce(this.search, 500),
     };
   },
   computed: {
@@ -221,7 +222,6 @@ export default {
     },
   },
   async mounted() {
-    this.debouncedSearch = debounce(this.search, 500);
     this.selectedSources = this.sources.map((s) => s.value);
     this.search();
   },
@@ -267,6 +267,7 @@ export default {
       data.append('file', this.selectedFile);
 
       await downloadApi.createDownload(data);
+      this.$snack.success('Upload complete');
       this.debouncedSearch();
     },
     handleFilterChange() {

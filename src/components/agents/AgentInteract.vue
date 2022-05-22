@@ -10,12 +10,37 @@
           <v-col
             cols="8"
           >
-            <v-text-field
-              v-model="form.command"
-              dense
-              outlined
-              label="Shell Command"
-            />
+            <div style="display: flex;">
+              <v-tooltip
+                bottom
+              >
+                <template #activator="{ on }">
+                  <v-icon
+                    small
+                    class="pr-2"
+                    v-on="on"
+                  >
+                    fa-question-circle
+                  </v-icon>
+                </template>
+                <p>{{ tooltipText }}</p>
+                <p>{{ tooltipText2 }}</p>
+              </v-tooltip>
+              <v-tooltip>
+                <v-icon>
+                  fa-info-circle
+                </v-icon>
+                <span>
+                  This is the name of the agent.
+                </span>
+              </v-tooltip>
+              <v-text-field
+                v-model="form.command"
+                dense
+                outlined
+                label="Shell Command"
+              />
+            </div>
           </v-col>
           <v-col
             cols="4"
@@ -52,6 +77,8 @@ export default {
         command: '',
       },
       commands: [],
+      tooltipText: "To bypass aliased commands such as 'ps', 'ipconfig', or 'whoami',",
+      tooltipText2: "prefix the command with 'shell' such as shell \"whoami /groups\"",
     };
   },
   methods: {

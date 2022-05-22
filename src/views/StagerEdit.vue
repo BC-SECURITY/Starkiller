@@ -232,7 +232,7 @@ export default {
 
       this.loading = true;
       if (this.id > 0) {
-        stagerApi.updateStager(this.id, this.form)
+        stagerApi.updateStager(this.id, { name: this.stager.name, options: this.form })
           .then(() => {
             this.$snack.success('Stager updated');
             this.loading = false;

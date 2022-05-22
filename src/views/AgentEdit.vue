@@ -423,6 +423,7 @@ export default {
       this.uploadLoading = true;
       try {
         await agentApi.uploadFile(this.agent.session_id, file, pathToFile);
+        this.$snack.success(`Tasked agent ${this.agent.name} to upload file to ${pathToFile}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
@@ -436,6 +437,7 @@ export default {
       this.downloadLoading = true;
       try {
         await agentApi.downloadFile(this.agent.session_id, pathToFile);
+        this.$snack.success(`Tasked agent ${this.agent.name} to downloaded file ${pathToFile}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
