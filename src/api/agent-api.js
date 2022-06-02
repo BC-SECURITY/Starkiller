@@ -164,7 +164,7 @@ export function downloadFile(name, pathToFile) {
 }
 
 export function updateComms(name, listener) {
-  return axios.put(`/agents/${name}/update_comms`, { listener })
+  return axios.post(`/agents/${name}/tasks/update_comms`, { new_listener_id: listener })
     .then(({ data }) => data.success)
     .catch((error) => Promise.reject(error.response.data.error));
 }

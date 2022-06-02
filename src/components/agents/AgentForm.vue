@@ -42,7 +42,7 @@
         v-model="form.listener"
         label="Listener"
         data-type="string"
-        :suggested-values="listeners"
+        :suggested-values="listeners.map(l => l.name)"
         :strict="true"
         :editable="!readOnly"
         @update="updateListener"
@@ -182,7 +182,7 @@ export default {
   },
   computed: {
     ...mapState({
-      listeners: (state) => state.listener.listeners.map((l) => l.name),
+      listeners: (state) => state.listener.listeners,
     }),
     fields() {
       // stale comes back as a boolean, while no other property does and el-input
@@ -248,7 +248,8 @@ export default {
       if (this.agent.listener === this.form.listener) return;
 
       try {
-        await agentApi.updateComms(this.agent.session_id, this.form.listener);
+        const listenerId = this.listeners.filter((l) => l.name === this.form.listener)[0].id;
+        await agentApi.updateComms(this.agent.session_id, listenerId);
       } catch (err) {
         this.$snack.error(`Update agent listener failed: ${err}`);
         return;
