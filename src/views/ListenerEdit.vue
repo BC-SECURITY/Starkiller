@@ -2,7 +2,7 @@
   <div>
     <edit-page-top
       :breads="breads"
-      :show-submit="true && initialLoad"
+      :show-submit="initialLoad"
       :disable-submit="!canEdit && initialLoad"
       :show-copy="id > 0 && initialLoad"
       :show-delete="id > 0 && initialLoad"
@@ -184,7 +184,7 @@ export default {
       return { authors: a.authors, description: a.description, comments: a.comments };
     },
     listenerOptions() {
-      if (!this.isNew) {
+      if (!this.isNew || this.isCopy) {
         // if its not new, set the options
         // iterate over the options in this.listener and set the values
         const options = {};
@@ -247,7 +247,9 @@ export default {
     this.$store.dispatch('listener/getListenerTemplates');
 
     if (!this.isNew || this.isCopy) {
-      this.getListener(this.id);
+      // using the route param id instad of this.id
+      // since this.id is 0 for copies.
+      this.getListener(this.$route.params.id);
     }
   },
   methods: {

@@ -78,7 +78,6 @@ export default {
         },
       ],
       headers: [
-        { text: 'id', align: 'start', value: 'id' },
         { text: 'Name', value: 'username' },
         { text: 'Is Admin', value: 'is_admin' },
         { text: 'Actions', value: 'actions', sortable: false },

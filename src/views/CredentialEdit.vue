@@ -2,10 +2,10 @@
   <div>
     <edit-page-top
       :breads="breads"
-      :show-submit="true"
-      :show-copy="!!id"
-      :show-delete="!!id"
-      :submit-loading="loading"
+      :show-submit="initialLoad"
+      :show-copy="id > 0 && initialLoad"
+      :show-delete="id > 0 && initialLoad"
+      :submit-loading="loading && initialLoad"
       :copy-link="copyLink"
       :small-copy="true"
       :small-delete="true"
@@ -50,7 +50,7 @@ export default {
     return {
       reset: true,
       loading: false,
-      initialLoad: true,
+      initialLoad: false,
       credential: {},
       form: {},
       errorState: false,
@@ -88,7 +88,7 @@ export default {
       return true;
     },
     id() {
-      return this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id;
     },
     copyLink() {
       if (this.id > 0) return { name: 'credentialNew', params: { copy: true, id: this.id } };
@@ -121,7 +121,11 @@ export default {
   },
   mounted() {
     if (!this.isNew || this.isCopy) {
-      this.getCredential(this.id);
+      // using the route param id instad of this.id
+      // since this.id is 0 for copies.
+      this.getCredential(this.$route.params.id);
+    } else {
+      this.initialLoad = true;
     }
   },
   methods: {
@@ -131,20 +135,20 @@ export default {
       }
 
       this.loading = true;
-      if (this.isNew) {
-        credentialApi.createCredential(this.form)
-          .then(({ id }) => {
+      if (this.id > 0) {
+        credentialApi.updateCredential(this.id, this.form)
+          .then(() => {
             this.loading = false;
-            this.$router.push({ name: 'credentialEdit', params: { id } });
           })
           .catch((err) => {
             this.$snack.error(`Error: ${err}`);
             this.loading = false;
           });
       } else {
-        credentialApi.updateCredential(this.id, this.form)
-          .then(() => {
+        credentialApi.createCredential(this.form)
+          .then(({ id }) => {
             this.loading = false;
+            this.$router.push({ name: 'credentialEdit', params: { id } });
           })
           .catch((err) => {
             this.$snack.error(`Error: ${err}`);
@@ -169,7 +173,7 @@ export default {
           this.reset = false;
 
           this.credential = data;
-          this.initialLoad = false;
+          this.initialLoad = true;
           setTimeout(() => { this.reset = true; }, 500);
         })
         .catch(() => {

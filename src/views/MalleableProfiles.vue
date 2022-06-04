@@ -38,7 +38,7 @@
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'malleableProfileEdit', params: { id: item.name }}"
+          :to="{ name: 'malleableProfileEdit', params: { id: item.id }}"
         >
           {{ item.name }}
         </router-link>
@@ -72,7 +72,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'malleableProfileEdit', params: { id: item.name }}"
+                :to="{ name: 'malleableProfileEdit', params: { id: item.id }}"
               >
                 <v-list-item-title>
                   <v-icon>fa-binoculars</v-icon>
@@ -82,7 +82,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'malleableProfileNew', params: { copy: true, id: item.name } }"
+              :to="{ name: 'malleableProfileNew', params: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>
@@ -159,18 +159,19 @@ export default {
       this.$router.push({ name: 'malleableProfileNew' });
     },
     view(item) {
-      this.$router.push({ name: 'malleableProfileEdit', params: { id: item.name } });
+      this.$router.push({ name: 'malleableProfileEdit', params: { id: item.id } });
     },
     async deleteMalleableProfile(item) {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete profile ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('malleable/deleteMalleableProfile', item.name);
+        this.$store.dispatch('malleable/deleteMalleableProfile', item.id);
       }
     },
     async deleteMalleableProfiles() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} profiles?`, { color: 'red' })) {
         this.selected.forEach((profile) => {
-          this.$store.dispatch('malleable/deleteMalleableProfile', profile.name);
+          this.$store.dispatch('malleable/deleteMalleableProfile', profile.id);
         });
+        this.selected = [];
       }
     },
   },

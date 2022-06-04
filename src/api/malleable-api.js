@@ -15,20 +15,20 @@ export function createMalleableProfile(name, category, code) {
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
-export function updateMalleableProfile(name, code) {
-  return axios.put(`/malleable-profiles/${name}`, { data: code })
+export function updateMalleableProfile(id, code) {
+  return axios.put(`/malleable-profiles/${id}`, { data: code })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(error.response.data.error));
 }
 
-export function getMalleableProfile(name) {
-  return axios.get(`/malleable-profiles/${name}`)
+export function getMalleableProfile(id) {
+  return axios.get(`/malleable-profiles/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(error.response.data.detail));
 }
 
-export function deleteMalleableProfile(name) {
-  return axios.delete(`/malleable-profiles/${name}`)
+export function deleteMalleableProfile(id) {
+  return axios.delete(`/malleable-profiles/${id}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(error.response.data.error));
 }

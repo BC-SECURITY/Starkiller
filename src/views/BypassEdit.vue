@@ -2,11 +2,14 @@
   <div>
     <edit-page-top
       :breads="breads"
-      :show-submit="true"
-      :show-copy="true"
-      :show-delete="!canEdit"
-      :submit-loading="loading"
+      :show-submit="initialLoad"
+      :disable-submit="!canEdit && initialLoad"
+      :show-copy="id > 0 && initialLoad"
+      :show-delete="id > 0 && initialLoad"
+      :submit-loading="loading && initialLoad"
       :copy-link="copyLink"
+      :small-copy="true"
+      :small-delete="true"
       @submit="submit"
       @delete="deleteBypass"
     />
@@ -81,6 +84,27 @@ export default {
     };
   },
   computed: {
+    isNew() {
+      return this.$route.name === 'bypassNew';
+    },
+    isCopy() {
+      return this.$route.params.copy === true;
+    },
+    mode() {
+      if (this.isCopy) return 'Copy';
+      if (this.isNew) return 'New';
+      return 'View';
+    },
+    canEdit() {
+      return true;
+    },
+    id() {
+      return this.isCopy ? 0 : this.$route.params.id;
+    },
+    copyLink() {
+      if (this.id > 0) return { name: 'bypassNew', params: { copy: true, id: this.id } };
+      return {};
+    },
     breads() {
       return [
         {
@@ -102,27 +126,6 @@ export default {
       if (this.id) return this.id;
       return 'New';
     },
-    isNew() {
-      return this.$route.name === 'bypassNew';
-    },
-    isCopy() {
-      return this.$route.params.copy === true;
-    },
-    mode() {
-      if (this.isCopy) return 'Copy';
-      if (this.isNew) return 'New';
-      return 'View';
-    },
-    canEdit() {
-      return this.isNew;
-    },
-    id() {
-      return this.$route.params.id;
-    },
-    copyLink() {
-      if (!this.canEdit) return { name: 'bypassNew', params: { copy: true, id: this.id } };
-      return {};
-    },
   },
   watch: {
     id(val) {
@@ -133,7 +136,11 @@ export default {
   },
   mounted() {
     if (!this.isNew || this.isCopy) {
-      this.getBypass(this.id);
+      // using the route param id instad of this.id
+      // since this.id is 0 for copies.
+      this.getBypass(this.$route.params.id);
+    } else {
+      this.initialLoad = true;
     }
   },
   methods: {
@@ -141,36 +148,30 @@ export default {
       if (this.loading || !this.$refs.form.validate()) {
         return;
       }
+
       this.loading = true;
-      if (this.isNew) {
-        await this.create();
+      if (this.id > 0) {
+        bypassApi.updateBypass(this.form.id, this.form.name, this.form.code)
+          .then(() => {
+            this.$snack.success('Bypass updated');
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       } else {
-        await this.update();
+        bypassApi.createBypass(this.form.name, this.form.code)
+          .then(({ id }) => {
+            this.$snack.success('Bypass created');
+            this.loading = false;
+            this.$router.push({ name: 'bypassEdit', params: { id } });
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       }
-      this.loading = false;
-    },
-    create() {
-      return bypassApi.createBypass(this.form.name, this.form.code)
-        .then((res) => {
-          console.log(res);
-          this.$router.push({ name: 'bypassEdit', params: { id: res.id } });
-        })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    update() {
-      return bypassApi.updateBypass(this.form.id, this.form.name, this.form.code)
-        .then(() => this.$router.push({ name: 'bypasses' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    getBypass(id) {
-      bypassApi.getBypass(id)
-        .then((data) => {
-          this.bypass = { ...data };
-          Vue.set(this, 'form', { ...data });
-        })
-        .catch(() => {
-          this.errorState = true;
-        });
     },
     async deleteBypass() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete bypass ${this.form.name}?`, { color: 'red' })) {
@@ -181,6 +182,17 @@ export default {
           this.$snack.error(`Error: ${err}`);
         }
       }
+    },
+    getBypass(id) {
+      bypassApi.getBypass(id)
+        .then((data) => {
+          this.bypass = { ...data };
+          this.initialLoad = true;
+          Vue.set(this, 'form', { ...data });
+        })
+        .catch(() => {
+          this.errorState = true;
+        });
     },
   },
 };
