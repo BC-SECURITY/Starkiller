@@ -32,10 +32,9 @@ export default {
       await obfuscationApi.deleteKeyword(id);
       context.commit('removeKeyword', id);
     },
-    // todo maybe there should be a list endpoint for this.
     async getConfigs(context) {
-      const config = await obfuscationApi.getObfuscationConfig();
-      context.commit('setConfigs', [config]);
+      const configs = await obfuscationApi.getObfuscationConfigs();
+      context.commit('setConfigs', configs);
     },
   },
   getters: {

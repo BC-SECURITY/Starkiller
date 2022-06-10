@@ -21,6 +21,12 @@ export function deleteKeyword(id) {
     .catch((error) => Promise.reject(error.response.data.detail));
 }
 
+export function getObfuscationConfigs() {
+  return axios.get('/obfuscation/global')
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(error.response.data.detail));
+}
+
 export function getObfuscationConfig(language = 'powershell') {
   return axios.get(`/obfuscation/global/${language}`)
     .then(({ data }) => data)

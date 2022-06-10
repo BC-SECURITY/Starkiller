@@ -187,7 +187,7 @@
                 <v-text-field
                   v-model="config.command"
                   label="Command"
-                  :rules="[v => !!v || 'Command is required']"
+                  :rules="config.language !== 'csharp' ? [v => !!v || 'Command is required'] : []"
                   dense
                   outlined
                   :readonly="readonly"
@@ -211,6 +211,7 @@
                 Save
               </v-btn>
               <v-btn
+                :disabled="!config.preobfuscatable"
                 text
                 color="primary"
                 @click="openPreobfuscateDialog(config)"
@@ -218,6 +219,7 @@
                 Preobfuscate
               </v-btn>
               <v-btn
+                :disabled="!config.preobfuscatable"
                 text
                 color="error"
                 @click="deletePreobfuscatedModules(config)"
@@ -330,7 +332,11 @@ export default {
     async editConfig(config) {
       try {
         await obfuscationApi.updateObfuscationConfig(config);
-        this.$snack.success('Updated config. Use "preobfuscate" to re-apply obfuscation.');
+        if (config.preobfuscatable) {
+          this.$snack.success('Updated config. Use "preobfuscate" to re-apply obfuscation.');
+        } else {
+          this.$snack.success('Updated config.');
+        }
       } catch (e) {
         this.$snack.error(`${e}`);
       }
