@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 import qs from 'qs';
 
 export function getDownloads({
@@ -15,7 +15,8 @@ export function getDownloads({
     },
     paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat', skipNulls: true }),
   })
-    .then((response) => response.data);
+    .then((response) => response.data)
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function createDownload(data) {
@@ -42,7 +43,7 @@ export function getDownload(id) {
       link.click();
       document.body.removeChild(link);
     })
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getDownloadAsUrl(id) {
@@ -52,11 +53,11 @@ export function getDownloadAsUrl(id) {
       const url = window.URL.createObjectURL(blob);
       return url;
     })
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getDownloadAsText(id) {
   return axios.get(`/downloads/${id}/download`, { responseType: 'text' })
     .then((response) => response.data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }

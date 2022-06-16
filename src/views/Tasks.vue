@@ -221,7 +221,6 @@ import { mapState } from 'vuex';
 import moment from 'moment';
 import Vue from 'vue';
 
-// todo might be able to remove reporting-api file
 import * as agentApi from '@/api/agent-api';
 import * as downloadApi from '@/api/download-api';
 
@@ -229,7 +228,7 @@ import ListPageTop from '@/components/ListPageTop.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 
 export default {
-  name: 'Reporting',
+  name: 'Tasks',
   components: {
     ListPageTop,
     TooltipButton,
@@ -238,9 +237,9 @@ export default {
     return {
       breads: [
         {
-          text: 'Reporting',
+          text: 'Tasks',
           disabled: true,
-          href: '/reporting',
+          href: '/tasks',
         },
       ],
       selectedAgents: [],

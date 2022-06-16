@@ -219,6 +219,11 @@ export default {
     },
   },
   watch: {
+    modules(val) {
+      if (val.length > 0) {
+        this.handleSelect(this.moduleName);
+      }
+    },
     selectedModule(newVal) {
       this.emitModuleChange(newVal);
     },
@@ -235,6 +240,7 @@ export default {
   },
   methods: {
     async handleSelect(item) {
+      this.errorState = false;
       if (item === '' || item == null) {
         this.reset = false;
         this.selectedItem = {};

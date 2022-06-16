@@ -141,9 +141,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "downloads" */ '../views/Downloads.vue'),
   },
   {
-    path: '/reporting',
-    name: 'reporting',
-    component: () => import(/* webpackChunkName: "reporting" */ '../views/Reporting.vue'),
+    path: '/tasks',
+    name: 'tasks',
+    component: () => import(/* webpackChunkName: "tasks" */ '../views/Tasks.vue'),
   },
   {
     path: '/plugins',

@@ -17,6 +17,15 @@
         />
       </template>
     </list-page-top>
+    <div
+      class="ml-3 mr-3 align-center"
+      style="display: flex; "
+    >
+      <v-switch
+        v-model="showIds"
+        label="Show IDs"
+      />
+    </div>
     <v-data-table
       :headers="headers"
       :items="modules"
@@ -25,10 +34,18 @@
       }"
       :items-per-page="15"
       :search="filter"
-      item-key="name"
+      item-key="id"
       show-expand
       dense
     >
+      <template #item.id="{ item }">
+        <router-link
+          style="color: inherit;"
+          :to="{ name: 'moduleExecute', params: { id: item.id } }"
+        >
+          {{ item.id }}
+        </router-link>
+      </template>
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
@@ -92,20 +109,6 @@ export default {
   },
   data() {
     return {
-      headers: [
-        {
-          text: 'Name',
-          align: 'start',
-          value: 'name',
-        },
-        { text: 'Language', value: 'language', sort: this.sortLanguage },
-        { text: 'Needs Admin', value: 'needs_admin', width: '75px' },
-        { text: 'Opsec Safe', value: 'opsec_safe', width: '75px' },
-        { text: 'Background', value: 'background', width: '75px' },
-        {
-          text: 'Techniques', value: 'techniques', width: '300px', sortable: false,
-        },
-      ],
       filter: '',
       filteredModules: [],
       breads: [
@@ -115,12 +118,37 @@ export default {
           href: '/modules',
         },
       ],
+      showIds: true,
     };
   },
   computed: {
     ...mapState({
       modules: (state) => state.module.modules,
     }),
+    headers() {
+      const headers = [
+        {
+          text: 'Name',
+          value: 'name',
+        },
+        { text: 'Language', value: 'language', sort: this.sortLanguage },
+        { text: 'Needs Admin', value: 'needs_admin', width: '75px' },
+        { text: 'Opsec Safe', value: 'opsec_safe', width: '75px' },
+        { text: 'Background', value: 'background', width: '75px' },
+        {
+          text: 'Techniques', value: 'techniques', width: '300px', sortable: false,
+        },
+      ];
+      if (this.showIds) {
+        headers.unshift({
+          text: 'id',
+          align: 'start',
+          value: 'id',
+        });
+      }
+
+      return headers;
+    },
   },
   mounted() {
     this.$store.dispatch('module/getModules');

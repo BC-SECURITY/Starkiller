@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a full list of modules.
@@ -6,14 +6,12 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getModules() {
   return axios.get('/modules')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 // todo move to agent-api.js or create a agent-task-api.js
 /**
  * Executes a module against an agent.
- * @param {*} name module name
- * @param {*} options module options
  */
 export function executeModule(name, options, ignoreAdminCheck, ignoreLanguageCheck) {
   return axios.post(`/agents/${options.Agent}/tasks/module/`, {
@@ -22,7 +20,7 @@ export function executeModule(name, options, ignoreAdminCheck, ignoreLanguageChe
     ignore_admin_check: ignoreAdminCheck,
     ignore_language_version_check: ignoreLanguageCheck,
   })
-    .then(({ data }) => ({ agent: options.Agent, message: data.msg, taskID: data.id }))
+    .then(({ data }) => ({ agent: options.Agent, ...data }))
     // eslint-disable-next-line prefer-promise-reject-errors
-    .catch((error) => Promise.reject({ agent: options.Agent, error: error.response.data.detail }));
+    .catch((error) => Promise.reject({ agent: options.Agent, error: handleError(error) }));
 }

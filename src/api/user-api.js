@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a single users.
@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getUser(id) {
   return axios.get(`/users/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -15,7 +15,7 @@ export function getUser(id) {
 export function getUsers() {
   return axios.get('/users')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -26,7 +26,7 @@ export function getUsers() {
 export function createUser(user) {
   return axios.post('/users', user)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -35,7 +35,7 @@ export function createUser(user) {
 export function updateUser(user) {
   return axios.put(`/users/${user.id}`, user)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -46,5 +46,5 @@ export function updateUser(user) {
 export function updatePassword(id, password) {
   return axios.put(`/users/${id}/password`, { password })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }

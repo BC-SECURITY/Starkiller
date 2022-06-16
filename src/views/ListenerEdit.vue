@@ -266,6 +266,16 @@ export default {
             this.loading = false;
           })
           .catch((err) => {
+            // if (typeof err === 'object') {
+            // err.details.forEach((detail) => {
+            // Here we could set an error object on the form
+            // Hot going to do it atm since it would require doing
+            // some refactoring of the GeneralForm and DynamicFormInput
+            // and most (all?) of the validations that would be needed
+            // are already done client side.
+            // const field = detail.loc[1]
+            // this.errors[field] = detail.msg
+            // });
             if (err.startsWith('[*]')) {
               this.validationMessage = err;
             } else {

@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a full list of plugins.
@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getPlugins() {
   return axios.get('/plugins')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -16,7 +16,7 @@ export function getPlugins() {
 export function getPlugin(name) {
   return axios.get(`/plugins/${name}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -25,5 +25,5 @@ export function getPlugin(name) {
 export function executePlugin(name, options) {
   return axios.post(`/plugins/${name}/execute`, { options })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }

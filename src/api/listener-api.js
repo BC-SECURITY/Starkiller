@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a single listener.
@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getListener(id) {
   return axios.get(`/listeners/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -15,7 +15,7 @@ export function getListener(id) {
 export function getListeners() {
   return axios.get('/listeners')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -25,7 +25,7 @@ export function getListeners() {
 export function getListenerTemplate(templateId) {
   return axios.get(`/listener-templates/${templateId}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -37,7 +37,7 @@ export function createListener(template, options) {
     .then(({ data }) => data)
     .catch((error) => {
       console.log(error);
-      return Promise.reject(error.response ? error.response.data.detail : error);
+      return Promise.reject(handleError(error));
     });
 }
 
@@ -48,7 +48,7 @@ export function createListener(template, options) {
 export function updateListener(listener) {
   return axios.put(`/listeners/${listener.id}`, listener)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response ? error.response.data.detail : error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -57,7 +57,7 @@ export function updateListener(listener) {
 export function getListenerTemplates() {
   return axios.get('/listener-templates')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -66,5 +66,5 @@ export function getListenerTemplates() {
  */
 export function killListener(name) {
   return axios.delete(`/listeners/${name}`)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }

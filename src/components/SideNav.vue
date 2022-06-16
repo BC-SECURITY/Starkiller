@@ -87,7 +87,7 @@ export default {
         { title: 'Modules', pathName: 'modules', icon: 'fa-grip-horizontal' },
         { title: 'Obfuscation', pathName: 'obfuscation', icon: 'fa-magic' },
         { title: 'Credentials', pathName: 'credentials', icon: 'fa-key' },
-        { title: 'Reporting', pathName: 'reporting', icon: 'fa-sticky-note' },
+        { title: 'Tasks', pathName: 'tasks', icon: 'fa-sticky-note' },
         { title: 'Malleable Profiles', pathName: 'malleableProfiles', icon: 'fa-random' },
         { title: 'Bypasses', pathName: 'bypasses', icon: 'fa-shield-virus' },
         { title: 'Plugins', pathName: 'plugins', icon: 'fa-plug' },

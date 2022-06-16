@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a full list of credentials.
@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getCredentials() {
   return axios.get('/credentials')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -15,7 +15,7 @@ export function getCredentials() {
 export function getCredential(id) {
   return axios.get(`/credentials/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -24,7 +24,7 @@ export function getCredential(id) {
 export function updateCredential(id, options) {
   return axios.put(`/credentials/${id}`, options)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -33,7 +33,7 @@ export function updateCredential(id, options) {
 export function createCredential(options) {
   return axios.post('/credentials', options)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response ? error.response.data.detail : error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -41,5 +41,5 @@ export function createCredential(options) {
  */
 export function deleteCredential(id) {
   return axios.delete(`/credentials/${id}`)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }

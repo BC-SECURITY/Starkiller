@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 import qs from 'qs';
 
 /**
@@ -7,7 +7,7 @@ import qs from 'qs';
 export function getAgent(name) {
   return axios.get(`/agents/${name}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -16,7 +16,7 @@ export function getAgent(name) {
 export function getAgents(includeArchived = false) {
   return axios.get('/agents', { params: { include_archived: includeArchived } })
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 // todo name should be session id on all these endpoints.
@@ -27,7 +27,7 @@ export function getAgents(includeArchived = false) {
 export function renameAgent(agent, newName) {
   return axios.put(`/agents/${agent.session_id}`, { ...agent, name: newName })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -38,7 +38,7 @@ export function killAgent(name) {
   console.log('killAgent', name);
   return axios.post(`/agents/${name}/tasks/exit`, {})
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -47,7 +47,7 @@ export function killAgent(name) {
  */
 export function removeAgent(name) {
   return axios.delete(`/agents/${name}`)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -57,7 +57,7 @@ export function removeAgent(name) {
 export function getTask(name, taskId) {
   return axios.get(`/agents/${name}/tasks/${taskId}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -99,7 +99,7 @@ export function getTasks(agentId, {
     paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat', skipNulls: true }),
   })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -107,13 +107,15 @@ export function getTasks(agentId, {
  * @param {string} name agent name
  */
 export function getDirectory(name, directory) {
+  // todo vr how are directory names being serialized?
   let uri = `/agents/${name}/files/${directory}`;
   if (directory === '/') {
     uri = `/agents/${name}/files/root`;
   }
+  // todo vr is this the right response/
   return axios.get(uri)
     .then(({ data }) => data.children)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -123,7 +125,7 @@ export function getDirectory(name, directory) {
 export function scrapeDirectory(name, directory) {
   return axios.post(`/agents/${name}/tasks/directory_list`, { path: directory })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -132,8 +134,8 @@ export function scrapeDirectory(name, directory) {
  */
 export function shell(name, command) {
   return axios.post(`/agents/${name}/tasks/shell`, { command })
-    .then(({ data }) => data.taskID)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -142,7 +144,7 @@ export function shell(name, command) {
  */
 export function deleteTask(name, taskId) {
   return axios.delete(`/agents/${name}/tasks/${taskId}`)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -151,7 +153,7 @@ export function deleteTask(name, taskId) {
 export function uploadFile(name, fileId, pathToFile) {
   return axios.post(`/agents/${name}/tasks/upload`, { path_to_file: pathToFile, file_id: fileId })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -160,29 +162,29 @@ export function uploadFile(name, fileId, pathToFile) {
 export function downloadFile(name, pathToFile) {
   return axios.post(`/agents/${name}/tasks/download`, { path_to_file: pathToFile })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateComms(name, listener) {
   return axios.post(`/agents/${name}/tasks/update_comms`, { new_listener_id: listener })
-    .then(({ data }) => data.success)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateKillDate(name, killDate) {
   return axios.post(`/agents/${name}/tasks/kill_date`, { kill_date: killDate })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateWorkingHours(name, workingHours) {
   return axios.post(`/agents/${name}/tasks/working_hours`, { working_hours: workingHours })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateSleep(name, delay, jitter) {
   return axios.post(`/agents/${name}/tasks/sleep`, { delay, jitter })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }

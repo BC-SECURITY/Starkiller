@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a full list of bypasses.
@@ -7,29 +7,29 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getBypasses() {
   return axios.get('/bypasses')
     .then(({ data }) => data.records)
-    .catch((error) => Promise.reject(error.response.data.detail));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getBypass(id) {
   return axios.get(`/bypasses/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function createBypass(name, code) {
   return axios.post('/bypasses', { name, code })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateBypass(id, name, code) {
   return axios.put(`/bypasses/${id}`, { name, code })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteBypass(id) {
   return axios.delete(`/bypasses/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
