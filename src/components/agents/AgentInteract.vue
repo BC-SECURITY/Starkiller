@@ -11,6 +11,11 @@
             cols="8"
           >
             <div style="display: flex;">
+              <v-checkbox
+                v-model="form.literal"
+                class="pr-2"
+                label="Literal"
+              />
               <v-tooltip
                 bottom
               >
@@ -24,15 +29,6 @@
                   </v-icon>
                 </template>
                 <p>{{ tooltipText }}</p>
-                <p>{{ tooltipText2 }}</p>
-              </v-tooltip>
-              <v-tooltip>
-                <v-icon>
-                  fa-info-circle
-                </v-icon>
-                <span>
-                  This is the name of the agent.
-                </span>
               </v-tooltip>
               <v-text-field
                 v-model="form.command"
@@ -75,10 +71,10 @@ export default {
       loading: false,
       form: {
         command: '',
+        literal: false,
       },
       commands: [],
-      tooltipText: "To bypass aliased commands such as 'ps', 'ipconfig', or 'whoami',",
-      tooltipText2: "prefix the command with 'shell' such as shell \"whoami /groups\"",
+      tooltipText: 'This will ensure that aliased commands such as whoami or ps do not execute the built-in agent aliases.',
     };
   },
   methods: {
@@ -88,7 +84,7 @@ export default {
       }
 
       this.loading = true;
-      await agentApi.shell(this.agent.name, this.form.command);
+      await agentApi.shell(this.agent.name, this.form.command, this.form.literal);
       this.form.command = '';
       this.loading = false;
       this.$snack.success(`Shell Command queued for ${this.agent.name}`);

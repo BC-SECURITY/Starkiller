@@ -112,7 +112,6 @@ export function getDirectory(name, directory) {
   if (directory === '/') {
     uri = `/agents/${name}/files/root`;
   }
-  // todo vr is this the right response/
   return axios.get(uri)
     .then(({ data }) => data.children)
     .catch((error) => Promise.reject(handleError(error)));
@@ -132,8 +131,8 @@ export function scrapeDirectory(name, directory) {
  * Task an agent to run a shell command.
  * @param {string} name agent name
  */
-export function shell(name, command) {
-  return axios.post(`/agents/${name}/tasks/shell`, { command })
+export function shell(name, command, literal = false) {
+  return axios.post(`/agents/${name}/tasks/shell`, { command, literal })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
