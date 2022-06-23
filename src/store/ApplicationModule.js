@@ -84,8 +84,8 @@ export default {
         formData.append('password', password);
         const token = await axios.post(`${url}/token`, formData);
 
-        const user = await axios.get(`${url}/api/v2beta/users/me`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
-        const version = await axios.get(`${url}/api/v2beta/meta/version`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
+        const user = await axios.get(`${url}/api/v2/users/me`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
+        const version = await axios.get(`${url}/api/v2/meta/version`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
         context.commit('setApplicationState', {
           token: token.data.access_token,
           url,

@@ -8,7 +8,7 @@ export let axiosInstance = null;
 
 export function setInstance(url, token) {
   axiosInstance = axios.create({
-    baseURL: `${url}/api/v2beta`,
+    baseURL: `${url}/api/v2`,
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
   });
 
