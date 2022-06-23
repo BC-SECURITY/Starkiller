@@ -204,7 +204,7 @@
                 >
                   <v-list-item-title>
                     <v-icon>fa-download</v-icon>
-                    Download {{ download.file_name }}
+                    Download {{ download.filename }}
                   </v-list-item-title>
                 </v-list-item>
               </v-list>

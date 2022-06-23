@@ -41,7 +41,7 @@
             <p><b>Task Output:</b></p>
             <div
               v-if="item.downloads.length > 0
-                && item.downloads.some(d => d.file_name.match(/[^/]+(jpg|jpeg|png|gif)$/))"
+                && item.downloads.some(d => d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/))"
             >
               <v-btn
                 text
@@ -55,7 +55,7 @@
                   v-for="download in item.downloads"
                   :key="download.id"
                   :src="imageData(item, download)"
-                  :alt="download.file_name"
+                  :alt="download.filename"
                   :max-width="700"
                   contain
                 />
@@ -166,7 +166,7 @@
             >
               <v-list-item-title>
                 <v-icon>fa-download</v-icon>
-                Download {{ download.file_name }}
+                Download {{ download.filename }}
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -321,7 +321,7 @@ export default {
       for (let i = 0; i < task.downloads.length; i++) {
         const download = task.downloads[i];
         if (!this.expandedTasks[task.id].downloads[download.id]?.image
-          && download.file_name.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
+          && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
           // eslint-disable-next-line
           const url = await downloadApi.getDownloadAsUrl(download.id);
           this.expandedTasks[task.id].downloads[i].image = url;
