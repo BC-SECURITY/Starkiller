@@ -14,6 +14,21 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header expand-icon="mdi-menu-down">
+              Search
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-text-field
+                v-model="search"
+                label="Search"
+                outlined
+                dense
+                required
+                @input="debouncedHandleSearch"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-menu-down">
               Agents
             </v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -220,6 +235,7 @@
 import { mapState } from 'vuex';
 import moment from 'moment';
 import Vue from 'vue';
+import debounce from 'lodash.debounce';
 
 import * as agentApi from '@/api/agent-api';
 import * as downloadApi from '@/api/download-api';
@@ -242,6 +258,7 @@ export default {
           href: '/tasks',
         },
       ],
+      search: '',
       selectedAgents: [],
       selectedUsers: [],
       tasks: [],
@@ -307,6 +324,8 @@ export default {
     this.selectedAgents = this.agents.map((a) => a.session_id);
     this.selectedUsers = this.users.map((u) => u.id);
     this.getTasks();
+
+    this.debouncedHandleSearch = debounce(this.handleSearch, 500);
   },
   // todo a lot of this stuff is copied from AgentCommandHistory and could probably be reused.
   methods: {
@@ -388,6 +407,7 @@ export default {
         sortBy: this.sortBy,
         sortOrder: this.sortDesc ? 'desc' : 'asc',
         users: this.selectedUsers,
+        search: this.search,
       });
       this.currentPage = response.page;
       this.totalPages = response.total_pages;
@@ -407,7 +427,10 @@ export default {
       this.tasks = response.records;
       this.loading = false;
     },
-    // todo where is debounced version?
+    handleSearch() {
+      this.getTasks();
+    },
+    // todo where is debounced version??
     // don't call this directly, use debouncedHandleFilterChange
     handleFilterChange() {
       this.getTasks();

@@ -11,26 +11,10 @@
         outlined
       />
       <div
-        v-if="!editSocket"
         style="margin-top: -30px; margin-bottom: 20px;"
       >
         <span class="caption grey--text font-weight-light">SocketIO: {{ form.socketUrl }}</span>
-        <!-- TODO I don't think this needs to be editable anymore -->
-        <!-- <v-icon
-          class="point"
-          small
-          @click="editSocket = true"
-        >
-          mdi-pencil
-        </v-icon> -->
       </div>
-      <v-text-field
-        v-else
-        v-model="form.socketUrl"
-        label="SocketIO Url"
-        dense
-        outlined
-      />
       <v-text-field
         v-model="form.username"
         label="Username"
@@ -72,7 +56,6 @@ export default {
       loading: false,
       showPassword: false,
       rememberMe: false,
-      editSocket: false,
       form: {
         url: '',
         username: '',

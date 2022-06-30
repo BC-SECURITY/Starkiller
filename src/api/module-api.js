@@ -9,7 +9,6 @@ export function getModules() {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-// todo move to agent-api.js or create a agent-task-api.js
 /**
  * Executes a module against an agent.
  */

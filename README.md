@@ -38,9 +38,9 @@ Thanks to our sponsors the following features which started as sponsor features 
 
 ## Build and run from source
 Prerequisites:
-* [Node.js](http://nodejs.org/) 10+.
+* [Node.js](http://nodejs.org/) 16+.
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
-Currently it has been tested using Yarn 1.22.0.
+Currently it has been tested using Yarn 1.22.
 ```
 yarn install
 ```

@@ -98,8 +98,6 @@ export default {
       ],
     };
   },
-  // TODO https://github.com/vuetifyjs/vuetify/issues/13309
-  // Once this issue is resolved, we can add the toggle functionality.
   computed: {
     expandOnHover() {
       return this.mini;

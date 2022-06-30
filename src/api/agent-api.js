@@ -4,8 +4,8 @@ import qs from 'qs';
 /**
  * Returns a single agent.
  */
-export function getAgent(name) {
-  return axios.get(`/agents/${name}`)
+export function getAgent(sessionId) {
+  return axios.get(`/agents/${sessionId}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -19,7 +19,6 @@ export function getAgents(includeArchived = false) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-// todo name should be session id on all these endpoints.
 // or even just id if we remove the numeric ids.
 /**
  * Rename an agent.
@@ -32,39 +31,39 @@ export function renameAgent(agent, newName) {
 
 /**
  * Kill an agent.
- * @param {string} name agent name
+ * @param {string} sessionId agent sessionId
  */
-export function killAgent(name) {
-  console.log('killAgent', name);
-  return axios.post(`/agents/${name}/tasks/exit`, {})
+export function killAgent(sessionId) {
+  console.log('killAgent', sessionId);
+  return axios.post(`/agents/${sessionId}/tasks/exit`, {})
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
  * Remove an agent.
- * @param {string} name agent name
+ * @param {string} sessionId sessionId name
  */
-export function removeAgent(name) {
-  return axios.delete(`/agents/${name}`)
+export function removeAgent(sessionId) {
+  return axios.delete(`/agents/${sessionId}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
  * Get a single task
- * @param {string} name agent name
+ * @param {string} sessionId sessionId name
  */
-export function getTask(name, taskId) {
-  return axios.get(`/agents/${name}/tasks/${taskId}`)
+export function getTask(sessionId, taskId) {
+  return axios.get(`/agents/${sessionId}/tasks/${taskId}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
  * Get tasking results for an agent.
- * @param {string} agentId agent's session_id. Can also be an array of session_ids.
+ * @param {string} sessionId agent's session_id. Can also be an array of session_ids.
  */
-export function getTasks(agentId, {
+export function getTasks(sessionId, {
   since = null,
   limit = 50,
   page = 1,
@@ -72,6 +71,7 @@ export function getTasks(agentId, {
   sortOrder = 'desc',
   status = null,
   users = null,
+  search = null,
 }) {
   const params = {
     since,
@@ -81,17 +81,18 @@ export function getTasks(agentId, {
     order_direction: sortOrder,
     status,
     users,
+    query: search,
   };
 
-  if (Array.isArray(agentId)) {
-    params.agents = agentId;
+  if (Array.isArray(sessionId)) {
+    params.agents = sessionId;
   }
 
   let url = '';
-  if (agentId == null || Array.isArray(agentId)) {
+  if (sessionId == null || Array.isArray(sessionId)) {
     url = '/agents/tasks';
   } else {
-    url = `/agents/${agentId}/tasks`;
+    url = `/agents/${sessionId}/tasks`;
   }
 
   return axios.get(url, {
@@ -104,13 +105,13 @@ export function getTasks(agentId, {
 
 /**
  * Get directory's files.
- * @param {string} name agent name
+ * @param {string} sessionId agent sessionId
  */
-export function getDirectory(name, directory) {
+export function getDirectory(sessionId, directory) {
   // todo vr how are directory names being serialized?
-  let uri = `/agents/${name}/files/${directory}`;
+  let uri = `/agents/${sessionId}/files/${directory}`;
   if (directory === '/') {
-    uri = `/agents/${name}/files/root`;
+    uri = `/agents/${sessionId}/files/root`;
   }
   return axios.get(uri)
     .then(({ data }) => data.children)
@@ -119,38 +120,38 @@ export function getDirectory(name, directory) {
 
 /**
  * Task an agent to scrape a directory.
- * @param {string} name agent name
+ * @param {string} sessionId agent sessionId
  */
-export function scrapeDirectory(name, directory) {
-  return axios.post(`/agents/${name}/tasks/directory_list`, { path: directory })
+export function scrapeDirectory(sessionId, directory) {
+  return axios.post(`/agents/${sessionId}/tasks/directory_list`, { path: directory })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
  * Task an agent to run a shell command.
- * @param {string} name agent name
+ * @param {string} sessionId agent sessionId
  */
-export function shell(name, command, literal = false) {
-  return axios.post(`/agents/${name}/tasks/shell`, { command, literal })
+export function shell(sessionId, command, literal = false) {
+  return axios.post(`/agents/${sessionId}/tasks/shell`, { command, literal })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
  * Delete a queued task.
- * @param {string} name agent name
+ * @param {string} sessionId agent sessionId
  */
-export function deleteTask(name, taskId) {
-  return axios.delete(`/agents/${name}/tasks/${taskId}`)
+export function deleteTask(sessionId, taskId) {
+  return axios.delete(`/agents/${sessionId}/tasks/${taskId}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
  * Task agent to receive file upload.
  */
-export function uploadFile(name, fileId, pathToFile) {
-  return axios.post(`/agents/${name}/tasks/upload`, { path_to_file: pathToFile, file_id: fileId })
+export function uploadFile(sessionId, fileId, pathToFile) {
+  return axios.post(`/agents/${sessionId}/tasks/upload`, { path_to_file: pathToFile, file_id: fileId })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -158,32 +159,32 @@ export function uploadFile(name, fileId, pathToFile) {
 /**
  * Task agent to send file to Empire.
  */
-export function downloadFile(name, pathToFile) {
-  return axios.post(`/agents/${name}/tasks/download`, { path_to_file: pathToFile })
+export function downloadFile(sessionId, pathToFile) {
+  return axios.post(`/agents/${sessionId}/tasks/download`, { path_to_file: pathToFile })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateComms(name, listener) {
-  return axios.post(`/agents/${name}/tasks/update_comms`, { new_listener_id: listener })
+export function updateComms(sessionId, listener) {
+  return axios.post(`/agents/${sessionId}/tasks/update_comms`, { new_listener_id: listener })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateKillDate(name, killDate) {
-  return axios.post(`/agents/${name}/tasks/kill_date`, { kill_date: killDate })
+export function updateKillDate(sessionId, killDate) {
+  return axios.post(`/agents/${sessionId}/tasks/kill_date`, { kill_date: killDate })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateWorkingHours(name, workingHours) {
-  return axios.post(`/agents/${name}/tasks/working_hours`, { working_hours: workingHours })
+export function updateWorkingHours(sessionId, workingHours) {
+  return axios.post(`/agents/${sessionId}/tasks/working_hours`, { working_hours: workingHours })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateSleep(name, delay, jitter) {
-  return axios.post(`/agents/${name}/tasks/sleep`, { delay, jitter })
+export function updateSleep(sessionId, delay, jitter) {
+  return axios.post(`/agents/${sessionId}/tasks/sleep`, { delay, jitter })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
