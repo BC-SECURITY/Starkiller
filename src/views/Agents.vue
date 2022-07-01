@@ -363,7 +363,7 @@ export default {
     },
     async killAgent(item) {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('agent/killAgent', { name: item.session_id });
+        this.$store.dispatch('agent/killAgent', { sessionId: item.session_id });
         this.$snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
       }
     },

@@ -128,7 +128,6 @@ export default {
      */
     rules() {
       return this.fields.reduce((map, field) => {
-        // eslint-disable-next-line no-param-reassign
         map[field.name] = [];
         if (field.required === true) {
           map[field.name].push(
@@ -159,10 +158,8 @@ export default {
       handler(arr) {
         const map2 = arr.reduce((map, obj) => {
           if (obj.name === 'Bypasses' && !Array.isArray(obj.value)) {
-            // eslint-disable-next-line no-param-reassign
             map[obj.name] = obj.value.split(' ') || [];
           } else {
-            // eslint-disable-next-line no-param-reassign
             map[obj.name] = obj.value == null ? '' : obj.value;
           }
           return map;

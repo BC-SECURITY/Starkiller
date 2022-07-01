@@ -46,7 +46,6 @@
               link
               :to="{ name: 'stagerNew', query: { template: item, listener: listener.name } }"
             >
-              <!-- todo use listener id -->
               <v-list-item-title>
                 {{ item }}
               </v-list-item-title>

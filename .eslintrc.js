@@ -15,6 +15,7 @@ module.exports = {
     'vue/valid-v-slot': ['error', {
       allowModifiers: true,
     }],
+    'no-param-reassign': 'off',
   },
   parserOptions: {
     parser: 'babel-eslint',

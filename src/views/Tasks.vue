@@ -23,7 +23,7 @@
                 outlined
                 dense
                 required
-                @input="debouncedHandleSearch"
+                @input="handleSearch"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -296,7 +296,7 @@ export default {
         } else {
           this.selectedAgents = [];
         }
-        this.getTasks();
+        this.debouncedGetTasks();
       },
       get() {
         return this.selectedAgents.length === this.agents.length;
@@ -309,7 +309,7 @@ export default {
         } else {
           this.selectedUsers = [];
         }
-        this.getTasks();
+        this.debouncedGetTasks();
       },
       get() {
         return this.selectedUsers.length === this.users.length;
@@ -323,9 +323,10 @@ export default {
     ]);
     this.selectedAgents = this.agents.map((a) => a.session_id);
     this.selectedUsers = this.users.map((u) => u.id);
-    this.getTasks();
 
-    this.debouncedHandleSearch = debounce(this.handleSearch, 500);
+    this.debouncedGetTasks = debounce(this.getTasks, 500);
+
+    this.debouncedGetTasks();
   },
   // todo a lot of this stuff is copied from AgentCommandHistory and could probably be reused.
   methods: {
@@ -339,7 +340,7 @@ export default {
       return task.downloads && task.downloads.length > 0;
     },
     downloadFile(download) {
-      downloadApi.getDownload(download.id); // todo
+      downloadApi.getDownload(download.id);
     },
     hasOutput(task) {
       return !!task.output;
@@ -378,10 +379,8 @@ export default {
       if (!this.expandedTasks[task.id]) {
         const data = await agentApi.getTask(task.agent_id, task.id);
         this.expandedTasks[task.id] = data;
-        // eslint-disable-next-line no-param-reassign
         task.expandedInput = true;
       } else {
-        // eslint-disable-next-line no-param-reassign
         task.expandedInput = !task.expandedInput;
       }
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
@@ -417,8 +416,6 @@ export default {
       // this ensures that the expandedInput doesn't get wiped away after a refresh
       this.tasks = response.records.map((task) => {
         if (this.expandedTasks[task.id]) {
-          // todo remove this rule because its stupid for modifying the original object
-          // eslint-disable-next-line no-param-reassign
           task.expandedInput = true;
         }
         return task;
@@ -428,16 +425,14 @@ export default {
       this.loading = false;
     },
     handleSearch() {
-      this.getTasks();
+      this.debouncedGetTasks();
     },
-    // todo where is debounced version??
-    // don't call this directly, use debouncedHandleFilterChange
     handleFilterChange() {
-      this.getTasks();
+      this.debouncedGetTasks();
     },
     handlePageChange(page) {
       this.currentPage = page;
-      this.getTasks();
+      this.debouncedGetTasks();
     },
     handleOptionsChange(value) {
       this.currentPage = value.page;
@@ -453,7 +448,7 @@ export default {
         this.sortDesc = true;
       }
       if (this.sortBy === 'agent_id') this.sortBy = 'agent';
-      this.getTasks();
+      this.debouncedGetTasks();
     },
   },
 };

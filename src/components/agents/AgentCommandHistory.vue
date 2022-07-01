@@ -212,8 +212,6 @@
 </template>
 
 <script>
-// todo still need to deal with linked downloads
-// todo what if the input is a file?
 import moment from 'moment';
 import debounce from 'lodash.debounce';
 
@@ -305,7 +303,7 @@ export default {
       return task.downloads && task.downloads.length > 0;
     },
     downloadFile(download) {
-      downloadApi.getDownload(download.id); // todo
+      downloadApi.getDownload(download.id);
     },
     hasOutput(task) {
       return !!task.output;
@@ -373,10 +371,8 @@ export default {
       if (!this.expandedTasks[task.id]) {
         const data = await agentApi.getTask(this.agent.session_id, task.id);
         this.expandedTasks[task.id] = data;
-        // eslint-disable-next-line no-param-reassign
         task.expandedInput = true;
       } else {
-        // eslint-disable-next-line no-param-reassign
         task.expandedInput = !task.expandedInput;
       }
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
@@ -400,8 +396,6 @@ export default {
       // this ensures that the expandedInput doesn't get wiped away after a refresh
       this.tasks = response.records.map((task) => {
         if (this.expandedTasks[task.id]) {
-          // todo remove this rule because its stupid for modifying the original object
-          // eslint-disable-next-line no-param-reassign
           task.expandedInput = true;
         }
         return task;

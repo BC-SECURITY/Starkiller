@@ -22,11 +22,11 @@ export default {
       const agent = (await agentApi.getAgent(sessionId))[0];
       context.dispatch('addAgent', agent);
     },
-    async rename(context, { oldName, newName }) {
+    async rename(context, { sessionId, newName }) {
       const { agents } = context.state;
-      const agent = agents.find((el) => el.name === oldName);
+      const agent = agents.find((el) => el.session_id === sessionId);
 
-      await agentApi.renameAgent(oldName, newName);
+      await agentApi.renameAgent(sessionId, newName);
       if (agent != null) {
         agent.name = newName;
       }
@@ -34,32 +34,21 @@ export default {
       context.commit('setAgents', agents);
       return agent.name;
     },
-    async killAgent(context, { name }) {
+    async killAgent(context, { sessionId }) {
       const { agents } = context.state;
-      const agent = agents.find((el) => el.session_id === name);
+      const agent = agents.find((el) => el.session_id === sessionId);
 
       if (agent == null) {
         return;
       }
 
-      await agentApi.killAgent(name);
+      await agentApi.killAgent(sessionId);
       agent.archived = true;
-      context.commit('setAgents', agents);
-    },
-    async removeAgent(context, { name }) {
-      const { agents } = context.state;
-      const agent = agents.find((el) => el.name === name);
-
-      if (agent == null) {
-        return;
-      }
-
-      await agentApi.removeAgent(name);
       context.commit('setAgents', agents);
     },
     async addAgent(context, agent) {
       const { agents } = context.state;
-      const foundIndex = agents.findIndex((el) => el.id === agent.id); // todo ID?
+      const foundIndex = agents.findIndex((el) => el.session_id === agent.session_id);
 
       if (foundIndex >= 0) {
         agents.splice(foundIndex, 1, agent);

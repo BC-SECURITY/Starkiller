@@ -191,10 +191,16 @@ export default {
       return stager.one_liner;
     },
     async copy(stager) {
-      return this.copyStager(await downloadApi.getDownloadAsText(stager.downloads[0].id));
+      // later on we could display multiple files, but at the moment,
+      // i think it makes sense to just get the last one.
+      const lastIndex = stager.downloads.length - 1;
+      return this.copyStager(await downloadApi.getDownloadAsText(stager.downloads[lastIndex].id));
     },
     async download(stager) {
-      return downloadApi.getDownload(stager.downloads[0].id); // todo
+      // later on we could display multiple files, but at the moment,
+      // i think it makes sense to just get the last one.
+      const lastIndex = stager.downloads.length - 1;
+      return downloadApi.getDownload(stager.downloads[lastIndex].id);
     },
     async deleteStager(item) {
       if (await this.$root.$confirm('Delete', 'Are you sure you want to delete this stager?', { color: 'red' })) {

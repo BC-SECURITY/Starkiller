@@ -215,10 +215,8 @@ export default {
             const year = dateArr[2];
             const month = dateArr[0];
             const day = dateArr[1];
-            // eslint-disable-next-line no-param-reassign
             map[obj.name] = `${year}-${month}-${day}`;
           } else {
-            // eslint-disable-next-line no-param-reassign
             map[obj.name] = obj.Value;
           }
           return map;
@@ -236,12 +234,11 @@ export default {
       if (this.agent.name === this.form.name) return;
 
       try {
-        await agentApi.renameAgent(this.agent, this.form.name);
+        await this.$store.dispatch('agent/rename', { sessionId: this.agent.session_id, newName: this.form.name });
       } catch (err) {
         this.$snack.error(`Update agent listener failed: ${err}`);
         return;
       }
-      // todo need to propogate this to the store or the page.
       this.$snack.info(`Agent ${this.agent.name} name updated`);
     },
     async updateListener() {

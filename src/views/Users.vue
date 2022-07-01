@@ -103,7 +103,7 @@ export default {
       userApi.updateUser(item)
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
-          item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
+          item.enabled = !item.enabled;
         });
     },
     getUsers() {

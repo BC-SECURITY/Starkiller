@@ -287,11 +287,15 @@ export default {
     isOneLiner(stager) {
       return stager.one_liner;
     },
+    // later on we could display multiple files, but at the moment,
+    // i think it makes sense to just get the last one.
     async copy(stager) {
-      return this.copyStager(await downloadApi.getDownloadAsText(stager.downloads[0].id));
+      const lastIndex = stager.downloads.length - 1;
+      return this.copyStager(await downloadApi.getDownloadAsText(stager.downloads[lastIndex].id));
     },
     async download(stager) {
-      return downloadApi.getDownload(stager.downloads[0].id); // todo
+      const lastIndex = stager.downloads.length - 1;
+      return downloadApi.getDownload(stager.downloads[lastIndex].id);
     },
   },
 };

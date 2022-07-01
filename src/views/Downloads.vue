@@ -243,7 +243,7 @@ export default {
       this.loading = false;
     },
     downloadFile(download) {
-      downloadApi.getDownload(download.id); // todo
+      downloadApi.getDownload(download.id);
     },
     async refreshDownloads() {
       this.search();

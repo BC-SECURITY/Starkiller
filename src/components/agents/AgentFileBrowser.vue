@@ -327,7 +327,6 @@ export default {
       files.sort(this.sortFiles);
       if (!this.force[a.id] && files.length > 0) {
         this.removeFromCurrentlyLoading(a.id);
-        // eslint-disable-next-line no-param-reassign
         a.children = files.map((el) => this.transform(el));
         return Promise.resolve();
       } if (!stopTrying && !this.readOnly) {

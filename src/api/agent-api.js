@@ -41,15 +41,6 @@ export function killAgent(sessionId) {
 }
 
 /**
- * Remove an agent.
- * @param {string} sessionId sessionId name
- */
-export function removeAgent(sessionId) {
-  return axios.delete(`/agents/${sessionId}`)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
-/**
  * Get a single task
  * @param {string} sessionId sessionId name
  */
@@ -108,7 +99,6 @@ export function getTasks(sessionId, {
  * @param {string} sessionId agent sessionId
  */
 export function getDirectory(sessionId, directory) {
-  // todo vr how are directory names being serialized?
   let uri = `/agents/${sessionId}/files/${directory}`;
   if (directory === '/') {
     uri = `/agents/${sessionId}/files/root`;

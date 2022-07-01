@@ -298,7 +298,7 @@ export default {
       uploadDialog: false,
       downloadDialog: false,
       interval: null,
-      initialized: true, // todo vr, is this needed?
+      initialized: true,
       errorState: false,
       paneSize: 100,
       rightPaneInitialized: false,
@@ -393,7 +393,7 @@ export default {
     },
     async killAgent() {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
-        this.$store.dispatch('agent/killAgent', { name: this.agent.session_id });
+        this.$store.dispatch('agent/killAgent', { sessionId: this.agent.session_id });
         this.$snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
         this.$router.push({ name: 'agents' });
       }
