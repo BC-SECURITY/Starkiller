@@ -15,6 +15,12 @@ export function createKeyword(keyword) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
+export function updateKeyword(keyword) {
+  return axios.put(`/obfuscation/keywords/${keyword.id}`, keyword)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
 export function deleteKeyword(id) {
   return axios.delete(`/obfuscation/keywords/${id}`)
     .then(({ data }) => data)

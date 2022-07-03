@@ -317,9 +317,13 @@ export default {
     },
     async saveKeyword() {
       try {
-        await obfuscationApi.createKeyword(this.editedKeyword);
+        if (!this.editedKeyword.id) {
+          await obfuscationApi.createKeyword(this.editedKeyword);
+        } else {
+          await obfuscationApi.updateKeyword(this.editedKeyword);
+        }
         this.refreshKeywords();
-        this.dialog = false;
+        this.keywordDialog = false;
       } catch (e) {
         this.$snack.error(`${e}`);
       }
