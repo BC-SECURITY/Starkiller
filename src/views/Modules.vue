@@ -81,14 +81,8 @@
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div class="d-flex flex-column">
-            <b>Authors:</b>
-            {{ item.authors ? item.authors.join(', ') : '' }}
-
             <b>Description:</b>
             {{ item.description }}
-
-            <b>Comments:</b>
-            {{ item.comments ? item.comments.join('\n ') : '' }}
           </div>
         </td>
       </template>
