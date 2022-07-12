@@ -251,6 +251,7 @@ export default {
       sortDesc: true,
       refreshInterval: null,
       expandedTasks: {},
+      debouncedHandleSearch: () => {},
       headers: [
         { text: 'Task ID', value: 'id', sortable: true },
         { text: 'Status', value: 'status', sortable: true },
@@ -341,9 +342,7 @@ export default {
     imageData(task, download) {
       const expandedDownloads = this.expandedTasks[task.id]?.downloads;
       if (expandedDownloads) {
-        console.log(expandedDownloads);
         const found = expandedDownloads.find((d) => d.id === download.id);
-        console.log(found);
         if (found) {
           return found.image;
         }

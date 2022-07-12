@@ -29,7 +29,7 @@ export function createDownload(data) {
 }
 
 export function getDownload(id) {
-  return axios.get(`/downloads/${id}`, { responseType: 'blob' })
+  return axios.get(`/downloads/${id}/download`, { responseType: 'blob' })
     .then((response) => {
       const blob = new Blob([response.data], { type: response.headers['content-type'] });
       const url = window.URL.createObjectURL(blob);
@@ -47,7 +47,7 @@ export function getDownload(id) {
 }
 
 export function getDownloadAsUrl(id) {
-  return axios.get(`/downloads/${id}`, { responseType: 'blob' })
+  return axios.get(`/downloads/${id}/download`, { responseType: 'blob' })
     .then((response) => {
       const blob = new Blob([response.data], { type: response.headers['content-type'] });
       const url = window.URL.createObjectURL(blob);
