@@ -84,7 +84,13 @@ export default {
       }
 
       this.loading = true;
-      await agentApi.shell(this.agent.name, this.form.command, this.form.literal);
+
+      if (this.form.command.trim() === 'sysinfo') {
+        await agentApi.sysinfo(this.agent.session_id);
+      } else {
+        await agentApi.shell(this.agent.session_id, this.form.command, this.form.literal);
+      }
+
       this.form.command = '';
       this.loading = false;
       this.$snack.success(`Shell Command queued for ${this.agent.name}`);

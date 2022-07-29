@@ -129,6 +129,16 @@ export function shell(sessionId, command, literal = false) {
 }
 
 /**
+ * Task an agent to run sysinfo.
+ * @param {*} sessionId agent sessionId
+ */
+export function sysinfo(sessionId) {
+  return axios.post(`/agents/${sessionId}/tasks/sysinfo`, {})
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+/**
  * Delete a queued task.
  * @param {string} sessionId agent sessionId
  */
