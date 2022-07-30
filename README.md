@@ -1,18 +1,15 @@
 <div align="center"><img width="125" src="src/assets/icon.png"></div>
 
 # Starkiller
-Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/Empire/). It is an Electron application written in VueJS. If you'd like to contribute please follow the [Contribution guide](/CONTRIBUTING.md). If you'd like to request a feature or report a bug, please follow the [Issue template](/.github/ISSUE_TEMPLATE.md).
+Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/Empire/). It is a web application written in VueJS. If you'd like to contribute please follow the [Contribution guide](/CONTRIBUTING.md). If you'd like to request a feature or report a bug, please follow the [Issue template](/.github/ISSUE_TEMPLATE.md).
 
 ## Sponsors
 [<img src="https://user-images.githubusercontent.com/20302208/104083160-41552780-51f1-11eb-8428-3b8cfaf76861.png" width="300"/>](https://www.kali.org/)
 [<img src="https://user-images.githubusercontent.com/20302208/113086242-219d2200-9196-11eb-8c91-84f19c646873.png" width="100"/>](https://kovert.no/)
 
 # Getting Started
-* To run Starkiller, you can download the installers for Mac, Linux, and Windows on the [Releases](https://github.com/BC-SECURITY/Starkiller/releases) page.
-  * For Mac and Windows - run the installer how you would any other .exe or .dmg
-  * For Linux - Change the permissions `chmod a+x starkiller-<version>.AppImage`, then execute `./starkiller-<version>.AppImage --no-sandbox`
-* Starkiller is also available via `apt install starkiller` on [Kali](https://www.kali.org/). Kali releases are 30 days ahead of the public release.
-* If you want to build from source or run in development mode, instructions are below.
+As of Empire 5.0 and Starkiller 2.0, you no longer need to install Starkiller or build it from source.
+It is prepackaged in Empire as a submodule and served via Empire's API.
 
 # Sponsorship and extra features
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
@@ -42,22 +39,17 @@ Prerequisites:
 * [Yarn](https://classic.yarnpkg.com/en/docs/install)
 Currently it has been tested using Yarn 1.22.
 ```
-yarn install
+yarn
 ```
 
 ### Compile and hot-reload for development
 ```
-yarn electron:serve
+yarn serve
 ```
 
 ### Compile and minify for production
 ```
-yarn electron:build
-
-# Or to target a specific OS.
-yarn electron:build:lin
-yarn electron:build:win
-yarn electron:build:mac
+yarn build
 ```
 
 
@@ -85,6 +77,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.6.x, 1.7.x       | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 | 1.8.x              | 4.0.0         | 
 | 1.9.x, 1.10.x, 1.11.x  | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
+| 2.0.x              | 5.0.0         | Uses the new v2 api
 
 ## Changelog
 
