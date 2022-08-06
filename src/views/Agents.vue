@@ -352,7 +352,7 @@ export default {
     async killAgents() {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill ${this.selected.length} agents?`, { color: 'red' })) {
         this.selected.forEach((agent) => {
-          this.$store.dispatch('agent/killAgent', { name: agent.session_id });
+          this.$store.dispatch('agent/killAgent', { sessionId: agent.session_id });
         });
         this.$snack.success(`${this.selected.length} agents tasked to run TASK_EXIT.`);
         this.selected = [];

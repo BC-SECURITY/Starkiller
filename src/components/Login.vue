@@ -10,11 +10,6 @@
         dense
         outlined
       />
-      <div
-        style="margin-top: -30px; margin-bottom: 20px;"
-      >
-        <span class="caption grey--text font-weight-light">SocketIO: {{ form.socketUrl }}</span>
-      </div>
       <v-text-field
         v-model="form.username"
         label="Username"
@@ -60,7 +55,6 @@ export default {
         url: '',
         username: '',
         password: '',
-        socketUrl: '',
       },
     };
   },
@@ -73,23 +67,6 @@ export default {
     }),
   },
   watch: {
-    'form.url': {
-      handler(val) {
-        try {
-          const cleanedUrl = (val.startsWith('http://') || val.startsWith('https://'))
-            ? val
-            : `https://${val}`;
-          const url = new URL(cleanedUrl);
-          if (cleanedUrl.startsWith('http://')) {
-            this.form.socketUrl = `ws://${url.hostname}:1337`;
-          } else {
-            this.form.socketUrl = `wss://${url.hostname}:1337`;
-          }
-        } catch (err) {
-          // noop
-        }
-      },
-    },
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;
@@ -101,35 +78,34 @@ export default {
     this.form.url = localStorage.getItem('loginUrl') || 'http://localhost:1337';
     this.form.username = localStorage.getItem('loginUsername') || '';
     this.rememberMe = localStorage.getItem('loginRememberMe') === 'true';
-    this.$nextTick(() => {
-      // this is in nextTick to allow us to write a saved socketUrl
-      // after the 'form.url' watcher.
-      const socketUrl = localStorage.getItem('socketUrl') || '';
-      if (socketUrl !== '') {
-        this.form.socketUrl = socketUrl;
-      }
-    });
   },
   methods: {
     submit() {
       const cleanedUrl = (this.form.url.startsWith('http://') || this.form.url.startsWith('https://'))
         ? this.form.url
-        : `https://${this.form.url}`;
+        : `http://${this.form.url}`;
       this.loading = true;
       localStorage.setItem('loginRememberMe', this.rememberMe);
 
       if (this.rememberMe === true) {
         localStorage.setItem('loginUrl', cleanedUrl);
-        localStorage.setItem('socketUrl', this.form.socketUrl);
         localStorage.setItem('loginUsername', this.form.username);
       } else {
         localStorage.removeItem('loginUrl');
         localStorage.removeItem('loginUsername');
       }
 
+      const { host } = new URL(cleanedUrl);
+      let socketUrl = '';
+      if (cleanedUrl.startsWith('http://')) {
+        socketUrl = `ws://${host}`;
+      } else {
+        socketUrl = `wss://${host}`;
+      }
+
       this.$store.dispatch('application/login', {
         url: cleanedUrl,
-        socketUrl: this.form.socketUrl,
+        socketUrl,
         username: this.form.username,
         password: this.form.password,
       });
