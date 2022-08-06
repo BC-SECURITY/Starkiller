@@ -189,7 +189,7 @@ export default {
 
       Object.keys(this.moduleOptionDefaults || {}).forEach((key) => {
         if (options[key]) {
-          options[key].Value = this.moduleOptionDefaults[key];
+          options[key].value = this.moduleOptionDefaults[key];
         }
       });
 
