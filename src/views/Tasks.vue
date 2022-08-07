@@ -87,7 +87,7 @@
         <v-data-table
           :headers="headers"
           :items="tasks"
-          item-key="id"
+          item-key="uniqueId"
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           :server-items-length="totalItems"
@@ -117,6 +117,28 @@
                   {{ item.expandedInput ? expandedTasks[item.id].full_input : item.input }}
                 </p>
                 <p><b>Task Output:</b></p>
+                <div
+                  v-if="item.downloads.length > 0
+                    && item.downloads.some(d => d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/))"
+                >
+                  <v-btn
+                    text
+                    x-small
+                    @click="getImagesForTask(item)"
+                  >
+                    View Images
+                  </v-btn>
+                  <div>
+                    <v-img
+                      v-for="download in item.downloads"
+                      :key="download.id"
+                      :src="imageData(item, download)"
+                      :alt="download.filename"
+                      :max-width="700"
+                      contain
+                    />
+                  </div>
+                </div>
                 <p
                   class="mono"
                   style="max-width: 900px"
@@ -415,6 +437,7 @@ export default {
       // iterate response.records and add expandedInput if it exists in expandedTasks
       // this ensures that the expandedInput doesn't get wiped away after a refresh
       this.tasks = response.records.map((task) => {
+        task.uniqueId = `${task.agent_id}-${task.id}`;
         if (this.expandedTasks[task.id]) {
           task.expandedInput = true;
         }
@@ -423,6 +446,33 @@ export default {
 
       this.tasks = response.records;
       this.loading = false;
+    },
+    imageData(task, download) {
+      const expandedDownloads = this.expandedTasks[task.id]?.downloads;
+      if (expandedDownloads) {
+        const found = expandedDownloads.find((d) => d.id === download.id);
+        if (found) {
+          return found.image;
+        }
+      }
+      return null;
+    },
+    async getImagesForTask(task) {
+      if (!this.expandedTasks[task.id]) {
+        const data = await agentApi.getTask(task.agent_id, task.id);
+        this.expandedTasks[task.id] = data;
+      }
+
+      for (let i = 0; i < task.downloads.length; i++) {
+        const download = task.downloads[i];
+        if (!this.expandedTasks[task.id].downloads[download.id]?.image
+          && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
+          // eslint-disable-next-line
+          const url = await downloadApi.getDownloadAsUrl(download.id);
+          this.expandedTasks[task.id].downloads[i].image = url;
+        }
+      }
+      Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     handleSearch() {
       this.debouncedGetTasks();

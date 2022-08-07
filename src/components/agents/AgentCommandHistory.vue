@@ -42,7 +42,7 @@
         <v-data-table
           :headers="headers"
           :items="tasks"
-          item-key="id"
+          item-key="uniqueId"
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           :server-items-length="totalItems"
@@ -394,6 +394,7 @@ export default {
       // iterate response.records and add expandedInput if it exists in expandedTasks
       // this ensures that the expandedInput doesn't get wiped away after a refresh
       this.tasks = response.records.map((task) => {
+        task.uniqueId = `${task.agent_id}-${task.id}`;
         if (this.expandedTasks[task.id]) {
           task.expandedInput = true;
         }
