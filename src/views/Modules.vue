@@ -112,7 +112,7 @@ export default {
           href: '/modules',
         },
       ],
-      showIds: true,
+      showIds: false,
     };
   },
   computed: {

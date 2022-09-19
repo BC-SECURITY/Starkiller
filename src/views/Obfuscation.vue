@@ -17,21 +17,31 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-            <v-text-field
-              v-model="editedKeyword.keyword"
-              dense
-              outlined
-              required
-              label="Keyword"
-            />
-            <!-- TODO vr Make not required -->
-            <v-text-field
-              v-model="editedKeyword.replacement"
-              dense
-              outlined
-              required
-              label="Replacement"
-            />
+            <v-form
+              ref="form"
+              v-model="valid"
+              @submit.prevent.native="saveKeyword"
+            >
+              <v-text-field
+                v-model="editedKeyword.keyword"
+                :rules="rules['keyword']"
+                dense
+                outlined
+                required
+                label="Keyword"
+              />
+              <v-text-field
+                v-model="editedKeyword.replacement"
+                :rules="rules['replacement']"
+                dense
+                outlined
+                required
+                label="Replacement"
+              />
+              <v-btn @click="generateRandom">
+                Random
+              </v-btn>
+            </v-form>
           </v-container>
         </v-card-text>
 
@@ -245,6 +255,7 @@ export default {
   },
   data() {
     return {
+      valid: true,
       keywordDialog: false,
       keywordDialogTitle: '',
       editedKeyword: {},
@@ -276,6 +287,14 @@ export default {
           width: 15,
         },
       ],
+      rules: {
+        keyword: [
+          (v) => !!v || 'Keyword is required',
+        ],
+        replacement: [
+          (v) => !!v || 'Replacement is required',
+        ],
+      },
     };
   },
   computed: {
@@ -315,7 +334,11 @@ export default {
       this.keywordDialogTitle = 'New Keyword';
       this.keywordDialog = true;
     },
+    generateRandom() {
+      this.editedKeyword.replacement = Math.random().toString(36).substring(2, 8);
+    },
     async saveKeyword() {
+      if (!this.$refs.form.validate()) { return; }
       try {
         if (!this.editedKeyword.id) {
           await obfuscationApi.createKeyword(this.editedKeyword);

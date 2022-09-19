@@ -39,6 +39,14 @@
           required
           :disabled="!isNew"
         />
+        <v-text-field
+          v-model="form.language"
+          :rules="rules['language']"
+          label="language"
+          outlined
+          dense
+          required
+        />
         <v-textarea
           v-model="form.code"
           :rules="rules['code']"
@@ -72,6 +80,10 @@ export default {
         name: [
           (v) => !!v || 'Name is required',
           (v) => (!!v && v.length > 2) || 'Name must be larger than 2 characters',
+        ],
+        language: [
+          (v) => !!v || 'Language is required',
+          (v) => (!!v && v.length > 2) || 'Language must be larger than 2 characters',
         ],
         code: [
           (v) => !!v || 'Code is required',
@@ -151,7 +163,7 @@ export default {
 
       this.loading = true;
       if (this.id > 0) {
-        bypassApi.updateBypass(this.form.id, this.form.name, this.form.code)
+        bypassApi.updateBypass(this.form.id, this.form.name, this.form.code, this.form.language)
           .then(() => {
             this.$snack.success('Bypass updated');
             this.loading = false;
@@ -161,7 +173,7 @@ export default {
             this.loading = false;
           });
       } else {
-        bypassApi.createBypass(this.form.name, this.form.code)
+        bypassApi.createBypass(this.form.name, this.form.code, this.form.language)
           .then(({ id }) => {
             this.$snack.success('Bypass created');
             this.loading = false;

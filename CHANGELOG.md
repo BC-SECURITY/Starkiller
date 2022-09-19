@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated "InfoViewer" component to display the description up top, format the comments better, and display the new author info added in Empire 5.0
 - Rename Reporting to Tasks
 - Add a "literal" checkbox to shell commands to bypass built-in aliases
+- Bypasses language is configurable
+- Technique chips can now link to sub-techniques
+- 
 
 ## [1.11.0] - 2022-03-15
 - Added malleable profile management pages (Thank you to our Sponsors!)

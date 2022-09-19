@@ -16,14 +16,14 @@ export function getBypass(id) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function createBypass(name, code) {
-  return axios.post('/bypasses', { name, code })
+export function createBypass(name, code, language) {
+  return axios.post('/bypasses', { name, code, language })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateBypass(id, name, code) {
-  return axios.put(`/bypasses/${id}`, { name, code })
+export function updateBypass(id, name, code, language) {
+  return axios.put(`/bypasses/${id}`, { name, code, language })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
