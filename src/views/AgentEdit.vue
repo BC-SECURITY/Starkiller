@@ -267,7 +267,7 @@ import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import { Splitpanes, Pane } from 'splitpanes';
+// import { Splitpanes, Pane } from 'splitpanes';
 import * as agentApi from '@/api/agent-api';
 
 import 'splitpanes/dist/splitpanes.css';
@@ -285,8 +285,8 @@ export default {
     TooltipButton,
     TooltipButtonToggle,
     ErrorStateAlert,
-    Splitpanes,
-    Pane,
+    // Splitpanes,
+    // Pane,
   },
   data() {
     return {

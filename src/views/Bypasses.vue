@@ -100,6 +100,7 @@
 import moment from 'moment';
 import ListPageTop from '@/components/ListPageTop.vue';
 import { mapState } from 'vuex';
+
 export default {
   name: 'Bypasses',
   components: {

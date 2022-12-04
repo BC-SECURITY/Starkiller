@@ -212,7 +212,7 @@ export default {
         }
       }
     },
-    search(val) {
+    search() {
       // For now we're just ignoring the search value and loading all the files.
       // If we find that this is slow we can make the autocomplete more complicated.
       // Items have already been loaded

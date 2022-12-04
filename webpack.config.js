@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 module.exports = {
   module: {
     rules: [
@@ -12,6 +13,7 @@ module.exports = {
             options: {
               implementation: require('sass'),
               sassOptions: {
+                // eslint-disable-next-line import/no-unresolved
                 fiber: require('fibers'),
                 indentedSyntax: true, // optional
               },

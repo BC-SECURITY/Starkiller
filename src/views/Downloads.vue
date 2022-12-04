@@ -217,7 +217,7 @@ export default {
     },
   },
   watch: {
-    filter(val) {
+    filter() {
       this.debouncedSearch();
     },
   },

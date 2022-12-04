@@ -75,7 +75,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import * as userApi from '@/api/user-api';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';

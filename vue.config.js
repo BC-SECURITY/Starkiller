@@ -1,4 +1,5 @@
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const webpack = require('webpack');
 
 module.exports = {
