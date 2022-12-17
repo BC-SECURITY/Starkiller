@@ -18,6 +18,15 @@ export default {
       const profiles = await malleableApi.getMalleableProfiles();
       context.commit('setMalleableProfiles', profiles);
     },
+    async deleteMalleableProfile(context, name) {
+      await malleableApi.deleteMalleableProfile(name);
+      const find = context.state.malleableProfiles.findIndex((p) => p.name === name);
+      if (find) {
+        const profiles = context.state.malleableProfiles.slice();
+        profiles.splice(find, 1);
+        context.commit('setMalleableProfiles', profiles);
+      }
+    },
   },
   getters: {
     profileNames: (state) => state.malleableProfiles.map((el) => el.name),

@@ -21,9 +21,6 @@ At the moment, the extra Starkiller sponsorship features include:
   ## Interactive agent shell
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
   
-  ## Malleable profile management
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/122686145-9cd60900-d1c4-11eb-8a74-e98a09c967cd.gif"></div>
-  
   ## Enable/Disable modules
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
   
@@ -37,6 +34,7 @@ Thanks to our sponsors the following features which started as sponsor features 
 - Popout windows
 - Chat widget
 - Bypass management
+- Malleable profile management
 
 ## Build and run from source
 Prerequisites:
@@ -86,7 +84,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.4.x, 1.5.x       | 3.5.0         | 3.5.0 added real-time notifications for new listeners and agents
 | 1.6.x, 1.7.x       | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 | 1.8.x              | 4.0.0         | 
-| 1.9.x, 1.10.x      | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
+| 1.9.x, 1.10.x, 1.11.x  | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
 
 ## Changelog
 
