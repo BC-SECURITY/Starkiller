@@ -1,0 +1,60 @@
+name: Sponsors & Kali - Tag Release
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - sponsors-main
+      - kali-main
+
+jobs:
+  tag_release:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository == 'BC-Security/Starkiller-Sponsors'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get tag name
+        run: |
+          echo "TAG_NAME=$(echo ${{ github.head_ref }} | sed 's/release\///')" >> $GITHUB_ENV
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.base_ref }}
+          token: ${{ secrets.RELEASE_TOKEN }}
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Set application version as variable
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Generate dist
+        # Can remove this check after 2.0 is released.
+        if: ${{ !startsWith(env.APP_VERSION, '1') }}
+        run: |
+          yarn
+          yarn build
+      - name: Commit dist
+        if: ${{ !startsWith(env.APP_VERSION, '1') }}
+        run: |
+          git add dist/
+          git commit -m "${{ env.TAG_NAME }} - Update dist/"
+          git push origin ${{ github.base_ref }}
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      - name: Extract release notes
+        id: extract_release_notes
+        uses: vinnybod/extract-release-notes@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+          commitish: ${{ env.COMMIT_SHA }}
+          tag_name: v${{ env.TAG_NAME }}
+          release_name: v${{ env.TAG_NAME }}
+          body: ${{ steps.extract_release_notes.outputs.release_notes }}
+          draft: false
+          prerelease: false
