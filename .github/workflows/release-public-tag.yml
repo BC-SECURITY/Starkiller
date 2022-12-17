@@ -34,7 +34,7 @@ jobs:
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Generate dist
         # Can remove this check after 2.0 is released.
-        if: ${{ !startsWith(env.APP_VERSION, "1") }}
+        if: ${{ !startsWith(env.APP_VERSION, '1') }}
         run: |
           yarn
           yarn build
