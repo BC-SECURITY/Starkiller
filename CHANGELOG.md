@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.12.0] - 2022-12-17
+
 ## [1.11.0] - 2022-03-15
 
 -   Added malleable profile management pages (Thank you to our Sponsors!)
@@ -163,7 +165,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/vinnybod/Starkiller-Sponsors/compare/v1.11.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.12.0...HEAD
+
+[1.12.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.11.0...v1.12.0
 
 [1.11.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.10.0...v1.11.0
 
