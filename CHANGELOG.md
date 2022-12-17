@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.12.0] - 2022-12-17
+-   New CI/CD Process (@vinnybod)
 
 ## [1.11.0] - 2022-03-15
 
