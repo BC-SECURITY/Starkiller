@@ -1,0 +1,48 @@
+# This merges two things.
+# It merges BC-SECURITY/Starkiller#private-main into BC-SECURITY/Starkiller-Sponsors#sponsors-main
+# It merges BC-SECURITY/Starkiller#private-main into BC-SECURITY/Starkiller-Sponsors#kali-main
+name: Prerelease - Merge private-main
+on:
+  workflow_dispatch:
+    inputs:
+      mergeKali:
+        description: 'Merge private-main branch into kali-main.'
+        type: boolean
+        default: true
+        required: true
+      mergeSponsors:
+        description: 'Merge private-main branch into sponsors-main.'
+        type: boolean
+        default: true
+        required: true
+
+jobs:
+  merge_main:
+    if: ${{ github.repository == 'BC-Security/Starkiller-Sponsors' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          ref: private-main
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - name: Clean Merge private-main->sponsors-main
+        if: ${{ github.event.inputs.mergeSponsors == 'true' }}
+        uses: ./.github/actions/clean-merge
+        with:
+          from-branch: private-main
+          to-branch: sponsors-main
+          push-repo: origin
+      - name: Clean Merge private-main->kali-main
+        if: ${{ github.event.inputs.mergeKali == 'true' }}
+        uses: ./.github/actions/clean-merge
+        with:
+          from-branch: private-main
+          to-branch: kali-main
+          push-repo: origin

@@ -1,0 +1,44 @@
+name: Private - Tag Release
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - private-main
+
+jobs:
+  tag_release:
+    if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository == 'BC-Security/Starkiller-Sponsors' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.base_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Set application version as variable
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Extract release notes
+        id: extract_release_notes
+        uses: vinnybod/extract-release-notes@v2
+      - name: Create Release Private
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          # Uses the non-default token in order to trigger other workflows.
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+          tag_name: v${{ env.APP_VERSION }}-private
+          release_name: v${{ env.APP_VERSION }}-private
+          body: ${{ steps.extract_release_notes.outputs.release_notes }}
+          draft: false
+          prerelease: false

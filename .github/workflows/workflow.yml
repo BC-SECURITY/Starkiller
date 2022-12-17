@@ -7,7 +7,7 @@ name: Upload Release Asset
 jobs:
   mac:
     name: Upload Release Asset Mac
-    if: github.event_name == 'release' && !contains(github.ref, 'kali')
+    if: github.event_name == 'release' && !contains(github.ref, 'kali') && startsWith(github.ref, 'refs/tags/v1')
     runs-on: macos-latest
     steps:
       - name: Trim release name
@@ -15,9 +15,12 @@ jobs:
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3 | cut -c 2-)  
       - name: Checkout code
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Get app version
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12'
+          node-version: 14
       - name: Build project
         run: |
           yarn
@@ -30,12 +33,12 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           # Note: the release name must match the version number in package.json.
-          asset_path: ./dist_electron/starkiller-${{ steps.get_version.outputs.VERSION }}.dmg
-          asset_name: starkiller-${{ steps.get_version.outputs.VERSION }}.dmg
+          asset_path: ./dist_electron/starkiller-${{ env.APP_VERSION }}.dmg
+          asset_name: starkiller-${{ env.APP_VERSION }}.dmg
           asset_content_type: application/octet-stream
   linux:
     name: Upload Release Asset Linux
-    if: github.event_name == 'release' && !contains(github.ref, 'kali')
+    if: github.event_name == 'release' && !contains(github.ref, 'kali') && startsWith(github.ref, 'refs/tags/v1')
     runs-on: ubuntu-latest
     steps:
       - name: Trim release name
@@ -43,9 +46,12 @@ jobs:
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3 | cut -c 2-)  
       - name: Checkout code
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Get app version
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12'
+          node-version: 14
       - name: Build project
         run: |
           yarn
@@ -58,12 +64,12 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           # Note: the release name must match the version number in package.json.
-          asset_path: ./dist_electron/starkiller-${{ steps.get_version.outputs.VERSION }}.AppImage
-          asset_name: starkiller-${{ steps.get_version.outputs.VERSION }}.AppImage
+          asset_path: ./dist_electron/starkiller-${{ env.APP_VERSION }}.AppImage
+          asset_name: starkiller-${{ env.APP_VERSION }}.AppImage
           asset_content_type: application/octet-stream
   windows:
     name: Upload Release Asset Windows
-    if: github.event_name == 'release' && !contains(github.ref, 'kali')
+    if: github.event_name == 'release' && !contains(github.ref, 'kali') && startsWith(github.ref, 'refs/tags/v1')
     runs-on: windows-latest
     steps:
       - name: Trim release name
@@ -72,9 +78,13 @@ jobs:
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3 | cut -c 2-)  
       - name: Checkout code
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Get app version
+        shell: bash
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12'
+          node-version: 14
       - name: Build project
         run: |
           yarn
@@ -87,8 +97,8 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           # Note: the release name must match the version number in package.json.
-          asset_path: ./dist_electron/starkiller Setup ${{ steps.get_version.outputs.VERSION }}.exe
-          asset_name: starkiller Setup ${{ steps.get_version.outputs.VERSION }}.exe
+          asset_path: ./dist_electron/starkiller Setup ${{ env.APP_VERSION }}.exe
+          asset_name: starkiller Setup ${{ env.APP_VERSION }}.exe
           asset_content_type: application/octet-stream
 
 # useful: https://developer.github.com/v3/repos/releases/#get-a-single-release

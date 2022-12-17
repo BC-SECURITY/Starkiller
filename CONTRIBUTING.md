@@ -20,16 +20,9 @@ The more information you provide in a Github issue the easier it will be for us 
 ## Making a Pull Request
   1. Create an issue describing the motivation for your changes
     * Pull Requests without associated Issues may still be accepted, if the motivation is obvious. However, this will help speed up code review if there's any uncertainty.
-  1. Fork the repo and create your branch from dev.
+  1. Fork the repo and create your branch from main.
   1. Make sure your code lints.
   1. Issue that pull request!
-
-## Git Branches / Release Process
-All features and bug fixes will go to the dev branch.
-When a release is ready we will:
-  1. Update the version number in the package.json
-  1. Merge to master
-  1. Create a GitHub release off master with the changes documented in the release
 
 ## Use a Consistent Coding Style
 We use Airbnb's and Vue's recommended ESLint configs. To make your life easier, consider installing an ESLint plugin in your editor of choice. You can also run `yarn lint`.
