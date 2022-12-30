@@ -1,5 +1,19 @@
 <template>
-  <div>
+  <div
+    v-if="agent.language === 'ironpython'"
+  >
+    <v-alert
+      prominent
+      type="error"
+    >
+      <v-row align="center">
+        <v-col class="grow">
+          The File Browser is not yet implemented for this agent language.
+        </v-col>
+      </v-row>
+    </v-alert>
+  </div>
+  <div v-else>
     <execute-module-dialog
       v-model="executeDialog"
       :agent="agent.session_id"

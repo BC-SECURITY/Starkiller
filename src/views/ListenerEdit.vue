@@ -145,7 +145,6 @@ export default {
       commonStagers: [
         'multi_launcher',
         'multi_macro',
-        'osx_launcher',
         'windows_csharp_exe',
         'windows_dll',
         'windows_shellcode',
