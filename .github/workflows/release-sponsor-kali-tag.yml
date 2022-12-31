@@ -5,7 +5,7 @@ on:
       - closed
     branches:
       - sponsors-main
-      - kali-main
+#     - kali-main
 
 jobs:
   tag_release:

@@ -10,6 +10,11 @@ All pull requests will run the `Lint and Test` workflow.
 * There are no tests yet.
 
 ## BC-SECURITY/Starkiller-Sponsors Sponsors & Kali Release Process
+*Note: Starting in 2023, the Kali team will be pulling from the public repo.
+I am keeping the Kali workflows running for now with the exception of the tagging.
+This is mostly out of laziness since I just wrote all of the CI/CD. In the near future,
+we can rework these jobs to be more like "sponsors & other downstream" releases.*
+
 Sponsors and Kali releases go through the same release process. It is easier to manage Starkiller releases by not allowing them to be released at different times and have the version numbers diverge.
 A side effect of this is its possible for a version bump to be empty (no changes) and still be released.
 

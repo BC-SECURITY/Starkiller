@@ -49,7 +49,9 @@ jobs:
             Merging this PR will trigger a tag and release automatically.
   # this is basically copy/paste from the above.
   create_kali:
-    if: ${{ github.repository == 'BC-Security/Starkiller-Sponsors' }}
+    # disable for now.
+    if: false
+#    if: ${{ github.repository == 'BC-Security/Starkiller-Sponsors' }}
     runs-on: ubuntu-latest
     steps:
       - name: Set env vars
