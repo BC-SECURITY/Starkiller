@@ -1,0 +1,65 @@
+name: Public - Tag Release
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  tag_release:
+    if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository == 'BC-Security/Starkiller' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - name: Find last released tag
+        run: |
+          # TODO Need to check that there aren't any other tags that match this pattern.
+          tags=$(git tag --list --sort=-version:refname "v*.*.*")
+          tags=$(echo "$tags" | grep -v -E "beta|alpha|rc|RC")
+          latest_tag=$(echo "$tags" | head -n 1)
+          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Set application version as variable
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Generate dist
+        # Can remove this check after 2.0 is released.
+        if: ${{ !startsWith(env.APP_VERSION, '1') }}
+        run: |
+          yarn
+          yarn build
+      - name: Commit dist
+        if: ${{ !startsWith(env.APP_VERSION, '1') }}
+        run: |
+          git add dist/
+          git commit -m "${{ env.APP_VERSION }} - Update dist/"
+          git push origin ${{ github.base_ref }}
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      - name: Extract release notes
+        id: extract_release_notes
+        # This is modified to pull multiple versions of the release notes
+        uses: vinnybod/extract-release-notes@v2
+        with:
+          last_version: ${{ env.LATEST_TAG }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+          commitish: ${{ env.COMMIT_SHA }}
+          tag_name: v${{ env.APP_VERSION }}
+          release_name: v${{ env.APP_VERSION }}
+          body: ${{ steps.extract_release_notes.outputs.release_notes }}
+          draft: false
+          prerelease: false

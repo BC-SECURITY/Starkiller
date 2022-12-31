@@ -1,0 +1,26 @@
+name: Lint and Test
+
+on:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Get app version
+        run: |
+          echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Install modules
+        run: yarn
+      - name: Run ESLint
+        if: ${{ !startsWith(env.APP_VERSION, '1') }}
+        run: yarn lint
