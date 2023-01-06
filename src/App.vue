@@ -44,18 +44,21 @@
         <a
           class="mr-2"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/bc-security/starkiller"
         > Starkiller </a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/bc-security/empire"
         > Empire</a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/sponsors/BC-SECURITY"
         > Sponsor for extra features</a>
       </v-footer>

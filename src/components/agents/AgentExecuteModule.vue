@@ -273,13 +273,15 @@ export default {
       this.loading = true;
 
       const result = await Promise.allSettled(this.agents
-        .map((agent) => moduleApi.executeModule(this.selectedModule,
+        .map((agent) => moduleApi.executeModule(
+          this.selectedModule,
           {
             ...this.form,
             Agent: agent,
           },
           this.ignoreAdminCheck,
-          this.ignoreLanguageCheck)));
+          this.ignoreLanguageCheck,
+        )));
 
       if (result.some((item) => item.status === 'rejected')) {
         const split = result.reduce((acc, val) => {

@@ -107,7 +107,7 @@
         </v-tooltip>
         <router-link
           style="color: inherit;"
-          :to="{ name: 'agentEdit', params: { id: item.session_id }}"
+          :to="{ name: 'agentEdit', params: { id: item.session_id } }"
         >
           {{ item.name }}
         </router-link>
@@ -131,7 +131,7 @@
       <template #item.listener="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'listenerEdit', params: { id: item.listener }}"
+          :to="{ name: 'listenerEdit', params: { id: item.listener } }"
         >
           {{ item.listener }}
         </router-link>
@@ -160,7 +160,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'agentEdit', params: { id: item.session_id }}"
+                :to="{ name: 'agentEdit', params: { id: item.session_id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-binoculars</v-icon>

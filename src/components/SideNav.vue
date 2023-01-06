@@ -15,7 +15,10 @@
           two-line
         >
           <v-list-item-avatar>
-            <img src="../../src/assets/icon.png">
+            <img
+              src="../../src/assets/icon.png"
+              alt="Starkiller Icon"
+            >
           </v-list-item-avatar>
 
           <v-list-item-content>

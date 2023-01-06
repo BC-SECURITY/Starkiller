@@ -38,7 +38,7 @@
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'malleableProfileEdit', params: { id: item.id }}"
+          :to="{ name: 'malleableProfileEdit', params: { id: item.id } }"
         >
           {{ item.name }}
         </router-link>
@@ -72,7 +72,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'malleableProfileEdit', params: { id: item.id }}"
+                :to="{ name: 'malleableProfileEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-binoculars</v-icon>

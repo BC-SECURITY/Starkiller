@@ -32,7 +32,7 @@
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'stagerEdit', params: { id: item.id }}"
+          :to="{ name: 'stagerEdit', params: { id: item.id } }"
         >
           {{ item.name }}
         </router-link>
@@ -40,7 +40,7 @@
       <template #item.options.Listener="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'listenerEdit', params: { id: item.id }}"
+          :to="{ name: 'listenerEdit', params: { id: item.id } }"
         >
           {{ item.options.Listener }}
         </router-link>

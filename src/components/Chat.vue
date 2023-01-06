@@ -28,7 +28,7 @@
           :title="user.name"
           class="sc-message--avatar"
           :style="{
-            backgroundImage: `url(${user.imageUrl})`
+            backgroundImage: `url(${user.imageUrl})`,
           }"
         >
           <div :class="user.online ? 'online-indicator' : 'offline-indicator'" />

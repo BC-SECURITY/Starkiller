@@ -3,11 +3,10 @@
   "version": "2.0.0-beta3",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
   },
   "main": "background.js",
   "dependencies": {
@@ -15,7 +14,6 @@
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@mdi/font": "5.9.55",
     "axios": "^0.24.0",
-    "chai-as-promised": "^7.1.1",
     "lodash.debounce": "^4.0.8",
     "moment": "^2.29.1",
     "portal-vue": "^2.1.7",
@@ -32,23 +30,13 @@
     "vuex-persistedstate": "^3.0.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.18",
-    "@vue/cli-plugin-e2e-cypress": "^4.5.18",
-    "@vue/cli-plugin-eslint": "^4.5.18",
-    "@vue/cli-plugin-router": "^4.5.18",
-    "@vue/cli-plugin-unit-mocha": "^4.5.18",
-    "@vue/cli-plugin-vuex": "^4.5.18",
-    "@vue/cli-service": "^4.5.18",
-    "@vue/eslint-config-airbnb": "^5.3.0",
-    "babel-eslint": "^10.0.3",
-    "chai": "^4.3.4",
-    "deepmerge": "^4.2.2",
-    "eslint": "^7.27.0",
+    "@rushstack/eslint-patch": "^1.2.0",
+    "@vitejs/plugin-vue2": "^2.2.0",
+    "@vue/eslint-config-airbnb": "^7.0.0",
+    "eslint": "^8.31.0",
     "eslint-plugin-vue": "^9.8.0",
-    "sass": "^1.34.1",
-    "sass-loader": "^10.0.0",
-    "vue-cli-plugin-vuetify": "^2.4.8",
-    "vuetify-loader": "^1.7.0",
-    "webpack-bundle-analyzer": "^4.5.0"
+    "sass": "^1.57.1",
+    "unplugin-vue-components": "^0.22.12",
+    "vite": "^3"
   }
 }

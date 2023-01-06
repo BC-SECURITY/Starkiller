@@ -13,6 +13,7 @@
       small
       :href="getTechniqueUrl(tech)"
       target="_blank"
+      rel="noopener noreferrer"
       color="green"
       class="mr-1 mb-1"
     >

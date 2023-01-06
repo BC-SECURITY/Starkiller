@@ -17,67 +17,67 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    component: () => import('../views/About.vue'),
   },
   {
     path: '/listeners',
     name: 'listeners',
-    component: () => import(/* webpackChunkName: "listeners" */ '../views/Listeners.vue'),
+    component: () => import('../views/Listeners.vue'),
   },
   {
     path: '/listeners/new',
     name: 'listenerNew',
-    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
+    component: () => import('../views/ListenerEdit.vue'),
   },
   {
     path: '/listeners/:id',
     name: 'listenerEdit',
-    component: () => import(/* webpackChunkName: "listener-edit" */ '../views/ListenerEdit.vue'),
+    component: () => import('../views/ListenerEdit.vue'),
   },
   {
     path: '/stagers',
     name: 'stagers',
-    component: () => import(/* webpackChunkName: "stagers" */ '../views/Stagers.vue'),
+    component: () => import('../views/Stagers.vue'),
   },
   {
     path: '/stagers/new',
     name: 'stagerNew',
-    component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
+    component: () => import('../views/StagerEdit.vue'),
   },
   {
     path: '/stagers/:id',
     name: 'stagerEdit',
-    component: () => import(/* webpackChunkName: "stager-edit" */ '../views/StagerEdit.vue'),
+    component: () => import('../views/StagerEdit.vue'),
   },
   {
     path: '/agents',
     name: 'agents',
-    component: () => import(/* webpackChunkName: "agents" */ '../views/Agents.vue'),
+    component: () => import('../views/Agents.vue'),
   },
   {
     path: '/agents/:id',
     name: 'agentEdit',
-    component: () => import(/* webpackChunkName: "agent-edit" */ '../views/AgentEdit.vue'),
+    component: () => import('../views/AgentEdit.vue'),
   },
   {
     path: '/modules',
     name: 'modules',
-    component: () => import(/* webpackChunkName: "modules" */ '../views/Modules.vue'),
+    component: () => import('../views/Modules.vue'),
   },
   {
     path: '/modules/:id',
     name: 'moduleExecute',
-    component: () => import(/* webpackChunkName: "modules" */ '../views/ModuleExecute.vue'),
+    component: () => import('../views/ModuleExecute.vue'),
   },
   {
     path: '/users',
     name: 'users',
-    component: () => import(/* webpackChunkName: "users" */ '../views/Users.vue'),
+    component: () => import('../views/Users.vue'),
   },
   {
     path: '/users/new',
     name: 'userNew',
-    component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+    component: () => import('../views/UserEdit.vue'),
     meta: {
       requiresAdmin: true,
     },
@@ -85,7 +85,7 @@ const routes = [
   {
     path: '/users/:id',
     name: 'userEdit',
-    component: () => import(/* webpackChunkName: "user-edit" */ '../views/UserEdit.vue'),
+    component: () => import('../views/UserEdit.vue'),
     meta: {
       requiresAdmin: true,
     },
@@ -93,83 +93,83 @@ const routes = [
   {
     path: '/credentials',
     name: 'credentials',
-    component: () => import(/* webpackChunkName: "credentials" */ '../views/Credentials.vue'),
+    component: () => import('../views/Credentials.vue'),
   },
   {
     path: '/credentials/new',
     name: 'credentialNew',
-    component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
+    component: () => import('../views/CredentialEdit.vue'),
   },
   {
     path: '/credentials/:id',
     name: 'credentialEdit',
-    component: () => import(/* webpackChunkName: "credential-edit" */ '../views/CredentialEdit.vue'),
+    component: () => import('../views/CredentialEdit.vue'),
   },
   {
     path: '/malleable-profiles',
     name: 'malleableProfiles',
-    component: () => import(/* webpackChunkName: "malleable-profiles" */ '../views/MalleableProfiles.vue'),
+    component: () => import('../views/MalleableProfiles.vue'),
   },
   {
     path: '/malleable-profiles/new',
     name: 'malleableProfileNew',
-    component: () => import(/* webpackChunkName: "malleable-profile-edit" */ '../views/MalleableProfileEdit.vue'),
+    component: () => import('../views/MalleableProfileEdit.vue'),
   },
   {
     path: '/malleable-profiles/:id',
     name: 'malleableProfileEdit',
-    component: () => import(/* webpackChunkName: "malleable-profile-edit" */ '../views/MalleableProfileEdit.vue'),
+    component: () => import('../views/MalleableProfileEdit.vue'),
   },
   {
     path: '/bypasses',
     name: 'bypasses',
-    component: () => import(/* webpackChunkName: "bypasses" */ '../views/Bypasses.vue'),
+    component: () => import('../views/Bypasses.vue'),
   },
   {
     path: '/bypasses/new',
     name: 'bypassNew',
-    component: () => import(/* webpackChunkName: "bypass-edit" */ '../views/BypassEdit.vue'),
+    component: () => import('../views/BypassEdit.vue'),
   },
   {
     path: '/bypasses/:id',
     name: 'bypassEdit',
-    component: () => import(/* webpackChunkName: "bypass-edit" */ '../views/BypassEdit.vue'),
+    component: () => import('../views/BypassEdit.vue'),
   },
   {
     path: '/downloads',
     name: 'downloads',
-    component: () => import(/* webpackChunkName: "downloads" */ '../views/Downloads.vue'),
+    component: () => import('../views/Downloads.vue'),
   },
   {
     path: '/tasks',
     name: 'tasks',
-    component: () => import(/* webpackChunkName: "tasks" */ '../views/Tasks.vue'),
+    component: () => import('../views/Tasks.vue'),
   },
   {
     path: '/plugins',
     name: 'plugins',
-    component: () => import(/* webpackChunkName: "plugins" */ '../views/Plugins.vue'),
+    component: () => import('../views/Plugins.vue'),
   },
   {
     path: '/plugins/:id',
     name: 'pluginEdit',
-    component: () => import(/* webpackChunkName: "plugin-edit" */ '../views/PluginEdit.vue'),
+    component: () => import('../views/PluginEdit.vue'),
   },
   {
     path: '/settings',
     name: 'settings',
-    component: () => import(/* webpackChunkName: "settings" */ '../views/Settings.vue'),
+    component: () => import('../views/Settings.vue'),
   },
   {
     path: '/obfuscation',
     name: 'obfuscation',
-    component: () => import(/* webpackChunkName: "obfuscation" */ '../views/Obfuscation.vue'),
+    component: () => import('../views/Obfuscation.vue'),
   },
 ];
 
 const router = new VueRouter({
   mode: 'hash',
-  base: process.env.BASE_URL,
+  base: import.meta.env.BASE_URL,
   routes,
 });
 

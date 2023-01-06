@@ -48,7 +48,7 @@ yarn
 
 ### Compile and hot-reload for development
 ```
-yarn serve
+yarn dev
 ```
 
 ### Compile and minify for production

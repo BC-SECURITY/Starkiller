@@ -33,6 +33,7 @@
                     :key="index"
                     medium
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="mr-1 mb-1"
                   >
                     {{ formatDisplayName(author) }}

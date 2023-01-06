@@ -25,6 +25,7 @@
           ref="uploader"
           class="d-none"
           type="file"
+          aria-label="uploader"
           @change="onFileChanged"
         >
       </template>
@@ -78,7 +79,7 @@
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           :server-items-length="totalItems"
-          :footer-props="{'items-per-page-options': [10, 25, 50, 100]}"
+          :footer-props="{ 'items-per-page-options': [10, 25, 50, 100] }"
           :items-per-page.sync="itemsPerPage"
           :loading="loading"
           :page="currentPage"

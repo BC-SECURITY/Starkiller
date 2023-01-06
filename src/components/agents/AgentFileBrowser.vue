@@ -79,6 +79,7 @@
 import Vue from 'vue';
 import * as agentApi from '@/api/agent-api';
 import debounce from 'lodash.debounce';
+import pause from '@/utils/pause';
 import ExecuteModuleDialog from './ExecuteModuleDialog.vue';
 
 export default {
@@ -252,7 +253,7 @@ export default {
         let complete = 0;
         while (i < 10) {
         // eslint-disable-next-line no-await-in-loop
-          await this.pause(6000);
+          await pause(6000);
           // eslint-disable-next-line no-await-in-loop
           if (await this.checkTaskComplete(task.id)) {
             complete = true;
@@ -330,9 +331,6 @@ export default {
         children: serverElement.is_file === false ? [] : undefined,
       };
     },
-    pause(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    },
     async loadChildren(a, { stopTrying } = {}) {
       if (this.currentlyLoading[a.id]) return Promise.resolve();
 
@@ -352,7 +350,7 @@ export default {
         let complete = false;
         while (i < 10) {
         // eslint-disable-next-line no-await-in-loop
-          await this.pause(6000);
+          await pause(6000);
           // eslint-disable-next-line no-await-in-loop
           if (await this.checkTaskComplete(task.id)) {
             console.log('task complete', task.id);

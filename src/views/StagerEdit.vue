@@ -244,9 +244,7 @@ export default {
             this.loading = false;
           });
       } else {
-        stagerApi.createStager(
-          this.selectedTemplate, this.stager.name || this.randomName(), this.form,
-        )
+        stagerApi.createStager(this.selectedTemplate, this.stager.name || this.randomName(), this.form)
           .then(({ id }) => {
             this.$snack.success('Stager created');
             this.loading = false;

@@ -111,7 +111,7 @@
         class="ma-2 pa-2"
       >
         <v-card-title>
-          <v-card-title-text style="display: flex; justify-content: space-between; width: 100%">
+          <span style="display: flex; justify-content: space-between; width: 100%">
             <span class="headline">Keyword Obfuscation</span>
             <v-btn
               color="primary"
@@ -124,7 +124,7 @@
                 fa-plus-square
               </v-icon>
             </v-btn>
-          </v-card-title-text>
+          </span>
         </v-card-title>
         <v-data-table
           :headers="headers"
@@ -175,9 +175,9 @@
         class="ma-2 pa-2"
       >
         <v-card-title>
-          <v-card-title-text>
+          <span>
             <span class="headline">Global Obfuscation</span>
-          </v-card-title-text>
+          </span>
         </v-card-title>
         <v-card-text>
           <v-card
@@ -379,9 +379,7 @@ export default {
       try {
         // save the current state of the config first
         await obfuscationApi.updateObfuscationConfig(this.editedPreobfuscate);
-        await obfuscationApi.preobfuscateModules(
-          this.editedPreobfuscate.language, this.reobfuscate,
-        );
+        await obfuscationApi.preobfuscateModules(this.editedPreobfuscate.language, this.reobfuscate);
         this.$snack.info('Preobfuscation started in the background. This will take a few minutes.');
       } catch (e) {
         this.$snack.error(`${e}`);

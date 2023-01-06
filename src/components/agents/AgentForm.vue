@@ -164,7 +164,7 @@ export default {
       form: {},
       moment,
       workingHoursRules: [
-        (v) => new RegExp('^[0-9]{1,2}:[0-5][0-9]-[0-9]{1,2}:[0-5][0-9]$').test(v) || 'Must be in the format 00:00-24:00',
+        (v) => /^[0-9]{1,2}:[0-5][0-9]-[0-9]{1,2}:[0-5][0-9]$/.test(v) || 'Must be in the format 00:00-24:00',
       ],
       nameRules: [
         (v) => !!v || 'Name is required',

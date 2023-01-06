@@ -1,3 +1,4 @@
+<!-- eslint-disable vuejs-accessibility/click-events-have-key-events -->
 <template>
   <div>
     <list-page-top
@@ -20,7 +21,7 @@
       <template #item.id="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'credentialEdit', params: { id: item.id }}"
+          :to="{ name: 'credentialEdit', params: { id: item.id } }"
         >
           {{ item.id }}
         </router-link>
@@ -64,7 +65,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'credentialEdit', params: { id: item.id }}"
+                :to="{ name: 'credentialEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-pencil-alt</v-icon>
