@@ -100,10 +100,9 @@ export default {
 
       this.loading = true;
 
-      // todo currently this endpoint just returns null on success.
-      // next version of this api should have better messaging.
       try {
-        await pluginApi.executePlugin(this.plugin.name, this.form);
+        const response = await pluginApi.executePlugin(this.plugin.name, this.form);
+        this.$snack.success(`${response.detail}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }

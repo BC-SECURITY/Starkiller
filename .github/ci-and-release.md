@@ -1,6 +1,6 @@
 # CI Processes
 
-Starkiller's workflows (and this documentation) are a fork of the [Empire workflows](todo).
+Starkiller's workflows (and this documentation) are a fork of the [Empire workflows](https://github.com/BC-SECURITY/Empire/tree/main/.github).
 The `main`, `kali-main`, and `sponsors-main` branches get a `dist/` generated upon release. `private-main` does not. 
 
 ## Build and Test
@@ -170,7 +170,7 @@ The workflow will detect the last released tag, and use the release notes from t
 Requires a secret in the repo `RELEASE_TOKEN` that has `repo` and `workflow` access.
 
 ## More Information
-TODO: Link to CI/CD blog post once it is written.
+https://www.bc-security.org/using-github-actions-to-manage-ci-cd-for-empire/
 
 ## Contributing
 To update the workflows if you don't have access to the `Starkiller-Sponsors` repo:
