@@ -96,7 +96,7 @@
         <v-tooltip top>
           <template #activator="{ on }">
             <v-icon
-              v-if="item.high_integrity === 1"
+              v-if="item.high_integrity"
               small
               v-on="on"
             >
