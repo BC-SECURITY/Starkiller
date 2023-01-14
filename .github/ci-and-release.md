@@ -1,6 +1,6 @@
 # CI Processes
 
-Starkiller's workflows (and this documentation) are a fork of the [Empire workflows](todo).
+Starkiller's workflows (and this documentation) are a fork of the [Empire workflows](https://github.com/BC-SECURITY/Empire/tree/main/.github).
 The `main`, `kali-main`, and `sponsors-main` branches get a `dist/` generated upon release. `private-main` does not. 
 
 ## Build and Test
@@ -10,6 +10,11 @@ All pull requests will run the `Lint and Test` workflow.
 * There are no tests yet.
 
 ## BC-SECURITY/Starkiller-Sponsors Sponsors & Kali Release Process
+*Note: Starting in 2023, the Kali team will be pulling from the public repo.
+I am keeping the Kali workflows running for now with the exception of the tagging.
+This is mostly out of laziness since I just wrote all of the CI/CD. In the near future,
+we can rework these jobs to be more like "sponsors & other downstream" releases.*
+
 Sponsors and Kali releases go through the same release process. It is easier to manage Starkiller releases by not allowing them to be released at different times and have the version numbers diverge.
 A side effect of this is its possible for a version bump to be empty (no changes) and still be released.
 
@@ -165,7 +170,7 @@ The workflow will detect the last released tag, and use the release notes from t
 Requires a secret in the repo `RELEASE_TOKEN` that has `repo` and `workflow` access.
 
 ## More Information
-TODO: Link to CI/CD blog post once it is written.
+https://www.bc-security.org/using-github-actions-to-manage-ci-cd-for-empire/
 
 ## Contributing
 To update the workflows if you don't have access to the `Starkiller-Sponsors` repo:

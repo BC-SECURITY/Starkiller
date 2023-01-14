@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 
 /**
  * Returns a single users.
@@ -6,7 +6,7 @@ import { axiosInstance as axios } from '@/api/axios-instance';
 export function getUser(id) {
   return axios.get(`/users/${id}`)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -14,8 +14,8 @@ export function getUser(id) {
  */
 export function getUsers() {
   return axios.get('/users')
-    .then(({ data }) => data.users)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -23,21 +23,19 @@ export function getUsers() {
  * @param {string} username
  * @param {string} password
  */
-export function createUser(username, password) {
-  return axios.post('/users', { username, password })
+export function createUser(user) {
+  return axios.post('/users', user)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
- * Disable/Able a user.
- * @param {string} id user's id
- * @param {boolean} disable whether the user should be disabled or not.
+ * Update a user.
  */
-export function disableUser(id, disable) {
-  return axios.put(`/users/${id}/disable`, { disable })
+export function updateUser(user) {
+  return axios.put(`/users/${user.id}`, user)
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**
@@ -46,7 +44,7 @@ export function disableUser(id, disable) {
  * @param {boolean} password new password
  */
 export function updatePassword(id, password) {
-  return axios.put(`/users/${id}/updatepassword`, { password })
+  return axios.put(`/users/${id}/password`, { password })
     .then(({ data }) => data)
-    .catch((error) => Promise.reject(error.response.data.error));
+    .catch((error) => Promise.reject(handleError(error)));
 }

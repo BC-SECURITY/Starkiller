@@ -26,7 +26,7 @@
       <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'bypassEdit', params: { id: item.id }}"
+          :to="{ name: 'bypassEdit', params: { id: item.id } }"
         >
           {{ item.name }}
         </router-link>
@@ -36,7 +36,7 @@
           <template #activator="{ on }">
             <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.updated_at).format('lll') }}</span>
+          <span>{{ moment(item.updated_at).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
       <template #item.actions="{ item }">
@@ -60,7 +60,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'bypassEdit', params: { id: item.id }}"
+                :to="{ name: 'bypassEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-binoculars</v-icon>
@@ -100,6 +100,7 @@
 import moment from 'moment';
 import ListPageTop from '@/components/ListPageTop.vue';
 import { mapState } from 'vuex';
+
 export default {
   name: 'Bypasses',
   components: {

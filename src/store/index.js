@@ -3,12 +3,12 @@ import Vuex from 'vuex';
 
 import createPersistedState from 'vuex-persistedstate';
 import { setInstance } from '@/api/axios-instance';
-import { initNamespacedStore } from '@/store/electron-store';
 import UserModule from './UserModule';
 import ListenerModule from './ListenerModule';
 import StagerModule from './StagerModule';
 import AgentModule from './AgentModule';
 import ModuleModule from './ModuleModule';
+import ObfuscationModule from './ObfuscationModule';
 import CredentialModule from './CredentialModule';
 import PluginModule from './PluginModule';
 import ApplicationModule from './ApplicationModule';
@@ -30,6 +30,7 @@ export default new Vuex.Store({
     stager: StagerModule,
     agent: AgentModule,
     module: ModuleModule,
+    obfuscation: ObfuscationModule,
     credential: CredentialModule,
     bypass: BypassModule,
     malleable: MalleableModule,
@@ -40,7 +41,6 @@ export default new Vuex.Store({
     paths: ['application'],
     rehydrated: ({ state }) => {
       setInstance(state.application.url, state.application.token);
-      initNamespacedStore(state.application.url);
     },
   })],
 });

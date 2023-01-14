@@ -51,7 +51,8 @@ export default {
   },
   computed: {
     ...mapState({
-      agents: (state) => state.agent.agents,
+      agents: (state) => state.agent.agents
+        .filter((agent) => agent.archived === false && agent.stale === false),
     }),
     breads() {
       return [
@@ -71,7 +72,7 @@ export default {
   },
   mounted() {
     this.getAgents();
-    this.moduleName = this.$route.query.module;
+    this.moduleName = this.$route.params.id;
   },
   methods: {
     submit() {
@@ -80,7 +81,7 @@ export default {
     },
     moduleChange(val) {
       this.moduleName = val;
-      this.$route.query.module = val;
+      this.$router.push({ name: 'moduleExecute', params: { id: val } });
     },
     getAgents() {
       this.$store.dispatch('agent/getAgents');

@@ -1,10 +1,11 @@
 <template>
   <div>
+    <list-page-top
+      :breads="breads"
+    />
     <div style="display: flex; flix-direction: row;">
       <v-card
         class="mr-2 pa-2"
-        elevation="2"
-        outlined
         style="width:300px;"
       >
         <v-expansion-panels
@@ -22,17 +23,61 @@
                 outlined
                 dense
                 required
-                @input="debouncedHandleSearch"
+                @input="handleSearch"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-menu-down">
+              Agents
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-checkbox
+                v-model="selectedAllAgents"
+                x-small
+                dense
+                label="Select All"
+              />
+              <v-divider class="pb-4" />
+              <v-checkbox
+                v-for="agent in agents"
+                :key="agent.session_id"
+                v-model="selectedAgents"
+                :value="agent.session_id"
+                x-small
+                dense
+                :label="agent.name"
+                @change="handleFilterChange"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-menu-down">
+              Users
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-checkbox
+                v-model="selectedAllUsers"
+                x-small
+                dense
+                label="Select All"
+              />
+              <v-divider class="pb-4" />
+              <v-checkbox
+                v-for="user in users"
+                :key="user.id"
+                v-model="selectedUsers"
+                :value="user.id"
+                x-small
+                dense
+                :label="user.username"
+                @change="handleFilterChange"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-card>
-      <v-card
-        style="flex-grow: 1;"
-        elevation="2"
-        outlined
-      >
+      <v-card style="flex-grow: 1;">
         <v-pagination
           v-model="currentPage"
           :length="totalPages"
@@ -123,9 +168,6 @@
           <template #item.input="{ item }">
             <span>{{ truncateMessage(item.input) }}</span>
           </template>
-          <template #item.task_name="{ item }">
-            <span>{{ item.module_name == null ? item.task_name : item.module_name }}</span>
-          </template>
           <template #item.updated_at="{ item }">
             <v-tooltip top>
               <template #activator="{ on }">
@@ -212,49 +254,50 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import moment from 'moment';
+import Vue from 'vue';
 import debounce from 'lodash.debounce';
 
-import TooltipButton from '@/components/TooltipButton.vue';
-import DownloadMixin from '@/mixins/download-stager';
-import * as downloadApi from '@/api/download-api';
 import * as agentApi from '@/api/agent-api';
-import Vue from 'vue';
+import * as downloadApi from '@/api/download-api';
+
+import ListPageTop from '@/components/ListPageTop.vue';
+import TooltipButton from '@/components/TooltipButton.vue';
 
 export default {
-  name: 'AgentCommandHistory',
+  name: 'Tasks',
   components: {
+    ListPageTop,
     TooltipButton,
-  },
-  mixins: [DownloadMixin],
-  props: {
-    agent: {
-      type: Object,
-      required: true,
-    },
-    refreshTasks: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
+      breads: [
+        {
+          text: 'Tasks',
+          disabled: true,
+          href: '/tasks',
+        },
+      ],
+      search: '',
+      selectedAgents: [],
+      selectedUsers: [],
       tasks: [],
       currentPage: 1,
       totalPages: 1,
       totalItems: 0,
       itemsPerPage: 10,
-      search: '',
       loading: false,
       moment,
-      sortBy: 'id',
+      sortBy: 'updated_at',
       sortDesc: true,
       refreshInterval: null,
       expandedTasks: {},
-      debouncedHandleSearch: () => {},
       headers: [
         { text: 'Task ID', value: 'id', sortable: true },
         { text: 'Status', value: 'status', sortable: true },
+        { text: 'Agent', value: 'agent_id', sortable: true },
         { text: 'Task Input', value: 'input', sortable: false },
         { text: 'Task Name', value: 'task_name', sortable: false },
         { text: 'User', value: 'username', sortable: false },
@@ -263,37 +306,52 @@ export default {
       ],
     };
   },
-  watch: {
-    refreshTasks(newVal) {
-      if (newVal) {
-        this.getTasks();
-        this.refreshInterval = setInterval(() => {
-          this.getTasks();
-        }, 8000);
-      } else {
-        clearInterval(this.refreshInterval);
-      }
+  computed: {
+    ...mapState({
+      agents: (state) => state.agent.agents,
+      users: (state) => state.user.users,
+    }),
+    selectedAllAgents: {
+      set(val) {
+        if (val) {
+          this.selectedAgents = this.agents.map((a) => a.session_id);
+        } else {
+          this.selectedAgents = [];
+        }
+        this.debouncedGetTasks();
+      },
+      get() {
+        return this.selectedAgents.length === this.agents.length;
+      },
     },
-    agent: {
-      handler() {
-        this.initialize();
+    selectedAllUsers: {
+      set(val) {
+        if (val) {
+          this.selectedUsers = this.users.map((u) => u.id);
+        } else {
+          this.selectedUsers = [];
+        }
+        this.debouncedGetTasks();
+      },
+      get() {
+        return this.selectedUsers.length === this.users.length;
       },
     },
   },
   async mounted() {
-    if (this.agent) {
-      this.initialize();
-    }
+    await Promise.all([
+      this.$store.dispatch('agent/getAgents'),
+      this.$store.dispatch('user/getUsers'),
+    ]);
+    this.selectedAgents = this.agents.map((a) => a.session_id);
+    this.selectedUsers = this.users.map((u) => u.id);
 
-    this.debouncedHandleSearch = debounce(this.handleSearch, 500);
+    this.debouncedGetTasks = debounce(this.getTasks, 500);
+
+    this.debouncedGetTasks();
   },
-  beforeDestroy() {
-    clearInterval(this.refreshInterval);
-  },
+  // todo a lot of this stuff is copied from AgentCommandHistory and could probably be reused.
   methods: {
-    initialize() {
-      this.getTasks();
-    },
     truncateMessage(task) {
       if (task) {
         return task.length > 30 ? `${task.substr(0, 30)}...` : task;
@@ -312,7 +370,7 @@ export default {
     async downloadInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(this.agent.session_id, task.id);
+          const data = await agentApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.id] = data;
         }
 
@@ -327,7 +385,7 @@ export default {
     async copyInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(this.agent.session_id, task.id);
+          const data = await agentApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.id] = data;
         }
 
@@ -339,36 +397,9 @@ export default {
         navigator.clipboard.writeText(task.output);
       }
     },
-    imageData(task, download) {
-      const expandedDownloads = this.expandedTasks[task.id]?.downloads;
-      if (expandedDownloads) {
-        const found = expandedDownloads.find((d) => d.id === download.id);
-        if (found) {
-          return found.image;
-        }
-      }
-      return null;
-    },
-    async getImagesForTask(task) {
-      if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(this.agent.session_id, task.id);
-        this.expandedTasks[task.id] = data;
-      }
-
-      for (let i = 0; i < task.downloads.length; i++) {
-        const download = task.downloads[i];
-        if (!this.expandedTasks[task.id].downloads[download.id]?.image
-          && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
-          // eslint-disable-next-line
-          const url = await downloadApi.getDownloadAsUrl(download.id);
-          this.expandedTasks[task.id].downloads[i].image = url;
-        }
-      }
-      Vue.set(this.tasks, this.tasks.indexOf(task), task);
-    },
     async toggleSeeFullInput(task) {
       if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(this.agent.session_id, task.id);
+        const data = await agentApi.getTask(task.agent_id, task.id);
         this.expandedTasks[task.id] = data;
         task.expandedInput = true;
       } else {
@@ -377,14 +408,26 @@ export default {
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     async getTasks() {
-      // eslint-disable-next-line camelcase
-      if (!this.agent?.session_id) return;
+      if (this.selectedAgents.length === 0) {
+        // seems weird to do this but it would be weirder to select all agents
+        // when no agents are selected. Even though the api sees no agents as all agents.
+        this.tasks = [];
+        this.currentPage = 1;
+        this.totalPages = 1;
+        this.totalItems = 0;
+        return;
+      }
       this.loading = true;
-      const response = await agentApi.getTasks(this.agent.session_id, {
+      let agents = null;
+      if (this.selectedAgents.length > 0) {
+        agents = this.selectedAgents;
+      }
+      const response = await agentApi.getTasks(agents, {
         page: this.currentPage,
         limit: this.itemsPerPage,
         sortBy: this.sortBy,
         sortOrder: this.sortDesc ? 'desc' : 'asc',
+        users: this.selectedUsers,
         search: this.search,
       });
       this.currentPage = response.page;
@@ -404,12 +447,42 @@ export default {
       this.tasks = response.records;
       this.loading = false;
     },
+    imageData(task, download) {
+      const expandedDownloads = this.expandedTasks[task.id]?.downloads;
+      if (expandedDownloads) {
+        const found = expandedDownloads.find((d) => d.id === download.id);
+        if (found) {
+          return found.image;
+        }
+      }
+      return null;
+    },
+    async getImagesForTask(task) {
+      if (!this.expandedTasks[task.id]) {
+        const data = await agentApi.getTask(task.agent_id, task.id);
+        this.expandedTasks[task.id] = data;
+      }
+
+      for (let i = 0; i < task.downloads.length; i++) {
+        const download = task.downloads[i];
+        if (!this.expandedTasks[task.id].downloads[download.id]?.image
+          && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
+          // eslint-disable-next-line
+          const url = await downloadApi.getDownloadAsUrl(download.id);
+          this.expandedTasks[task.id].downloads[i].image = url;
+        }
+      }
+      Vue.set(this.tasks, this.tasks.indexOf(task), task);
+    },
     handleSearch() {
-      this.getTasks();
+      this.debouncedGetTasks();
+    },
+    handleFilterChange() {
+      this.debouncedGetTasks();
     },
     handlePageChange(page) {
       this.currentPage = page;
-      this.getTasks();
+      this.debouncedGetTasks();
     },
     handleOptionsChange(value) {
       this.currentPage = value.page;
@@ -424,7 +497,8 @@ export default {
         this.sortBy = 'id';
         this.sortDesc = true;
       }
-      this.getTasks();
+      if (this.sortBy === 'agent_id') this.sortBy = 'agent';
+      this.debouncedGetTasks();
     },
   },
 };

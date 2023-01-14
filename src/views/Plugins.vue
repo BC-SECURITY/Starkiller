@@ -4,18 +4,20 @@
       :breads="breads"
       :show-create="false"
       :show-delete="false"
+      :show-refresh="true"
+      @refresh="getPlugins"
     />
     <v-data-table
       :headers="headers"
       :items="plugins"
       dense
     >
-      <template #item.Name="{ item }">
+      <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'pluginExecute', params: { id: item.Name } }"
+          :to="{ name: 'pluginEdit', params: { id: item.id } }"
         >
-          {{ item.Name }}
+          {{ item.name }}
         </router-link>
       </template>
     </v-data-table>
@@ -41,9 +43,8 @@ export default {
         },
       ],
       headers: [
-        { text: 'Name', value: 'Name' },
-        { text: 'Description', value: 'Description' },
-        { text: 'Author', value: 'Author' },
+        { text: 'Name', value: 'name' },
+        { text: 'Description', value: 'description' },
       ],
     };
   },

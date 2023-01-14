@@ -11,8 +11,9 @@
       v-for="tech in techniques.filter(t => t !== '')"
       :key="tech"
       small
-      :href="`https://attack.mitre.org/techniques/${tech}`"
+      :href="getTechniqueUrl(tech)"
       target="_blank"
+      rel="noopener noreferrer"
       color="green"
       class="mr-1 mb-1"
     >
@@ -32,6 +33,15 @@ export default {
     showTitle: {
       type: Boolean,
       default: true,
+    },
+  },
+  methods: {
+    getTechniqueUrl(tech) {
+      if (tech.includes('.')) {
+        const [main, sub] = tech.split('.');
+        return `https://attack.mitre.org/techniques/${main}/${sub}`;
+      }
+      return `https://attack.mitre.org/techniques/${tech}`;
     },
   },
 };

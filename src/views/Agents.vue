@@ -17,6 +17,11 @@
         v-model="hideStaleAgentsCheckbox"
         label="Hide Stale Agents"
       />
+      <v-switch
+        v-model="hideArchivedAgentsCheckbox"
+        class="pl-4"
+        label="Hide Archived Agents"
+      />
       <v-spacer />
       <v-menu
         v-model="showHeaderMenu"
@@ -91,7 +96,7 @@
         <v-tooltip top>
           <template #activator="{ on }">
             <v-icon
-              v-if="item.high_integrity === 1"
+              v-if="item.high_integrity"
               small
               v-on="on"
             >
@@ -102,7 +107,7 @@
         </v-tooltip>
         <router-link
           style="color: inherit;"
-          :to="{ name: 'agentEdit', params: { id: item.name }}"
+          :to="{ name: 'agentEdit', params: { id: item.session_id } }"
         >
           {{ item.name }}
         </router-link>
@@ -112,7 +117,7 @@
           <template #activator="{ on }">
             <span v-on="on">{{ moment(item.lastseen_time).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.lastseen_time).format('lll') }}</span>
+          <span>{{ moment(item.lastseen_time).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
       <template #item.checkin_time="{ item }">
@@ -120,13 +125,13 @@
           <template #activator="{ on }">
             <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.checkin_time).format('lll') }}</span>
+          <span>{{ moment(item.checkin_time).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
       <template #item.listener="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'listenerEdit', params: { id: item.listener }}"
+          :to="{ name: 'listenerEdit', params: { id: item.listener } }"
         >
           {{ item.listener }}
         </router-link>
@@ -155,7 +160,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'agentEdit', params: { id: item.name }}"
+                :to="{ name: 'agentEdit', params: { id: item.session_id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-binoculars</v-icon>
@@ -169,7 +174,9 @@
               @click="popout(item)"
             >
               <v-list-item-title>
-                <v-icon>fa-external-link-alt</v-icon>
+                <v-icon>
+                  fa-external-link-alt
+                </v-icon>
                 Popout
               </v-list-item-title>
             </v-list-item>
@@ -195,8 +202,6 @@
 import moment from 'moment';
 import { mapState } from 'vuex';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { ipcRenderer } from 'electron';
 import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
@@ -258,13 +263,13 @@ export default {
       selected: [],
       showHeaderMenu: false,
       moment,
-      hideStale: false,
     };
   },
   computed: {
     ...mapState({
       agents: (state) => state.agent.agents,
       hideStaleAgents: (state) => state.application.hideStaleAgents,
+      hideArchivedAgents: (state) => state.application.hideArchivedAgents,
       selectedHeadersState: (state) => state.application.agentHeaders,
     }),
     selectedAll: {
@@ -295,9 +300,12 @@ export default {
     },
     sortedAgents() {
       const sorted = this.agents.slice();
-      sorted.sort((a, b) => -a.checkin_time.localeCompare(b.checkin_time));
+      sorted.sort((a, b) => -a.lastseen_time.localeCompare(b.lastseen_time));
       if (this.hideStaleAgents) {
         return sorted.filter((agent) => !agent.stale);
+      }
+      if (this.hideArchivedAgents) {
+        return sorted.filter((agent) => !agent.archived);
       }
       return sorted;
     },
@@ -310,6 +318,14 @@ export default {
       },
       get() {
         return this.hideStaleAgents;
+      },
+    },
+    hideArchivedAgentsCheckbox: {
+      set(val) {
+        this.$store.dispatch('application/hideArchivedAgents', val);
+      },
+      get() {
+        return this.hideArchivedAgents;
       },
     },
     selectedHeaders: {
@@ -336,9 +352,10 @@ export default {
     async killAgents() {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill ${this.selected.length} agents?`, { color: 'red' })) {
         this.selected.forEach((agent) => {
-          this.$store.dispatch('agent/killAgent', { name: agent.name });
+          this.$store.dispatch('agent/killAgent', { sessionId: agent.session_id });
         });
         this.$snack.success(`${this.selected.length} agents tasked to run TASK_EXIT.`);
+        this.selected = [];
       }
     },
     getAgents() {
@@ -346,12 +363,12 @@ export default {
     },
     async killAgent(item) {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('agent/killAgent', { name: item.name });
+        this.$store.dispatch('agent/killAgent', { sessionId: item.session_id });
         this.$snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
       }
     },
     popout(item) {
-      ipcRenderer.send('agentWindowOpen', { id: item.name });
+      window.open(`${window.location.href}/${item.name}?hideSideBar=true`, 'popup', 'width=600,height=600');
     },
     truncateMessage(str) {
       if (str) {

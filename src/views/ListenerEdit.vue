@@ -2,14 +2,67 @@
   <div>
     <edit-page-top
       :breads="breads"
-      :show-submit="canEdit"
-      :show-copy="!canEdit"
-      :show-delete="!canEdit"
+      :show-submit="initialLoad"
+      :disable-submit="!canEdit && initialLoad"
+      :show-copy="id > 0 && initialLoad"
+      :show-delete="id > 0 && initialLoad"
       :submit-loading="loading"
       :copy-link="copyLink"
+      :small-copy="true"
+      :small-delete="true"
       @submit="submit"
       @delete="kill"
-    />
+    >
+      <template slot="extra-stuff">
+        <v-switch
+          v-if="!isNew && initialLoad"
+          v-model="listener.enabled"
+          color="green"
+          label="Enabled"
+          class="mt-6 mr-2"
+          @change="toggleEnabled"
+        />
+        <v-menu
+          v-if="!isNew && initialLoad"
+          offset-y
+          open-on-hover
+        >
+          <template #activator="{ on, attrs }">
+            <v-btn
+              class="mr-5"
+              text
+              icon
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>fa-suitcase-rolling</v-icon>
+            </v-btn>
+          </template>
+          <v-list class="ml-2 mr-2">
+            <v-list-item
+              v-for="(item, index) in commonStagers"
+              :key="index"
+              link
+              :to="{ name: 'stagerNew', query: { template: item, listener: listener.name } }"
+            >
+              <v-list-item-title>
+                {{ item }}
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider />
+            <v-list-item
+              link
+              :to="{ name: 'stagerNew' }"
+            >
+              <v-list-item-title>
+                Other
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+    </edit-page-top>
     <div class="headers">
       <h3>{{ mode }} Listener</h3>
     </div>
@@ -24,11 +77,11 @@
     >
       <info-viewer
         class="info-viewer"
-        :info-array="listenerInfoArray"
+        :info="listenerInfo"
       />
       <v-autocomplete
-        v-model="listenerType"
-        :items="listenerTypes"
+        v-model="selectedTemplate"
+        :items="listenerTemplateIds"
         :loading="!reset"
         dense
         outlined
@@ -63,7 +116,7 @@
 
 <script>
 import * as listenerApi from '@/api/listener-api';
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import GeneralForm from '@/components/GeneralForm.vue';
 import InfoViewer from '@/components/InfoViewer.vue';
 import EditPageTop from '@/components/EditPageTop.vue';
@@ -80,19 +133,27 @@ export default {
   data() {
     return {
       listener: { options: {} },
-      listenerType: '',
+      listenerTemplate: { options: {} },
+      selectedTemplate: '',
       form: {},
       reset: true,
       loading: false,
       formPriorities: ['Name', 'Host', 'Port'],
-      initialLoad: true,
       errorState: false,
       validationMessage: null,
+      initialLoad: false,
+      commonStagers: [
+        'multi_launcher',
+        'multi_macro',
+        'windows_csharp_exe',
+        'windows_dll',
+        'windows_shellcode',
+      ],
     };
   },
   computed: {
-    ...mapState({
-      listenerTypes: (state) => state.listener.types,
+    ...mapGetters({
+      listenerTemplateIds: 'listener/templateIds',
     }),
     isNew() {
       return this.$route.name === 'listenerNew';
@@ -106,32 +167,35 @@ export default {
       return 'View';
     },
     canEdit() {
-      return this.isNew;
+      return this.isNew || !this.listener.enabled;
     },
     id() {
-      return this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id;
     },
     copyLink() {
-      if (!this.canEdit) return { name: 'listenerNew', params: { copy: true, id: this.id } };
+      if (this.id > 0) return { name: 'listenerNew', params: { copy: true, id: this.id } };
       return {};
     },
-    listenerInfoArray() {
-      const a = this.listener.info || {};
-      if (Object.keys(a).length === 0) return [];
-
-      return [
-        { key: 'Author', value: a.Author ? a.Author.join(', ') : '' },
-        { key: 'Comments', value: a.Comments ? a.Comments.join('\n') : '' },
-        { key: 'Description', value: a.Description },
-      ];
+    listenerInfo() {
+      if (!this.listenerTemplate) return {};
+      const a = this.listenerTemplate;
+      return { authors: a.authors, description: a.description, comments: a.comments };
     },
     listenerOptions() {
-      const { options } = this.listener;
-      if (this.listenerType === 'onedrive' && options) {
-        // If this is required, we wouldn't be able to submit.
-        // It technically is required, but we need it blank to do the validation step.
-        options.AuthCode.Required = false;
+      if (!this.isNew || this.isCopy) {
+        // if its not new, set the options
+        // iterate over the options in this.listener and set the values
+        const options = {};
+        Object.keys(this.listener.options).forEach((key) => {
+          options[key] = { ...this.listenerTemplate.options[key] };
+          options[key].value = this.listener.options[key];
+        });
+        return options;
       }
+
+      // if its new, use the defaults from the template
+      const { options } = this.listenerTemplate;
+      if (!options) return {};
       return options;
     },
     breads() {
@@ -143,30 +207,31 @@ export default {
           exact: true,
         },
         {
-          text: this.id && !this.isCopy ? `${this.id}` : 'New',
+          text: this.breadcrumbName,
           disabled: true,
           to: '/listeners-edit',
         },
       ];
     },
+    breadcrumbName() {
+      if (this.isCopy) return 'New';
+      if (this.listener.name) return this.listener.name;
+      if (this.id) return this.id;
+      return 'New';
+    },
   },
   watch: {
-    listenerType: {
+    selectedTemplate: {
       async handler(val) {
-        // if its not new OR its a copy, then we want to let mounted call for the listener
-        // we are viewing.
-        if (!this.isNew || this.isCopy) {
-          if (this.initialLoad) {
-            return;
-          }
-        }
-        const a = await listenerApi.getListenerOptions(val)
+        const a = await listenerApi.getListenerTemplate(val)
           .catch((err) => this.$snack.error(`Error: ${err}`));
         if (a) {
           this.reset = false;
 
-          this.listener = a;
-          setTimeout(() => { this.reset = true; }, 500);
+          this.listenerTemplate = a;
+          await this.$nextTick();
+          this.reset = true;
+          this.initialLoad = true;
         }
       },
     },
@@ -177,10 +242,12 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('listener/getListenerTypes');
+    this.$store.dispatch('listener/getListenerTemplates');
 
     if (!this.isNew || this.isCopy) {
-      this.getListener(this.id);
+      // using the route param id instad of this.id
+      // since this.id is 0 for copies.
+      this.getListener(this.$route.params.id);
     }
   },
   methods: {
@@ -190,27 +257,51 @@ export default {
       }
 
       this.loading = true;
-      await this.create();
-      this.loading = false;
-    },
-    async create() {
-      const resp = await listenerApi.validateListener(this.listenerType, this.form);
-      if (!resp.success) {
-        this.validationMessage = resp;
-        return;
-      }
-
-      try {
-        await listenerApi.createListener(this.listenerType, this.form);
-        this.$router.push({ name: 'listenerEdit', params: { id: this.form.Name } });
-      } catch (err) {
-        this.$snack.error(`Error: ${err}`);
+      if (this.id > 0) {
+        listenerApi.updateListener({ ...this.listener, options: this.form })
+          .then(() => {
+            this.$snack.success('Listener updated');
+            this.loading = false;
+          })
+          .catch((err) => {
+            // if (typeof err === 'object') {
+            // err.details.forEach((detail) => {
+            // Here we could set an error object on the form
+            // Hot going to do it atm since it would require doing
+            // some refactoring of the GeneralForm and DynamicFormInput
+            // and most (all?) of the validations that would be needed
+            // are already done client side.
+            // const field = detail.loc[1]
+            // this.errors[field] = detail.msg
+            // });
+            if (err.startsWith('[*]')) {
+              this.validationMessage = err;
+            } else {
+              this.$snack.error(`Error: ${err}`);
+            }
+            this.loading = false;
+          });
+      } else {
+        listenerApi.createListener(this.selectedTemplate, this.form)
+          .then(({ id }) => {
+            this.$snack.success('Listener created');
+            this.loading = false;
+            this.$router.push({ name: 'listenerEdit', params: { id } });
+          })
+          .catch((err) => {
+            if (err.startsWith('[*]')) {
+              this.validationMessage = err;
+            } else {
+              this.$snack.error(`Error: ${err}`);
+            }
+            this.loading = false;
+          });
       }
     },
     async kill() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${this.form.Name}?`, { color: 'red' })) {
         try {
-          await this.$store.dispatch('listener/killListener', this.form.Name);
+          await this.$store.dispatch('listener/killListener', this.id);
           this.$router.push({ name: 'listeners' });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);
@@ -221,12 +312,27 @@ export default {
       listenerApi.getListener(id)
         .then((data) => {
           this.listener = data;
-          this.listenerType = data.module;
-          setTimeout(() => { this.initialLoad = false; }, 500);
+          this.selectedTemplate = data.template;
         })
         .catch(() => {
           this.errorState = true;
         });
+    },
+    async toggleEnabled(val) {
+      this.listener.enabled = val;
+
+      if (val === true && !await this.$root.$confirm('', 'Re-enabling the listener will also save any unsaved option changes.', { color: 'yellow' })) {
+        this.listener.enabled = !val;
+        return;
+      }
+
+      try {
+        const response = await listenerApi.updateListener({ ...this.listener, options: this.form });
+        this.listener = response;
+      } catch (err) {
+        this.listener.enabled = !val;
+        this.$snack.error(`Error: ${err}`);
+      }
     },
   },
 };

@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
-/dist
+
+# As of 2.0, we will commit /dist on tagged releases.
+# /dist
 
 /tests/e2e/videos/
 /tests/e2e/screenshots/
