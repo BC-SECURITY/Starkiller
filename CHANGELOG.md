@@ -6,32 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Added an obfuscation page to manage keyword obfuscation and global obfuscation
-- Added the ability to view archived (deleted) agents
-- Added advanced filtering to the reporting page
-- Added warning on agent page for modules that are not opsec safe
-- Added the ability to turn listeners on and off
-- Added the ability to modify listener options
-- Added a button the Listener View top bar that prefills a stager form with the listener's id
-- Added a downloads page
-- Added a "literal" checkbox to shell commands to bypass built-in aliases
-- Added the ability to configure bypasses language
-- Added options for ignoring the check for elevated permissions and the agent language version when executing a module
-- Sort file browser correctly
-- Updated "InfoViewer" component to display the description up top, format the comments better, and display the new author info added in Empire 5.0
-- Technique chips can now link to sub-techniques
-- Rename Reporting to Tasks
-- Upgrade Dependencies
-- Migrate from Webpack to Vite
-- Update all -api files to use v2 api
-- General UI changes
-- Reporting page and agent task page more performant utilizing server-side pagination and sorting provided by the v2 api. Option to expand input, download inputs, outputs, joined downloads, and view images
-- Upgrade stager storage to utilize server side storage with the new v2 api
-- Remove Electron. Starkiller is now a plain old web app!
-- Remove agent command viewer sidebar in favor of the tasks tab
-- Removed API Token from settings, since the v2 api uses JWT
+
+## [2.0.0] - 2023-01-14
+
+-   Added an obfuscation page to manage keyword obfuscation and global obfuscation
+-   Added the ability to view archived (deleted) agents
+-   Added advanced filtering to the reporting page
+-   Added warning on agent page for modules that are not opsec safe
+-   Added the ability to turn listeners on and off
+-   Added the ability to modify listener options
+-   Added a button the Listener View top bar that prefills a stager form with the listener's id
+-   Added a downloads page
+-   Added a "literal" checkbox to shell commands to bypass built-in aliases
+-   Added the ability to configure bypasses language
+-   Added options for ignoring the check for elevated permissions and the agent language version when executing a module
+-   Sort file browser correctly
+-   Updated "InfoViewer" component to display the description up top, format the comments better, and display the new author info added in Empire 5.0
+-   Technique chips can now link to sub-techniques
+-   Rename Reporting to Tasks
+-   Upgrade Dependencies
+-   Migrate from Webpack to Vite
+-   Update all -api files to use v2 api
+-   General UI changes
+-   Reporting page and agent task page more performant utilizing server-side pagination and sorting provided by the v2 api. Option to expand input, download inputs, outputs, joined downloads, and view images
+-   Upgrade stager storage to utilize server side storage with the new v2 api
+-   Remove Electron. Starkiller is now a plain old web app!
+-   Remove agent command viewer sidebar in favor of the tasks tab
+-   Removed API Token from settings, since the v2 api uses JWT
 
 ## [1.12.0] - 2022-12-17
+
 -   New CI/CD Process (@vinnybod)
 
 ## [1.11.0] - 2022-03-15
@@ -190,7 +194,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.12.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.0...HEAD
+
+[2.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.12.0...v2.0.0
 
 [1.12.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.11.0...v1.12.0
 
