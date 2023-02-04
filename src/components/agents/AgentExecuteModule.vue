@@ -14,6 +14,8 @@
         class="info-viewer"
         :info="moduleInfo"
       />
+      <!-- todo could make this more friendly by looking up the "name" in the state in case it was changed -->
+      <span class="mr-2 mb-4">Executing on Agents: {{ agents.join(', ') }}</span>
       <technique-chips :techniques="selectedItem.techniques" />
       <v-autocomplete
         v-model="selectedModule"
@@ -44,7 +46,6 @@
           class="pa-1"
           label="Ignore Admin Check"
           color="primary"
-          v-on="on"
         />
         <v-checkbox
           v-model="ignoreLanguageCheck"

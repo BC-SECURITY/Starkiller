@@ -169,10 +169,18 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('listener/getListeners');
-    this.$store.dispatch('bypass/getBypasses');
-    this.$store.dispatch('malleable/getMalleableProfiles');
-    this.$store.dispatch('credential/getCredentials');
+    if (!this.listeners) {
+      this.$store.dispatch('listener/getListeners');
+    }
+    if (!this.bypasses) {
+      this.$store.dispatch('bypass/getBypasses');
+    }
+    if (!this.malleableProfiles) {
+      this.$store.dispatch('malleable/getMalleableProfiles');
+    }
+    if (!this.credentials) {
+      this.$store.dispatch('credential/getCredentials');
+    }
   },
   methods: {
     suggestedValuesForField(field) {

@@ -4,7 +4,6 @@
       v-if="agent.session_id"
       ref="form"
       v-model="valid"
-      style="overflow-y: hidden;"
     >
       <click-to-edit
         label="Session ID"
@@ -311,12 +310,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.agent-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .form {
   max-width: 600px;
   width: 100%;

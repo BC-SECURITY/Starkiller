@@ -8,7 +8,6 @@
           <v-tabs
             v-model="tab"
             align-with-title
-            class="scrollable-pane"
           >
             <v-tab
               key="interact"
@@ -145,112 +144,100 @@
         v-if="!errorState"
         :style="splitPaneHeight()"
       >
-        <!-- <splitpanes
+        <splitpanes
+          :disabled="true"
           @resize="paneSize = $event[0].size"
         >
           <pane
             min-size="30"
             :size="paneSize"
-          > -->
-        <v-tabs
-          v-model="tab"
-          class="scrollable-pane"
-          fixed-tabs
-        >
-          <v-tab-item
-            key="interact"
-            :value="'interact'"
-            :transition="false"
-            :reverse-transition="false"
           >
-            <v-card
-              v-if="initialized && !archived"
+            <v-tabs-items
+              v-model="tab"
               class="scrollable-pane"
-              flat
             >
-              <agent-interact :agent="agent" />
-              <v-divider />
-              <h4 class="pl-4 pt-2">
-                Execute Module
-              </h4>
-              <agent-execute-module :agents="[agent.session_id]" />
-            </v-card>
-            <v-card
-              v-else-if="initialized && archived"
-              class="scrollable-pane"
-              flat
-            >
-              <v-card-text>
-                <v-alert
-                  type="error"
-                  icon="fa-exclamation-triangle"
-                  :value="true"
+              <v-tab-item
+                key="interact"
+                :value="'interact'"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card
+                  v-if="initialized && !archived"
+                  flat
                 >
-                  This agent is archived.
-                </v-alert>
-              </v-card-text>
-            </v-card>
-          </v-tab-item>
-          <v-tab-item
-            key="browser"
-            :value="'file-browser'"
-            :transition="false"
-            :reverse-transition="false"
-          >
-            <v-card
-              class="scrollable-pane"
-              flat
-            >
-              <agent-file-browser
-                :agent="agent"
-                :read-only="initialized && archived"
-                @openUploadDialog="openUploadDialogPrefilled"
-              />
-            </v-card>
-          </v-tab-item>
-          <v-tab-item
-            key="tasks"
-            :value="'tasks'"
-            :transition="false"
-            :reverse-transition="false"
-          >
-            <v-card
-              class="scrollable-pane"
-              flat
-            >
-              <agent-command-history
-                :agent="agent"
-                :refresh-tasks="isRefreshTasks"
-              />
-            </v-card>
-          </v-tab-item>
-          <v-tab-item
-            key="view"
-            :value="'view'"
-            :transition="false"
-            :reverse-transition="false"
-          >
-            <v-card
-              class="scrollable-pane"
-              flat
-            >
-              <agent-form
-                :read-only="initialized && archived"
-                :agent="agent"
-              />
-            </v-card>
-          </v-tab-item>
-        </v-tabs>
-        <!-- </pane> -->
-        <!-- <pane :size="100 - paneSize"> -->
-        <!-- TODO Remove AgentCommandViewer? -->
-        <!-- <div
+                  <agent-interact :agent="agent" />
+                  <v-divider />
+                  <h4 class="pl-4 pt-2">
+                    Execute Module
+                  </h4>
+                  <agent-execute-module :agents="[agent.session_id]" />
+                </v-card>
+                <v-card
+                  v-else-if="initialized && archived"
+                  flat
+                >
+                  <v-card-text>
+                    <v-alert
+                      type="error"
+                      icon="fa-exclamation-triangle"
+                      :value="true"
+                    >
+                      This agent is archived.
+                    </v-alert>
+                  </v-card-text>
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
+                key="browser"
+                :value="'file-browser'"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card flat>
+                  <agent-file-browser
+                    :agent="agent"
+                    :read-only="initialized && archived"
+                    @openUploadDialog="openUploadDialogPrefilled"
+                  />
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
+                key="tasks"
+                :value="'tasks'"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card flat>
+                  <agent-command-history
+                    :agent="agent"
+                    :refresh-tasks="isRefreshTasks"
+                  />
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
+                key="view"
+                :value="'view'"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card flat>
+                  <agent-form
+                    :read-only="initialized && archived"
+                    :agent="agent"
+                  />
+                </v-card>
+              </v-tab-item>
+            </v-tabs-items>
+          </pane>
+          <!-- <pane :size="100 - paneSize">
+            <div
               v-if="rightPaneInitialized"
               ref="bottomScrollable"
               class="right-pane"
             />
-          </pane>
-        </splitpanes> -->
+          </pane> -->
+        </splitpanes>
       </div>
     </div>
   </div>
@@ -267,7 +254,7 @@ import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-// import { Splitpanes, Pane } from 'splitpanes';
+import { Splitpanes, Pane } from 'splitpanes';
 import * as agentApi from '@/api/agent-api';
 
 import 'splitpanes/dist/splitpanes.css';
@@ -285,8 +272,8 @@ export default {
     TooltipButton,
     TooltipButtonToggle,
     ErrorStateAlert,
-    // Splitpanes,
-    // Pane,
+    Splitpanes,
+    Pane,
   },
   data() {
     return {
@@ -457,12 +444,6 @@ export default {
 
 <style lang="scss">
 .scrollable-pane {
-  max-height: 100%;
-  overflow: auto;
-}
-
-.right-pane {
-  background-color: white;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
