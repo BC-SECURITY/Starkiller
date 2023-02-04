@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.0.1] - 2023-02-04
+
 -   Small tweaks to the Agents UI. Fix scroll on the agents view tab
 -   Auto-merge `private-main` to downstream `main` branches using a label
 
@@ -196,7 +199,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.1...HEAD
+
+[2.0.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.0...v2.0.1
 
 [2.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v1.12.0...v2.0.0
 
