@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Auto-merge `private-main` to downstream `main` branches using a label
+
 ## [2.0.0] - 2023-01-14
 
 -   Added an obfuscation page to manage keyword obfuscation and global obfuscation

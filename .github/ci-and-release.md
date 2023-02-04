@@ -3,11 +3,13 @@
 Starkiller's workflows (and this documentation) are a fork of the [Empire workflows](https://github.com/BC-SECURITY/Empire/tree/main/.github).
 The `main`, `kali-main`, and `sponsors-main` branches get a `dist/` generated upon release. `private-main` does not. 
 
-## Build and Test
+## Pull Requests - Build and Test
 All pull requests will run the `Lint and Test` workflow.
 
 * The workflow will run `vue-cli-service lint` to lint the code.
 * There are no tests yet.
+
+When submitting a pull request to `private-main`, the label `auto-merge-downstream` can be added. If the label is present, then merging a branch to `private-main` will automatically trigger the prerelease step of merging `private-main` into `sponsors-main` and `kali-main`.
 
 ## BC-SECURITY/Starkiller-Sponsors Sponsors & Kali Release Process
 *Note: Starting in 2023, the Kali team will be pulling from the public repo.
