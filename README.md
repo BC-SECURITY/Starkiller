@@ -28,6 +28,9 @@ At the moment, the extra Starkiller sponsorship features include:
   ## Proxy Management
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/210124448-4f1107b0-3250-4faa-8ea9-4daec77e277e.gif"></div>
 
+  ## Graph View
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/216792129-5b0fed82-b209-48cb-9a43-eeb3e69c7229.gif"></div>
+
 There is also a collection of Empire plugins available via sponsorship.
 
 Thanks to our sponsors the following features which started as sponsor features have been moved to the public and kali builds.
