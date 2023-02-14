@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Add warnings when clipboard copy fails
 -   Use module_id instead of module_slug for agent task endpoint
 
 ## [2.0.3] - 2023-02-04

@@ -331,12 +331,20 @@ export default {
           this.expandedTasks[task.id] = data;
         }
 
-        navigator.clipboard.writeText(this.expandedTasks[task.id].full_input);
+        try {
+          navigator.clipboard.writeText(this.expandedTasks[task.id].full_input);
+        } catch (error) {
+          this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+        }
       }
     },
     copyOutput(task) {
       if (task.output) {
-        navigator.clipboard.writeText(task.output);
+        try {
+          navigator.clipboard.writeText(task.output);
+        } catch (error) {
+          this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+        }
       }
     },
     imageData(task, download) {

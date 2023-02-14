@@ -388,13 +388,20 @@ export default {
           const data = await agentApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.id] = data;
         }
-
-        navigator.clipboard.writeText(this.expandedTasks[task.id].full_input);
+        try {
+          navigator.clipboard.writeText(this.expandedTasks[task.id].full_input);
+        } catch (error) {
+          this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+        }
       }
     },
     copyOutput(task) {
       if (task.output) {
-        navigator.clipboard.writeText(task.output);
+        try {
+          navigator.clipboard.writeText(task.output);
+        } catch (error) {
+          this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+        }
       }
     },
     async toggleSeeFullInput(task) {

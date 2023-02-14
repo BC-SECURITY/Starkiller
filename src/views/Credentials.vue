@@ -167,8 +167,12 @@ export default {
       }
     },
     async copyToClipboard(val) {
-      await navigator.clipboard.writeText(val);
-      this.$snack.success('Output copied to clipboard');
+      try {
+        await navigator.clipboard.writeText(val);
+        this.$snack.success('Output copied to clipboard');
+      } catch (error) {
+        this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+      }
     },
   },
 };
