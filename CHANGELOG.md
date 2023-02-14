@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2023-02-14
+
 -   Add warnings when clipboard copy fails
 -   Use module_id instead of module_slug for agent task endpoint
 
@@ -206,7 +208,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.3...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.4...HEAD
+
+[2.0.4]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.3...v2.0.4
 
 [2.0.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.2...v2.0.3
 
