@@ -14,7 +14,7 @@ export function getModules() {
  */
 export function executeModule(name, options, ignoreAdminCheck, ignoreLanguageCheck) {
   return axios.post(`/agents/${options.Agent}/tasks/module/`, {
-    module_slug: name,
+    module_id: name,
     options,
     ignore_admin_check: ignoreAdminCheck,
     ignore_language_version_check: ignoreLanguageCheck,
