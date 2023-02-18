@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Update the GitHub actions to remove usages of deprecated ::set-output function
+
 ## [2.0.4] - 2023-02-14
 
 -   Add warnings when clipboard copy fails

@@ -12,7 +12,7 @@ jobs:
         run: |
           echo "TARGET_BRANCH=sponsors-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: private-main
           fetch-depth: 0
@@ -58,7 +58,7 @@ jobs:
         run: |
           echo "TARGET_BRANCH=kali-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: private-main
           fetch-depth: 0

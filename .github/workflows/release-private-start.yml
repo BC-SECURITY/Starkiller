@@ -20,7 +20,7 @@ jobs:
       - name: Set target branch
         run: echo "TARGET_BRANCH=private-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ env.TARGET_BRANCH }}
           submodules: 'recursive'
@@ -54,7 +54,7 @@ jobs:
         run: |
           git add -A
           git commit --message "Prepare release ${{ env.APP_VERSION }} private"
-          echo "::set-output name=commit::$(git rev-parse HEAD)"
+          echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - name: Push new branch
         run: git push origin ${{ env.RELEASE_BRANCH }}
       - name: Create pull request into ${{ env.TARGET_BRANCH }}
