@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.5] - 2023-02-20
+
 -   Update the GitHub actions to remove usages of deprecated ::set-output function
 
 ## [2.0.4] - 2023-02-14
@@ -210,7 +212,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.4...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.5...HEAD
+
+[2.0.5]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.4...v2.0.5
 
 [2.0.4]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.3...v2.0.4
 
