@@ -1,9 +1,9 @@
 <template>
   <div style="padding: 10px">
     <v-form
+      v-if="agent.session_id"
       ref="form"
       v-model="valid"
-      style="overflow-y: hidden;"
     >
       <click-to-edit
         label="Session ID"
@@ -14,6 +14,7 @@
         v-model="form.name"
         label="Name"
         :rules="nameRules"
+        :editable="!readOnly"
         @update="updateName"
       />
       <click-to-edit
@@ -40,20 +41,23 @@
         v-model="form.listener"
         label="Listener"
         data-type="string"
-        :suggested-values="listeners"
+        :suggested-values="listeners.map(l => l.name)"
         :strict="true"
+        :editable="!readOnly"
         @update="updateListener"
       />
       <click-to-edit
         v-model="form.kill_date"
         label="Kill Date"
         data-type="date"
+        :editable="!readOnly"
         @update="updateKillDate"
       />
       <click-to-edit
         v-model="form.working_hours"
         label="Working Hours"
         :rules="workingHoursRules"
+        :editable="!readOnly"
         @update="updateWorkingHours"
       />
       <click-to-edit
@@ -71,6 +75,7 @@
         label="Delay"
         data-type="number"
         :rules="delayRules"
+        :editable="!readOnly"
         @update="updateDelay"
       />
       <click-to-edit
@@ -78,6 +83,7 @@
         label="Jitter"
         data-type="number"
         :rules="jitterRules"
+        :editable="!readOnly"
         @update="updateJitter"
       />
       <click-to-edit
@@ -142,6 +148,10 @@ export default {
       type: Object,
       required: true,
     },
+    readOnly: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -153,7 +163,7 @@ export default {
       form: {},
       moment,
       workingHoursRules: [
-        (v) => new RegExp('^[0-9]{1,2}:[0-5][0-9]-[0-9]{1,2}:[0-5][0-9]$').test(v) || 'Must be in the format 00:00-24:00',
+        (v) => /^[0-9]{1,2}:[0-5][0-9]-[0-9]{1,2}:[0-5][0-9]$/.test(v) || 'Must be in the format 00:00-24:00',
       ],
       nameRules: [
         (v) => !!v || 'Name is required',
@@ -171,7 +181,7 @@ export default {
   },
   computed: {
     ...mapState({
-      listeners: (state) => state.listener.listeners.map((l) => l.name),
+      listeners: (state) => state.listener.listeners,
     }),
     fields() {
       // stale comes back as a boolean, while no other property does and el-input
@@ -204,10 +214,8 @@ export default {
             const year = dateArr[2];
             const month = dateArr[0];
             const day = dateArr[1];
-            // eslint-disable-next-line no-param-reassign
             map[obj.name] = `${year}-${month}-${day}`;
           } else {
-            // eslint-disable-next-line no-param-reassign
             map[obj.name] = obj.Value;
           }
           return map;
@@ -225,19 +233,19 @@ export default {
       if (this.agent.name === this.form.name) return;
 
       try {
-        await agentApi.renameAgent(this.agent.name, this.form.name);
+        await this.$store.dispatch('agent/rename', { sessionId: this.agent.session_id, newName: this.form.name });
       } catch (err) {
         this.$snack.error(`Update agent listener failed: ${err}`);
         return;
       }
       this.$snack.info(`Agent ${this.agent.name} name updated`);
-      this.$router.push({ name: 'agentEdit', params: { id: this.form.name } });
     },
     async updateListener() {
       if (this.agent.listener === this.form.listener) return;
 
       try {
-        await agentApi.updateComms(this.agent.session_id, this.form.listener);
+        const listenerId = this.listeners.filter((l) => l.name === this.form.listener)[0].id;
+        await agentApi.updateComms(this.agent.session_id, listenerId);
       } catch (err) {
         this.$snack.error(`Update agent listener failed: ${err}`);
         return;
@@ -302,12 +310,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.agent-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .form {
   max-width: 600px;
   width: 100%;

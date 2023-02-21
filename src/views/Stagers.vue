@@ -8,10 +8,19 @@
       @create="create"
       @delete="deleteStagers"
     />
+    <div
+      class="ml-3 mr-3 align-center"
+      style="display: flex; "
+    >
+      <v-switch
+        v-model="filterOnlyMyStagersCheckbox"
+        label="Only My Stagers"
+      />
+    </div>
     <v-data-table
       v-model="selected"
       :headers="headers"
-      :items="stagers"
+      :items="filteredStagers"
       :footer-props="{
         itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
       }"
@@ -20,28 +29,28 @@
       dense
       show-select
     >
-      <template #item.StarkillerName.Value="{ item }">
+      <template #item.name="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'stagerEdit', params: { id: item.id }}"
+          :to="{ name: 'stagerEdit', params: { id: item.id } }"
         >
-          {{ item.StarkillerName.Value }}
+          {{ item.name }}
         </router-link>
       </template>
-      <template #item.Listener.Value="{ item }">
+      <template #item.options.Listener="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'listenerEdit', params: { id: item.Listener.Value }}"
+          :to="{ name: 'listenerEdit', params: { id: item.id } }"
         >
-          {{ item.Listener.Value }}
+          {{ item.options.Listener }}
         </router-link>
       </template>
-      <template #item.createdAt="{ item }">
+      <template #item.created_at="{ item }">
         <v-tooltip top>
           <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.createdAt).fromNow() }}</span>
+            <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
           </template>
-          <span>{{ moment(item.createdAt).format('lll') }}</span>
+          <span>{{ moment(item.created_at).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
       <template #item.actions="{ item }">
@@ -70,7 +79,7 @@
               </v-list-item-title>
             </v-list-item>
             <v-list-item
-              v-else
+              v-if="isOneLiner(item)"
               key="clipboard"
               link
               @click="copy(item)"
@@ -114,6 +123,7 @@ import DownloadMixin from '@/mixins/download-stager';
 import CopyMixin from '@/mixins/copy-stager';
 import moment from 'moment';
 import ListPageTop from '@/components/ListPageTop.vue';
+import * as downloadApi from '@/api/download-api';
 
 export default {
   name: 'Stagers',
@@ -132,11 +142,11 @@ export default {
         },
       ],
       headers: [
-        { text: 'Name', value: 'StarkillerName.Value' },
-        { text: 'Listener', value: 'Listener.Value' },
-        { text: 'Type', value: 'name' },
-        { text: 'Language', value: 'Language.Value' },
-        { text: 'Created At', value: 'createdAt' },
+        { text: 'Name', value: 'name' },
+        { text: 'Listener', value: 'options.Listener' },
+        { text: 'Type', value: 'template' },
+        { text: 'Language', value: 'options.Language' },
+        { text: 'Created At', value: 'created_at' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
       selected: [],
@@ -145,9 +155,26 @@ export default {
   computed: {
     ...mapState({
       stagers: (state) => state.stager.stagers,
+      filterOnlyMyStagersCheckbox: (state) => state.application.filterOnlyMyStagers,
     }),
+    filteredStagers() {
+      return this.stagers.filter((stager) => {
+        if (this.filterOnlyMyStagers) {
+          return stager.user_id === this.user.id;
+        }
+        return true;
+      });
+    },
     showDelete() {
       return this.selected.length > 0;
+    },
+    filterOnlyMyStagersCheckbox: {
+      set(val) {
+        this.$store.dispatch('application/filterOnlyMyStagers', val);
+      },
+      get() {
+        return this.filterOnlyMyStagers;
+      },
     },
   },
   mounted() {
@@ -158,13 +185,22 @@ export default {
       this.$router.push({ name: 'stagerNew' });
     },
     isDownload(stager) {
-      return stager.OutFile && stager.OutFile.Value.length > 0;
+      return stager.downloads && stager.downloads.length > 0;
+    },
+    isOneLiner(stager) {
+      return stager.one_liner;
     },
     async copy(stager) {
-      return this.copyStager(stager.Output);
+      // later on we could display multiple files, but at the moment,
+      // i think it makes sense to just get the last one.
+      const lastIndex = stager.downloads.length - 1;
+      return this.copyStager(await downloadApi.getDownloadAsText(stager.downloads[lastIndex].id));
     },
     async download(stager) {
-      return this.downloadStager(stager.Output, stager.OutFile.Value);
+      // later on we could display multiple files, but at the moment,
+      // i think it makes sense to just get the last one.
+      const lastIndex = stager.downloads.length - 1;
+      return downloadApi.getDownload(stager.downloads[lastIndex].id);
     },
     async deleteStager(item) {
       if (await this.$root.$confirm('Delete', 'Are you sure you want to delete this stager?', { color: 'red' })) {
@@ -176,6 +212,7 @@ export default {
         this.selected.forEach((stager) => {
           this.$store.dispatch('stager/deleteStager', stager.id);
         });
+        this.selected = [];
       }
     },
   },

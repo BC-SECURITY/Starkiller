@@ -13,7 +13,7 @@
         app
       >
         <template
-          v-if="$route.name === 'agentEdit'"
+          v-if="$route.name === 'agentEdit' || $route.name === 'agents'"
           #extension
         >
           <portal-target
@@ -44,18 +44,21 @@
         <a
           class="mr-2"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/bc-security/starkiller"
         > Starkiller </a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/bc-security/empire"
         > Empire</a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
+          rel="noopener noreferrer"
           href="https://github.com/sponsors/BC-SECURITY"
         > Sponsor for extra features</a>
       </v-footer>
@@ -117,10 +120,10 @@ export default {
     empireVersion: {
       async handler(val) {
         if (val.length > 0) {
-          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<4.1')) {
+          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<5.0')) {
             await this.$nextTick();
             this.$snack.warn(
-              'Starkiller 1.9.x is recommended to be used with Empire 4.1 or greater.'
+              'Starkiller 2.0.x is recommended to be used with Empire 5.0 or greater.'
               + ' Some features may not work properly.',
             );
           }
@@ -154,8 +157,6 @@ export default {
 </script>
 <style lang="scss">
 @import 'app.scss';
-
-@import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
 
 #app {
   -webkit-font-smoothing: antialiased;

@@ -8,7 +8,7 @@
     <ul class="shell-body">
       <agent-command-viewer-entry
         v-for="result in agentResults"
-        :key="result.taskID"
+        :key="result.id"
         :result="result"
       />
     </ul>
@@ -43,10 +43,10 @@ export default {
     agentResults() {
       return this.taskResults.length > 0
         ? this.taskResults.map((res) => ({
-          taskID: res.taskID,
-          command: res.command,
-          results: res.results ? res.results.split('\\n') : '',
-          ogResults: res.results ? res.results.split('\\n').join('\n') : '',
+          id: res.id,
+          input: res.input,
+          output: res.output ? res.output.split('\\n') : '',
+          ogOutput: res.output ? res.output.split('\\n').join('\n') : '',
           username: res.username ? res.username : 'unknown',
           updatedAt: res.updated_at,
         })).slice(-10)
@@ -54,8 +54,8 @@ export default {
     },
     totalLength() {
       return [
-        ...this.agentResults.map((el) => el.command).filter((command) => command.length > 0),
-        ...this.agentResults.map((el) => el.results).filter((result) => result.length > 0),
+        ...this.agentResults.map((el) => el.input).filter((input) => input.length > 0),
+        ...this.agentResults.map((el) => el.output).filter((output) => output.length > 0),
       ];
     },
   },

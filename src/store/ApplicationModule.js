@@ -1,9 +1,5 @@
 import { setInstance } from '@/api/axios-instance';
 import axios from 'axios';
-import { initNamespacedStore } from '@/store/electron-store';
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { ipcRenderer } from 'electron';
 
 export default {
   namespaced: true,
@@ -16,6 +12,8 @@ export default {
     darkMode: true,
     chatWidget: true,
     hideStaleAgents: false,
+    hideArchivedAgents: true,
+    filterOnlyMyStagers: true,
     agentHeaders: [],
     connectionError: 0,
   },
@@ -29,7 +27,6 @@ export default {
       state.user = user;
       state.empireVersion = version;
       setInstance(url, token);
-      initNamespacedStore(url);
     },
     setLoginError(state, error) {
       state.loginError = error;
@@ -53,6 +50,8 @@ export default {
       state.darkMode = true;
       state.chatWidget = true;
       state.hideStaleAgents = false;
+      state.hideArchivedAgents = true;
+      state.filterOnlyMyStagers = true;
       state.agentHeaders = [];
     },
     setDarkMode(state, val) {
@@ -64,6 +63,12 @@ export default {
     setHideStaleAgents(state, val) {
       state.hideStaleAgents = val;
     },
+    setHideArchivedAgents(state, val) {
+      state.hideArchivedAgents = val;
+    },
+    setFilterOnlyMyStagers(state, val) {
+      state.filterOnlyMyStagers = val;
+    },
     setAgentHeaders(state, val) {
       state.agentHeaders = val;
     },
@@ -74,19 +79,24 @@ export default {
     }) {
       try {
         context.commit('setLoginError', '');
-        const token = await axios.post(`${url}/api/admin/login`,
-          { username, password },
-          { headers: { 'Content-Type': 'application/json' } });
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+        const token = await axios.post(`${url}/token`, formData);
 
-        const user = await axios.get(`${url}/api/users/me?token=${token.data.token}`);
-        const version = await axios.get(`${url}/api/version?token=${token.data.token}`);
+        const user = await axios.get(`${url}/api/v2/users/me`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
+        const version = await axios.get(`${url}/api/v2/meta/version`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
         context.commit('setApplicationState', {
-          token: token.data.token, url, socketUrl, user: user.data, version: version.data.version,
+          token: token.data.access_token,
+          url,
+          socketUrl,
+          user: user.data,
+          version: version.data.version,
         });
       } catch (err) {
         let message = '';
         if (err.response && err.response.data) {
-          message = err.response.data;
+          message = err.response.data.detail;
         } else if (err.response && err.response.statusText) {
           message = err.response.statusText;
         } else {
@@ -99,8 +109,6 @@ export default {
       context.commit('setConnectionError');
     },
     async logout(context) {
-      axios.post(`${context.state.url}/api/admin/logout?token=${context.state.token}`);
-      ipcRenderer.send('closeAllAgentWindows');
       context.commit('setLogout');
     },
     clear(context) {
@@ -115,6 +123,12 @@ export default {
     hideStaleAgents(context, val) {
       context.commit('setHideStaleAgents', val);
     },
+    hideArchivedAgents(context, val) {
+      context.commit('setHideArchivedAgents', val);
+    },
+    filterOnlyMyStagers(context, val) {
+      context.commit('setFilterOnlyMyStagers', val);
+    },
     agentHeaders(context, val) {
       context.commit('setAgentHeaders', val);
     },
@@ -124,7 +138,7 @@ export default {
       return state.token.length > 0;
     },
     isAdmin(state) {
-      return state.user.admin === true;
+      return state.user.is_admin === true;
     },
     isDarkMode(state) {
       return state.darkMode;

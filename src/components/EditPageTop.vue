@@ -6,8 +6,9 @@
     >
       <v-breadcrumbs :items="breads" />
       <v-spacer />
+      <slot name="extra-stuff" />
       <v-btn
-        v-if="showDelete"
+        v-if="showDelete && !smallDelete"
         color="error"
         text
         class="mr-2"
@@ -20,8 +21,15 @@
           fa-trash-alt
         </v-icon>
       </v-btn>
+      <tooltip-button
+        v-else-if="showDelete && smallDelete"
+        icon="fa-trash-alt"
+        color="error"
+        :text="deleteText"
+        @click="$emit('delete')"
+      />
       <v-btn
-        v-if="showCopy && Object.keys(copyLink).length > 0"
+        v-if="showCopy && Object.keys(copyLink).length > 0 && !smallCopy"
         color="primary"
         text
         class="mr-2"
@@ -34,8 +42,15 @@
           fa-copy
         </v-icon>
       </v-btn>
+      <tooltip-button
+        v-else-if="showCopy && Object.keys(copyLink).length > 0 && smallCopy"
+        icon="fa-copy"
+        :text="copyText"
+        :to="copyLink"
+      />
       <v-btn
         v-if="showSubmit"
+        :disabled="disableSubmit"
         type="submit"
         class="primary"
         :loading="submitLoading"
@@ -48,8 +63,11 @@
 </template>
 
 <script>
+import TooltipButton from '@/components/TooltipButton.vue';
+
 export default {
   name: 'ListPageTop',
+  components: { TooltipButton },
   props: {
     deleteText: {
       type: String,
@@ -75,6 +93,9 @@ export default {
       type: Boolean,
       default: false,
     },
+    disableSubmit: {
+      type: Boolean,
+    },
     submitLoading: {
       type: Boolean,
       default: false,
@@ -82,6 +103,14 @@ export default {
     copyLink: {
       type: Object,
       default: () => {},
+    },
+    smallCopy: {
+      type: Boolean,
+      default: false,
+    },
+    smallDelete: {
+      type: Boolean,
+      default: false,
     },
     breads: {
       type: Array,

@@ -27,5 +27,16 @@ export default {
         document.body.removeChild(link);
       }
     },
+    async downloadText(output, fileName) {
+      const blob = new Blob([output], { type: 'text/plain' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
   },
 };

@@ -1,9 +1,9 @@
 <template>
   <div :class="pulsate ? 'pulsate' : ''">
     <li>
-      <span class="username">({{ result.username }})</span>&nbsp;{{ result.command }}
+      <span class="username">({{ result.username }})</span>&nbsp;{{ result.input }}
     </li>
-    <li> {{ result.ogResults }}</li>
+    <li> {{ result.ogOutput }}</li>
   </div>
 </template>
 

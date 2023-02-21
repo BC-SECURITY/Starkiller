@@ -6,37 +6,38 @@
       >
         <div style="display: flex; flex-direction: row; width:100%">
           <v-tabs
-            v-model="activeTab"
+            v-model="tab"
             align-with-title
-            class="scrollable-pane"
           >
             <v-tab
               key="interact"
-              href="#tab-interact"
+              href="#interact"
             >
               Interact
             </v-tab>
             <v-tab
               key="file-browser"
-              href="#tab-file-browser"
+              href="#file-browser"
             >
               File Browser
             </v-tab>
             <v-tab
               key="tasks"
-              href="#tab-tasks"
+              href="#tasks"
             >
               Tasks
             </v-tab>
             <v-tab
               key="view"
-              href="#tab-view"
+              href="#view"
             >
               View
             </v-tab>
           </v-tabs>
           <div style="display: flex; flex-direction: row;">
+            <!-- Keeping infra in place to add the split pane back -->
             <v-btn
+              v-if="false"
               icon
               @click="toggleCollapsePane()"
             >
@@ -72,10 +73,14 @@
             </template>
             <span>Elevated Process</span>
           </v-tooltip>
+          <v-chip v-if="initialized && archived">
+            Archived
+          </v-chip>
           <v-spacer />
           <div
             v-if="!errorState"
             class="pt-2"
+            style="display: flex; flex-direction: row; align-items: center;"
           >
             <agent-upload-dialog
               v-model="uploadDialog"
@@ -89,30 +94,39 @@
               :loading="downloadLoading"
               @submit="doDownload"
             />
-            <agent-tooltip-button
+            <tooltip-button-toggle
+              v-if="initialized && !archived"
+              v-model="isRefreshTasks"
+              icon="fa-redo"
+              :button-text="isRefreshTasks ? 'On' : 'Off'"
+              text="Auto-refresh tasks"
+            />
+            <tooltip-button
+              v-if="initialized && !archived"
               icon="fa-calendar-times"
               text="Clear Queued Tasks"
-              color="primary"
-              flat
               @click="clearQueue"
             />
-            <agent-tooltip-button
+            <tooltip-button
+              v-if="initialized && !archived"
               icon="fa-upload"
               text="Upload"
               @click="uploadDialog = true"
             />
-            <agent-tooltip-button
+            <tooltip-button
+              v-if="initialized && !archived"
               icon="fa-download"
               text="Download"
               @click="downloadDialog = true"
             />
-            <agent-tooltip-button
+            <tooltip-button
               v-if="!hideSideBar"
               icon="fa-external-link-alt"
               text="Popout"
               @click="popout"
             />
-            <agent-tooltip-button
+            <tooltip-button
+              v-if="initialized && !archived"
               icon="fa-trash-alt"
               text="Kill Agent"
               color="error"
@@ -131,25 +145,25 @@
         :style="splitPaneHeight()"
       >
         <splitpanes
+          :disabled="true"
           @resize="paneSize = $event[0].size"
         >
           <pane
             min-size="30"
             :size="paneSize"
           >
-            <v-tabs
-              v-model="activeTab"
+            <v-tabs-items
+              v-model="tab"
               class="scrollable-pane"
-              fixed-tabs
             >
               <v-tab-item
                 key="interact"
-                :value="'tab-interact'"
+                :value="'interact'"
                 :transition="false"
                 :reverse-transition="false"
               >
                 <v-card
-                  class="scrollable-pane"
+                  v-if="initialized && !archived"
                   flat
                 >
                   <agent-interact :agent="agent" />
@@ -157,76 +171,72 @@
                   <h4 class="pl-4 pt-2">
                     Execute Module
                   </h4>
-                  <agent-execute-module :agents="[agent.name]" />
+                  <agent-execute-module :agents="[agent.session_id]" />
+                </v-card>
+                <v-card
+                  v-else-if="initialized && archived"
+                  flat
+                >
+                  <v-card-text>
+                    <v-alert
+                      type="error"
+                      icon="fa-exclamation-triangle"
+                      :value="true"
+                    >
+                      This agent is archived.
+                    </v-alert>
+                  </v-card-text>
                 </v-card>
               </v-tab-item>
               <v-tab-item
                 key="browser"
-                :value="'tab-file-browser'"
+                :value="'file-browser'"
                 :transition="false"
                 :reverse-transition="false"
               >
-                <v-card
-                  class="scrollable-pane"
-                  flat
-                >
-                  <!-- TODO While most agent endpoints will accept name or session_id,
-                the file browser endpoints only use session_id.
-                So if the agent gets renamed, the file browser references break.
-                In a future release, all agent endpoints should just use session_id by default,
-                since it is an immutable field. The API will probably be updated to only
-                look up by session_id -->
+                <v-card flat>
                   <agent-file-browser
                     :agent="agent"
+                    :read-only="initialized && archived"
                     @openUploadDialog="openUploadDialogPrefilled"
                   />
                 </v-card>
               </v-tab-item>
               <v-tab-item
                 key="tasks"
-                :value="'tab-tasks'"
+                :value="'tasks'"
                 :transition="false"
                 :reverse-transition="false"
               >
-                <v-card
-                  class="scrollable-pane"
-                  flat
-                >
+                <v-card flat>
                   <agent-command-history
-                    :agent-name="agent.name"
-                    :task-results="taskResultsDeduped"
+                    :agent="agent"
+                    :refresh-tasks="isRefreshTasks"
                   />
                 </v-card>
               </v-tab-item>
               <v-tab-item
                 key="view"
-                :value="'tab-view'"
+                :value="'view'"
                 :transition="false"
                 :reverse-transition="false"
               >
-                <v-card
-                  class="scrollable-pane"
-                  flat
-                >
-                  <agent-form :agent="agent" />
+                <v-card flat>
+                  <agent-form
+                    :read-only="initialized && archived"
+                    :agent="agent"
+                  />
                 </v-card>
               </v-tab-item>
-            </v-tabs>
+            </v-tabs-items>
           </pane>
-          <pane :size="100 - paneSize">
+          <!-- <pane :size="100 - paneSize">
             <div
               v-if="rightPaneInitialized"
               ref="bottomScrollable"
               class="right-pane"
-            >
-              <agent-command-viewer
-                :name="$route.params.id"
-                :task-results="taskResultsDeduped"
-                :initialized="initialized"
-                @new-results="scrollResults"
-              />
-            </div>
-          </pane>
+            />
+          </pane> -->
         </splitpanes>
       </div>
     </div>
@@ -238,17 +248,14 @@ import AgentForm from '@/components/agents/AgentForm.vue';
 import AgentInteract from '@/components/agents/AgentInteract.vue';
 import AgentCommandHistory from '@/components/agents/AgentCommandHistory.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
-import AgentCommandViewer from '@/components/agents/AgentCommandViewer.vue';
 import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
-import AgentTooltipButton from '@/components/agents/AgentTooltipButton.vue';
+import TooltipButton from '@/components/TooltipButton.vue';
+import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
 import { Splitpanes, Pane } from 'splitpanes';
 import * as agentApi from '@/api/agent-api';
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { ipcRenderer } from 'electron';
 
 import 'splitpanes/dist/splitpanes.css';
 
@@ -258,12 +265,12 @@ export default {
     AgentForm,
     AgentInteract,
     AgentExecuteModule,
-    AgentCommandViewer,
     AgentFileBrowser,
     AgentCommandHistory,
     AgentUploadDialog,
     AgentDownloadDialog,
-    AgentTooltipButton,
+    TooltipButton,
+    TooltipButtonToggle,
     ErrorStateAlert,
     Splitpanes,
     Pane,
@@ -274,17 +281,16 @@ export default {
       nameLoading: false,
       uploadLoading: false,
       downloadLoading: false,
-      activeTab: 'View',
       nameDialog: false,
       uploadDialog: false,
       downloadDialog: false,
       interval: null,
-      taskResults: [],
-      initialized: false,
+      initialized: true,
       errorState: false,
       paneSize: 100,
       rightPaneInitialized: false,
       pathToFile: '',
+      isRefreshTasks: false,
     };
   },
   computed: {
@@ -297,11 +303,17 @@ export default {
           exact: true,
         },
         {
-          text: `${this.id}`,
+          text: this.breadcrumbName,
           disabled: true,
           to: '/agent-edit',
         },
       ];
+    },
+    archived() {
+      return this.agent.archived;
+    },
+    breadcrumbName() {
+      return this.agent.name || this.id;
     },
     id() {
       return this.$route.params.id;
@@ -309,27 +321,17 @@ export default {
     isChild() {
       return !!this.$route.query.hideSideBar;
     },
-    newestTaskingTime() {
-      if (this.taskResults?.length > 0) {
-        const temp = [...this.taskResults]
-          .map((t) => t.updated_at)
-          .map((t) => t.split('.')[0]);
-        temp.sort((a, b) => b.localeCompare(a));
-        return temp[0];
-      }
-      return '';
-    },
-    taskResultsDeduped() {
-      let temp = [...this.taskResults];
-      temp.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-      temp = temp
-        .reduce((unique, item) => (unique.some((t) => t.taskID === item.taskID)
-          ? unique
-          : [...unique, item]), []);
-      return temp.reverse();
-    },
     hideSideBar() {
       return this.$route.query.hideSideBar;
+    },
+    // https://jareklipski.medium.com/linking-to-a-specific-tab-in-vuetify-js-d978525f2e1a
+    tab: {
+      set(tab) {
+        this.$router.replace({ query: { ...this.$route.query, tab } });
+      },
+      get() {
+        return this.$route.query.tab || 'interact';
+      },
     },
   },
   watch: {
@@ -350,9 +352,6 @@ export default {
   mounted() {
     this.getAgent(this.$route.params.id);
   },
-  beforeDestroy() {
-    clearInterval(this.interval);
-  },
   methods: {
     toggleCollapsePane() {
       if (this.paneSize > 95) {
@@ -367,23 +366,13 @@ export default {
       return `height: calc(96vh - 104px ${this.isChild ? '' : '- 36px'})`;
     },
     popout() {
-      ipcRenderer.send('agentWindowOpen', { id: this.$route.params.id });
+      window.open(`${window.location.href}/?hideSideBar=true`, 'popup', 'width=600,height=600');
       this.$router.push({ name: 'agents' });
     },
     getAgent(id) {
       agentApi.getAgent(id)
         .then((data) => {
           this.agent = data;
-          if (this.interval !== null) {
-            clearInterval(this.interval);
-            this.interval = null;
-          }
-          this.interval = setInterval(async () => {
-            let temp = await agentApi.getResults(this.agent.name, this.newestTaskingTime);
-            temp = temp[0]?.AgentResults || [];
-            this.taskResults = [...this.taskResults, ...temp];
-            this.initialized = true;
-          }, 7000);
         })
         .catch(() => {
           this.errorState = true;
@@ -391,15 +380,24 @@ export default {
     },
     async killAgent() {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
-        this.$store.dispatch('agent/killAgent', { name: this.agent.name });
+        this.$store.dispatch('agent/killAgent', { sessionId: this.agent.session_id });
         this.$snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
         this.$router.push({ name: 'agents' });
       }
     },
     async clearQueue() {
-      if (await this.$root.$confirm('', 'Do you want to clear queue?', { color: 'red' })) {
-        this.$store.dispatch('agent/clearQueue', { name: this.agent.name });
-        this.$snack.success(`Clearing queued tasks for Agent ${this.agent.name}.`);
+      const queuedTasks = await agentApi.getTasks(this.agent.session_id, { limit: -1, page: 1, status: 'queued' });
+      const queuedIds = queuedTasks.records.map((el) => el.id);
+      if (queuedIds.length === 0) {
+        this.$snack.info('No queued tasks to clear.');
+        return;
+      }
+      if (await this.$root.$confirm('', `Do you want to clear ${queuedIds.length} queued tasks?`, { color: 'red' })) {
+        this.$store.dispatch('agent/clearQueue', {
+          name: this.agent.session_id,
+          tasks: queuedIds,
+        });
+        this.$snack.success(`Clearing queued tasks for Agent ${this.agent.session_id}.`);
       }
     },
     openUploadDialogPrefilled({ pathToFile }) {
@@ -411,7 +409,8 @@ export default {
 
       this.uploadLoading = true;
       try {
-        await agentApi.uploadFile(this.agent.name, file, pathToFile);
+        await agentApi.uploadFile(this.agent.session_id, file, pathToFile);
+        this.$snack.success(`Tasked agent ${this.agent.name} to upload file to ${pathToFile}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
@@ -424,7 +423,8 @@ export default {
 
       this.downloadLoading = true;
       try {
-        await agentApi.downloadFile(this.agent.name, pathToFile);
+        await agentApi.downloadFile(this.agent.session_id, pathToFile);
+        this.$snack.success(`Tasked agent ${this.agent.name} to downloaded file ${pathToFile}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
@@ -436,7 +436,7 @@ export default {
      * When new results appear in the AgentCommandViewer, scroll it down to the bottom.
      */
     scrollResults() {
-      this.$refs.bottomScrollable.scrollTop = this.$refs.bottomScrollable.scrollHeight;
+      // this.$refs.bottomScrollable.scrollTop = this.$refs.bottomScrollable.scrollHeight;
     },
   },
 };
@@ -444,12 +444,6 @@ export default {
 
 <style lang="scss">
 .scrollable-pane {
-  max-height: 100%;
-  overflow: auto;
-}
-
-.right-pane {
-  background-color: white;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;

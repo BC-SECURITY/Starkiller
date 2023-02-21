@@ -5,7 +5,7 @@ on:
       - closed
     branches:
       - sponsors-main
-      - kali-main
+#     - kali-main
 
 jobs:
   tag_release:
@@ -16,7 +16,7 @@ jobs:
         run: |
           echo "TAG_NAME=$(echo ${{ github.head_ref }} | sed 's/release\///')" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.base_ref }}
           token: ${{ secrets.RELEASE_TOKEN }}
@@ -27,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: 'yarn'
       - name: Set application version as variable
         run: |
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV

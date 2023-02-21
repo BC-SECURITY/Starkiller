@@ -3,6 +3,11 @@
 # It merges BC-SECURITY/Starkiller#private-main into BC-SECURITY/Starkiller-Sponsors#kali-main
 name: Prerelease - Merge private-main
 on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - private-main
   workflow_dispatch:
     inputs:
       mergeKali:
@@ -16,13 +21,24 @@ on:
         default: true
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   merge_main:
-    if: ${{ github.repository == 'BC-Security/Starkiller-Sponsors' }}
+    # If its a workflow dispatch, always run.
+    # If its a pull request, run if the pull request has the label 'auto-merge-downstream'.
+    # Already filtered above to closed PRs on private-main.
+    if: ${{ github.repository == 'BC-Security/Starkiller-Sponsors' &&
+      (github.event_name == 'workflow_dispatch' ||
+        (github.event.pull_request &&
+        github.event.pull_request.merged == true &&
+        contains(github.event.pull_request.labels.*.name, 'auto-merge-downstream'))) }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'recursive'
           ref: private-main
@@ -33,14 +49,14 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
       - name: Clean Merge private-main->sponsors-main
-        if: ${{ github.event.inputs.mergeSponsors == 'true' }}
+        if: ${{ github.event.inputs.mergeSponsors == 'true' || github.event.pull_request }}
         uses: ./.github/actions/clean-merge
         with:
           from-branch: private-main
           to-branch: sponsors-main
           push-repo: origin
       - name: Clean Merge private-main->kali-main
-        if: ${{ github.event.inputs.mergeKali == 'true' }}
+        if: ${{ github.event.inputs.mergeKali == 'true' || github.event.pull_request }}
         uses: ./.github/actions/clean-merge
         with:
           from-branch: private-main

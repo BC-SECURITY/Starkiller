@@ -28,7 +28,7 @@
           :title="user.name"
           class="sc-message--avatar"
           :style="{
-            backgroundImage: `url(${user.imageUrl})`
+            backgroundImage: `url(${user.imageUrl})`,
           }"
         >
           <div :class="user.online ? 'online-indicator' : 'offline-indicator'" />
@@ -117,7 +117,6 @@ export default {
     });
     this.socket.on('chat/message', (data) => {
       if (!this.isChatOpen) this.newMessagesCount++;
-      // eslint-disable-next-line no-param-reassign
       if (data.username === this.me) { data.username = 'me'; }
       const message = { type: 'text', author: data.username, data: { text: data.message } };
       this.messageList = [...this.messageList, message];

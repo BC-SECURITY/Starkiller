@@ -2,10 +2,13 @@
   <div>
     <edit-page-top
       :breads="breads"
-      :show-submit="true"
-      :show-copy="false"
-      :show-delete="!!id"
-      :submit-loading="loading"
+      :show-submit="initialLoad"
+      :show-copy="id > 0 && initialLoad"
+      :show-delete="id > 0 && initialLoad"
+      :submit-loading="loading && initialLoad"
+      :copy-link="copyLink"
+      :small-copy="true"
+      :small-delete="true"
       @submit="submit"
       @delete="deleteCredential"
     />
@@ -47,7 +50,7 @@ export default {
     return {
       reset: true,
       loading: false,
-      initialLoad: true,
+      initialLoad: false,
       credential: {},
       form: {},
       errorState: false,
@@ -85,28 +88,32 @@ export default {
       return true;
     },
     id() {
-      return this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id;
+    },
+    copyLink() {
+      if (this.id > 0) return { name: 'credentialNew', params: { copy: true, id: this.id } };
+      return {};
     },
     options() {
       const op = {
         credtype: {
-          Required: true,
-          Strict: true,
-          SuggestedValues: [
+          required: true,
+          strict: true,
+          suggested_values: [
             'plaintext', 'hash',
           ],
         },
-        domain: { Required: true },
-        username: { Required: true },
-        password: { Required: true },
-        host: { Required: true },
-        os: { Required: false },
-        sid: { Required: false },
-        notes: { Required: false },
+        domain: { required: true },
+        username: { required: true },
+        password: { required: true },
+        host: { required: true },
+        os: { required: false },
+        sid: { required: false },
+        notes: { required: false },
       };
       Object.keys(this.credential).forEach((field) => {
-        if (field !== 'ID') {
-          op[field].Value = this.credential[field];
+        if (field !== 'id' && op[field]) {
+          op[field].value = this.credential[field];
         }
       });
       return op;
@@ -114,32 +121,41 @@ export default {
   },
   mounted() {
     if (!this.isNew || this.isCopy) {
-      this.getCredential(this.id);
+      // using the route param id instad of this.id
+      // since this.id is 0 for copies.
+      this.getCredential(this.$route.params.id);
+    } else {
+      this.initialLoad = true;
     }
   },
   methods: {
-    async submit() {
-      if (this.loading) {
+    submit() {
+      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
       }
 
       this.loading = true;
-      if (this.isNew) {
-        await this.create();
+      if (this.id > 0) {
+        credentialApi.updateCredential(this.id, this.form)
+          .then(() => {
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       } else {
-        await this.update();
+        credentialApi.createCredential(this.form)
+          .then(({ id }) => {
+            this.loading = false;
+            this.$router.push({ name: 'credentialEdit', params: { id } });
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       }
       this.loading = false;
-    },
-    create() {
-      return credentialApi.createCredential(this.form)
-        .then(() => this.$router.push({ name: 'credentials' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    update() {
-      return credentialApi.updateCredential(this.id, this.form)
-        .then(() => this.$router.push({ name: 'credentials' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     async deleteCredential() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${this.id}?`, { color: 'red' })) {
@@ -157,7 +173,7 @@ export default {
           this.reset = false;
 
           this.credential = data;
-          this.initialLoad = false;
+          this.initialLoad = true;
           setTimeout(() => { this.reset = true; }, 500);
         })
         .catch(() => {

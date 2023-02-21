@@ -20,7 +20,7 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader> {{ field.Description }} </v-subheader>
+        <v-subheader> {{ field.description }} </v-subheader>
       </v-col>
     </v-row>
 
@@ -46,7 +46,7 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader> {{ field.Description }} </v-subheader>
+        <v-subheader> {{ field.description }} </v-subheader>
       </v-col>
     </v-row>
   </v-form>
@@ -93,7 +93,7 @@ export default {
      */
     optionalFields() {
       return this.fields
-        .filter((el) => el.Required === false)
+        .filter((el) => el.required === false)
         .map((el) => ({ ...el, type: this.fieldType(el) }));
     },
     /**
@@ -101,7 +101,7 @@ export default {
      */
     requiredFields() {
       return this.fields
-        .filter((el) => el.Required === true)
+        .filter((el) => el.required === true)
         .map((el) => ({ ...el, type: this.fieldType(el) }));
     },
     /**
@@ -128,9 +128,8 @@ export default {
      */
     rules() {
       return this.fields.reduce((map, field) => {
-        // eslint-disable-next-line no-param-reassign
         map[field.name] = [];
-        if (field.Required === true) {
+        if (field.required === true) {
           map[field.name].push(
             (v) => (!!v || v === 0) || `${field.name} is required`,
           );
@@ -158,12 +157,10 @@ export default {
       immediate: true,
       handler(arr) {
         const map2 = arr.reduce((map, obj) => {
-          if (obj.name === 'Bypasses' && !Array.isArray(obj.Value)) {
-            // eslint-disable-next-line no-param-reassign
-            map[obj.name] = obj.Value.split(' ') || [];
+          if (obj.name === 'Bypasses' && !Array.isArray(obj.value)) {
+            map[obj.name] = obj.value.split(' ') || [];
           } else {
-            // eslint-disable-next-line no-param-reassign
-            map[obj.name] = obj.Value == null ? '' : obj.Value;
+            map[obj.name] = obj.value == null ? '' : obj.value;
           }
           return map;
         }, {});
@@ -172,10 +169,18 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('listener/getListeners');
-    this.$store.dispatch('bypass/getBypasses');
-    this.$store.dispatch('malleable/getMalleableProfiles');
-    this.$store.dispatch('credential/getCredentials');
+    if (!this.listeners) {
+      this.$store.dispatch('listener/getListeners');
+    }
+    if (!this.bypasses) {
+      this.$store.dispatch('bypass/getBypasses');
+    }
+    if (!this.malleableProfiles) {
+      this.$store.dispatch('malleable/getMalleableProfiles');
+    }
+    if (!this.credentials) {
+      this.$store.dispatch('credential/getCredentials');
+    }
   },
   methods: {
     suggestedValuesForField(field) {
@@ -188,7 +193,7 @@ export default {
       } if (field.name === 'CredID') {
         return this.credentials;
       }
-      return field.SuggestedValues;
+      return field.suggested_values;
     },
     strictForField(field) {
       if (field.name === 'Listener') {
@@ -200,19 +205,16 @@ export default {
       } if (field.name === 'CredID') {
         return true;
       }
-      return field.Strict;
+      return field.strict;
     },
     fieldExists(name) {
       return this.fields.find((el) => el.name === name);
     },
     fieldType(el) {
-      if (typeof el.Value === 'number') {
-        if (el.Value.toString().indexOf('.') === -1) {
-          return 'number';
-        }
-        return 'float';
-      }
-
+      if (el.value_type === 'INTEGER') return 'number';
+      if (el.value_type === 'FLOAT') return 'float';
+      if (el.value_type === 'BOOLEAN') return 'boolean';
+      if (el.value_type === 'STRING') return 'string';
       return 'string';
     },
   },

@@ -2,11 +2,14 @@
   <div>
     <edit-page-top
       :breads="breads"
-      :show-submit="true"
-      :show-copy="true"
-      :show-delete="!canEdit"
-      :submit-loading="loading"
+      :show-submit="initialLoad"
+      :disable-submit="!canEdit && initialLoad"
+      :show-copy="id > 0 && initialLoad"
+      :show-delete="id > 0 && initialLoad"
+      :submit-loading="loading && initialLoad"
       :copy-link="copyLink"
+      :small-copy="true"
+      :small-delete="true"
       @submit="submit"
       @delete="deleteMalleableProfile"
     />
@@ -87,28 +90,14 @@ export default {
           (v) => !!v || 'Code is required',
         ],
       },
-      profile: {},
+      malleableProfile: {},
       valid: true,
       loading: false,
       errorState: false,
+      initialLoad: false,
     };
   },
   computed: {
-    breads() {
-      return [
-        {
-          text: 'Malleable Profiles',
-          disabled: false,
-          to: '/malleable-profiles',
-          exact: true,
-        },
-        {
-          text: this.id && !this.isCopy ? `${this.id}` : 'New',
-          disabled: true,
-          to: '/malleable-profiles-edit',
-        },
-      ];
-    },
     isNew() {
       return this.$route.name === 'malleableProfileNew';
     },
@@ -121,19 +110,51 @@ export default {
       return 'View';
     },
     canEdit() {
-      return this.isNew;
+      return true;
     },
     id() {
-      return this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id;
     },
     copyLink() {
-      if (!this.canEdit) return { name: 'malleableProfileNew', params: { copy: true, id: this.id } };
+      if (this.id > 0) return { name: 'malleableProfileNew', params: { copy: true, id: this.id } };
       return {};
+    },
+    breads() {
+      return [
+        {
+          text: 'Malleable Profiles',
+          disabled: false,
+          to: '/malleable-profiles',
+          exact: true,
+        },
+        {
+          text: this.breadcrumbName,
+          disabled: true,
+          to: '/malleable-profiles-edit',
+        },
+      ];
+    },
+    breadcrumbName() {
+      if (this.isCopy) return 'New';
+      if (this.malleableProfile.name) return this.malleableProfile.name;
+      if (this.id) return this.id;
+      return 'New';
+    },
+  },
+  watch: {
+    id(val) {
+      if (val) {
+        this.getMalleableProfile(val);
+      }
     },
   },
   mounted() {
     if (!this.isNew || this.isCopy) {
-      this.getMalleableProfile(this.id);
+      // using the route param id instad of this.id
+      // since this.id is 0 for copies.
+      this.getMalleableProfile(this.$route.params.id);
+    } else {
+      this.initialLoad = true;
     }
   },
   methods: {
@@ -143,32 +164,28 @@ export default {
       }
 
       this.loading = true;
-      if (this.isNew) {
-        await this.create();
+      if (this.id > 0) {
+        malleableApi.updateMalleableProfile(this.id, this.form.data)
+          .then(() => {
+            this.$snack.success('Malleable Profile updated');
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       } else {
-        await this.update();
+        malleableApi.createMalleableProfile(this.form.name, this.form.category, this.form.data)
+          .then(({ id }) => {
+            this.$snack.success('Malleable Profile created');
+            this.loading = false;
+            this.$router.push({ name: 'malleableProfileEdit', params: { id } });
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       }
-      this.loading = false;
-    },
-    create() {
-      return malleableApi.createMalleableProfile(this.form.name, this.form.category, this.form.data)
-        .then(() => this.$router.push({ name: 'malleableProfileEdit', params: { id: this.form.name } }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    update() {
-      return malleableApi.updateMalleableProfile(this.form.name, this.form.data)
-        .then(() => this.$router.push({ name: 'malleableProfiles' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    getMalleableProfile(id) {
-      malleableApi.getMalleableProfile(id)
-        .then((data) => {
-          this.malleableProfile = data;
-          Vue.set(this, 'form', { ...data });
-        })
-        .catch(() => {
-          this.errorState = true;
-        });
     },
     async deleteMalleableProfile() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete profile ${this.form.name}?`, { color: 'red' })) {
@@ -179,6 +196,17 @@ export default {
           this.$snack.error(`Error: ${err}`);
         }
       }
+    },
+    getMalleableProfile(id) {
+      malleableApi.getMalleableProfile(id)
+        .then((data) => {
+          this.malleableProfile = data;
+          this.initialLoad = true;
+          Vue.set(this, 'form', { ...data });
+        })
+        .catch(() => {
+          this.errorState = true;
+        });
     },
   },
 };

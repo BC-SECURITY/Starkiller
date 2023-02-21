@@ -6,7 +6,7 @@
       :show-copy="false"
       :show-delete="false"
       :submit-loading="loading"
-      @submit="create"
+      @submit="submit"
     />
     <h3>{{ id ? 'Edit' : 'New' }} User</h3>
     <error-state-alert
@@ -34,6 +34,7 @@
           :disabled="!isNew"
         />
         <v-text-field
+          v-if="isNew"
           v-model="form.password"
           :type="showPassword ? 'text' : 'password'"
           :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
@@ -46,7 +47,8 @@
           @click:append="showPassword = !showPassword"
         />
         <v-text-field
-          v-model="form.confirmPassword"
+          v-if="isNew"
+          v-model="form.confirm_password"
           :type="showConfirm ? 'text' : 'password'"
           :append-icon="showConfirm ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['confirmPassword']"
@@ -57,13 +59,23 @@
           required
           @click:append="showConfirm = !showConfirm"
         />
+        <v-switch
+          v-if="isAdmin"
+          v-model="form.is_admin"
+          label="Admin"
+        />
+        <v-switch
+          v-if="!isNew"
+          v-model="form.enabled"
+          label="Enabled"
+        />
       </v-form>
     </v-card>
   </div>
 </template>
 
 <script>
-import Vue from 'vue';
+import { mapGetters } from 'vuex';
 import * as userApi from '@/api/user-api';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
 import EditPageTop from '@/components/EditPageTop.vue';
@@ -76,7 +88,12 @@ export default {
   },
   data() {
     return {
-      form: {},
+      form: {
+        username: '',
+        password: '',
+        confirm_password: '',
+        is_admin: false,
+      },
       rules: {
         name: [
           (v) => !!v || 'Name is required',
@@ -100,6 +117,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      isAdmin: 'application/isAdmin',
+    }),
     breads() {
       return [
         {
@@ -133,34 +153,40 @@ export default {
     }
   },
   methods: {
-    async submit() {
+    submit() {
       if (this.loading || !this.$refs.form.validate()) {
         return;
       }
 
       this.loading = true;
-      if (this.isNew) {
-        await this.create();
+      if (this.id > 0) {
+        userApi.updateUser(this.form)
+          .then(() => {
+            this.$snack.success('User updated');
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       } else {
-        await this.updatePassword();
+        userApi.createUser(this.form)
+          .then(({ id }) => {
+            this.$snack.success('User created');
+            this.loading = false;
+            this.$router.push({ name: 'userEdit', params: { id } });
+          })
+          .catch((err) => {
+            this.$snack.error(`Error: ${err}`);
+            this.loading = false;
+          });
       }
-      this.loading = false;
-    },
-    create() {
-      return userApi.createUser(this.form.username, this.form.password)
-        .then(() => this.$router.push({ name: 'users' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    updatePassword() {
-      return userApi.updatePassword(this.id, this.form.password)
-        .then(() => this.$router.push({ name: 'users' }))
-        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     getUser(id) {
       userApi.getUser(id)
         .then((data) => {
           this.user = data;
-          Vue.set(this.form, 'username', data.username);
+          this.form = data;
         })
         .catch(() => {
           this.errorState = true;

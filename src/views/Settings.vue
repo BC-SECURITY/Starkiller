@@ -72,7 +72,7 @@
       <div class="headers pl-0 mt-2">
         <div>
           <h4> Clear Application State </h4>
-          <span> This will clear UI preferences and locally stored stagers.</span>
+          <span> This will clear UI preferences and other localstorage data.</span>
         </div>
         <v-btn
           color="error"
@@ -82,16 +82,6 @@
         </v-btn>
       </div>
       <v-divider />
-      <div class="headers pl-0 mt-2">
-        <h4> Api Token </h4>
-        <div
-          class="point"
-          @click="copyTokenToClipboard"
-        >
-          <span>{{ apiToken }}</span>
-          <i class="fa fa-paperclip center-icon" />
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -137,9 +127,6 @@ export default {
       darkMode: (state) => state.application.darkMode,
       chatWidget: (state) => state.application.chatWidget,
     }),
-    apiToken() {
-      return this.user.api_token;
-    },
     userId() {
       return this.user.id;
     },
@@ -161,17 +148,12 @@ export default {
     },
   },
   methods: {
-    async copyTokenToClipboard() {
-      await navigator.clipboard.writeText(this.apiToken);
-      this.$snack.success('Output copied to clipboard');
-    },
     async logout() {
       if (await this.$root.$confirm('', 'Are you sure you want to logout?', { color: 'green' })) {
         this.$store.dispatch('application/logout');
       }
     },
     clearState() {
-      this.$store.dispatch('stager/clear');
       this.$store.dispatch('application/clear');
     },
     submit() {

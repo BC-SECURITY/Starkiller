@@ -10,12 +10,33 @@
           <v-col
             cols="8"
           >
-            <v-text-field
-              v-model="form.command"
-              dense
-              outlined
-              label="Shell Command"
-            />
+            <div style="display: flex;">
+              <v-checkbox
+                v-model="form.literal"
+                class="pr-2"
+                label="Literal"
+              />
+              <v-tooltip
+                bottom
+              >
+                <template #activator="{ on }">
+                  <v-icon
+                    small
+                    class="pr-2"
+                    v-on="on"
+                  >
+                    fa-question-circle
+                  </v-icon>
+                </template>
+                <p>{{ tooltipText }}</p>
+              </v-tooltip>
+              <v-text-field
+                v-model="form.command"
+                dense
+                outlined
+                label="Shell Command"
+              />
+            </div>
           </v-col>
           <v-col
             cols="4"
@@ -50,8 +71,10 @@ export default {
       loading: false,
       form: {
         command: '',
+        literal: false,
       },
       commands: [],
+      tooltipText: 'This will ensure that aliased commands such as whoami or ps do not execute the built-in agent aliases.',
     };
   },
   methods: {
@@ -61,7 +84,13 @@ export default {
       }
 
       this.loading = true;
-      await agentApi.shell(this.agent.name, this.form.command);
+
+      if (this.form.command.trim() === 'sysinfo') {
+        await agentApi.sysinfo(this.agent.session_id);
+      } else {
+        await agentApi.shell(this.agent.session_id, this.form.command, this.form.literal);
+      }
+
       this.form.command = '';
       this.loading = false;
       this.$snack.success(`Shell Command queued for ${this.agent.name}`);

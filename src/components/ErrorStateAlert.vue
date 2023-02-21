@@ -30,7 +30,7 @@ export default {
     },
     message: {
       type: String,
-      default: () => `The resource '${this.resourceType}/${this.resourceId}' Not Found.`,
+      default() { return `The resource '${this.resourceType}/${this.resourceId}' Not Found.`; },
     },
   },
 };

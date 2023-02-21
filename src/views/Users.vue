@@ -17,19 +17,17 @@
         <router-link
           v-if="isAdmin"
           style="color: inherit;"
-          :to="{ name: 'userEdit', params: { id: item.ID } }"
+          :to="{ name: 'userEdit', params: { id: item.id } }"
         >
           {{ item.username }}
         </router-link>
         <span v-else>{{ item.username }}</span>
       </template>
-      <template #item.last_logon_time="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.last_logon_time).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.last_logon_time).format('lll') }}</span>
-        </v-tooltip>
+      <template #item.is_admin="{ item }">
+        <v-simple-checkbox
+          v-model="item.is_admin"
+          disabled
+        />
       </template>
       <template #item.actions="{ item }">
         <v-tooltip
@@ -47,7 +45,7 @@
                 :disabled="item.admin"
                 label="Enabled"
                 v-on="on"
-                @click.stop="disableUser(item)"
+                @change="disableUser(item)"
               />
             </div>
           </template>
@@ -80,9 +78,8 @@ export default {
         },
       ],
       headers: [
-        { text: 'id', align: 'start', value: 'ID' },
         { text: 'Name', value: 'username' },
-        { text: 'Last Logon', value: 'last_logon_time' },
+        { text: 'Is Admin', value: 'is_admin' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
     };
@@ -103,13 +100,10 @@ export default {
       this.$router.push({ name: 'userNew' });
     },
     async disableUser(item) {
-      // eslint-disable-next-line no-param-reassign
-      item.enabled = !item.enabled;
-
-      userApi.disableUser(item.ID, !item.enabled)
+      userApi.updateUser(item)
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
-          item.enabled = !item.enabled; // eslint-disable-line no-param-reassign
+          item.enabled = !item.enabled;
         });
     },
     getUsers() {

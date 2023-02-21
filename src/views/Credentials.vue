@@ -1,3 +1,4 @@
+<!-- eslint-disable vuejs-accessibility/click-events-have-key-events -->
 <template>
   <div>
     <list-page-top
@@ -13,16 +14,16 @@
       v-model="selected"
       :headers="headers"
       :items="credentials"
-      item-key="ID"
+      item-key="id"
       dense
       show-select
     >
-      <template #item.ID="{ item }">
+      <template #item.id="{ item }">
         <router-link
           style="color: inherit;"
-          :to="{ name: 'credentialEdit', params: { id: item.ID }}"
+          :to="{ name: 'credentialEdit', params: { id: item.id } }"
         >
-          {{ item.ID }}
+          {{ item.id }}
         </router-link>
       </template>
       <template #item.username="{ item }">
@@ -64,7 +65,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'credentialEdit', params: { id: item.ID }}"
+                :to="{ name: 'credentialEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-pencil-alt</v-icon>
@@ -79,7 +80,7 @@
               <router-link
                 class="text-decoration-none"
                 style="color: inherit;"
-                :to="{ name: 'credentialNew', params: { copy: true, id: item.ID } }"
+                :to="{ name: 'credentialNew', params: { copy: true, id: item.id } }"
               >
                 <v-list-item-title>
                   <v-icon>fa-clone</v-icon>
@@ -124,7 +125,7 @@ export default {
         },
       ],
       headers: [
-        { text: 'id', value: 'ID' },
+        { text: 'id', value: 'id' },
         { text: 'CredType', value: 'credtype' },
         { text: 'Username', value: 'username' },
         { text: 'Password', value: 'password' },
@@ -154,20 +155,24 @@ export default {
       this.$router.push({ name: 'credentialNew' });
     },
     async deleteCredential(item) {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${item.ID}?`, { color: 'red' })) {
-        this.$store.dispatch('credential/deleteCredential', item.ID);
+      if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${item.id}?`, { color: 'red' })) {
+        this.$store.dispatch('credential/deleteCredential', item.id);
       }
     },
     async deleteCredentials() {
       if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} credentials?`, { color: 'red' })) {
         this.selected.forEach((credential) => {
-          this.$store.dispatch('credential/deleteCredential', credential.ID);
+          this.$store.dispatch('credential/deleteCredential', credential.id);
         });
       }
     },
     async copyToClipboard(val) {
-      await navigator.clipboard.writeText(val);
-      this.$snack.success('Output copied to clipboard');
+      try {
+        await navigator.clipboard.writeText(val);
+        this.$snack.success('Output copied to clipboard');
+      } catch (error) {
+        this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+      }
     },
   },
 };

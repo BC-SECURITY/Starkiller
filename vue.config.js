@@ -1,5 +1,6 @@
 module.exports = {
   lintOnSave: true,
+
   // change these to false while developing
   // to avoid the overlay yelling at you to lint.
   devServer: {
@@ -8,10 +9,8 @@ module.exports = {
       errors: true,
     },
   },
-  pluginOptions: {
-    electronBuilder: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  },
+
+  transpileDependencies: [
+    'vuetify',
+  ],
 };

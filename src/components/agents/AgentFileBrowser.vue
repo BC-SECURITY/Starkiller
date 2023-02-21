@@ -1,5 +1,19 @@
 <template>
-  <div>
+  <div
+    v-if="agent.language === 'ironpython'"
+  >
+    <v-alert
+      prominent
+      type="error"
+    >
+      <v-row align="center">
+        <v-col class="grow">
+          The File Browser is not yet implemented for this agent language.
+        </v-col>
+      </v-row>
+    </v-alert>
+  </div>
+  <div v-else>
     <execute-module-dialog
       v-model="executeDialog"
       :agent="agent.session_id"
@@ -65,6 +79,7 @@
 import Vue from 'vue';
 import * as agentApi from '@/api/agent-api';
 import debounce from 'lodash.debounce';
+import pause from '@/utils/pause';
 import ExecuteModuleDialog from './ExecuteModuleDialog.vue';
 
 export default {
@@ -75,6 +90,10 @@ export default {
     agent: {
       type: Object,
       required: true,
+    },
+    readOnly: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -96,6 +115,7 @@ export default {
         pptx: 'mdi-file-powerpoint',
         jpg: 'mdi-file-image',
         jpeg: 'mdi-file-image',
+        gif: 'mdi-file-image',
         doc: 'mdi-file-word',
         docx: 'mdi-file-word',
       },
@@ -201,38 +221,56 @@ export default {
       });
     },
   },
+  watch: {
+    agent: {
+      handler() {
+        this.initialize();
+      },
+    },
+  },
   async mounted() {
-    this.debouncedLoadChildren = debounce(this.loadChildren, 500, { leading: true });
-
-    this.loading = true;
-    try {
-      const items = await agentApi.getDirectory(this.agent.session_id, '/');
-      this.tree = items.map((el) => this.transform(el));
-    } catch (err) { // directory not found.
-      const task = await this.scrapeDirectory('/');
-
-      let i = 0;
-      let complete = 0;
-      while (i < 10) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.pause(6000);
-        // eslint-disable-next-line no-await-in-loop
-        if (await this.checkTaskComplete(task.taskID)) {
-          complete = true;
-          break;
-        }
-        i++;
-      }
-
-      if (!complete) {
-        this.$snack.error('Agent didn\'t respond in time. Please try again later.');
-      }
-
-      this.tree = (await agentApi.getDirectory(this.agent.session_id, '/')).map((el) => this.transform(el));
+    if (this.agent) {
+      this.initialize();
     }
-    this.loading = false;
   },
   methods: {
+    async initialize() {
+      this.debouncedLoadChildren = debounce(this.loadChildren, 500, { leading: true });
+
+      this.loading = true;
+      try {
+        const items = await agentApi.getDirectory(this.agent.session_id, '/');
+        items.sort(this.sortFiles);
+        this.tree = items.map((el) => this.transform(el));
+      } catch (err) { // directory not found.
+        if (this.readOnly) {
+          this.loading = false;
+          return;
+        }
+        const task = await this.scrapeDirectory('/');
+
+        let i = 0;
+        let complete = 0;
+        while (i < 10) {
+        // eslint-disable-next-line no-await-in-loop
+          await pause(6000);
+          // eslint-disable-next-line no-await-in-loop
+          if (await this.checkTaskComplete(task.id)) {
+            complete = true;
+            break;
+          }
+          i++;
+        }
+
+        if (!complete) {
+          this.$snack.error('Agent didn\'t respond in time. Please try again later.');
+        }
+        const items = await agentApi.getDirectory(this.agent.session_id, '/');
+        items.sort(this.sortFiles);
+        this.tree = items.map((el) => this.transform(el));
+      }
+      this.loading = false;
+    },
     async clickAction(action) {
       if (action === 'open') {
         this.open.push(this.selected.id);
@@ -289,35 +327,33 @@ export default {
     transform(serverElement) {
       return {
         file: serverElement.is_file === true ? serverElement.name.split('.').pop() : false,
-        children: serverElement.is_file === false ? [] : undefined,
         ...serverElement,
+        children: serverElement.is_file === false ? [] : undefined,
       };
-    },
-    pause(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
     },
     async loadChildren(a, { stopTrying } = {}) {
       if (this.currentlyLoading[a.id]) return Promise.resolve();
 
       this.currentlyLoading[a.id] = true;
-      const files = await agentApi.getDirectory(this.agent.session_id, a.path);
+      const files = await agentApi.getDirectory(this.agent.session_id, a.id);
+      files.sort(this.sortFiles);
       if (!this.force[a.id] && files.length > 0) {
         this.removeFromCurrentlyLoading(a.id);
-        // eslint-disable-next-line no-param-reassign
         a.children = files.map((el) => this.transform(el));
         return Promise.resolve();
-      } if (!stopTrying) {
-        this.$snack.success(`Attempting to retrieve directory: ${a.path}`);
+      } if (!stopTrying && !this.readOnly) {
+        console.log(stopTrying, this.readOnly);
+        this.$snack.success(`Attempting to retrieve directory: ${a.path} with id ${a.id}`);
         const task = await this.scrapeDirectory(a.path);
 
         let i = 0;
         let complete = false;
         while (i < 10) {
         // eslint-disable-next-line no-await-in-loop
-          await this.pause(6000);
+          await pause(6000);
           // eslint-disable-next-line no-await-in-loop
-          if (await this.checkTaskComplete(task.taskID)) {
-            console.log('task complete', task.taskID);
+          if (await this.checkTaskComplete(task.id)) {
+            console.log('task complete', task.id);
             complete = true;
             break;
           }
@@ -348,7 +384,7 @@ export default {
     async checkTaskComplete(taskId) {
       try {
         const task = await agentApi.getTask(this.agent.session_id, taskId);
-        if (task.results) {
+        if (task.output) {
           return true;
         }
 
@@ -356,6 +392,13 @@ export default {
       } catch (err) {
         return false;
       }
+    },
+    sortFiles(aFile, bFile) {
+      const aName = aFile.name.toLowerCase();
+      const bName = bFile.name.toLowerCase();
+      if (aName < bName) return -1;
+      if (aName > bName) return 1;
+      return 0;
     },
   },
 };

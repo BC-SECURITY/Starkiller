@@ -3,8 +3,8 @@
     v-model="notification.enabled"
     :color="notification.color"
     transition="scroll-y-transition"
-    right
-    top
+    left
+    bottom
     app
   >
     {{ notification.text }}

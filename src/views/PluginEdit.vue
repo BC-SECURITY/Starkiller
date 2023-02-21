@@ -14,7 +14,7 @@
     <v-card style="padding: 10px">
       <info-viewer
         class="info-viewer"
-        :info-array="pluginInfoArray"
+        :info="pluginInfo"
       />
       <technique-chips :techniques="plugin.TechniqueChips" />
       <general-form
@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import GeneralForm from '@/components/GeneralForm.vue';
 import InfoViewer from '@/components/InfoViewer.vue';
 import * as pluginApi from '@/api/plugin-api';
@@ -36,7 +35,7 @@ import TechniqueChips from '@/components/TechniqueChips.vue';
 import EditPageTop from '@/components/EditPageTop.vue';
 
 export default {
-  name: 'PluginExecute',
+  name: 'PluginEdit',
   components: {
     InfoViewer,
     GeneralForm,
@@ -48,12 +47,10 @@ export default {
       reset: true,
       loading: false,
       form: {},
+      plugin: {},
     };
   },
   computed: {
-    ...mapState({
-      plugins: (state) => state.plugin.plugins,
-    }),
     breads() {
       return [
         {
@@ -63,28 +60,37 @@ export default {
           exact: true,
         },
         {
-          text: `${this.plugin.Name}`,
+          text: this.breadcrumbName,
           disabled: true,
-          to: '/plugins/execute',
+          to: '/plugins/edit',
         },
       ];
     },
-    plugin() {
-      return this.plugins.find((p) => p.Name === this.$route.params.id) || {};
+    breadcrumbName() {
+      if (this.plugin.name) return this.plugin.name;
+      if (this.id) return this.id;
+      return '';
     },
-    pluginInfoArray() {
-      if (Object.keys(this.plugin).length < 1) return [];
-      return [
-        { key: 'Author', value: this.plugin.Author.join(', ') },
-        { key: 'Comments', value: this.plugin.Comments.join('\n') },
-        { key: 'Description', value: this.plugin.Description },
-      ];
+    pluginInfo() {
+      if (Object.keys(this.plugin).length < 1) return {};
+      return {
+        authors: this.plugin.authors,
+        description: this.plugin.description,
+        comments: this.plugin.comments,
+      };
+    },
+    pluginOptions() {
+      const { options } = this.plugin;
+      if (!options) return {};
+
+      return options;
+    },
+    id() {
+      return this.$route.params.id;
     },
   },
   mounted() {
-    if (this.plugins.length === 0) {
-      this.$store.dispatch('plugin/getPlugins');
-    }
+    this.getPlugin(this.id);
   },
   methods: {
     async submit() {
@@ -94,15 +100,26 @@ export default {
 
       this.loading = true;
 
-      // todo currently this endpoint just returns null on success.
-      // next version of this api should have better messaging.
       try {
-        await pluginApi.executePlugin(this.plugin.Name, this.form);
+        const response = await pluginApi.executePlugin(this.plugin.name, this.form);
+        this.$snack.success(`${response.detail}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
 
       this.loading = false;
+    },
+    getPlugin(id) {
+      pluginApi.getPlugin(id)
+        .then((data) => {
+          this.reset = false;
+
+          this.plugin = data;
+          setTimeout(() => { this.reset = true; }, 500);
+        })
+        .catch(() => {
+          this.errorState = true;
+        });
     },
   },
 };

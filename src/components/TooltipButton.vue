@@ -5,9 +5,11 @@
     <template #activator="{ on }">
       <v-btn
         :color="flat ? '' : color"
+        :to="to"
         class="mr-5"
         icon
-        small
+        :small="!xSmall"
+        :x-small="xSmall"
         v-on="on"
         @click="$emit('click')"
       >
@@ -24,7 +26,7 @@
 
 <script>
 export default {
-  name: 'AgentTooltipButton',
+  name: 'TooltipButton',
   props: {
     icon: {
       type: String,
@@ -43,6 +45,14 @@ export default {
       default: '',
     },
     flat: {
+      type: Boolean,
+      default: false,
+    },
+    to: {
+      type: Object,
+      default: null,
+    },
+    xSmall: {
       type: Boolean,
       default: false,
     },

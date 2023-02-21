@@ -10,26 +10,6 @@
         dense
         outlined
       />
-      <div
-        v-if="!editSocket"
-        style="margin-top: -30px; margin-bottom: 20px;"
-      >
-        <span class="caption grey--text font-weight-light">SocketIO: {{ form.socketUrl }}</span>
-        <v-icon
-          class="point"
-          small
-          @click="editSocket = true"
-        >
-          mdi-pencil
-        </v-icon>
-      </div>
-      <v-text-field
-        v-else
-        v-model="form.socketUrl"
-        label="SocketIO Url"
-        dense
-        outlined
-      />
       <v-text-field
         v-model="form.username"
         label="Username"
@@ -63,7 +43,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import electronStore from '@/store/electron-store';
 
 export default {
   name: 'Login',
@@ -72,12 +51,10 @@ export default {
       loading: false,
       showPassword: false,
       rememberMe: false,
-      editSocket: false,
       form: {
         url: '',
         username: '',
         password: '',
-        socketUrl: '',
       },
     };
   },
@@ -90,19 +67,6 @@ export default {
     }),
   },
   watch: {
-    'form.url': {
-      handler(val) {
-        try {
-          const cleanedUrl = (val.startsWith('http://') || val.startsWith('https://'))
-            ? val
-            : `https://${val}`;
-          const url = new URL(cleanedUrl);
-          this.form.socketUrl = `wss://${url.hostname}:5000`;
-        } catch (err) {
-          // noop
-        }
-      },
-    },
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;
@@ -111,38 +75,37 @@ export default {
     },
   },
   mounted() {
-    this.form.url = electronStore.get('url', 'https://localhost:1337');
-    this.form.username = electronStore.get('username', '');
-    this.rememberMe = electronStore.get('rememberMe', false);
-    this.$nextTick(() => {
-      // this is in nextTick to allow us to write a saved socketUrl
-      // after the 'form.url' watcher.
-      const socketUrl = electronStore.get('socketUrl', '');
-      if (socketUrl !== '') {
-        this.form.socketUrl = socketUrl;
-      }
-    });
+    this.form.url = localStorage.getItem('loginUrl') || 'http://localhost:1337';
+    this.form.username = localStorage.getItem('loginUsername') || '';
+    this.rememberMe = localStorage.getItem('loginRememberMe') === 'true';
   },
   methods: {
     submit() {
       const cleanedUrl = (this.form.url.startsWith('http://') || this.form.url.startsWith('https://'))
         ? this.form.url
-        : `https://${this.form.url}`;
+        : `http://${this.form.url}`;
       this.loading = true;
-      electronStore.set('rememberMe', this.rememberMe);
+      localStorage.setItem('loginRememberMe', this.rememberMe);
 
       if (this.rememberMe === true) {
-        electronStore.set('url', cleanedUrl);
-        electronStore.set('socketUrl', this.form.socketUrl);
-        electronStore.set('username', this.form.username);
+        localStorage.setItem('loginUrl', cleanedUrl);
+        localStorage.setItem('loginUsername', this.form.username);
       } else {
-        electronStore.delete('url');
-        electronStore.delete('username');
+        localStorage.removeItem('loginUrl');
+        localStorage.removeItem('loginUsername');
+      }
+
+      const { host } = new URL(cleanedUrl);
+      let socketUrl = '';
+      if (cleanedUrl.startsWith('http://')) {
+        socketUrl = `ws://${host}`;
+      } else {
+        socketUrl = `wss://${host}`;
       }
 
       this.$store.dispatch('application/login', {
         url: cleanedUrl,
-        socketUrl: this.form.socketUrl,
+        socketUrl,
         username: this.form.username,
         password: this.form.password,
       });
