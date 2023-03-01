@@ -33,6 +33,11 @@ module.exports = {
       ignoreRegExpLiterals: true,
       ignoreUrls: true,
     }],
+    'no-unused-vars': ['error', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_',
+    }],
   },
   settings: {
     ...createAliasSetting({

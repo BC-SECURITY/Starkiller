@@ -40,7 +40,7 @@
           </v-col>
         </v-row>
       </v-alert>
-      <div style="display: flex; flex-direction: row;">
+      <div v-if="Object.keys(selectedItem).length > 0" style="display: flex; flex-direction: row;">
         <v-checkbox
           v-model="ignoreAdminCheck"
           class="pa-1"

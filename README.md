@@ -30,6 +30,9 @@ At the moment, the extra Starkiller sponsorship features include:
   ## Graph View
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/216792129-5b0fed82-b209-48cb-9a43-eeb3e69c7229.gif"></div>
 
+  ## Modify Module Scripts
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/221427395-28d63b1d-bbe5-423e-9113-e58a10a86ced.gif"></div>
+
 There is also a collection of Empire plugins available via sponsorship.
 
 Thanks to our sponsors the following features which started as sponsor features have been moved to the public and kali builds.
