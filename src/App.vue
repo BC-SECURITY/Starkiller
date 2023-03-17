@@ -40,7 +40,7 @@
         v-if="!hideSideBar"
         app
       >
-        <span class="mr-2">Copyright (c) 2021 BC Security |</span>
+        <span class="mr-2">Copyright (c) 2023 BC Security |</span>
         <a
           class="mr-2"
           target="_blank"
