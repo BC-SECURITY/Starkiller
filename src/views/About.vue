@@ -15,7 +15,7 @@
           href="https://bc-security.org/blog"
           target="_blank"
           rel="noopener noreferrer"
-        >BC-Security</a>.</span>
+        >BC Security</a>.</span>
       <span>If you would like to contribute please visit our
         <a
           href="https://github.com/BC-SECURITY/Starkiller"

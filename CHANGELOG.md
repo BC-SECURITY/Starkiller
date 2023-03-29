@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2023-03-29
+
+## [2.1.0] - 2023-03-01
+
+-   Hide the module checkboxes if the module is not selected
+-   ESLint update - allow unused vars that start with an underscore
+
 ## [2.0.5] - 2023-02-20
 
 -   Update the GitHub actions to remove usages of deprecated ::set-output function
@@ -212,7 +219,11 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.5...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...HEAD
+
+[2.1.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.0...v2.1.1
+
+[2.1.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.5...v2.1.0
 
 [2.0.5]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.4...v2.0.5
 
