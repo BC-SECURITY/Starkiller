@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2023-03-29
+
 ## [2.1.0] - 2023-03-01
 
 -   Hide the module checkboxes if the module is not selected
@@ -217,7 +219,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...HEAD
+
+[2.1.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.0...v2.1.1
 
 [2.1.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.0.5...v2.1.0
 
