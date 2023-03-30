@@ -1,5 +1,13 @@
 <template>
   <div>
+    <list-page-top
+      v-if="active"
+      :breads="breads"
+      :show-create="false"
+      :show-refresh="true"
+      :show-delete="false"
+      @refresh="getTasks"
+    />
     <div style="display: flex; flix-direction: row;">
       <v-card
         class="mr-2 pa-2"
@@ -264,6 +272,7 @@ import moment from 'moment';
 import debounce from 'lodash.debounce';
 import { mapState } from 'vuex';
 
+import ListPageTop from '@/components/ListPageTop.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import * as downloadApi from '@/api/download-api';
@@ -274,6 +283,7 @@ export default {
   name: 'AgentTasksList',
   components: {
     TooltipButton,
+    ListPageTop,
   },
   mixins: [DownloadMixin],
   props: {
@@ -286,9 +296,24 @@ export default {
       type: Boolean,
       default: false,
     },
+    active: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
+      breads: [
+        {
+          text: 'Agents',
+          disabled: true,
+          href: '/agents',
+        }, {
+          text: 'Tasks',
+          disabled: true,
+          href: '/agents?tab=tasks',
+        },
+      ],
       tasks: [],
       currentPage: 1,
       totalPages: 1,
