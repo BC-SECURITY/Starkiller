@@ -13,7 +13,10 @@
         app
       >
         <template
-          v-if="$route.name === 'agentEdit' || $route.name === 'agents'"
+          v-if="$route.name === 'agentEdit'
+            || $route.name === 'agents'
+            || $route.name === 'pluginEdit'
+            || $route.name === 'plugins'"
           #extension
         >
           <portal-target

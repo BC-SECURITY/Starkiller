@@ -14,24 +14,36 @@
               href="#interact"
             >
               Interact
+              <v-icon x-small class="ml-1">
+                fa-terminal
+              </v-icon>
             </v-tab>
             <v-tab
               key="file-browser"
               href="#file-browser"
             >
               File Browser
+              <v-icon x-small class="ml-1">
+                fa-folder-open
+              </v-icon>
             </v-tab>
             <v-tab
               key="tasks"
               href="#tasks"
             >
               Tasks
+              <v-icon x-small class="ml-1">
+                fa-sticky-note
+              </v-icon>
             </v-tab>
             <v-tab
               key="view"
               href="#view"
             >
               View
+              <v-icon x-small class="ml-1">
+                fa-eye
+              </v-icon>
             </v-tab>
           </v-tabs>
           <div style="display: flex; flex-direction: row;">
@@ -209,7 +221,7 @@
                 :reverse-transition="false"
               >
                 <v-card flat>
-                  <agent-command-history
+                  <agent-tasks-list
                     :agent="agent"
                     :refresh-tasks="isRefreshTasks"
                   />
@@ -246,7 +258,7 @@
 <script>
 import AgentForm from '@/components/agents/AgentForm.vue';
 import AgentInteract from '@/components/agents/AgentInteract.vue';
-import AgentCommandHistory from '@/components/agents/AgentCommandHistory.vue';
+import AgentTasksList from '@/components/agents/AgentTasksList.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
@@ -266,7 +278,7 @@ export default {
     AgentInteract,
     AgentExecuteModule,
     AgentFileBrowser,
-    AgentCommandHistory,
+    AgentTasksList,
     AgentUploadDialog,
     AgentDownloadDialog,
     TooltipButton,

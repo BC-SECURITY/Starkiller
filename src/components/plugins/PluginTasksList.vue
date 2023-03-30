@@ -1,11 +1,10 @@
 <template>
   <div>
-    <list-page-top
-      :breads="breads"
-    />
     <div style="display: flex; flix-direction: row;">
       <v-card
         class="mr-2 pa-2"
+        elevation="2"
+        outlined
         style="width:300px;"
       >
         <v-expansion-panels
@@ -27,26 +26,26 @@
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
-          <v-expansion-panel>
+          <v-expansion-panel v-if="!plugin">
             <v-expansion-panel-header expand-icon="mdi-menu-down">
-              Agents
+              Plugins
             </v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-checkbox
-                v-model="selectedAllAgents"
+                v-model="selectedAllPlugins"
                 x-small
                 dense
                 label="Select All"
               />
               <v-divider class="pb-4" />
               <v-checkbox
-                v-for="agent in agents"
-                :key="agent.session_id"
-                v-model="selectedAgents"
-                :value="agent.session_id"
+                v-for="plugin in plugins"
+                :key="plugin.id"
+                v-model="selectedPlugins"
+                :value="plugin.id"
                 x-small
                 dense
-                :label="agent.name"
+                :label="plugin.name"
                 @change="handleFilterChange"
               />
             </v-expansion-panel-content>
@@ -77,7 +76,11 @@
           </v-expansion-panel>
         </v-expansion-panels>
       </v-card>
-      <v-card style="flex-grow: 1;">
+      <v-card
+        style="flex-grow: 1;"
+        elevation="2"
+        outlined
+      >
         <v-pagination
           v-model="currentPage"
           :length="totalPages"
@@ -143,30 +146,19 @@
                   class="mono"
                   style="max-width: 900px"
                 >
-                  <!-- TODO Option for original output -->
                   {{ item.output }}
                 </p>
               </div>
             </td>
           </template>
           <template #item.status="{ item }">
-            <v-icon
-              v-if="item.status === 'pulled'"
-              color="green"
-              small
-            >
-              fa-check-square
-            </v-icon>
-            <v-icon
-              v-else-if="item.status === 'queued'"
-              color="orange"
-              small
-            >
-              fa-clock
-            </v-icon>
+            {{ item.status }}
           </template>
           <template #item.input="{ item }">
             <span>{{ truncateMessage(item.input) }}</span>
+          </template>
+          <template #item.task_name="{ item }">
+            <span>{{ item.module_name == null ? item.task_name : item.module_name }}</span>
           </template>
           <template #item.updated_at="{ item }">
             <v-tooltip top>
@@ -254,74 +246,79 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import moment from 'moment';
-import Vue from 'vue';
 import debounce from 'lodash.debounce';
+import { mapState } from 'vuex';
 
-import * as agentApi from '@/api/agent-api';
-import * as downloadApi from '@/api/download-api';
-
-import ListPageTop from '@/components/ListPageTop.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
+import DownloadMixin from '@/mixins/download-stager';
+import * as downloadApi from '@/api/download-api';
+import * as pluginApi from '@/api/plugin-api';
+import Vue from 'vue';
 
 export default {
-  name: 'Tasks',
+  name: 'PluginTasksList',
   components: {
-    ListPageTop,
     TooltipButton,
+  },
+  mixins: [DownloadMixin],
+  props: {
+    // If plugin is passed, this is a per-plugin task list.
+    // Otherwise, we're showing all tasks.
+    plugin: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    refreshTasks: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      breads: [
-        {
-          text: 'Tasks',
-          disabled: true,
-          href: '/tasks',
-        },
-      ],
-      search: '',
-      selectedAgents: [],
-      selectedUsers: [],
       tasks: [],
       currentPage: 1,
       totalPages: 1,
       totalItems: 0,
       itemsPerPage: 10,
+      search: '',
       loading: false,
       moment,
-      sortBy: 'updated_at',
+      sortBy: 'id',
       sortDesc: true,
       refreshInterval: null,
       expandedTasks: {},
       headers: [
         { text: 'Task ID', value: 'id', sortable: true },
         { text: 'Status', value: 'status', sortable: true },
-        { text: 'Agent', value: 'agent_id', sortable: true },
+        { text: 'Plugin', value: 'plugin_id', sortable: true },
         { text: 'Task Input', value: 'input', sortable: false },
         { text: 'Task Name', value: 'task_name', sortable: false },
         { text: 'User', value: 'username', sortable: false },
         { text: 'Updated At', value: 'updated_at', sortable: true },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
+      selectedPlugins: [],
+      selectedUsers: [],
     };
   },
   computed: {
     ...mapState({
-      agents: (state) => state.agent.agents,
+      plugins: (state) => state.plugin.plugins,
       users: (state) => state.user.users,
     }),
-    selectedAllAgents: {
+    selectedAllPlugins: {
       set(val) {
         if (val) {
-          this.selectedAgents = this.agents.map((a) => a.session_id);
+          this.selectedPlugins = this.plugins.map((p) => p.id);
         } else {
-          this.selectedAgents = [];
+          this.selectedPlugins = [];
         }
         this.debouncedGetTasks();
       },
       get() {
-        return this.selectedAgents.length === this.agents.length;
+        return this.selectedPlugins.length === this.plugins.length;
       },
     },
     selectedAllUsers: {
@@ -338,20 +335,45 @@ export default {
       },
     },
   },
+  watch: {
+    refreshTasks(newVal) {
+      if (newVal) {
+        this.debouncedGetTasks();
+        this.refreshInterval = setInterval(() => {
+          this.debouncedGetTasks();
+        }, 8000);
+      } else {
+        clearInterval(this.refreshInterval);
+      }
+    },
+    plugin: {
+      handler() {
+        this.initialize();
+      },
+    },
+  },
   async mounted() {
+    // todo could add a default on data() to avoid the race condition
+    this.debouncedGetTasks = debounce(this.getTasks, 500);
     await Promise.all([
-      this.$store.dispatch('agent/getAgents'),
+      this.$store.dispatch('plugin/getPlugins'),
       this.$store.dispatch('user/getUsers'),
     ]);
-    this.selectedAgents = this.agents.map((a) => a.session_id);
+    this.selectedPlugins = this.plugins.map((a) => a.id);
     this.selectedUsers = this.users.map((u) => u.id);
 
-    this.debouncedGetTasks = debounce(this.getTasks, 500);
-
-    this.debouncedGetTasks();
+    if (this.plugin) {
+      this.selectedPlugins = [this.plugin.id];
+    }
+    this.initialize();
   },
-  // todo a lot of this stuff is copied from AgentCommandHistory and could probably be reused.
+  beforeDestroy() {
+    clearInterval(this.refreshInterval);
+  },
   methods: {
+    initialize() {
+      this.debouncedGetTasks();
+    },
     truncateMessage(task) {
       if (task) {
         return task.length > 30 ? `${task.substr(0, 30)}...` : task;
@@ -370,24 +392,25 @@ export default {
     async downloadInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(task.agent_id, task.id);
+          const data = await pluginApi.getTask(task.plugin_id, task.id);
           this.expandedTasks[task.id] = data;
         }
 
-        this.downloadText(this.expandedTasks[task.id].full_input, `${task.agent_id}-${task.id}-input.txt`);
+        this.downloadText(this.expandedTasks[task.id].full_input, `${task.plugin_id}-${task.id}-input.txt`);
       }
     },
     downloadOutput(task) {
       if (task.output) {
-        this.downloadText(task.output, `${task.agent_id}-${task.id}-output.txt`);
+        this.downloadText(task.output, `${task.plugin_id}-${task.id}-output.txt`);
       }
     },
     async copyInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(task.agent_id, task.id);
+          const data = await pluginApi.getTask(task.plugin_id, task.id);
           this.expandedTasks[task.id] = data;
         }
+
         try {
           navigator.clipboard.writeText(this.expandedTasks[task.id].full_input);
         } catch (error) {
@@ -404,9 +427,36 @@ export default {
         }
       }
     },
+    imageData(task, download) {
+      const expandedDownloads = this.expandedTasks[task.id]?.downloads;
+      if (expandedDownloads) {
+        const found = expandedDownloads.find((d) => d.id === download.id);
+        if (found) {
+          return found.image;
+        }
+      }
+      return null;
+    },
+    async getImagesForTask(task) {
+      if (!this.expandedTasks[task.id]) {
+        const data = await pluginApi.getTask(task.plugin_id, task.id);
+        this.expandedTasks[task.id] = data;
+      }
+
+      for (let i = 0; i < task.downloads.length; i++) {
+        const download = task.downloads[i];
+        if (!this.expandedTasks[task.id].downloads[download.id]?.image
+            && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
+          // eslint-disable-next-line
+            const url = await downloadApi.getDownloadAsUrl(download.id);
+          this.expandedTasks[task.id].downloads[i].image = url;
+        }
+      }
+      Vue.set(this.tasks, this.tasks.indexOf(task), task);
+    },
     async toggleSeeFullInput(task) {
       if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(task.agent_id, task.id);
+        const data = await pluginApi.getTask(task.plugin_id, task.id);
         this.expandedTasks[task.id] = data;
         task.expandedInput = true;
       } else {
@@ -415,9 +465,9 @@ export default {
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     async getTasks() {
-      if (this.selectedAgents.length === 0) {
-        // seems weird to do this but it would be weirder to select all agents
-        // when no agents are selected. Even though the api sees no agents as all agents.
+      if (this.selectedPlugins.length === 0) {
+        // seems weird to do this but it would be weirder to select all plugins
+        // when no plugins are selected. Even though the api sees no plugins as all plugins.
         this.tasks = [];
         this.currentPage = 1;
         this.totalPages = 1;
@@ -425,11 +475,12 @@ export default {
         return;
       }
       this.loading = true;
-      let agents = null;
-      if (this.selectedAgents.length > 0) {
-        agents = this.selectedAgents;
+      let plugins = null;
+      if (this.selectedPlugins.length > 0) {
+        plugins = this.selectedPlugins;
       }
-      const response = await agentApi.getTasks(agents, {
+
+      const response = await pluginApi.getTasks(plugins, {
         page: this.currentPage,
         limit: this.itemsPerPage,
         sortBy: this.sortBy,
@@ -444,7 +495,7 @@ export default {
       // iterate response.records and add expandedInput if it exists in expandedTasks
       // this ensures that the expandedInput doesn't get wiped away after a refresh
       this.tasks = response.records.map((task) => {
-        task.uniqueId = `${task.agent_id}-${task.id}`;
+        task.uniqueId = `${task.plugin_id}-${task.id}`;
         if (this.expandedTasks[task.id]) {
           task.expandedInput = true;
         }
@@ -453,33 +504,6 @@ export default {
 
       this.tasks = response.records;
       this.loading = false;
-    },
-    imageData(task, download) {
-      const expandedDownloads = this.expandedTasks[task.id]?.downloads;
-      if (expandedDownloads) {
-        const found = expandedDownloads.find((d) => d.id === download.id);
-        if (found) {
-          return found.image;
-        }
-      }
-      return null;
-    },
-    async getImagesForTask(task) {
-      if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(task.agent_id, task.id);
-        this.expandedTasks[task.id] = data;
-      }
-
-      for (let i = 0; i < task.downloads.length; i++) {
-        const download = task.downloads[i];
-        if (!this.expandedTasks[task.id].downloads[download.id]?.image
-          && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
-          // eslint-disable-next-line
-          const url = await downloadApi.getDownloadAsUrl(download.id);
-          this.expandedTasks[task.id].downloads[i].image = url;
-        }
-      }
-      Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     handleSearch() {
       this.debouncedGetTasks();
@@ -504,17 +528,16 @@ export default {
         this.sortBy = 'id';
         this.sortDesc = true;
       }
-      if (this.sortBy === 'agent_id') this.sortBy = 'agent';
       this.debouncedGetTasks();
     },
   },
 };
 </script>
 
-<style>
-.mono {
-  white-space: pre-wrap;
-  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
-  line-height: 1.6em;
-}
-</style>
+  <style>
+  .mono {
+    white-space: pre-wrap;
+    font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+    line-height: 1.6em;
+  }
+  </style>
