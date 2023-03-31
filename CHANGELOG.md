@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.2.0] - 2023-03-31
+
 -   Move Agent Tasks under the Agents page
 -   Add a Plugin Tasks view under the Plugins page
 -   Add a Plugin Tasks view under the Plugin Execution page
@@ -222,7 +225,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.2.0...HEAD
+
+[2.2.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...v2.2.0
 
 [2.1.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.0...v2.1.1
 
