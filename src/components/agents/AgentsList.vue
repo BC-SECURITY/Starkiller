@@ -205,7 +205,7 @@ import { mapState } from 'vuex';
 import ListPageTop from '@/components/ListPageTop.vue';
 
 export default {
-  name: 'AgentList',
+  name: 'AgentsList',
   components: {
     ListPageTop,
   },

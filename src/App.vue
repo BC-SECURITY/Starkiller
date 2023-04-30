@@ -13,7 +13,10 @@
         app
       >
         <template
-          v-if="$route.name === 'agentEdit' || $route.name === 'agents'"
+          v-if="$route.name === 'agentEdit'
+            || $route.name === 'agents'
+            || $route.name === 'pluginEdit'
+            || $route.name === 'plugins'"
           #extension
         >
           <portal-target
@@ -120,10 +123,10 @@ export default {
     empireVersion: {
       async handler(val) {
         if (val.length > 0) {
-          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<5.0')) {
+          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<5.2')) {
             await this.$nextTick();
             this.$snack.warn(
-              'Starkiller 2.0.x is recommended to be used with Empire 5.0 or greater.'
+              'This version of Starkiller is recommended to be used with Empire 5.2 or greater.'
               + ' Some features may not work properly.',
             );
           }

@@ -1,6 +1,18 @@
 import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 import qs from 'qs';
 
+function getFilename(contentDisposition) {
+  // need to handle filename="filename.jpg" and filename*=UTF-8''filename.jpg
+  if (contentDisposition.indexOf('filename*=') !== -1) {
+    return decodeURIComponent(contentDisposition.split('filename*=')[1].split("'")[2]);
+  }
+
+  let filename = contentDisposition.split('filename=')[1];
+  filename = filename.replace(/^["']|["']$/g, '');
+
+  return filename;
+}
+
 export function getDownloads({
   page, limit, sortBy = 'updated_at', sortOrder = 'desc', query, sources,
 }) {
@@ -35,9 +47,10 @@ export function getDownload(id) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      let filename = response.headers['content-disposition'].split('filename=')[1];
-      // strip quotes from filename
-      filename = filename.replace(/^["']|["']$/g, '');
+      const filename = getFilename(response.headers['content-disposition']);
+      console.warn(filename);
+      console.warn(response.headers['content-disposition']);
+
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();

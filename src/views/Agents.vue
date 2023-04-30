@@ -17,6 +17,15 @@
               fa-list
             </v-icon>
           </v-tab>
+          <v-tab
+            key="tasks"
+            href="#tasks"
+          >
+            Tasks
+            <v-icon x-small class="ml-1">
+              fa-sticky-note
+            </v-icon>
+          </v-tab>
         </v-tabs>
       </div>
     </portal>
@@ -35,17 +44,31 @@
           <agents-list :active="tab === 'list-view'" />
         </v-card>
       </v-tab-item>
+      <v-tab-item
+        key="tasks"
+        :value="'tasks'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card
+          flat
+        >
+          <agent-tasks-list :active="tab === 'tasks'" />
+        </v-card>
+      </v-tab-item>
     </v-tabs-items>
   </div>
 </template>
 
 <script>
 import AgentsList from '@/components/agents/AgentsList.vue';
+import AgentTasksList from '@/components/agents/AgentTasksList.vue';
 
 export default {
   name: 'Agents',
   components: {
     AgentsList,
+    AgentTasksList,
   },
   data() {
     return {

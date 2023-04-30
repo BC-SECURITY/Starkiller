@@ -80,7 +80,6 @@ export default {
     return {
       version,
       mini: true,
-      // expandOnHover: true,
       items: [
         { title: 'Listeners', pathName: 'listeners', icon: 'fa-headphones' },
         {
@@ -90,7 +89,6 @@ export default {
         { title: 'Modules', pathName: 'modules', icon: 'fa-grip-horizontal' },
         { title: 'Obfuscation', pathName: 'obfuscation', icon: 'fa-magic' },
         { title: 'Credentials', pathName: 'credentials', icon: 'fa-key' },
-        { title: 'Tasks', pathName: 'tasks', icon: 'fa-sticky-note' },
         { title: 'Malleable Profiles', pathName: 'malleableProfiles', icon: 'fa-random' },
         { title: 'Bypasses', pathName: 'bypasses', icon: 'fa-shield-virus' },
         { title: 'Plugins', pathName: 'plugins', icon: 'fa-plug' },

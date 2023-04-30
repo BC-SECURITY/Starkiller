@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2023-03-31
+
+-   Move Agent Tasks under the Agents page
+-   Add a Plugin Tasks view under the Plugins page
+-   Add a Plugin Tasks view under the Plugin Execution page
+
 ## [2.1.1] - 2023-03-29
 
 ## [2.1.0] - 2023-03-01
@@ -219,7 +225,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.2.0...HEAD
+
+[2.2.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...v2.2.0
 
 [2.1.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.0...v2.1.1
 

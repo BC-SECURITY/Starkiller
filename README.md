@@ -76,7 +76,8 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.6.x, 1.7.x       | 3.7.0         | 1.6.0 was tested against Empire 3.7.0. There *shouldn't* be any breaking changes, but there were a lot of code changes.
 | 1.8.x              | 4.0.0         | 
 | 1.9.x, 1.10.x, 1.11.x  | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
-| 2.0.x              | 5.0.0         | Uses the new v2 api
+| 2.0.x, 2.1.x           | 5.0.0         | Uses the new v2 api
+| 2.2.x              | 5.2.0         | Requires the new plugin task endpoints
 
 ## Changelog
 

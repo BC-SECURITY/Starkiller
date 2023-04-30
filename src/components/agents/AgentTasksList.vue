@@ -1,5 +1,13 @@
 <template>
   <div>
+    <list-page-top
+      v-if="active"
+      :breads="breads"
+      :show-create="false"
+      :show-refresh="true"
+      :show-delete="false"
+      @refresh="getTasks"
+    />
     <div style="display: flex; flix-direction: row;">
       <v-card
         class="mr-2 pa-2"
@@ -22,7 +30,55 @@
                 outlined
                 dense
                 required
-                @input="debouncedHandleSearch"
+                @input="handleSearch"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel v-if="!agent">
+            <v-expansion-panel-header expand-icon="mdi-menu-down">
+              Agents
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-checkbox
+                v-model="selectedAllAgents"
+                x-small
+                dense
+                label="Select All"
+              />
+              <v-divider class="pb-4" />
+              <v-checkbox
+                v-for="agent in agents"
+                :key="agent.session_id"
+                v-model="selectedAgents"
+                :value="agent.session_id"
+                x-small
+                dense
+                :label="agent.name"
+                @change="handleFilterChange"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-menu-down">
+              Users
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-checkbox
+                v-model="selectedAllUsers"
+                x-small
+                dense
+                label="Select All"
+              />
+              <v-divider class="pb-4" />
+              <v-checkbox
+                v-for="user in users"
+                :key="user.id"
+                v-model="selectedUsers"
+                :value="user.id"
+                x-small
+                dense
+                :label="user.username"
+                @change="handleFilterChange"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -214,7 +270,9 @@
 <script>
 import moment from 'moment';
 import debounce from 'lodash.debounce';
+import { mapState } from 'vuex';
 
+import ListPageTop from '@/components/ListPageTop.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import * as downloadApi from '@/api/download-api';
@@ -222,23 +280,40 @@ import * as agentApi from '@/api/agent-api';
 import Vue from 'vue';
 
 export default {
-  name: 'AgentCommandHistory',
+  name: 'AgentTasksList',
   components: {
     TooltipButton,
+    ListPageTop,
   },
   mixins: [DownloadMixin],
   props: {
     agent: {
       type: Object,
-      required: true,
+      required: false,
+      default: null,
     },
     refreshTasks: {
+      type: Boolean,
+      default: false,
+    },
+    active: {
       type: Boolean,
       default: false,
     },
   },
   data() {
     return {
+      breads: [
+        {
+          text: 'Agents',
+          disabled: true,
+          href: '/agents',
+        }, {
+          text: 'Tasks',
+          disabled: true,
+          href: '/agents?tab=tasks',
+        },
+      ],
       tasks: [],
       currentPage: 1,
       totalPages: 1,
@@ -247,28 +322,62 @@ export default {
       search: '',
       loading: false,
       moment,
-      sortBy: 'id',
+      sortBy: 'updated_at',
       sortDesc: true,
       refreshInterval: null,
       expandedTasks: {},
-      debouncedHandleSearch: () => {},
       headers: [
         { text: 'Task ID', value: 'id', sortable: true },
         { text: 'Status', value: 'status', sortable: true },
+        { text: 'Agent', value: 'agent_id', sortable: true },
         { text: 'Task Input', value: 'input', sortable: false },
         { text: 'Task Name', value: 'task_name', sortable: false },
         { text: 'User', value: 'username', sortable: false },
         { text: 'Updated At', value: 'updated_at', sortable: true },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
+      selectedAgents: [],
+      selectedUsers: [],
     };
+  },
+  computed: {
+    ...mapState({
+      agents: (state) => state.agent.agents,
+      users: (state) => state.user.users,
+    }),
+    selectedAllAgents: {
+      set(val) {
+        if (val) {
+          this.selectedAgents = this.agents.map((a) => a.session_id);
+        } else {
+          this.selectedAgents = [];
+        }
+        this.debouncedGetTasks();
+      },
+      get() {
+        return this.selectedAgents.length === this.agents.length;
+      },
+    },
+    selectedAllUsers: {
+      set(val) {
+        if (val) {
+          this.selectedUsers = this.users.map((u) => u.id);
+        } else {
+          this.selectedUsers = [];
+        }
+        this.debouncedGetTasks();
+      },
+      get() {
+        return this.selectedUsers.length === this.users.length;
+      },
+    },
   },
   watch: {
     refreshTasks(newVal) {
       if (newVal) {
-        this.getTasks();
+        this.debouncedGetTasks();
         this.refreshInterval = setInterval(() => {
-          this.getTasks();
+          this.debouncedGetTasks();
         }, 8000);
       } else {
         clearInterval(this.refreshInterval);
@@ -281,18 +390,25 @@ export default {
     },
   },
   async mounted() {
-    if (this.agent) {
-      this.initialize();
-    }
+    this.debouncedGetTasks = debounce(this.getTasks, 500);
+    await Promise.all([
+      this.$store.dispatch('agent/getAgents'),
+      this.$store.dispatch('user/getUsers'),
+    ]);
+    this.selectedAgents = this.agents.map((a) => a.session_id);
+    this.selectedUsers = this.users.map((u) => u.id);
 
-    this.debouncedHandleSearch = debounce(this.handleSearch, 500);
+    if (this.agent) {
+      this.selectedAgents = [this.agent.session_id];
+    }
+    this.initialize();
   },
   beforeDestroy() {
     clearInterval(this.refreshInterval);
   },
   methods: {
     initialize() {
-      this.getTasks();
+      this.debouncedGetTasks();
     },
     truncateMessage(task) {
       if (task) {
@@ -312,7 +428,7 @@ export default {
     async downloadInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(this.agent.session_id, task.id);
+          const data = await agentApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.id] = data;
         }
 
@@ -327,7 +443,7 @@ export default {
     async copyInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(this.agent.session_id, task.id);
+          const data = await agentApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.id] = data;
         }
 
@@ -359,7 +475,7 @@ export default {
     },
     async getImagesForTask(task) {
       if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(this.agent.session_id, task.id);
+        const data = await agentApi.getTask(task.agent_id, task.id);
         this.expandedTasks[task.id] = data;
       }
 
@@ -376,7 +492,7 @@ export default {
     },
     async toggleSeeFullInput(task) {
       if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(this.agent.session_id, task.id);
+        const data = await agentApi.getTask(task.plugin_id, task.id);
         this.expandedTasks[task.id] = data;
         task.expandedInput = true;
       } else {
@@ -385,14 +501,26 @@ export default {
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     async getTasks() {
-      // eslint-disable-next-line camelcase
-      if (!this.agent?.session_id) return;
+      if (this.selectedAgents.length === 0) {
+        // seems weird to do this but it would be weirder to select all agents
+        // when no agents are selected. Even though the api sees no agents as all agents.
+        this.tasks = [];
+        this.currentPage = 1;
+        this.totalPages = 1;
+        this.totalItems = 0;
+        return;
+      }
       this.loading = true;
-      const response = await agentApi.getTasks(this.agent.session_id, {
+      let agents = null;
+      if (this.selectedAgents.length > 0) {
+        agents = this.selectedAgents;
+      }
+      const response = await agentApi.getTasks(agents, {
         page: this.currentPage,
         limit: this.itemsPerPage,
         sortBy: this.sortBy,
         sortOrder: this.sortDesc ? 'desc' : 'asc',
+        users: this.selectedUsers,
         search: this.search,
       });
       this.currentPage = response.page;
@@ -413,11 +541,14 @@ export default {
       this.loading = false;
     },
     handleSearch() {
-      this.getTasks();
+      this.debouncedGetTasks();
+    },
+    handleFilterChange() {
+      this.debouncedGetTasks();
     },
     handlePageChange(page) {
       this.currentPage = page;
-      this.getTasks();
+      this.debouncedGetTasks();
     },
     handleOptionsChange(value) {
       this.currentPage = value.page;
@@ -432,7 +563,7 @@ export default {
         this.sortBy = 'id';
         this.sortDesc = true;
       }
-      this.getTasks();
+      this.debouncedGetTasks();
     },
   },
 };
