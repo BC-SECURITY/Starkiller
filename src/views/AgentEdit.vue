@@ -360,6 +360,11 @@ export default {
         this.rightPaneInitialized = true;
       }
     },
+    uploadDialog(val) {
+      if (!val) {
+        this.pathToFile = '';
+      }
+    },
   },
   mounted() {
     this.getAgent(this.$route.params.id);

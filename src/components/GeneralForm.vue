@@ -215,6 +215,7 @@ export default {
       if (el.value_type === 'FLOAT') return 'float';
       if (el.value_type === 'BOOLEAN') return 'boolean';
       if (el.value_type === 'STRING') return 'string';
+      if (el.value_type === 'FILE') return 'file';
       return 'string';
     },
   },
