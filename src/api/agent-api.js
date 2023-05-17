@@ -201,3 +201,9 @@ export function scriptImport(sessionId, file) {
     .then((response) => response.data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function scriptCommand(sessionId, command) {
+  return axios.post(`/agents/${sessionId}/tasks/script_command`, { command })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}

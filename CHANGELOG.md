@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--   Add a script import button to the agents page
+-   Add a script import button to the agent page
+-   Add a script command checkbox to the agent page
 -   Modules with a 'file' type option now get a file selector/uploader instead of a text box 
 
 ## [2.2.0] - 2023-03-31
