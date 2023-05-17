@@ -94,6 +94,11 @@
             class="pt-2"
             style="display: flex; flex-direction: row; align-items: center;"
           >
+            <agent-script-import-dialog
+              v-model="scriptImportDialog"
+              :loading="scriptImportLoading"
+              @submit="doScriptImport"
+            />
             <agent-upload-dialog
               v-model="uploadDialog"
               :language="agent.language"
@@ -130,6 +135,12 @@
               icon="fa-download"
               text="Download"
               @click="downloadDialog = true"
+            />
+            <tooltip-button
+              v-if="initialized && !archived"
+              icon="fa-file-import"
+              text="Import Script"
+              @click="scriptImportDialog = true"
             />
             <tooltip-button
               v-if="!hideSideBar"
@@ -262,6 +273,7 @@ import AgentTasksList from '@/components/agents/AgentTasksList.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
+import AgentScriptImportDialog from '@/components/agents/AgentScriptImportDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
@@ -280,6 +292,7 @@ export default {
     AgentFileBrowser,
     AgentTasksList,
     AgentUploadDialog,
+    AgentScriptImportDialog,
     AgentDownloadDialog,
     TooltipButton,
     TooltipButtonToggle,
@@ -293,9 +306,11 @@ export default {
       nameLoading: false,
       uploadLoading: false,
       downloadLoading: false,
+      scriptImportLoading: false,
       nameDialog: false,
       uploadDialog: false,
       downloadDialog: false,
+      scriptImportDialog: false,
       interval: null,
       initialized: true,
       errorState: false,
@@ -394,6 +409,19 @@ export default {
         .catch(() => {
           this.errorState = true;
         });
+    },
+    async doScriptImport({ file }) {
+      if (this.scriptImportLoading || file == null) return;
+
+      this.scriptImportLoading = true;
+      try {
+        await agentApi.scriptImport(this.agent.session_id, file);
+        this.$snack.success(`Tasked agent ${this.agent.name} to import script ${file.filename}`);
+      } catch (err) {
+        this.$snack.error(`Error: ${err}`);
+      }
+      this.scriptImportLoading = false;
+      this.scriptImportDialog = false;
     },
     async killAgent() {
       if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
