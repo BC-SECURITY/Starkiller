@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2023-05-22
+
 ## [2.3.0] - 2023-05-17
 
 -   Add a script import button to the agent page
@@ -231,7 +233,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.1...HEAD
+
+[2.3.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.0...v2.3.1
 
 [2.3.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.2.0...v2.3.0
 
