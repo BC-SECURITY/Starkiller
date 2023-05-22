@@ -33,6 +33,12 @@ jobs:
           tag: v${{ env.APP_VERSION }}
           changelogPath: CHANGELOG-SPONSORS.md
           skipDiff: false
+      - name: Commit changelog and manifest files
+        id: make-commit
+        run: |
+          git add -A
+          git commit --message "Prepare release ${{ env.APP_VERSION }} sponsors"
+          echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - name: Get release branch name
         run: |
             echo "RELEASE_BRANCH=release/$APP_VERSION-sponsors" >> $GITHUB_ENV
