@@ -16,7 +16,8 @@
           v-if="$route.name === 'agentEdit'
             || $route.name === 'agents'
             || $route.name === 'pluginEdit'
-            || $route.name === 'plugins'"
+            || $route.name === 'plugins'
+            || $route.name === 'listeners'"
           #extension
         >
           <portal-target

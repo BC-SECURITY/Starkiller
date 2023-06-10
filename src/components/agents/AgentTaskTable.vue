@@ -87,6 +87,14 @@
           fa-clock
         </v-icon>
       </template>
+      <template v-if="!agent" #item.agent_id="{ item }">
+        <router-link
+          style="color: inherit;"
+          :to="{ name: 'agentEdit', params: { id: item.agent_id } }"
+        >
+          {{ item.agent_id }}
+        </router-link>
+      </template>
       <template #item.input="{ item }">
         <span>{{ truncateMessage(item.input) }}</span>
       </template>
