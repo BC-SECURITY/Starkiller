@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2023-06-10
+
 -   Turn on auto-refresh for the agent page by default
 -   Refactoring Agent Task components
 -   Add preview of Sponsor dashboard feature
@@ -244,7 +246,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.0...HEAD
+
+[2.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.2...v2.4.0
 
 [2.3.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.1...v2.3.2
 
