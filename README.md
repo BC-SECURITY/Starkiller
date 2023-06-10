@@ -33,6 +33,9 @@ At the moment, the extra Starkiller sponsorship features include:
   ## Modify Module Scripts
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/221427395-28d63b1d-bbe5-423e-9113-e58a10a86ced.gif"></div>
 
+  ## Dashboard
+  <div align="left"><img width="800" src="https://github.com/BC-SECURITY/Starkiller/assets/9831420/7fda92cd-52ab-4d84-a835-89c35b38cf7e"></div>
+
 There is also a collection of Empire plugins available via sponsorship.
 
 Thanks to our sponsors the following features which started as sponsor features have been moved to the public and kali builds.
@@ -77,7 +80,8 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 1.8.x              | 4.0.0         | 
 | 1.9.x, 1.10.x, 1.11.x  | 4.1.0         | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
 | 2.0.x, 2.1.x           | 5.0.0         | Uses the new v2 api
-| 2.2.x              | 5.2.0         | Requires the new plugin task endpoints
+| 2.2.x, 2.3.x           | 5.2.0         | Requires the new plugin task endpoints
+| 2.4.x              | 5.5.0         | For sponsors, requires the checkin endpoints
 
 ## Changelog
 

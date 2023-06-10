@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Turn on auto-refresh for the agent page by default
+-   Refactoring Agent Task components
+-   Add preview of Sponsor dashboard feature
+
 ## [2.3.2] - 2023-05-22
 
 -   Some improvements to the release flow
