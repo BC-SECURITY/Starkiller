@@ -15,26 +15,26 @@ It is prepackaged in Empire as a submodule and served via Empire's API.
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
 At the moment, the extra Starkiller sponsorship features include:
 
-  ## Interactive agent shell
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
-  
-  ## Enable/Disable modules
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
-  
-  ## Process Browser
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/131264080-0264558d-59c4-44d9-8dae-7b518c47a9cb.gif"></div>
-
-  ## Proxy Management
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/210124448-4f1107b0-3250-4faa-8ea9-4daec77e277e.gif"></div>
+  ## Dashboard
+  <div align="left"><img width="800" src="https://github.com/BC-SECURITY/Starkiller/assets/9831420/7fda92cd-52ab-4d84-a835-89c35b38cf7e"></div>
 
   ## Graph View
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/216792129-5b0fed82-b209-48cb-9a43-eeb3e69c7229.gif"></div>
 
+  ## Interactive agent shell
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/104983879-e37fc700-59ca-11eb-9c90-bd2d166c4ac5.gif"></div>
+  
+  ## Process Browser
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/131264080-0264558d-59c4-44d9-8dae-7b518c47a9cb.gif"></div>
+
   ## Modify Module Scripts
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/221427395-28d63b1d-bbe5-423e-9113-e58a10a86ced.gif"></div>
 
-  ## Dashboard
-  <div align="left"><img width="800" src="https://github.com/BC-SECURITY/Starkiller/assets/9831420/7fda92cd-52ab-4d84-a835-89c35b38cf7e"></div>
+  ## Enable/Disable modules
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
+
+  ## Proxy Management
+  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/210124448-4f1107b0-3250-4faa-8ea9-4daec77e277e.gif"></div>
 
 There is also a collection of Empire plugins available via sponsorship.
 

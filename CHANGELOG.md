@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Add preview of Sponsor dashboard feature
 -   Move malleable profiles under listeners
 -   Make agent id clickable from tasks table
+-   Fix issue with navigating to login page when already logged in
 
 ## [2.3.2] - 2023-05-22
 
