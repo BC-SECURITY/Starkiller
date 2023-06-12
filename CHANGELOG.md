@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2023-05-22
+
+-   Some improvements to the release flow
+
+## [2.3.1] - 2023-05-22
+
+## [2.3.0] - 2023-05-17
+
+-   Add a script import button to the agent page
+-   Add a script command checkbox to the agent page
+-   Modules with a 'file' type option now get a file selector/uploader instead of a text box 
+
 ## [2.2.0] - 2023-03-31
 
 -   Move Agent Tasks under the Agents page
@@ -225,7 +237,13 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.2...HEAD
+
+[2.3.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.1...v2.3.2
+
+[2.3.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.0...v2.3.1
+
+[2.3.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.2.0...v2.3.0
 
 [2.2.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.1.1...v2.2.0
 

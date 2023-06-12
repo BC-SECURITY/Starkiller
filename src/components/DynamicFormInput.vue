@@ -22,6 +22,12 @@
       chips
     />
 
+    <file-input
+      v-else-if="type === 'file'"
+      v-model="internalValue"
+      :label="name"
+    />
+
     <v-autocomplete
       v-else-if="name === 'CredID'"
       v-model="internalValue"
@@ -75,7 +81,10 @@
 </template>
 
 <script>
+import FileInput from '@/components/FileInput.vue';
+
 export default {
+  components: { FileInput },
   props: {
     value: {
       type: [String, Array, Number],

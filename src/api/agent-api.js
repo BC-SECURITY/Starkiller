@@ -1,6 +1,5 @@
 import { axiosInstance as axios, handleError } from '@/api/axios-instance';
 import qs from 'qs';
-
 /**
  * Returns a single agent.
  */
@@ -185,6 +184,26 @@ export function updateWorkingHours(sessionId, workingHours) {
 
 export function updateSleep(sessionId, delay, jitter) {
   return axios.post(`/agents/${sessionId}/tasks/sleep`, { delay, jitter })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function scriptImport(sessionId, file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return axios({
+    method: 'post',
+    url: `/agents/${sessionId}/tasks/script_import`,
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+    .then((response) => response.data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function scriptCommand(sessionId, command) {
+  return axios.post(`/agents/${sessionId}/tasks/script_command`, { command })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

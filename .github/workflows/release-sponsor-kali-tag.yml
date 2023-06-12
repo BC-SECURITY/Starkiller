@@ -5,7 +5,6 @@ on:
       - closed
     branches:
       - sponsors-main
-#     - kali-main
 
 jobs:
   tag_release:
@@ -47,6 +46,11 @@ jobs:
       - name: Extract release notes
         id: extract_release_notes
         uses: vinnybod/extract-release-notes@v2
+      - name: Extract release notes - sponsors
+        id: extract_release_notes_sponsors
+        uses: vinnybod/extract-release-notes@v2
+        with:
+          changelog_file: CHANGELOG-SPONSORS.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -56,6 +60,10 @@ jobs:
           commitish: ${{ env.COMMIT_SHA }}
           tag_name: v${{ env.TAG_NAME }}
           release_name: v${{ env.TAG_NAME }}
-          body: ${{ steps.extract_release_notes.outputs.release_notes }}
+          body: |
+            ${{ steps.extract_release_notes.outputs.release_notes }}
+            
+            ### Sponsors Only
+            ${{ steps.extract_release_notes_sponsors.outputs.release_notes }}
           draft: false
           prerelease: false

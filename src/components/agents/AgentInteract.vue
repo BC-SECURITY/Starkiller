@@ -8,13 +8,13 @@
       <v-container>
         <v-row>
           <v-col
-            cols="8"
+            cols="10"
           >
             <div style="display: flex;">
               <v-checkbox
-                v-model="form.literal"
+                v-model="form.scriptCommand"
                 class="pr-2"
-                label="Literal"
+                label="Script Command"
               />
               <v-tooltip
                 bottom
@@ -28,7 +28,27 @@
                     fa-question-circle
                   </v-icon>
                 </template>
-                <p>{{ tooltipText }}</p>
+                <p>{{ scriptCommandTooltipText }}</p>
+              </v-tooltip>
+              <v-checkbox
+                v-model="form.literal"
+                class="pr-2"
+                label="Literal"
+                :disabled="literal.disabled"
+              />
+              <v-tooltip
+                bottom
+              >
+                <template #activator="{ on }">
+                  <v-icon
+                    small
+                    class="pr-2"
+                    v-on="on"
+                  >
+                    fa-question-circle
+                  </v-icon>
+                </template>
+                <p>{{ literalTooltipText }}</p>
               </v-tooltip>
               <v-text-field
                 v-model="form.command"
@@ -39,8 +59,8 @@
             </div>
           </v-col>
           <v-col
-            cols="4"
-            md="4"
+            cols="2"
+            md="2"
           >
             <v-btn
               color="primary"
@@ -72,10 +92,29 @@ export default {
       form: {
         command: '',
         literal: false,
+        scriptCommand: false,
+      },
+      literal: {
+        disabled: false,
+        tooltipText: 'This will ensure that aliased commands such as whoami or ps do not execute the built-in agent aliases.',
+      },
+      scriptCommand: {
+        tooltipText: 'Execute a script command. The function being executing should first be loading via the "Script Import" functionality.',
       },
       commands: [],
-      tooltipText: 'This will ensure that aliased commands such as whoami or ps do not execute the built-in agent aliases.',
     };
+  },
+  watch: {
+    'form.scriptCommand': {
+      handler(val) {
+        if (val) {
+          this.form.literal = false;
+          this.literal.disabled = true;
+        } else {
+          this.literal.disabled = false;
+        }
+      },
+    },
   },
   methods: {
     async submit() {
@@ -87,6 +126,8 @@ export default {
 
       if (this.form.command.trim() === 'sysinfo') {
         await agentApi.sysinfo(this.agent.session_id);
+      } else if (this.form.scriptCommand) {
+        await agentApi.scriptCommand(this.agent.session_id, this.form.command);
       } else {
         await agentApi.shell(this.agent.session_id, this.form.command, this.form.literal);
       }
