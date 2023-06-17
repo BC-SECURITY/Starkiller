@@ -169,16 +169,16 @@ export default {
     },
   },
   mounted() {
-    if (!this.listeners) {
+    if (this.listeners?.length === 0) {
       this.$store.dispatch('listener/getListeners');
     }
-    if (!this.bypasses) {
+    if (this.bypasses?.length === 0) {
       this.$store.dispatch('bypass/getBypasses');
     }
-    if (!this.malleableProfiles) {
+    if (this.malleableProfiles?.length === 0) {
       this.$store.dispatch('malleable/getMalleableProfiles');
     }
-    if (!this.credentials) {
+    if (this.credentials?.length === 0) {
       this.$store.dispatch('credential/getCredentials');
     }
   },

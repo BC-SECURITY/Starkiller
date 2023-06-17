@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Fix issue with bypasses not loading on form pages
+
 ## [2.4.0] - 2023-06-10
 
 -   Turn on auto-refresh for the agent page by default
