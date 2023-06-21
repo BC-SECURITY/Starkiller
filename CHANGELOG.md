@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 -   Fix issue with bypasses not loading on form pages
+-   Fix issue with agent rename
+-   Fix tooltips on agent page not displaying
 
 ## [2.4.0] - 2023-06-10
 
