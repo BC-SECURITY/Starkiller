@@ -32,3 +32,15 @@ export function deleteMalleableProfile(id) {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function resetProfiles() {
+  return axios.post('/malleable-profiles/reset')
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function reloadProfiles() {
+  return axios.post('/malleable-profiles/reload')
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}

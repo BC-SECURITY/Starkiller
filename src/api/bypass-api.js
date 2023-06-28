@@ -33,3 +33,15 @@ export function deleteBypass(id) {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function reloadBypasses() {
+  return axios.post('/bypasses/reload')
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function resetBypasses() {
+  return axios.post('/bypasses/reset')
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
