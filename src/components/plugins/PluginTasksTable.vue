@@ -23,20 +23,30 @@
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div>
-            <div class="pt-2">
-              <tooltip-button
-                :icon="item.expandedInput ? 'fa-minus' : 'fa-plus'"
-                text="See Full Input"
-                x-small
-                @click="toggleSeeFullInput(item)"
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <tooltip-button
+                  :icon="item.expandedInput ? 'fa-minus' : 'fa-plus'"
+                  text="See Full Input"
+                  x-small
+                  @click="toggleSeeFullInput(item)"
+                />
+                <span v-if="item.expandedInput">Showing full input</span>
+              </div>
+              <v-switch
+                v-model="expandedTasks[item.uniqueId].backgroundColor"
+                false-value="white"
+                true-value="black"
+                label="Dark Background"
+                @change="updateTaskBackgroundColor(item)"
               />
             </div>
             <p><b>Task Input:</b></p>
             <p
-              class="mono"
-              style="max-width: 900px"
+              :class="'mono ' + (expandedTasks[item.uniqueId].backgroundColor === 'white' ? 'font-black' : 'font-white') "
+              :style="'background-color: ' + expandedTasks[item.uniqueId].backgroundColor + ';'"
             >
-              {{ item.expandedInput ? expandedTasks[item.id].full_input : item.input }}
+              {{ item.expandedInput ? expandedTasks[item.uniqueId].full_input : item.input }}
             </p>
             <p><b>Task Output:</b></p>
             <div
@@ -61,39 +71,21 @@
                 />
               </div>
             </div>
-            <p
-              class="mono"
-              style="max-width: 900px"
+            <div
+              :class="'mono ' + (expandedTasks[item.uniqueId].backgroundColor === 'white' ? 'font-black' : 'font-white') "
+              :style="'background-color: ' + expandedTasks[item.uniqueId].backgroundColor + ';'"
             >
               <!-- TODO Option for original output -->
-              {{ item.output }}
-            </p>
+              <div v-if="expandedTasks[item.uniqueId].htmlOutput" v-html="expandedTasks[item.uniqueId].htmlOutput" />
+              <div v-else>
+                {{ item.output }}
+              </div>
+            </div>
           </div>
         </td>
       </template>
       <template #item.status="{ item }">
-        <v-icon
-          v-if="item.status === 'pulled'"
-          color="green"
-          small
-        >
-          fa-check-square
-        </v-icon>
-        <v-icon
-          v-else-if="item.status === 'queued'"
-          color="orange"
-          small
-        >
-          fa-clock
-        </v-icon>
-      </template>
-      <template v-if="!agent" #item.agent_id="{ item }">
-        <router-link
-          style="color: inherit;"
-          :to="{ name: 'agentEdit', params: { id: item.agent_id } }"
-        >
-          {{ item.agent_id }}
-        </router-link>
+        {{ item.status }}
       </template>
       <template #item.input="{ item }">
         <span>{{ truncateMessage(item.input) }}</span>
@@ -190,17 +182,19 @@ import debounce from 'lodash.debounce';
 import TooltipButton from '@/components/TooltipButton.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import * as downloadApi from '@/api/download-api';
-import * as agentApi from '@/api/agent-api';
+import * as pluginApi from '@/api/plugin-api';
 import Vue from 'vue';
+// eslint-disable-next-line import/no-named-default
+import { default as AnsiUp } from 'ansi_up';
 
 export default {
-  name: 'AgentTaskTable',
+  name: 'PluginTasksTable',
   components: {
     TooltipButton,
   },
   mixins: [DownloadMixin],
   props: {
-    agent: {
+    plugin: {
       type: Object,
       required: false,
       default: null,
@@ -213,7 +207,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    selectedAgents: {
+    selectedPlugins: {
       type: Array,
       default: () => [],
     },
@@ -250,7 +244,7 @@ export default {
       return [
         { text: 'Task ID', value: 'id', sortable: true },
         { text: 'Status', value: 'status', sortable: true },
-        { text: 'Agent', value: 'agent_id', sortable: true },
+        { text: 'Plugin', value: 'plugin_id', sortable: true },
         { text: 'Task Input', value: 'input', sortable: false },
         { text: 'Task Name', value: 'task_name', sortable: false },
         { text: 'User', value: 'username', sortable: false },
@@ -281,10 +275,10 @@ export default {
     currentPage() {
       this.debouncedGetTasks();
     },
-    agent() {
+    plugin() {
       this.debouncedGetTasks();
     },
-    selectedAgents() {
+    selectedPlugins() {
       this.debouncedGetTasks();
     },
     selectedUsers() {
@@ -303,11 +297,34 @@ export default {
     clearInterval(this.refreshInterval);
   },
   methods: {
+    // eslint-disable-next-line no-unused-vars
+    // from https://github.com/xpl/ansicolor
+    stripAnsi(text) {
+      // eslint-disable-next-line no-control-regex
+      return text.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-PRZcf-nqry=><]/g, ''); // hope V8 caches the regexp
+    },
+    isAnsi(output) {
+      return this.stripAnsi(output) !== output;
+    },
+    ansiToHtml(output) {
+      return new AnsiUp().ansi_to_html(output);
+    },
     truncateMessage(task) {
       if (task) {
         return task.length > 30 ? `${task.substr(0, 30)}...` : task;
       }
       return '';
+    },
+    updateTaskBackgroundColor(task) {
+      if (task.backgroundColor === 'black') {
+        task.backgroundColor = 'white';
+      } else {
+        task.backgroundColor = 'black';
+      }
+      this.expandedTasks[task.uniqueId].backgroundColor = task.backgroundColor;
+
+      // Need to call vue set to trigger reactivity on the table
+      Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     isDownload(task) {
       return task.downloads && task.downloads.length > 0;
@@ -320,28 +337,28 @@ export default {
     },
     async downloadInput(task) {
       if (task.input) {
-        if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.id] = data;
+        if (!this.expandedTasks[task.uniqueId]) {
+          const data = await pluginApi.getTask(task.agent_id, task.id);
+          this.expandedTasks[task.uniqueId] = data;
         }
 
-        this.downloadText(this.expandedTasks[task.id].full_input, `${task.agent_id}-${task.id}-input.txt`);
+        this.downloadText(this.expandedTasks[task.uniqueId].full_input, `${task.uniqueId}-input.txt`);
       }
     },
     downloadOutput(task) {
       if (task.output) {
-        this.downloadText(task.output, `${task.agent_id}-${task.id}-output.txt`);
+        this.downloadText(task.output, `${task.uniqueId}-output.txt`);
       }
     },
     async copyInput(task) {
       if (task.input) {
-        if (!this.expandedTasks[task.id]) {
-          const data = await agentApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.id] = data;
+        if (!this.expandedTasks[task.uniqueId]) {
+          const data = await pluginApi.getTask(task.plugin_id, task.id);
+          this.expandedTasks[task.uniqueId] = data;
         }
 
         try {
-          navigator.clipboard.writeText(this.expandedTasks[task.id].full_input);
+          navigator.clipboard.writeText(this.expandedTasks[task.uniqueId].full_input);
         } catch (error) {
           this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
         }
@@ -357,7 +374,7 @@ export default {
       }
     },
     imageData(task, download) {
-      const expandedDownloads = this.expandedTasks[task.id]?.downloads;
+      const expandedDownloads = this.expandedTasks[task.uniqueId]?.downloads;
       if (expandedDownloads) {
         const found = expandedDownloads.find((d) => d.id === download.id);
         if (found) {
@@ -367,30 +384,33 @@ export default {
       return null;
     },
     async getImagesForTask(task) {
-      if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(task.agent_id, task.id);
-        this.expandedTasks[task.id] = data;
+      if (!this.expandedTasks[task.uniqueId]) {
+        const data = await pluginApi.getTask(task.plugin_id, task.id);
+        this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
       }
 
       for (let i = 0; i < task.downloads.length; i++) {
         const download = task.downloads[i];
-        if (!this.expandedTasks[task.id].downloads[download.id]?.image
+        if (!this.expandedTasks[task.uniqueId].downloads[download.id]?.image
           && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
           // eslint-disable-next-line
           const url = await downloadApi.getDownloadAsUrl(download.id);
-          this.expandedTasks[task.id].downloads[i].image = url;
+          this.expandedTasks[task.uniqueId].downloads[i].image = url;
         }
       }
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     async toggleSeeFullInput(task) {
-      if (!this.expandedTasks[task.id]) {
-        const data = await agentApi.getTask(task.plugin_id, task.id);
-        this.expandedTasks[task.id] = data;
+      if (!task.expandedInput) {
+        const data = await pluginApi.getTask(task.plugin_id, task.id);
+        this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data, expandedInput: true };
         task.expandedInput = true;
       } else {
-        task.expandedInput = !task.expandedInput;
+        this.expandedTasks[task.uniqueId].expandedInput = false;
+        task.expandedInput = false;
       }
+
+      // Need to call vue set to trigger reactivity on the table
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
     },
     handlePageChange() {
@@ -414,7 +434,7 @@ export default {
     async getTasks() {
       if (
         !this.noFilters
-        && (this.selectedAgents.length === 0 || this.selectedUsers.length === 0)
+        && (this.selectedPlugins.length === 0 || this.selectedUsers.length === 0)
       ) {
         // seems weird to do this but it would be weirder to select all agents
         // when no agents are selected. Even though the api sees no agents as all agents.
@@ -425,11 +445,12 @@ export default {
         return;
       }
       this.loading = true;
-      let agents = null;
-      if (this.selectedAgents.length > 0) {
-        agents = this.selectedAgents;
+      let plugins = null;
+      if (this.selectedPlugins.length > 0) {
+        plugins = this.selectedPlugins;
       }
-      const response = await agentApi.getTasks(agents, {
+
+      const response = await pluginApi.getTasks(plugins, {
         page: this.currentPage,
         limit: this.itemsPerPage,
         sortBy: this.sortBy,
@@ -444,10 +465,23 @@ export default {
       // iterate response.records and add expandedInput if it exists in expandedTasks
       // this ensures that the expandedInput doesn't get wiped away after a refresh
       this.tasks = response.records.map((task) => {
-        task.uniqueId = `${task.agent_id}-${task.id}`;
-        if (this.expandedTasks[task.id]) {
+        task.uniqueId = `${task.plugin_id}-${task.id}`;
+
+        if (!this.expandedTasks[task.uniqueId]) {
+          this.expandedTasks[task.uniqueId] = {};
+        }
+
+        if (this.expandedTasks[task.uniqueId].expandedInput) {
           task.expandedInput = true;
         }
+
+        this.expandedTasks[task.uniqueId].backgroundColor = this.expandedTasks[task.uniqueId].backgroundColor || 'black';
+        task.backgroundColor = this.expandedTasks[task.uniqueId].backgroundColor;
+
+        if (this.isAnsi(task.output)) {
+          this.expandedTasks[task.uniqueId].htmlOutput = this.ansiToHtml(task.output);
+        }
+
         return task;
       });
 
@@ -461,8 +495,17 @@ export default {
 <style>
 .mono {
   white-space: pre-wrap;
-  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+  font: 1.1em 'Andale Mono', Consolas, 'Courier New';
+  font-weight: bold;
   line-height: 1.6em;
   text-align: left;
+}
+
+.font-white {
+  color: white;
+}
+
+.font-black {
+  color: black;
 }
 </style>

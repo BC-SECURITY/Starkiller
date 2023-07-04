@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Fix issue with bypasses not loading on form pages
 -   Fix issue with agent rename
 -   Fix tooltips on agent page not displaying
+-   Add ansi formatting to plugin and agent tasks
+-   Refactor plugin task table to match agent task table
+-   Dependency updates
 -   Add options to settings page for reloading profiles, modules, bypasses, and plugins
 
 ## [2.4.0] - 2023-06-10

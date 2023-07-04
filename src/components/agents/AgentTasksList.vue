@@ -86,7 +86,7 @@
         elevation="2"
         outlined
       >
-        <agent-task-table
+        <agent-tasks-table
           ref="agentTaskTable"
           :agent="agent"
           :refresh-tasks="refreshTasks"
@@ -105,14 +105,14 @@ import moment from 'moment';
 import debounce from 'lodash.debounce';
 import { mapState } from 'vuex';
 
-import AgentTaskTable from '@/components/agents/AgentTaskTable.vue';
+import AgentTasksTable from '@/components/agents/AgentTasksTable.vue';
 import ListPageTop from '@/components/ListPageTop.vue';
 import DownloadMixin from '@/mixins/download-stager';
 
 export default {
   name: 'AgentTasksList',
   components: {
-    AgentTaskTable,
+    AgentTasksTable,
     ListPageTop,
   },
   mixins: [DownloadMixin],
