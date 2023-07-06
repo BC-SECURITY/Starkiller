@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.1] - 2023-07-06
+
 -   Fix issue with bypasses not loading on form pages
 -   Fix issue with agent rename
 -   Fix tooltips on agent page not displaying
@@ -254,7 +256,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.1...HEAD
+
+[2.4.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.0...v2.4.1
 
 [2.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.2...v2.4.0
 
