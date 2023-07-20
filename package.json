@@ -1,6 +1,6 @@
 {
   "name": "starkiller",
-  "version": "2.3.2",
+  "version": "2.4.2",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "@fontsource/roboto": "^4.5.1",
     "@fortawesome/fontawesome-free": "^6",
     "@mdi/font": "5.9.55",
+    "ansi_up": "^5.2.1",
     "axios": "^0.24.0",
     "lodash.debounce": "^4.0.8",
     "moment": "^2.29.1",

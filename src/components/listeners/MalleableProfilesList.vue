@@ -1,6 +1,7 @@
 <template>
   <div>
     <list-page-top
+      v-if="active"
       :breads="breads"
       :show-create="true"
       :show-refresh="true"
@@ -118,9 +119,20 @@ export default {
   components: {
     ListPageTop,
   },
+  props: {
+    active: {
+      type: Boolean,
+      default: true,
+    },
+  },
   data() {
     return {
       breads: [
+        {
+          text: 'Listeners',
+          disabled: true,
+          href: '/listeners',
+        },
         {
           text: 'Malleable Profiles',
           disabled: true,

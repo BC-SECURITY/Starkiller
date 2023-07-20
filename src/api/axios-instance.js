@@ -29,5 +29,6 @@ export function setInstance(url, token) {
 }
 
 export function handleError(error) {
+  console.error(error);
   return error?.response?.data?.detail || error;
 }

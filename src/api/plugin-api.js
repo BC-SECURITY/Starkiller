@@ -82,3 +82,8 @@ export function getTasks(pluginId, {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+export function reloadPlugins() {
+  return axios.post('/plugins/reload')
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}

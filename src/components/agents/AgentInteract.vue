@@ -28,7 +28,7 @@
                     fa-question-circle
                   </v-icon>
                 </template>
-                <p>{{ scriptCommandTooltipText }}</p>
+                <p>{{ scriptCommand.tooltipText }}</p>
               </v-tooltip>
               <v-checkbox
                 v-model="form.literal"
@@ -48,7 +48,7 @@
                     fa-question-circle
                   </v-icon>
                 </template>
-                <p>{{ literalTooltipText }}</p>
+                <p>{{ literal.tooltipText }}</p>
               </v-tooltip>
               <v-text-field
                 v-model="form.command"

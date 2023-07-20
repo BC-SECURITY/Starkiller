@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.2] - 2023-07-20
+
+## [2.4.1] - 2023-07-06
+
+-   Fix issue with bypasses not loading on form pages
+-   Fix issue with agent rename
+-   Fix tooltips on agent page not displaying
+-   Add ansi formatting to plugin and agent tasks
+-   Refactor plugin task table to match agent task table
+-   Dependency updates
+-   Add options to settings page for reloading profiles, modules, bypasses, and plugins
+
+## [2.4.0] - 2023-06-10
+
+-   Turn on auto-refresh for the agent page by default
+-   Refactoring Agent Task components
+-   Add preview of Sponsor dashboard feature
+-   Move malleable profiles under listeners
+-   Make agent id clickable from tasks table
+-   Fix issue with navigating to login page when already logged in
+
 ## [2.3.2] - 2023-05-22
 
 -   Some improvements to the release flow
@@ -237,7 +258,13 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.2...HEAD
+
+[2.4.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.1...v2.4.2
+
+[2.4.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.0...v2.4.1
+
+[2.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.2...v2.4.0
 
 [2.3.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.3.1...v2.3.2
 

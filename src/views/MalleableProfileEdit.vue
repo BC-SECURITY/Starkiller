@@ -122,9 +122,15 @@ export default {
     breads() {
       return [
         {
+          text: 'Listeners',
+          disabled: true,
+          to: '/listeners',
+          exact: true,
+        },
+        {
           text: 'Malleable Profiles',
           disabled: false,
-          to: '/malleable-profiles',
+          to: '/listeners?tab=malleable-profiles',
           exact: true,
         },
         {

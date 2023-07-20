@@ -311,13 +311,12 @@ export default {
       uploadDialog: false,
       downloadDialog: false,
       scriptImportDialog: false,
-      interval: null,
       initialized: true,
       errorState: false,
       paneSize: 100,
       rightPaneInitialized: false,
       pathToFile: '',
-      isRefreshTasks: false,
+      isRefreshTasks: true,
     };
   },
   computed: {

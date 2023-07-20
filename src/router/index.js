@@ -103,17 +103,12 @@ const routes = [
     component: () => import('../views/CredentialEdit.vue'),
   },
   {
-    path: '/malleable-profiles',
-    name: 'malleableProfiles',
-    component: () => import('../views/MalleableProfiles.vue'),
-  },
-  {
-    path: '/malleable-profiles/new',
+    path: '/listeners/malleable-profiles/new',
     name: 'malleableProfileNew',
     component: () => import('../views/MalleableProfileEdit.vue'),
   },
   {
-    path: '/malleable-profiles/:id',
+    path: '/listeners/malleable-profiles/:id',
     name: 'malleableProfileEdit',
     component: () => import('../views/MalleableProfileEdit.vue'),
   },

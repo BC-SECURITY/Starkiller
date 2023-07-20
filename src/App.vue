@@ -16,7 +16,8 @@
           v-if="$route.name === 'agentEdit'
             || $route.name === 'agents'
             || $route.name === 'pluginEdit'
-            || $route.name === 'plugins'"
+            || $route.name === 'plugins'
+            || $route.name === 'listeners'"
           #extension
         >
           <portal-target
@@ -103,6 +104,16 @@ export default {
     },
   },
   watch: {
+    isLoginPage: {
+      immediate: true,
+      handler(val) {
+        if (val === true && this.isLoggedIn === true) {
+          this.$router.push({ name: 'listeners' });
+        } else if (val === false && this.isLoggedIn === false) {
+          this.$router.push({ name: 'home' });
+        }
+      },
+    },
     isDarkMode: {
       immediate: true,
       handler(val) {
@@ -142,11 +153,6 @@ export default {
   },
   mounted() {
     this.$root.$confirm = this.$refs.confirm.open;
-    if (this.isLoggedIn === false && !this.isLoginPage) {
-      this.$router.push({ name: 'home' });
-    } else if (this.isLoggedIn === true && this.$route.name === 'home') {
-      this.$router.push({ name: 'listeners' });
-    }
 
     // register global snackbar
     Vue.prototype.$snack = this.$refs.snack;
