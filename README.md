@@ -1,5 +1,25 @@
 <div align="center"><img width="125" src="src/assets/icon.png"></div>
 
+<div align="center">
+
+[![Donate](https://img.shields.io/badge/Donate-Sponsor-blue?style=plastic&logo=github)](https://github.com/sponsors/BC-SECURITY)
+[![Docs](https://img.shields.io/badge/Wiki-Docs-green?style=plastic&logo=wikipedia)](https://bc-security.gitbook.io/empire-wiki/)
+[![Twitter URL](https://img.shields.io/twitter/follow/BCSecurity1?style=plastic&logo=twitter)](https://twitter.com/BCSecurity1)
+[![YouTube URL](https://img.shields.io/youtube/channel/views/UCIV4xSntF1h1bvFt8SUfzZg?style=plastic&logo=youtube)](https://www.youtube.com/channel/UCIV4xSntF1h1bvFt8SUfzZg)
+[![Discord](https://img.shields.io/discord/716165691383873536?style=plastic&logo=discord)](https://discord.gg/P8PZPyf)
+[![Donate](https://img.shields.io/badge/Donate-Sponsor-blue?style=plastic&logo=github)](https://github.com/sponsors/BC-SECURITY)
+[![Blog](https://img.shields.io/badge/Blog-Read%20me-orange?style=plastic&logo=wordpress)](https://www.bc-security.org/blog)
+[![Twitter URL](https://img.shields.io/twitter/follow/BCSecurity?style=plastic&logo=twitter)](https://twitter.com/BCSecurity)
+[![Twitter URL](https://img.shields.io/twitter/follow/EmpireC2Project?style=plastic&logo=twitter)](https://twitter.com/EmpireC2Project)
+[![YouTube URL](https://img.shields.io/youtube/channel/views/UCIV4xSntF1h1bvFt8SUfzZg?style=plastic&logo=youtube)](https://www.youtube.com/channel/UCIV4xSntF1h1bvFt8SUfzZg)
+![Mastodon Follow](https://img.shields.io/mastodon/follow/109299433521243792?domain=https%3A%2F%2Finfosec.exchange%2F&style=plastic&logo=mastodon)
+![Mastodon Follow](https://img.shields.io/mastodon/follow/109384907460361134?domain=https%3A%2F%2Finfosec.exchange%2F&style=plastic&logo=mastodon)
+[![Threads](https://img.shields.io/badge/follow%20@BCSecurity0-grey?style=plastic&logo=threads&logoColor=#000000)](https://www.threads.net/@bcsecurity0)
+[![Threads](https://img.shields.io/badge/follow%20@EmpireC2Project-grey?style=plastic&logo=threads&logoColor=#000000)](https://www.threads.net/@empirec2project)
+[![LinkedIn](https://img.shields.io/badge/Linkedin-blue?style=plastic&logo=linkedin&logoColor=#0A66C2)](https://www.linkedin.com/company/bc-security/)
+
+</div>
+
 # Starkiller
 Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/Empire/). It is a web application written in VueJS. If you'd like to contribute please follow the [Contribution guide](/CONTRIBUTING.md). If you'd like to request a feature or report a bug, please follow the [Issue template](/.github/ISSUE_TEMPLATE.md).
 
@@ -8,8 +28,13 @@ As of Empire 5.0 and Starkiller 2.0, you no longer need to install Starkiller or
 It is prepackaged in Empire as a submodule and served via Empire's API.
 
 ## Sponsors
-[<img src="https://user-images.githubusercontent.com/20302208/185246508-56f4f574-5a06-4a2c-ac62-320922588dcf.png" width="100"/>](https://www.sans.org/cyber-security-courses/red-team-operations-adversary-emulation/) &emsp; &emsp; &emsp;
-[<img src="https://user-images.githubusercontent.com/20302208/208271681-235c914b-5359-426e-8a3d-903bbd018847.png" width="100"/>](https://www.cybrary.it/)
+<div align="center">
+
+[<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/f273f4b0-400c-49ce-b62f-521239a86754" width="100"/>](https://www.cybrary.it/)
+
+[<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/d14af000-80d2-4f67-b70c-b62ac42b6a52" width="100"/>](https://twitter.com/joehelle)
+
+</div>
 
 # Sponsorship and extra features
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
