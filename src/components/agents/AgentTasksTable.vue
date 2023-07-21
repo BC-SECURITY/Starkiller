@@ -498,7 +498,7 @@ export default {
         this.expandedTasks[task.uniqueId].backgroundColor = this.expandedTasks[task.uniqueId].backgroundColor || 'black';
         task.backgroundColor = this.expandedTasks[task.uniqueId].backgroundColor;
 
-        if (this.isAnsi(task.output)) {
+        if (this.isAnsi(task.output || '')) {
           this.expandedTasks[task.uniqueId].htmlOutput = this.ansiToHtml(task.output);
         }
 

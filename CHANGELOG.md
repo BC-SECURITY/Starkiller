@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Fix issue with agent and plugin tasks table not loading
+
 ## [2.4.2] - 2023-07-20
 
 ## [2.4.1] - 2023-07-06
