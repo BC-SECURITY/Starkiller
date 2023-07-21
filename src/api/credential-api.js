@@ -1,10 +1,14 @@
 import { axiosInstance as axios, handleError } from '@/api/axios-instance';
+import qs from 'qs';
 
 /**
  * Returns a full list of credentials.
  */
-export function getCredentials() {
-  return axios.get('/credentials')
+export function getCredentials({ tags, search } = {}) {
+  return axios.get('/credentials', {
+    params: { tags, search },
+    paramsSerializer: (p) => qs.stringify(p, { arrayFormat: 'repeat', skipNulls: true }),
+  })
     .then(({ data }) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -41,5 +45,22 @@ export function createCredential(options) {
  */
 export function deleteCredential(id) {
   return axios.delete(`/credentials/${id}`)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function deleteTag(credentialId, tag) {
+  return axios.delete(`credentials/${credentialId}/tags/${tag}`)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function updateTag(credentialId, tag) {
+  return axios.put(`credentials/${credentialId}/tags/${tag.id}`, tag)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function addTag(credentialId, tag) {
+  return axios.post(`credentials/${credentialId}/tags`, tag)
+    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

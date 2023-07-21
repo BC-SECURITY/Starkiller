@@ -41,7 +41,7 @@ export default {
     async getListeners(context) {
       context.commit('setStatus', 'loading');
       const listeners = await listenerApi.getListeners();
-      context.commit('setListeners', listeners);
+      await context.commit('setListeners', listeners);
       context.commit('setStatus', 'success');
     },
     async getListenerTemplates(context) {

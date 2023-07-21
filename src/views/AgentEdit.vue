@@ -158,6 +158,12 @@
           </div>
         </div>
       </portal>
+      <tag-viewer
+        :tags="agent.tags"
+        @update-tag="updateTag"
+        @delete-tag="deleteTag"
+        @new-tag="addTag"
+      />
       <error-state-alert
         v-if="errorState"
         :resource-id="id"
@@ -278,14 +284,17 @@ import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import { Splitpanes, Pane } from 'splitpanes';
+import TagViewer from '@/components/TagViewer.vue';
+import { Pane, Splitpanes } from 'splitpanes';
 import * as agentApi from '@/api/agent-api';
+import * as agentTaskApi from '@/api/agent-task-api';
 
 import 'splitpanes/dist/splitpanes.css';
 
 export default {
   name: 'AgentEdit',
   components: {
+    TagViewer,
     AgentForm,
     AgentInteract,
     AgentExecuteModule,
@@ -384,6 +393,29 @@ export default {
     this.getAgent(this.$route.params.id);
   },
   methods: {
+    deleteTag(tag) {
+      agentApi.deleteTag(this.agent.session_id, tag.id)
+        .then(() => {
+          this.agent.tags = this.agent.tags.filter((t) => t.id !== tag.id);
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    updateTag(tag) {
+      agentApi.updateTag(this.agent.session_id, tag)
+        .then((t) => {
+          const index = this.agent.tags.findIndex((x) => x.id === t.id);
+          this.agent.tags.splice(index, 1, t);
+          this.$snack.success('Tag updated');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    addTag(tag) {
+      agentApi.addTag(this.agent.session_id, tag)
+        .then((t) => {
+          this.agent.tags.push(t);
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
     toggleCollapsePane() {
       if (this.paneSize > 95) {
         this.paneSize = 50;
@@ -414,7 +446,7 @@ export default {
 
       this.scriptImportLoading = true;
       try {
-        await agentApi.scriptImport(this.agent.session_id, file);
+        await agentTaskApi.scriptImport(this.agent.session_id, file);
         this.$snack.success(`Tasked agent ${this.agent.name} to import script ${file.filename}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
@@ -430,7 +462,7 @@ export default {
       }
     },
     async clearQueue() {
-      const queuedTasks = await agentApi.getTasks(this.agent.session_id, { limit: -1, page: 1, status: 'queued' });
+      const queuedTasks = await agentTaskApi.getTasks(this.agent.session_id, { limit: -1, page: 1, status: 'queued' });
       const queuedIds = queuedTasks.records.map((el) => el.id);
       if (queuedIds.length === 0) {
         this.$snack.info('No queued tasks to clear.');
@@ -453,7 +485,7 @@ export default {
 
       this.uploadLoading = true;
       try {
-        await agentApi.uploadFile(this.agent.session_id, file, pathToFile);
+        await agentTaskApi.uploadFile(this.agent.session_id, file, pathToFile);
         this.$snack.success(`Tasked agent ${this.agent.name} to upload file to ${pathToFile}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
@@ -467,7 +499,7 @@ export default {
 
       this.downloadLoading = true;
       try {
-        await agentApi.downloadFile(this.agent.session_id, pathToFile);
+        await agentTaskApi.downloadFile(this.agent.session_id, pathToFile);
         this.$snack.success(`Tasked agent ${this.agent.name} to downloaded file ${pathToFile}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);

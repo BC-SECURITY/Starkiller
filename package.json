@@ -36,7 +36,7 @@
     "@vue/eslint-config-airbnb": "^7.0.0",
     "eslint": "^8.31.0",
     "eslint-plugin-vue": "^9.8.0",
-    "sass": "^1.57.1",
+    "sass": "~1.32",
     "unplugin-vue-components": "^0.22.12",
     "vite": "^3"
   }

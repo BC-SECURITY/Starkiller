@@ -1,0 +1,7 @@
+repos:
+  - repo: local
+    hooks:
+      - id: yarn-lint
+        name: yarn-lint
+        entry: bash -c 'yarn lint'
+        language: system

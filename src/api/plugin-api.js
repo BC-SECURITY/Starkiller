@@ -51,6 +51,7 @@ export function getTasks(pluginId, {
   sortOrder = 'desc',
   status = null,
   users = null,
+  tags = null,
   search = null,
 }) {
   const params = {
@@ -61,6 +62,7 @@ export function getTasks(pluginId, {
     order_direction: sortOrder,
     status,
     users,
+    tags,
     query: search,
   };
 
@@ -84,6 +86,23 @@ export function getTasks(pluginId, {
 }
 export function reloadPlugins() {
   return axios.post('/plugins/reload')
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function deleteTag(pluginId, taskId, tag) {
+  return axios.delete(`plugins/${pluginId}/tasks/${taskId}/tags/${tag}`)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function updateTag(pluginId, taskId, tag) {
+  return axios.put(`plugins/${pluginId}/${taskId}/tags/${tag.id}`, tag)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function addTag(pluginId, taskId, tag) {
+  return axios.post(`plugins/${pluginId}/tasks/${taskId}/tags`, tag)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

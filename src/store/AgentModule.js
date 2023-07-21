@@ -1,9 +1,11 @@
 import * as agentApi from '@/api/agent-api';
+import * as agentTaskApi from '@/api/agent-task-api';
 
 export default {
   namespaced: true,
   state: {
     agents: [],
+    status: 'success',
   },
   mutations: {
     setAgents(state, agents) {
@@ -12,11 +14,16 @@ export default {
     pushAgent(state, agent) {
       state.agents.push(agent);
     },
+    setStatus(state, status) {
+      state.status = status;
+    },
   },
   actions: {
     async getAgents(context) {
+      context.commit('setStatus', 'loading');
       const agents = await agentApi.getAgents(true);
       await context.commit('setAgents', agents);
+      context.commit('setStatus', 'success');
     },
     async getAgent(context, { sessionId }) {
       const agent = (await agentApi.getAgent(sessionId))[0];
@@ -63,7 +70,7 @@ export default {
     },
     clearQueue(context, { name, tasks }) {
       tasks.forEach((task) => {
-        agentApi.deleteTask(name, task);
+        agentTaskApi.deleteTask(name, task);
       });
     },
   },

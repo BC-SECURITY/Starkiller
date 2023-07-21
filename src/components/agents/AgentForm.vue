@@ -135,7 +135,7 @@
 import Vue from 'vue';
 import moment from 'moment';
 import { mapState } from 'vuex';
-import * as agentApi from '@/api/agent-api';
+import * as agentTaskApi from '@/api/agent-task-api';
 import ClickToEdit from '../ClickToEdit.vue';
 
 export default {
@@ -245,7 +245,7 @@ export default {
 
       try {
         const listenerId = this.listeners.filter((l) => l.name === this.form.listener)[0].id;
-        await agentApi.updateComms(this.agent.session_id, listenerId);
+        await agentTaskApi.updateComms(this.agent.session_id, listenerId);
       } catch (err) {
         this.$snack.error(`Update agent listener failed: ${err}`);
         return;
@@ -261,7 +261,7 @@ export default {
       if (this.agent.kill_date === date) return;
 
       try {
-        await agentApi.updateKillDate(this.agent.session_id, date);
+        await agentTaskApi.updateKillDate(this.agent.session_id, date);
       } catch (err) {
         this.$snack.error(`Update agent kill date failed: ${err}`);
         return;
@@ -273,7 +273,7 @@ export default {
       if (this.agent.working_hours === this.form.working_hours) return;
 
       try {
-        await agentApi.updateWorkingHours(this.agent.session_id, this.form.working_hours);
+        await agentTaskApi.updateWorkingHours(this.agent.session_id, this.form.working_hours);
       } catch (err) {
         this.$snack.error(`Update agent working hours failed: ${err}`);
         return;
@@ -284,7 +284,7 @@ export default {
       if (this.agent.delay === this.form.delay) return;
 
       try {
-        await agentApi.updateSleep(this.agent.session_id, this.form.delay, this.form.jitter);
+        await agentTaskApi.updateSleep(this.agent.session_id, this.form.delay, this.form.jitter);
       } catch (err) {
         this.$snack.error(`Update agent delay failed: ${err}`);
         return;
@@ -295,7 +295,7 @@ export default {
       if (this.agent.jitter === this.form.jitter) return;
 
       try {
-        await agentApi.updateSleep(this.agent.session_id, this.form.delay, this.form.jitter);
+        await agentTaskApi.updateSleep(this.agent.session_id, this.form.delay, this.form.jitter);
       } catch (err) {
         this.$snack.error(`Update agent delay failed: ${err}`);
         return;

@@ -22,8 +22,8 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-list-item-title>Starkiller</v-list-item-title>
-            <v-list-item-subtitle>{{ version }}</v-list-item-subtitle>
+            <v-list-item-title>Starkiller: {{ version }}</v-list-item-title>
+            <v-list-item-subtitle>Empire: {{ empireVersion }}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-icon>
             <v-btn
@@ -73,6 +73,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { version } from '../../package.json';
 
 export default {
@@ -99,6 +100,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      empireVersion: (state) => state.application.empireVersion,
+    }),
     expandOnHover() {
       return this.mini;
     },

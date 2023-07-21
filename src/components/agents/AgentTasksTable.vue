@@ -122,6 +122,14 @@
           <span>{{ moment(item.updated_at).format('MMM D YYYY, h:mm:ss a') }}</span>
         </v-tooltip>
       </template>
+      <template #item.tags="{ item }">
+        <tag-viewer
+          :tags="item.tags"
+          @update-tag="updateTag(item, ...arguments)"
+          @delete-tag="deleteTag(item, ...arguments)"
+          @new-tag="addTag(item, ...arguments)"
+        />
+      </template>
       <template #item.actions="{ item }">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
@@ -201,9 +209,10 @@
 import moment from 'moment';
 import debounce from 'lodash.debounce';
 import TooltipButton from '@/components/TooltipButton.vue';
+import TagViewer from '@/components/TagViewer.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import * as downloadApi from '@/api/download-api';
-import * as agentApi from '@/api/agent-api';
+import * as agentTaskApi from '@/api/agent-task-api';
 import Vue from 'vue';
 // eslint-disable-next-line import/no-named-default
 import { default as AnsiUp } from 'ansi_up';
@@ -211,6 +220,7 @@ import { default as AnsiUp } from 'ansi_up';
 export default {
   name: 'AgentTasksTable',
   components: {
+    TagViewer,
     TooltipButton,
   },
   mixins: [DownloadMixin],
@@ -236,6 +246,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    selectedTags: {
+      type: Array,
+      default: () => [],
+    },
     search: {
       type: String,
       default: '',
@@ -258,6 +272,7 @@ export default {
       sortDesc: true,
       refreshInterval: null,
       expandedTasks: {},
+      debouncedGetTasks: debounce(this.getTasks, 500),
     };
   },
   computed: {
@@ -270,6 +285,9 @@ export default {
         { text: 'Task Name', value: 'task_name', sortable: false },
         { text: 'User', value: 'username', sortable: false },
         { text: 'Updated At', value: 'updated_at', sortable: true },
+        {
+          text: 'Tags', value: 'tags', sortable: false, width: 400,
+        },
         { text: 'Actions', value: 'actions', sortable: false },
       ]
         .filter((h) => !this.hideColumns.includes(h.value));
@@ -305,13 +323,14 @@ export default {
     selectedUsers() {
       this.debouncedGetTasks();
     },
+    selectedTags() {
+      this.debouncedGetTasks();
+    },
     search() {
       this.debouncedGetTasks();
     },
   },
   async mounted() {
-    this.debouncedGetTasks = debounce(this.getTasks, 500);
-
     this.debouncedGetTasks();
   },
   beforeDestroy() {
@@ -329,6 +348,32 @@ export default {
     },
     ansiToHtml(output) {
       return new AnsiUp().ansi_to_html(output);
+    },
+    deleteTag(task, tag) {
+      agentTaskApi.deleteTag(task.agent_id, task.id, tag.id)
+        .then(() => {
+          this.$set(task, 'tags', task.tags.filter((t) => t.id !== tag.id));
+          this.$emit('refresh-tags');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    updateTag(task, tag) {
+      agentTaskApi.updateTag(task.agent_id, task.id, tag)
+        .then((t) => {
+          const index = task.tags.findIndex((x) => x.id === t.id);
+          task.tags.splice(index, 1, t);
+          this.$emit('refresh-tags');
+          this.$snack.success('Tag updated');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    addTag(task, tag) {
+      agentTaskApi.addTag(task.agent_id, task.id, tag)
+        .then((t) => {
+          this.$set(task, 'tags', [...task.tags, t]);
+          this.$emit('refresh-tags');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     truncateMessage(task) {
       if (task) {
@@ -359,7 +404,7 @@ export default {
     async downloadInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.uniqueId]) {
-          const data = await agentApi.getTask(task.agent_id, task.id);
+          const data = await agentTaskApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.uniqueId] = data;
         }
 
@@ -374,7 +419,7 @@ export default {
     async copyInput(task) {
       if (task.input) {
         if (!this.expandedTasks[task.uniqueId]) {
-          const data = await agentApi.getTask(task.agent_id, task.id);
+          const data = await agentTaskApi.getTask(task.agent_id, task.id);
           this.expandedTasks[task.uniqueId] = data;
         }
 
@@ -406,7 +451,7 @@ export default {
     },
     async getImagesForTask(task) {
       if (!this.expandedTasks[task.uniqueId]) {
-        const data = await agentApi.getTask(task.agent_id, task.id);
+        const data = await agentTaskApi.getTask(task.agent_id, task.id);
         this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
       }
 
@@ -423,7 +468,7 @@ export default {
     },
     async toggleSeeFullInput(task) {
       if (!task.expandedInput) {
-        const data = await agentApi.getTask(task.agent_id, task.id);
+        const data = await agentTaskApi.getTask(task.agent_id, task.id);
         this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data, expandedInput: true };
         task.expandedInput = true;
       } else {
@@ -470,12 +515,13 @@ export default {
       if (this.selectedAgents.length > 0) {
         agents = this.selectedAgents;
       }
-      const response = await agentApi.getTasks(agents, {
+      const response = await agentTaskApi.getTasks(agents, {
         page: this.currentPage,
         limit: this.itemsPerPage,
         sortBy: this.sortBy,
         sortOrder: this.sortDesc ? 'desc' : 'asc',
         users: this.selectedUsers,
+        tags: this.selectedTags,
         search: this.search,
       });
       this.currentPage = response.page;

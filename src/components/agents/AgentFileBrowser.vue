@@ -78,6 +78,7 @@
 <script>
 import Vue from 'vue';
 import * as agentApi from '@/api/agent-api';
+import * as agentTaskApi from '@/api/agent-task-api';
 import debounce from 'lodash.debounce';
 import pause from '@/utils/pause';
 import ExecuteModuleDialog from './ExecuteModuleDialog.vue';
@@ -293,7 +294,7 @@ export default {
 
         this.open.push(this.selected.id);
       } else if (action === 'download') {
-        agentApi.downloadFile(this.agent.session_id, this.selected.path);
+        agentTaskApi.downloadFile(this.agent.session_id, this.selected.path);
         this.$snack.success(`Tasked ${this.agent.session_id} for download ${this.selected.path}`);
       } else if (action === 'zip') {
         this.prepareZip();
@@ -383,7 +384,7 @@ export default {
     },
     async checkTaskComplete(taskId) {
       try {
-        const task = await agentApi.getTask(this.agent.session_id, taskId);
+        const task = await agentTaskApi.getTask(this.agent.session_id, taskId);
         if (task.output) {
           return true;
         }

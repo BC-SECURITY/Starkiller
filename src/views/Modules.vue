@@ -5,106 +5,73 @@
       :show-create="false"
       :show-refresh="false"
       :show-delete="false"
-    >
-      <template slot="extra-stuff">
-        <v-text-field
-          v-model="filter"
-          append-icon="mdi-magnify"
-          outlined
-          dense
+    />
+    <advanced-table>
+      <template #filters>
+        <v-switch
+          v-model="showIds"
+          label="Show IDs"
+        />
+        <expansion-panel-search
+          v-model="search"
+          title="Search"
           label="Search"
-          style="max-width: 250px; padding-top: 25px;"
+        />
+        <expansion-panel-boolean
+          v-model="needsAdmin"
+          title="Needs Admin"
+        />
+        <expansion-panel-boolean
+          v-model="opsecSafe"
+          title="Opsec Safe"
+        />
+        <expansion-panel-boolean
+          v-model="background"
+          title="Background"
+        />
+        <expansion-panel-filter
+          v-model="languages"
+          title="Language"
+          label="label"
+          item-key="value"
+          item-value="value"
+          :items="languageOptions"
         />
       </template>
-    </list-page-top>
-    <div
-      class="ml-3 mr-3 align-center"
-      style="display: flex; "
-    >
-      <v-switch
-        v-model="showIds"
-        label="Show IDs"
-      />
-    </div>
-    <v-data-table
-      :headers="headers"
-      :items="modules"
-      :footer-props="{
-        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
-      }"
-      :items-per-page="15"
-      :search="filter"
-      item-key="id"
-      show-expand
-      dense
-    >
-      <template #item.id="{ item }">
-        <router-link
-          style="color: inherit;"
-          :to="{ name: 'moduleExecute', params: { id: item.id } }"
-        >
-          {{ item.id }}
-        </router-link>
-      </template>
-      <template #item.name="{ item }">
-        <router-link
-          style="color: inherit;"
-          :to="{ name: 'moduleExecute', params: { id: item.id } }"
-        >
-          {{ item.name }}
-        </router-link>
-      </template>
-      <template #item.techniques="{ item }">
-        <technique-chips
-          :techniques="item.techniques"
-          :show-title="false"
+      <template #table>
+        <modules-table
+          :search="search"
+          :show-ids="showIds"
+          :needs-admin="needsAdmin"
+          :opsec-safe="opsecSafe"
+          :background="background"
+          :selected-languages="languages"
+          @languages-changed="languagesChanged"
         />
       </template>
-      <template #item.needs_admin="{ item }">
-        <v-simple-checkbox
-          v-model="item.needs_admin"
-          disabled
-        />
-      </template>
-      <template #item.opsec_safe="{ item }">
-        <v-simple-checkbox
-          v-model="item.opsec_safe"
-          disabled
-        />
-      </template>
-      <template #item.background="{ item }">
-        <v-simple-checkbox
-          v-model="item.background"
-          disabled
-        />
-      </template>
-      <template #expanded-item="{ headers, item }">
-        <td :colspan="headers.length">
-          <div class="d-flex flex-column">
-            <b>Description:</b>
-            {{ item.description }}
-          </div>
-        </td>
-      </template>
-    </v-data-table>
+    </advanced-table>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import TechniqueChips from '@/components/TechniqueChips.vue';
 import ListPageTop from '@/components/ListPageTop.vue';
+import ModulesTable from '@/components/modules/ModulesTable.vue';
+import AdvancedTable from '@/components/tables/AdvancedTable.vue';
+import ExpansionPanelFilter from '@/components/tables/ExpansionPanelFilter.vue';
+import ExpansionPanelBoolean from '@/components/tables/ExpansionPanelBoolean.vue';
 
 export default {
   name: 'Modules',
   components: {
-    TechniqueChips,
+    ExpansionPanelBoolean,
+    ExpansionPanelFilter,
+    AdvancedTable,
+    ModulesTable,
     ListPageTop,
   },
   data() {
     return {
-      filter: '',
-      filteredModules: [],
+      search: '',
       breads: [
         {
           text: 'Modules',
@@ -113,63 +80,19 @@ export default {
         },
       ],
       showIds: false,
+      needsAdmin: [],
+      opsecSafe: [],
+      background: [],
+      languages: [],
+      languageOptions: [],
     };
   },
-  computed: {
-    ...mapState({
-      modules: (state) => state.module.modules,
-    }),
-    headers() {
-      const headers = [
-        {
-          text: 'Name',
-          value: 'name',
-        },
-        { text: 'Language', value: 'language', sort: this.sortLanguage },
-        { text: 'Needs Admin', value: 'needs_admin', width: '75px' },
-        { text: 'Opsec Safe', value: 'opsec_safe', width: '75px' },
-        { text: 'Background', value: 'background', width: '75px' },
-        {
-          text: 'Techniques', value: 'techniques', width: '300px', sortable: false,
-        },
-      ];
-      if (this.showIds) {
-        headers.unshift({
-          text: 'id',
-          align: 'start',
-          value: 'id',
-        });
-      }
-
-      return headers;
-    },
-  },
-  mounted() {
-    this.$store.dispatch('module/getModules');
-  },
   methods: {
-    toLower(row, column, cellValue) {
-      if (cellValue == null) {
-        return '';
-      }
-
-      return cellValue.toLowerCase();
-    },
-    sortLanguage(a, b) {
-      if (a == null) {
-        return -1;
-      } if (b == null) {
-        return 1;
-      }
-      return a.toLowerCase().localeCompare(b.toLowerCase());
-    },
-    sortMinLanguageVersion(a, b) {
-      if (a == null) {
-        return -1;
-      } if (b == null) {
-        return 1;
-      }
-      return a.localeCompare(b, undefined, { numeric: true });
+    languagesChanged(val) {
+      this.languageOptions = val.map((language) => ({
+        label: language,
+        value: language,
+      }));
     },
   },
 };
