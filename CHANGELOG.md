@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.3] - 2023-07-21
+
+-   Fix issue with agent and plugin tasks table not loading
+
 ## [2.4.2] - 2023-07-20
 
 ## [2.4.1] - 2023-07-06
@@ -258,7 +262,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.3...HEAD
+
+[2.4.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.2...v2.4.3
 
 [2.4.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.1...v2.4.2
 
