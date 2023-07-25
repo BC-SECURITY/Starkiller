@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Refactor agent task api endpoints to another file
 -   Modules page has a lot of filtering options now
 -   Tag Management
--   Add a reusable Tag Manager component
--   Works on Listeners, Agents, Agent Tasks, Plugin Tasks, Credentials, and Downloads
+    -   Add a reusable Tag Manager component
+    -   Works on Listeners, Agents, Agent Tasks, Plugin Tasks, Credentials, and Downloads
 -   Display Empire version on the sidenav
 
 ## [2.4.3] - 2023-07-21
