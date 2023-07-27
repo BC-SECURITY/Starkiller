@@ -29,12 +29,7 @@
         </router-link>
       </template>
       <template #item.created_at="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.created_at).format('MMM D YYYY, h:mm:ss a') }}</span>
-        </v-tooltip>
+        <date-time-display :timestamp="item.created_at" />
       </template>
       <template #item.tags="{ item }">
         <tag-viewer
@@ -105,11 +100,13 @@
 import { mapState } from 'vuex';
 import moment from 'moment';
 import TagViewer from '@/components/TagViewer.vue';
+import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
 import * as listenerApi from '@/api/listener-api';
 
 export default {
   name: 'ListenersTable',
   components: {
+    DateTimeDisplay,
     TagViewer,
   },
   props: {

@@ -96,20 +96,10 @@
         </router-link>
       </template>
       <template #item.lastseen_time="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.lastseen_time).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.lastseen_time).format('MMM D YYYY, h:mm:ss a') }}</span>
-        </v-tooltip>
+        <date-time-display :timestamp="item.lastseen_time" />
       </template>
       <template #item.checkin_time="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.checkin_time).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.checkin_time).format('MMM D YYYY, h:mm:ss a') }}</span>
-        </v-tooltip>
+        <date-time-display :timestamp="item.checkin_time" />
       </template>
       <template #item.listener="{ item }">
         <router-link
@@ -192,12 +182,14 @@
 <script>
 import moment from 'moment';
 import { mapState } from 'vuex';
+import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
 import TagViewer from '@/components/TagViewer.vue';
 import * as agentApi from '@/api/agent-api';
 
 export default {
   name: 'AgentsTable',
   components: {
+    DateTimeDisplay,
     TagViewer,
   },
   props: {

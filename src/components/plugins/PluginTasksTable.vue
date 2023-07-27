@@ -94,12 +94,7 @@
         <span>{{ item.module_name == null ? item.task_name : item.module_name }}</span>
       </template>
       <template #item.updated_at="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.updated_at).format('MMM D YYYY, h:mm:ss a') }}</span>
-        </v-tooltip>
+        <date-time-display :timestamp="item.updated_at" />
       </template>
       <template #item.tags="{ item }">
         <tag-viewer
@@ -185,20 +180,22 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import moment from 'moment';
 import debounce from 'lodash.debounce';
+// eslint-disable-next-line import/no-named-default
+import { default as AnsiUp } from 'ansi_up';
+import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import TagViewer from '@/components/TagViewer.vue';
 import DownloadMixin from '@/mixins/download-stager';
 import * as downloadApi from '@/api/download-api';
 import * as pluginApi from '@/api/plugin-api';
-import Vue from 'vue';
-// eslint-disable-next-line import/no-named-default
-import { default as AnsiUp } from 'ansi_up';
 
 export default {
   name: 'PluginTasksTable',
   components: {
+    DateTimeDisplay,
     TagViewer,
     TooltipButton,
   },

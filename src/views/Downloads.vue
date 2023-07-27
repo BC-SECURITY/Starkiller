@@ -82,20 +82,10 @@
           @update:options="handleOptionsChange"
         >
           <template #item.updated_at="{ item }">
-            <v-tooltip top>
-              <template #activator="{ on }">
-                <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
-              </template>
-              <span>{{ moment(item.updated_at).format('MMM D YYYY, h:mm:ss a') }}</span>
-            </v-tooltip>
+            <date-time-display :timestamp="item.updated_at" />
           </template>
           <template #item.created_at="{ item }">
-            <v-tooltip top>
-              <template #activator="{ on }">
-                <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
-              </template>
-              <span>{{ moment(item.created_at).format('MMM D YYYY, h:mm:ss a') }}</span>
-            </v-tooltip>
+            <date-time-display :timestamp="item.created_at" />
           </template>
           <template #item.size="{ item }">
             <span>{{ formatBytes(item.size) }}</span>
@@ -150,11 +140,13 @@ import TooltipButton from '@/components/TooltipButton.vue';
 import TagViewer from '@/components/TagViewer.vue';
 import ExpansionPanelFilter from '@/components/tables/ExpansionPanelFilter.vue';
 import ExpansionPanelSearch from '@/components/tables/ExpansionPanelSearch.vue';
+import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
 import * as tagApi from '@/api/tag-api';
 
 export default {
   name: 'Downloads',
   components: {
+    DateTimeDisplay,
     ExpansionPanelSearch,
     ExpansionPanelFilter,
     TagViewer,

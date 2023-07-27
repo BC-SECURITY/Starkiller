@@ -30,12 +30,7 @@
         </router-link>
       </template>
       <template #item.created_at="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.created_at).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.created_at).format('MMM D YYYY, h:mm:ss a') }}</span>
-        </v-tooltip>
+        <date-time-display :timestamp="item.created_at" />
       </template>
       <template #item.actions="{ item }">
         <v-menu offset-y>
@@ -106,11 +101,13 @@ import { mapState } from 'vuex';
 import moment from 'moment';
 import DownloadMixin from '@/mixins/download-stager';
 import CopyMixin from '@/mixins/copy-stager';
+import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
 import * as downloadApi from '@/api/download-api';
 
 export default {
   name: 'StagersTable',
   components: {
+    DateTimeDisplay,
   },
   mixins: [DownloadMixin, CopyMixin],
   props: {
