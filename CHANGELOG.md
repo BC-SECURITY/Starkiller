@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1] - 2023-08-02
+
 -   Add a DateTimeDisplay component
 
 ## [2.5.0] - 2023-07-25
@@ -277,7 +279,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.1...HEAD
+
+[2.5.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.0...v2.5.1
 
 [2.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.3...v2.5.0
 
