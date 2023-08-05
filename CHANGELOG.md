@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-  Update the github issue templates to use forms (@Vinnybod)
+
 ## [2.4.3] - 2023-07-21
 
 -   Fix issue with agent and plugin tasks table not loading
