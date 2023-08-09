@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.2] - 2023-08-09
+
 -   Update the github issue templates to use forms
 -   Fix listener name update showing up on the list page
 -   Fix stager deletion from the ellipses menu
@@ -284,7 +286,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.2...HEAD
+
+[2.5.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.1...v2.5.2
 
 [2.5.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.0...v2.5.1
 
