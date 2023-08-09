@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--  Update the github issue templates to use forms (@Vinnybod)
-- 
+-   Update the github issue templates to use forms
+-   Fix listener name update showing up on the list page
+-   Fix stager deletion from the ellipses menu
+-   Use a listener dropdown for RedirectListener on hop listeners
+
 ## [2.5.1] - 2023-08-02
 
 -   Add a DateTimeDisplay component

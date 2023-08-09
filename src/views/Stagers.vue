@@ -21,6 +21,7 @@
           ref="stagersTable"
           v-model="selected"
           :only-my-stagers="filterOnlyMyStagersCheckbox"
+          @delete-stager="deleteStager"
         />
       </template>
     </advanced-table>

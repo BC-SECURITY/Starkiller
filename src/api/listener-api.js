@@ -46,6 +46,7 @@ export function createListener(template, options) {
  * @param {Object} options the options needed for creating a listener.
  */
 export function updateListener(listener) {
+  listener.name = listener.options.Name;
   return axios.put(`/listeners/${listener.id}`, listener)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
