@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.3] - 2023-08-24
+
 -   Fix elevated process icon on agent page
 -   Fix input and output downloads not working 
 
@@ -289,7 +291,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.3...HEAD
+
+[2.5.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.2...v2.5.3
 
 [2.5.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.1...v2.5.2
 
