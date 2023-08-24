@@ -72,7 +72,7 @@
         >
           <v-breadcrumbs :items="breads" />
           <v-tooltip
-            v-if="agent.high_integrity === 1"
+            v-if="agent.high_integrity"
             bottom
           >
             <template #activator="{ on }">

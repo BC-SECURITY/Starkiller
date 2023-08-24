@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Fix elevated process icon on agent page
+-   Fix input and output downloads not working 
+
 ## [2.5.2] - 2023-08-09
 
 -   Update the github issue templates to use forms

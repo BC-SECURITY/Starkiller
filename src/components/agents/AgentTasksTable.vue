@@ -400,9 +400,9 @@ export default {
     },
     async downloadInput(task) {
       if (task.input) {
-        if (!this.expandedTasks[task.uniqueId]) {
+        if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await agentTaskApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.uniqueId] = data;
+          this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
         }
 
         this.downloadText(this.expandedTasks[task.uniqueId].full_input, `${task.uniqueId}-input.txt`);
@@ -415,9 +415,9 @@ export default {
     },
     async copyInput(task) {
       if (task.input) {
-        if (!this.expandedTasks[task.uniqueId]) {
+        if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await agentTaskApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.uniqueId] = data;
+          this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
         }
 
         try {
@@ -447,9 +447,10 @@ export default {
       return null;
     },
     async getImagesForTask(task) {
-      if (!this.expandedTasks[task.uniqueId]) {
+      if (!this.expandedTasks[task.uniqueId].imagesRetrieved) {
         const data = await agentTaskApi.getTask(task.agent_id, task.id);
         this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
+        this.expandedTasks[task.uniqueId].imagesRetrieved = true;
       }
 
       for (let i = 0; i < task.downloads.length; i++) {
