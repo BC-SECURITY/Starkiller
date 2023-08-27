@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import * as agentApi from '@/api/agent-api';
+import * as agentTaskApi from '@/api/agent-task-api';
 
 export default {
   props: {
@@ -125,11 +125,11 @@ export default {
       this.loading = true;
 
       if (this.form.command.trim() === 'sysinfo') {
-        await agentApi.sysinfo(this.agent.session_id);
+        await agentTaskApi.sysinfo(this.agent.session_id);
       } else if (this.form.scriptCommand) {
-        await agentApi.scriptCommand(this.agent.session_id, this.form.command);
+        await agentTaskApi.scriptCommand(this.agent.session_id, this.form.command);
       } else {
-        await agentApi.shell(this.agent.session_id, this.form.command, this.form.literal);
+        await agentTaskApi.shell(this.agent.session_id, this.form.command, this.form.literal);
       }
 
       this.form.command = '';

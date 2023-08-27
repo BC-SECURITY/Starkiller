@@ -7,7 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--  Update the github issue templates to use forms (@Vinnybod)
+## [2.5.3] - 2023-08-24
+
+-   Fix elevated process icon on agent page
+-   Fix input and output downloads not working 
+
+## [2.5.2] - 2023-08-09
+
+-   Update the github issue templates to use forms
+-   Fix listener name update showing up on the list page
+-   Fix stager deletion from the ellipses menu
+-   Use a listener dropdown for RedirectListener on hop listeners
+
+## [2.5.1] - 2023-08-02
+
+-   Add a DateTimeDisplay component
+
+## [2.5.0] - 2023-07-25
+
+-   Downgrade sass to fix vuetify errors
+-   Fix credential dropdown on DynamicFormInput
+-   Refactor advanced filtering expansion panels to common components
+-   Refactor a bunch of the list pages so they use a shared component and adds the advanced filtering
+-   Refactor agent task api endpoints to another file
+-   Modules page has a lot of filtering options now
+-   Tag Management
+    -   Add a reusable Tag Manager component
+    -   Works on Listeners, Agents, Agent Tasks, Plugin Tasks, Credentials, and Downloads
+-   Display Empire version on the sidenav
 
 ## [2.4.3] - 2023-07-21
 
@@ -264,7 +291,15 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.3...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.3...HEAD
+
+[2.5.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.2...v2.5.3
+
+[2.5.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.1...v2.5.2
+
+[2.5.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.0...v2.5.1
+
+[2.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.3...v2.5.0
 
 [2.4.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.4.2...v2.4.3
 

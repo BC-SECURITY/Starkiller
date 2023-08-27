@@ -184,7 +184,7 @@ export default {
   },
   methods: {
     suggestedValuesForField(field) {
-      if (field.name === 'Listener') {
+      if (['Listener', 'RedirectListener'].includes(field.name)) {
         return this.listeners;
       } if (field.name === 'Bypasses') {
         return this.bypasses;

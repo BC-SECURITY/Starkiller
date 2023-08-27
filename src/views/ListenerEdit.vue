@@ -66,6 +66,13 @@
     <div class="headers">
       <h3>{{ mode }} Listener</h3>
     </div>
+    <tag-viewer
+      v-if="!isNew"
+      :tags="listener.tags"
+      @update-tag="updateTag"
+      @delete-tag="deleteTag"
+      @new-tag="addTag"
+    />
     <error-state-alert
       v-if="errorState"
       :resource-id="id"
@@ -121,10 +128,12 @@ import GeneralForm from '@/components/GeneralForm.vue';
 import InfoViewer from '@/components/InfoViewer.vue';
 import EditPageTop from '@/components/EditPageTop.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
+import TagViewer from '@/components/TagViewer.vue';
 
 export default {
   name: 'ListenerEdit',
   components: {
+    TagViewer,
     InfoViewer,
     GeneralForm,
     ErrorStateAlert,
@@ -251,6 +260,29 @@ export default {
     }
   },
   methods: {
+    deleteTag(tag) {
+      listenerApi.deleteTag(this.listener.id, tag.id)
+        .then(() => {
+          this.listener.tags = this.listener.tags.filter((t) => t.id !== tag.id);
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    updateTag(tag) {
+      listenerApi.updateTag(this.listener.id, tag)
+        .then((t) => {
+          const index = this.listener.tags.findIndex((x) => x.id === t.id);
+          this.listener.tags.splice(index, 1, t);
+          this.$snack.success('Tag updated');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    addTag(tag) {
+      listenerApi.addTag(this.listener.id, tag)
+        .then((t) => {
+          this.listener.tags.push(t);
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
     async submit() {
       if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
@@ -312,6 +344,9 @@ export default {
       listenerApi.getListener(id)
         .then((data) => {
           this.listener = data;
+          this.listener.tags.forEach((tag) => {
+            tag.color = tag.color || '#0E0CDA';
+          });
           this.selectedTemplate = data.template;
         })
         .catch(() => {

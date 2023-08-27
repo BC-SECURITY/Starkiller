@@ -14,7 +14,7 @@ function getFilename(contentDisposition) {
 }
 
 export function getDownloads({
-  page, limit, sortBy = 'updated_at', sortOrder = 'desc', query, sources,
+  page, limit, sortBy = 'updated_at', sortOrder = 'desc', query, sources, tags,
 }) {
   return axios.get('/downloads', {
     params: {
@@ -22,6 +22,7 @@ export function getDownloads({
       limit,
       query,
       sources,
+      tags,
       order_by: sortBy,
       order_direction: sortOrder,
     },
@@ -72,5 +73,22 @@ export function getDownloadAsUrl(id) {
 export function getDownloadAsText(id) {
   return axios.get(`/downloads/${id}/download`, { responseType: 'text' })
     .then((response) => response.data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function deleteTag(downloadId, tag) {
+  return axios.delete(`downloads/${downloadId}/tags/${tag}`)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function updateTag(downloadId, tag) {
+  return axios.put(`downloads/${downloadId}/tags/${tag.id}`, tag)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function addTag(downloadId, tag) {
+  return axios.post(`downloads/${downloadId}/tags`, tag)
+    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

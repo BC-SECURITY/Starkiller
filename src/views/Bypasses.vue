@@ -32,12 +32,7 @@
         </router-link>
       </template>
       <template #item.updated_at="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <span v-on="on">{{ moment(item.updated_at).fromNow() }}</span>
-          </template>
-          <span>{{ moment(item.updated_at).format('MMM D YYYY, h:mm:ss a') }}</span>
-        </v-tooltip>
+        <date-time-display :timestamp="item.updated_at" />
       </template>
       <template #item.actions="{ item }">
         <v-menu offset-y>
@@ -98,12 +93,14 @@
 
 <script>
 import moment from 'moment';
-import ListPageTop from '@/components/ListPageTop.vue';
 import { mapState } from 'vuex';
+import ListPageTop from '@/components/ListPageTop.vue';
+import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
 
 export default {
   name: 'Bypasses',
   components: {
+    DateTimeDisplay,
     ListPageTop,
   },
   data() {

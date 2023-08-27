@@ -35,17 +35,17 @@
       :label="name"
       outlined
       dense
-      item-value="ID"
-      item-text="ID"
+      item-value="id"
+      item-text="id"
     >
       <template
         #item="data"
       >
         <v-list-item-content>
           <v-list-item-title
-            v-text="truncate(`${data.item.username} ${data.item.domain} ${data.item.password}`)"
+            v-text="truncate(`${data.item.username}, ${data.item.domain}, ${data.item.password}`)"
           />
-          <v-list-item-subtitle v-text="truncate(`${data.item.ID}, ${data.item.notes}`)" />
+          <v-list-item-subtitle v-text="truncate(`id: ${data.item.id}, notes: ${data.item.notes}`)" />
         </v-list-item-content>
       </template>
     </v-autocomplete>

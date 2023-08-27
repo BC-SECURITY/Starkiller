@@ -46,6 +46,7 @@ export function createListener(template, options) {
  * @param {Object} options the options needed for creating a listener.
  */
 export function updateListener(listener) {
+  listener.name = listener.options.Name;
   return axios.put(`/listeners/${listener.id}`, listener)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
@@ -66,5 +67,22 @@ export function getListenerTemplates() {
  */
 export function killListener(name) {
   return axios.delete(`/listeners/${name}`)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function deleteTag(listenerId, tag) {
+  return axios.delete(`listeners/${listenerId}/tags/${tag}`)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function updateTag(listenerId, tag) {
+  return axios.put(`listeners/${listenerId}/tags/${tag.id}`, tag)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function addTag(listenerId, tag) {
+  return axios.post(`listeners/${listenerId}/tags`, tag)
+    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

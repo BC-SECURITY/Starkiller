@@ -5,10 +5,14 @@ export default {
   state: {
     stagers: [],
     templates: [],
+    status: 'success',
   },
   mutations: {
     setStagers(state, stagers) {
       state.stagers = stagers;
+    },
+    setStatus(state, status) {
+      state.status = status;
     },
     pushStager(state, stager) {
       state.stagers.push(stager);
@@ -25,8 +29,10 @@ export default {
   },
   actions: {
     async getStagers(context) {
+      context.commit('setStatus', 'loading');
       const stagers = await stagerApi.getStagers();
-      context.commit('setStagers', stagers);
+      await context.commit('setStagers', stagers);
+      context.commit('setStatus', 'success');
     },
     async getStagerTemplates(context) {
       const templates = await stagerApi.getStagerTemplates();

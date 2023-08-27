@@ -13,6 +13,13 @@
       @delete="deleteCredential"
     />
     <h3>{{ mode }} Credential</h3>
+    <tag-viewer
+      v-if="!isNew"
+      :tags="credential.tags"
+      @update-tag="updateTag"
+      @delete-tag="deleteTag"
+      @new-tag="addTag"
+    />
     <error-state-alert
       v-if="errorState"
       :resource-id="id"
@@ -34,14 +41,16 @@
 </template>
 
 <script>
-import * as credentialApi from '@/api/credential-api';
 import GeneralForm from '@/components/GeneralForm.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
 import EditPageTop from '@/components/EditPageTop.vue';
+import TagViewer from '@/components/TagViewer.vue';
+import * as credentialApi from '@/api/credential-api';
 
 export default {
   name: 'CredentialEdit',
   components: {
+    TagViewer,
     GeneralForm,
     ErrorStateAlert,
     EditPageTop,
@@ -129,6 +138,29 @@ export default {
     }
   },
   methods: {
+    deleteTag(tag) {
+      credentialApi.deleteTag(this.credential.id, tag.id)
+        .then(() => {
+          this.credential.tags = this.credential.tags.filter((t) => t !== tag);
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    updateTag(tag) {
+      credentialApi.updateTag(this.credential.id, tag)
+        .then((t) => {
+          const index = this.credential.tags.findIndex((x) => x.id === t.id);
+          this.credential.tags.splice(index, 1, t);
+          this.$snack.success('Tag updated');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    addTag(tag) {
+      credentialApi.addTag(this.credential.id, tag)
+        .then((t) => {
+          this.credential.tags.push(t);
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
     submit() {
       if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
         return;
