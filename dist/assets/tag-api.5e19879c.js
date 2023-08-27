@@ -1,0 +1,1 @@
+import{ae as n,af as d,ag as c}from"./index.154e9cc6.js";function p({page:r,limit:e,sortBy:t="updated_at",sortOrder:s="desc",query:i,sources:o}){return n.get("/tags",{params:{page:r,limit:e,query:i,sources:o,order_by:t,order_direction:s},paramsSerializer:a=>d.stringify(a,{arrayFormat:"repeat",skipNulls:!0})}).then(a=>a.data).catch(a=>Promise.reject(c(a)))}export{p as g};
