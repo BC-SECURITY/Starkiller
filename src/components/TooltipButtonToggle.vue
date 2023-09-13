@@ -1,14 +1,8 @@
 <template>
   <v-tooltip bottom>
     <template #activator="{ on }">
-      <v-btn-toggle
-        v-model="internalValue"
-        class="mr-5"
-      >
-        <v-btn
-          :value="true"
-          v-on="on"
-        >
+      <v-btn-toggle v-model="internalValue" class="mr-5">
+        <v-btn :value="true" v-on="on">
           <v-icon left>
             {{ icon }}
           </v-icon>
@@ -22,7 +16,7 @@
 
 <script>
 export default {
-  name: 'TooltipButtonToggle',
+  name: "TooltipButtonToggle",
   props: {
     value: {
       type: Boolean,
@@ -34,7 +28,7 @@ export default {
     },
     buttonText: {
       type: String,
-      default: '',
+      default: "",
     },
     text: {
       type: String,
@@ -55,13 +49,11 @@ export default {
     },
     internalValue: {
       handler(newValue) {
-        this.$emit('input', newValue);
+        this.$emit("input", newValue);
       },
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

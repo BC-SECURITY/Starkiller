@@ -6,37 +6,18 @@
     @keydown.esc="cancel"
   >
     <v-card>
-      <v-toolbar
-        dark
-        :color="options.color"
-        dense
-        flat
-      >
+      <v-toolbar dark :color="options.color" dense flat>
         <v-toolbar-title class="white--text">
           {{ title }}
         </v-toolbar-title>
       </v-toolbar>
-      <v-card-text
-        v-show="!!message"
-        class="pa-4"
-      >
+      <v-card-text v-show="!!message" class="pa-4">
         {{ message }}
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer />
-        <v-btn
-          color="grey"
-          text
-          @click.native="cancel"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          color="primary"
-          @click.native="agree"
-        >
-          Yes
-        </v-btn>
+        <v-btn color="grey" text @click.native="cancel"> Cancel </v-btn>
+        <v-btn color="primary" @click.native="agree"> Yes </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -80,7 +61,7 @@ export default {
     message: null,
     title: null,
     options: {
-      color: 'primary',
+      color: "primary",
       width: 290,
       zIndex: 200,
     },

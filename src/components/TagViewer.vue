@@ -1,5 +1,5 @@
 <template>
-  <div style="display: flex; flex-direction: row-reverse;">
+  <div style="display: flex; flex-direction: row-reverse">
     <div>
       <tag-chip
         v-for="tag in tags"
@@ -21,10 +21,10 @@
 </template>
 
 <script>
-import TagChip from '@/components/TagChip.vue';
+import TagChip from "@/components/TagChip.vue";
 
 export default {
-  name: 'TagViewer',
+  name: "TagViewer",
   components: {
     TagChip,
   },
@@ -41,18 +41,16 @@ export default {
   },
   methods: {
     deleteTag(tag) {
-      this.$emit('delete-tag', tag);
+      this.$emit("delete-tag", tag);
     },
     updateTag(tag) {
-      this.$emit('update-tag', tag);
+      this.$emit("update-tag", tag);
     },
     newTag(tag) {
-      this.$emit('new-tag', tag);
+      this.$emit("new-tag", tag);
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

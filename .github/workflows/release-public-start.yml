@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       sponsorTag:
-        description: 'The tag to merge into master and dev from the sponsors repo. Example: v4.5.2-private'
+        description: "The tag to merge into master and dev from the sponsors repo. Example: v4.5.2-private"
         type: string
         required: true
 
@@ -15,7 +15,7 @@ jobs:
       - name: Check out sponsor repo
         uses: actions/checkout@v3
         with:
-          repository: 'BC-Security/Starkiller-Sponsors'
+          repository: "BC-Security/Starkiller-Sponsors"
           ref: ${{ inputs.sponsorTag }}
           token: ${{ secrets.RELEASE_TOKEN }}
           fetch-depth: 0
@@ -37,7 +37,7 @@ jobs:
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Get release branch name
         run: |
-            echo "RELEASE_BRANCH=release/$APP_VERSION" >> $GITHUB_ENV
+          echo "RELEASE_BRANCH=release/$APP_VERSION" >> $GITHUB_ENV
       - name: Create release branch
         run: |
           git checkout -b ${{ env.RELEASE_BRANCH }}

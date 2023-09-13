@@ -1,9 +1,6 @@
 <template>
   <portal to="app-bar">
-    <div
-      class="v-toolbar__content"
-      style="width:100%"
-    >
+    <div class="v-toolbar__content" style="width: 100%">
       <v-breadcrumbs :items="breads" />
       <v-spacer />
       <slot name="extra-stuff" />
@@ -16,11 +13,7 @@
           @click="$emit('delete')"
         >
           {{ deleteText }}
-          <v-icon
-            right
-          >
-            fa-trash-alt
-          </v-icon>
+          <v-icon right> fa-trash-alt </v-icon>
         </v-btn>
         <v-btn
           v-if="showRefresh"
@@ -31,11 +24,7 @@
           @click="$emit('refresh')"
         >
           {{ refreshText }}
-          <v-icon
-            right
-          >
-            fa-redo {{ refreshLoading ? 'fa-spin' : '' }}
-          </v-icon>
+          <v-icon right> fa-redo {{ refreshLoading ? "fa-spin" : "" }} </v-icon>
         </v-btn>
         <v-btn
           v-if="showCreate"
@@ -45,11 +34,7 @@
           @click="$emit('create')"
         >
           {{ createText }}
-          <v-icon
-            right
-          >
-            fa-plus-square
-          </v-icon>
+          <v-icon right> fa-plus-square </v-icon>
         </v-btn>
       </div>
     </div>
@@ -58,19 +43,19 @@
 
 <script>
 export default {
-  name: 'ListPageTop',
+  name: "ListPageTop",
   props: {
     deleteText: {
       type: String,
-      default: 'Delete',
+      default: "Delete",
     },
     refreshText: {
       type: String,
-      default: 'Refresh',
+      default: "Refresh",
     },
     createText: {
       type: String,
-      default: 'Create',
+      default: "Create",
     },
     showDelete: {
       type: Boolean,
@@ -96,6 +81,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

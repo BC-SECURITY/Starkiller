@@ -1,10 +1,11 @@
-import { axiosInstance as axios, handleError } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from "@/api/axios-instance";
 
 /**
  * Returns a single listener.
  */
 export function getListener(id) {
-  return axios.get(`/listeners/${id}`)
+  return axios
+    .get(`/listeners/${id}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -13,7 +14,8 @@ export function getListener(id) {
  * Returns a full list of listeners.
  */
 export function getListeners() {
-  return axios.get('/listeners')
+  return axios
+    .get("/listeners")
     .then(({ data }) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -23,7 +25,8 @@ export function getListeners() {
  * @param {string} type the type of listener
  */
 export function getListenerTemplate(templateId) {
-  return axios.get(`/listener-templates/${templateId}`)
+  return axios
+    .get(`/listener-templates/${templateId}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -33,7 +36,8 @@ export function getListenerTemplate(templateId) {
  * @param {Object} options the options needed for creating a listener.
  */
 export function createListener(template, options) {
-  return axios.post('/listeners', { name: options.Name, template, options })
+  return axios
+    .post("/listeners", { name: options.Name, template, options })
     .then(({ data }) => data)
     .catch((error) => {
       console.log(error);
@@ -47,7 +51,8 @@ export function createListener(template, options) {
  */
 export function updateListener(listener) {
   listener.name = listener.options.Name;
-  return axios.put(`/listeners/${listener.id}`, listener)
+  return axios
+    .put(`/listeners/${listener.id}`, listener)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -56,7 +61,8 @@ export function updateListener(listener) {
  * Get the listener templates as an array of strings.
  */
 export function getListenerTemplates() {
-  return axios.get('/listener-templates')
+  return axios
+    .get("/listener-templates")
     .then(({ data }) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -66,23 +72,27 @@ export function getListenerTemplates() {
  * @param {string} name name of the listener to kill
  */
 export function killListener(name) {
-  return axios.delete(`/listeners/${name}`)
+  return axios
+    .delete(`/listeners/${name}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteTag(listenerId, tag) {
-  return axios.delete(`listeners/${listenerId}/tags/${tag}`)
+  return axios
+    .delete(`listeners/${listenerId}/tags/${tag}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateTag(listenerId, tag) {
-  return axios.put(`listeners/${listenerId}/tags/${tag.id}`, tag)
+  return axios
+    .put(`listeners/${listenerId}/tags/${tag.id}`, tag)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function addTag(listenerId, tag) {
-  return axios.post(`listeners/${listenerId}/tags`, tag)
+  return axios
+    .post(`listeners/${listenerId}/tags`, tag)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

@@ -22,20 +22,9 @@
           class="mt-6 mr-2"
           @change="toggleEnabled"
         />
-        <v-menu
-          v-if="!isNew && initialLoad"
-          offset-y
-          open-on-hover
-        >
+        <v-menu v-if="!isNew && initialLoad" offset-y open-on-hover>
           <template #activator="{ on, attrs }">
-            <v-btn
-              class="mr-5"
-              text
-              icon
-              small
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn class="mr-5" text icon small v-bind="attrs" v-on="on">
               <v-icon>fa-suitcase-rolling</v-icon>
             </v-btn>
           </template>
@@ -44,20 +33,18 @@
               v-for="(item, index) in commonStagers"
               :key="index"
               link
-              :to="{ name: 'stagerNew', query: { template: item, listener: listener.name } }"
+              :to="{
+                name: 'stagerNew',
+                query: { template: item, listener: listener.name },
+              }"
             >
               <v-list-item-title>
                 {{ item }}
               </v-list-item-title>
             </v-list-item>
             <v-divider />
-            <v-list-item
-              link
-              :to="{ name: 'stagerNew' }"
-            >
-              <v-list-item-title>
-                Other
-              </v-list-item-title>
+            <v-list-item link :to="{ name: 'stagerNew' }">
+              <v-list-item-title> Other </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -78,14 +65,8 @@
       :resource-id="id"
       resource-type="listener"
     />
-    <v-card
-      v-else
-      style="padding: 10px"
-    >
-      <info-viewer
-        class="info-viewer"
-        :info="listenerInfo"
-      />
+    <v-card v-else style="padding: 10px">
+      <info-viewer class="info-viewer" :info="listenerInfo" />
       <v-autocomplete
         v-model="selectedTemplate"
         :items="listenerTemplateIds"
@@ -95,16 +76,9 @@
         label="Type"
         :readonly="!canEdit"
       />
-      <v-alert
-        v-if="validationMessage"
-        prominent
-        type="warning"
-      >
+      <v-alert v-if="validationMessage" prominent type="warning">
         <v-row align="center">
-          <v-col
-            class="grow"
-            style="word-wrap: word-break; width: 500px"
-          >
+          <v-col class="grow" style="word-wrap: word-break; width: 500px">
             {{ validationMessage }}
           </v-col>
         </v-row>
@@ -122,16 +96,16 @@
 </template>
 
 <script>
-import * as listenerApi from '@/api/listener-api';
-import { mapGetters } from 'vuex';
-import GeneralForm from '@/components/GeneralForm.vue';
-import InfoViewer from '@/components/InfoViewer.vue';
-import EditPageTop from '@/components/EditPageTop.vue';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import TagViewer from '@/components/TagViewer.vue';
+import * as listenerApi from "@/api/listener-api";
+import { mapGetters } from "vuex";
+import GeneralForm from "@/components/GeneralForm.vue";
+import InfoViewer from "@/components/InfoViewer.vue";
+import EditPageTop from "@/components/EditPageTop.vue";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import TagViewer from "@/components/TagViewer.vue";
 
 export default {
-  name: 'ListenerEdit',
+  name: "ListenerEdit",
   components: {
     TagViewer,
     InfoViewer,
@@ -143,37 +117,37 @@ export default {
     return {
       listener: { options: {} },
       listenerTemplate: { options: {} },
-      selectedTemplate: '',
+      selectedTemplate: "",
       form: {},
       reset: true,
       loading: false,
-      formPriorities: ['Name', 'Host', 'Port'],
+      formPriorities: ["Name", "Host", "Port"],
       errorState: false,
       validationMessage: null,
       initialLoad: false,
       commonStagers: [
-        'multi_launcher',
-        'multi_macro',
-        'windows_csharp_exe',
-        'windows_dll',
-        'windows_shellcode',
+        "multi_launcher",
+        "multi_macro",
+        "windows_csharp_exe",
+        "windows_dll",
+        "windows_shellcode",
       ],
     };
   },
   computed: {
     ...mapGetters({
-      listenerTemplateIds: 'listener/templateIds',
+      listenerTemplateIds: "listener/templateIds",
     }),
     isNew() {
-      return this.$route.name === 'listenerNew';
+      return this.$route.name === "listenerNew";
     },
     isCopy() {
       return this.$route.params.copy === true;
     },
     mode() {
-      if (this.isCopy) return 'Copy';
-      if (this.isNew) return 'New';
-      return 'View';
+      if (this.isCopy) return "Copy";
+      if (this.isNew) return "New";
+      return "View";
     },
     canEdit() {
       return this.isNew || !this.listener.enabled;
@@ -182,13 +156,18 @@ export default {
       return this.isCopy ? 0 : this.$route.params.id;
     },
     copyLink() {
-      if (this.id > 0) return { name: 'listenerNew', params: { copy: true, id: this.id } };
+      if (this.id > 0)
+        return { name: "listenerNew", params: { copy: true, id: this.id } };
       return {};
     },
     listenerInfo() {
       if (!this.listenerTemplate) return {};
       const a = this.listenerTemplate;
-      return { authors: a.authors, description: a.description, comments: a.comments };
+      return {
+        authors: a.authors,
+        description: a.description,
+        comments: a.comments,
+      };
     },
     listenerOptions() {
       if (!this.isNew || this.isCopy) {
@@ -210,29 +189,30 @@ export default {
     breads() {
       return [
         {
-          text: 'Listeners',
+          text: "Listeners",
           disabled: false,
-          to: '/listeners',
+          to: "/listeners",
           exact: true,
         },
         {
           text: this.breadcrumbName,
           disabled: true,
-          to: '/listeners-edit',
+          to: "/listeners-edit",
         },
       ];
     },
     breadcrumbName() {
-      if (this.isCopy) return 'New';
+      if (this.isCopy) return "New";
       if (this.listener.name) return this.listener.name;
       if (this.id) return this.id;
-      return 'New';
+      return "New";
     },
   },
   watch: {
     selectedTemplate: {
       async handler(val) {
-        const a = await listenerApi.getListenerTemplate(val)
+        const a = await listenerApi
+          .getListenerTemplate(val)
           .catch((err) => this.$snack.error(`Error: ${err}`));
         if (a) {
           this.reset = false;
@@ -251,7 +231,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch('listener/getListenerTemplates');
+    this.$store.dispatch("listener/getListenerTemplates");
 
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
@@ -261,23 +241,28 @@ export default {
   },
   methods: {
     deleteTag(tag) {
-      listenerApi.deleteTag(this.listener.id, tag.id)
+      listenerApi
+        .deleteTag(this.listener.id, tag.id)
         .then(() => {
-          this.listener.tags = this.listener.tags.filter((t) => t.id !== tag.id);
+          this.listener.tags = this.listener.tags.filter(
+            (t) => t.id !== tag.id,
+          );
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     updateTag(tag) {
-      listenerApi.updateTag(this.listener.id, tag)
+      listenerApi
+        .updateTag(this.listener.id, tag)
         .then((t) => {
           const index = this.listener.tags.findIndex((x) => x.id === t.id);
           this.listener.tags.splice(index, 1, t);
-          this.$snack.success('Tag updated');
+          this.$snack.success("Tag updated");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     addTag(tag) {
-      listenerApi.addTag(this.listener.id, tag)
+      listenerApi
+        .addTag(this.listener.id, tag)
         .then((t) => {
           this.listener.tags.push(t);
         })
@@ -290,9 +275,10 @@ export default {
 
       this.loading = true;
       if (this.id > 0) {
-        listenerApi.updateListener({ ...this.listener, options: this.form })
+        listenerApi
+          .updateListener({ ...this.listener, options: this.form })
           .then(() => {
-            this.$snack.success('Listener updated');
+            this.$snack.success("Listener updated");
             this.loading = false;
           })
           .catch((err) => {
@@ -306,7 +292,7 @@ export default {
             // const field = detail.loc[1]
             // this.errors[field] = detail.msg
             // });
-            if (err.startsWith('[*]')) {
+            if (err.startsWith("[*]")) {
               this.validationMessage = err;
             } else {
               this.$snack.error(`Error: ${err}`);
@@ -314,14 +300,15 @@ export default {
             this.loading = false;
           });
       } else {
-        listenerApi.createListener(this.selectedTemplate, this.form)
+        listenerApi
+          .createListener(this.selectedTemplate, this.form)
           .then(({ id }) => {
-            this.$snack.success('Listener created');
+            this.$snack.success("Listener created");
             this.loading = false;
-            this.$router.push({ name: 'listenerEdit', params: { id } });
+            this.$router.push({ name: "listenerEdit", params: { id } });
           })
           .catch((err) => {
-            if (err.startsWith('[*]')) {
+            if (err.startsWith("[*]")) {
               this.validationMessage = err;
             } else {
               this.$snack.error(`Error: ${err}`);
@@ -331,21 +318,28 @@ export default {
       }
     },
     async kill() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to kill listener ${this.form.Name}?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to kill listener ${this.form.Name}?`,
+          { color: "red" },
+        )
+      ) {
         try {
-          await this.$store.dispatch('listener/killListener', this.id);
-          this.$router.push({ name: 'listeners' });
+          await this.$store.dispatch("listener/killListener", this.id);
+          this.$router.push({ name: "listeners" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);
         }
       }
     },
     getListener(id) {
-      listenerApi.getListener(id)
+      listenerApi
+        .getListener(id)
         .then((data) => {
           this.listener = data;
           this.listener.tags.forEach((tag) => {
-            tag.color = tag.color || '#0E0CDA';
+            tag.color = tag.color || "#0E0CDA";
           });
           this.selectedTemplate = data.template;
         })
@@ -356,13 +350,23 @@ export default {
     async toggleEnabled(val) {
       this.listener.enabled = val;
 
-      if (val === true && !await this.$root.$confirm('', 'Re-enabling the listener will also save any unsaved option changes.', { color: 'yellow' })) {
+      if (
+        val === true &&
+        !(await this.$root.$confirm(
+          "",
+          "Re-enabling the listener will also save any unsaved option changes.",
+          { color: "yellow" },
+        ))
+      ) {
         this.listener.enabled = !val;
         return;
       }
 
       try {
-        const response = await listenerApi.updateListener({ ...this.listener, options: this.form });
+        const response = await listenerApi.updateListener({
+          ...this.listener,
+          options: this.form,
+        });
         this.listener = response;
       } catch (err) {
         this.listener.enabled = !val;
@@ -373,5 +377,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

@@ -1,19 +1,11 @@
 <template>
-  <v-dialog
-    ref="scriptImportDialog"
-    v-model="show"
-    max-width="750px"
-  >
+  <v-dialog ref="scriptImportDialog" v-model="show" max-width="750px">
     <v-card>
       <v-card-title>
         <span class="headline">Import Script</span>
       </v-card-title>
       <v-card-text>
-        <v-form
-          ref="form"
-          on-submit="return false;"
-          @submit.prevent
-        >
+        <v-form ref="form" on-submit="return false;" @submit.prevent>
           <v-container>
             <v-row>
               <v-col cols="12">
@@ -33,19 +25,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          text
-          @click.stop="show = false"
-        >
+        <v-btn color="blue darken-1" text @click.stop="show = false">
           Close
         </v-btn>
-        <v-btn
-          color="blue darken-1"
-          text
-          :loading="loading"
-          @click="submit"
-        >
+        <v-btn color="blue darken-1" text :loading="loading" @click="submit">
           Import
         </v-btn>
       </v-card-actions>
@@ -69,8 +52,10 @@ export default {
       file: null,
       rules: {
         fileInput: [
-          (v) => !!v || 'File required',
-          (v) => (!!v && v.size < MAX_BYTES) || `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
+          (v) => !!v || "File required",
+          (v) =>
+            (!!v && v.size < MAX_BYTES) ||
+            `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
         ],
       },
     };
@@ -81,7 +66,7 @@ export default {
         return this.value;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit("input", value);
       },
     },
   },
@@ -94,8 +79,10 @@ export default {
   },
   methods: {
     async submit() {
-      if (!this.$refs.form.validate()) { return; }
-      this.$emit('submit', { file: this.file });
+      if (!this.$refs.form.validate()) {
+        return;
+      }
+      this.$emit("submit", { file: this.file });
     },
   },
 };

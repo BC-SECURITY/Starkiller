@@ -3,15 +3,15 @@
     <template #activator="{ on }">
       <span v-on="on">{{ moment(timestamp).fromNow() }}</span>
     </template>
-    <span>{{ moment(timestamp).format('MMM D YYYY, h:mm:ss a') }}</span>
+    <span>{{ moment(timestamp).format("MMM D YYYY, h:mm:ss a") }}</span>
   </v-tooltip>
 </template>
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 
 export default {
-  name: 'DateTimeDisplay',
+  name: "DateTimeDisplay",
   props: {
     timestamp: {
       type: String,
@@ -26,5 +26,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

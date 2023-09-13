@@ -1,10 +1,10 @@
-import * as userApi from '@/api/user-api';
+import * as userApi from "@/api/user-api";
 
 export default {
   namespaced: true,
   state: {
-    token: '',
-    url: '',
+    token: "",
+    url: "",
     users: [],
   },
   mutations: {
@@ -15,9 +15,8 @@ export default {
   actions: {
     async getUsers(context) {
       const response = await userApi.getUsers();
-      context.commit('setUsers', response);
+      context.commit("setUsers", response);
     },
   },
-  getters: {
-  },
+  getters: {},
 };

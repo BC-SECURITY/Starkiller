@@ -1,4 +1,4 @@
-import * as bypassApi from '@/api/bypass-api';
+import * as bypassApi from "@/api/bypass-api";
 
 export default {
   namespaced: true,
@@ -16,7 +16,7 @@ export default {
   actions: {
     async getBypasses(context) {
       const bypasses = await bypassApi.getBypasses();
-      context.commit('setBypasses', bypasses);
+      context.commit("setBypasses", bypasses);
     },
     async deleteBypass(context, id) {
       await bypassApi.deleteBypass(id);
@@ -24,7 +24,7 @@ export default {
       if (find) {
         const bypasses = context.state.bypasses.slice();
         bypasses.splice(find, 1);
-        context.commit('setBypasses', bypasses);
+        context.commit("setBypasses", bypasses);
       }
     },
   },

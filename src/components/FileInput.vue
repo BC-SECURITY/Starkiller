@@ -1,6 +1,10 @@
 <template>
   <div>
-    <file-upload-dialog v-model="showDialog" :rules="rules" @submit="fileUploaded" />
+    <file-upload-dialog
+      v-model="showDialog"
+      :rules="rules"
+      @submit="fileUploaded"
+    />
     <v-autocomplete
       v-model="internalValue"
       :items="fileItems"
@@ -24,9 +28,9 @@
 </template>
 
 <script>
-import * as downloadApi from '@/api/download-api';
-import FileUploadDialog from '@/components/FileUploadDialog.vue';
-import formatBytes from '@/utils/format-bytes';
+import * as downloadApi from "@/api/download-api";
+import FileUploadDialog from "@/components/FileUploadDialog.vue";
+import formatBytes from "@/utils/format-bytes";
 
 export default {
   components: { FileUploadDialog },
@@ -37,7 +41,7 @@ export default {
     },
     label: {
       type: String,
-      default: 'Server Files',
+      default: "Server Files",
     },
     rules: {
       type: Array,
@@ -67,9 +71,13 @@ export default {
   computed: {
     fileItems() {
       return this.entries.map((entry) => {
-        const description = entry.location.length > this.descriptionLimit
-          ? `(${formatBytes(entry.size)}) ${entry.location.slice(0, this.descriptionLimit)}...`
-          : `(${formatBytes(entry.size)}) ${entry.location}`;
+        const description =
+          entry.location.length > this.descriptionLimit
+            ? `(${formatBytes(entry.size)}) ${entry.location.slice(
+                0,
+                this.descriptionLimit,
+              )}...`
+            : `(${formatBytes(entry.size)}) ${entry.location}`;
 
         return { ...entry, description };
       });
@@ -77,7 +85,7 @@ export default {
   },
   watch: {
     internalValue(val) {
-      this.$emit('input', val);
+      this.$emit("input", val);
     },
     value(val) {
       this.internalValue = val;
@@ -102,13 +110,16 @@ export default {
       this.isLoading = true;
 
       // Lazily load input items
-      downloadApi.getDownloads({ page: 1, limit: -1 })
+      downloadApi
+        .getDownloads({ page: 1, limit: -1 })
         .then((res) => {
           const { records } = res;
 
           // Filter out files that are too large
           if (this.maximumFileSize > 0) {
-            this.entries = records.filter((entry) => entry.size <= this.maximumFileSize);
+            this.entries = records.filter(
+              (entry) => entry.size <= this.maximumFileSize,
+            );
           } else {
             this.entries = records;
           }
@@ -134,6 +145,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

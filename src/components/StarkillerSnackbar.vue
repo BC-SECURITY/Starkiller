@@ -12,11 +12,13 @@
     <template #action="{ attrs }">
       <v-btn
         v-if="notification.showButton"
-        :color="notification.color === 'error'
-          || notification.color === 'warning'
-          || notification.color === 'success'
-          ? 'white'
-          : 'orange darken-2'"
+        :color="
+          notification.color === 'error' ||
+          notification.color === 'warning' ||
+          notification.color === 'success'
+            ? 'white'
+            : 'orange darken-2'
+        "
         text
         v-bind="attrs"
         @click="notification.buttonAction"
@@ -38,7 +40,7 @@
 
 <script>
 export default {
-  name: 'StarkillerSnackbar',
+  name: "StarkillerSnackbar",
   data() {
     return {
       queue: [],
@@ -54,39 +56,41 @@ export default {
         }
       },
     },
-    'notification.enabled': {
+    "notification.enabled": {
       async handler(val) {
         if (this.queue.length > 0 && val === false) {
           // give transition time.
-          setTimeout(() => { this.notification = this.queue.shift(); }, 500);
+          setTimeout(() => {
+            this.notification = this.queue.shift();
+          }, 500);
         }
       },
     },
   },
   methods: {
     error(obj) {
-      if (typeof obj === 'string') {
-        this.q({ text: obj, color: 'error' });
+      if (typeof obj === "string") {
+        this.q({ text: obj, color: "error" });
       } else {
-        this.q({ ...obj, color: 'error' });
+        this.q({ ...obj, color: "error" });
       }
     },
     warn(obj) {
-      if (typeof obj === 'string') {
-        this.q({ text: obj, color: 'warning' });
+      if (typeof obj === "string") {
+        this.q({ text: obj, color: "warning" });
       } else {
-        this.q({ ...obj, color: 'warning' });
+        this.q({ ...obj, color: "warning" });
       }
     },
     success(obj) {
-      if (typeof obj === 'string') {
-        this.q({ text: obj, color: 'success' });
+      if (typeof obj === "string") {
+        this.q({ text: obj, color: "success" });
       } else {
-        this.q({ ...obj, color: 'success' });
+        this.q({ ...obj, color: "success" });
       }
     },
     info(obj) {
-      if (typeof obj === 'string') {
+      if (typeof obj === "string") {
         this.q({ text: obj });
       } else {
         this.q({ ...obj });
@@ -94,20 +98,24 @@ export default {
     },
     q({
       text,
-      buttonText = 'View',
+      buttonText = "View",
       showButton = false,
       buttonAction,
-      color = '',
+      color = "",
       dismissable = true,
     }) {
       this.queue.push({
-        text, buttonText, showButton, buttonAction, enabled: true, color, dismissable,
+        text,
+        buttonText,
+        showButton,
+        buttonAction,
+        enabled: true,
+        color,
+        dismissable,
       });
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

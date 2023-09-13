@@ -2,10 +2,12 @@
 <template>
   <div>
     <v-switch
-      v-if="suggestedValues.length > 0
-        && strict
-        && suggestedValues.includes('True')
-        && suggestedValues.includes('False')"
+      v-if="
+        suggestedValues.length > 0 &&
+        strict &&
+        suggestedValues.includes('True') &&
+        suggestedValues.includes('False')
+      "
       v-model="internalValue"
       false-value="False"
       true-value="True"
@@ -38,14 +40,18 @@
       item-value="id"
       item-text="id"
     >
-      <template
-        #item="data"
-      >
+      <template #item="data">
         <v-list-item-content>
           <v-list-item-title
-            v-text="truncate(`${data.item.username}, ${data.item.domain}, ${data.item.password}`)"
+            v-text="
+              truncate(
+                `${data.item.username}, ${data.item.domain}, ${data.item.password}`,
+              )
+            "
           />
-          <v-list-item-subtitle v-text="truncate(`id: ${data.item.id}, notes: ${data.item.notes}`)" />
+          <v-list-item-subtitle
+            v-text="truncate(`id: ${data.item.id}, notes: ${data.item.notes}`)"
+          />
         </v-list-item-content>
       </template>
     </v-autocomplete>
@@ -81,7 +87,7 @@
 </template>
 
 <script>
-import FileInput from '@/components/FileInput.vue';
+import FileInput from "@/components/FileInput.vue";
 
 export default {
   components: { FileInput },
@@ -108,7 +114,7 @@ export default {
     },
     type: {
       type: String,
-      default: 'text',
+      default: "text",
     },
   },
   data() {
@@ -118,7 +124,7 @@ export default {
   },
   watch: {
     internalValue(val) {
-      this.$emit('input', val);
+      this.$emit("input", val);
     },
   },
   methods: {
@@ -126,12 +132,10 @@ export default {
       if (msg) {
         return msg.length > 80 ? `${msg.substr(0, 80)}...` : msg;
       }
-      return '';
+      return "";
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

@@ -1,14 +1,14 @@
-import { setInstance } from '@/api/axios-instance';
-import axios from 'axios';
+import { setInstance } from "@/api/axios-instance";
+import axios from "axios";
 
 export default {
   namespaced: true,
   state: {
-    token: '',
-    url: '',
+    token: "",
+    url: "",
     user: {},
-    loginError: '',
-    empireVersion: '',
+    loginError: "",
+    empireVersion: "",
     darkMode: true,
     chatWidget: true,
     hideStaleAgents: false,
@@ -18,9 +18,7 @@ export default {
     connectionError: 0,
   },
   mutations: {
-    setApplicationState(state, {
-      token, url, socketUrl, user, version,
-    }) {
+    setApplicationState(state, { token, url, socketUrl, user, version }) {
       state.token = token;
       state.url = url;
       state.socketUrl = socketUrl;
@@ -35,18 +33,18 @@ export default {
       state.connectionError += 1;
     },
     setLogout(state) {
-      state.token = '';
-      state.url = '';
-      state.socketUrl = '';
+      state.token = "";
+      state.url = "";
+      state.socketUrl = "";
       state.user = {};
-      state.empireVersion = '';
+      state.empireVersion = "";
     },
     clearState(state) {
-      state.token = '';
-      state.url = '';
+      state.token = "";
+      state.url = "";
       state.user = {};
-      state.loginError = '';
-      state.empireVersion = '';
+      state.loginError = "";
+      state.empireVersion = "";
       state.darkMode = true;
       state.chatWidget = true;
       state.hideStaleAgents = false;
@@ -74,19 +72,21 @@ export default {
     },
   },
   actions: {
-    async login(context, {
-      url, socketUrl, username, password,
-    }) {
+    async login(context, { url, socketUrl, username, password }) {
       try {
-        context.commit('setLoginError', '');
+        context.commit("setLoginError", "");
         const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
+        formData.append("username", username);
+        formData.append("password", password);
         const token = await axios.post(`${url}/token`, formData);
 
-        const user = await axios.get(`${url}/api/v2/users/me`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
-        const version = await axios.get(`${url}/api/v2/meta/version`, { headers: { Authorization: `Bearer ${token.data.access_token}` } });
-        context.commit('setApplicationState', {
+        const user = await axios.get(`${url}/api/v2/users/me`, {
+          headers: { Authorization: `Bearer ${token.data.access_token}` },
+        });
+        const version = await axios.get(`${url}/api/v2/meta/version`, {
+          headers: { Authorization: `Bearer ${token.data.access_token}` },
+        });
+        context.commit("setApplicationState", {
           token: token.data.access_token,
           url,
           socketUrl,
@@ -94,43 +94,43 @@ export default {
           version: version.data.version,
         });
       } catch (err) {
-        let message = '';
+        let message = "";
         if (err.response && err.response.data) {
           message = err.response.data.detail;
         } else if (err.response && err.response.statusText) {
           message = err.response.statusText;
         } else {
-          message = 'Unable to connect to server.';
+          message = "Unable to connect to server.";
         }
-        context.commit('setLoginError', message);
+        context.commit("setLoginError", message);
       }
     },
     connectionError(context) {
-      context.commit('setConnectionError');
+      context.commit("setConnectionError");
     },
     async logout(context) {
-      context.commit('setLogout');
+      context.commit("setLogout");
     },
     clear(context) {
-      context.commit('clearState');
+      context.commit("clearState");
     },
     darkMode(context, val) {
-      context.commit('setDarkMode', val);
+      context.commit("setDarkMode", val);
     },
     chatWidget(context, val) {
-      context.commit('setChatWidget', val);
+      context.commit("setChatWidget", val);
     },
     hideStaleAgents(context, val) {
-      context.commit('setHideStaleAgents', val);
+      context.commit("setHideStaleAgents", val);
     },
     hideArchivedAgents(context, val) {
-      context.commit('setHideArchivedAgents', val);
+      context.commit("setHideArchivedAgents", val);
     },
     filterOnlyMyStagers(context, val) {
-      context.commit('setFilterOnlyMyStagers', val);
+      context.commit("setFilterOnlyMyStagers", val);
     },
     agentHeaders(context, val) {
-      context.commit('setAgentHeaders', val);
+      context.commit("setAgentHeaders", val);
     },
   },
   getters: {

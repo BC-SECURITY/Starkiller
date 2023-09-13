@@ -1,98 +1,50 @@
 <template>
   <div>
     <div>
-      <portal
-        to="app-bar-extension"
-      >
-        <div style="display: flex; flex-direction: row; width:100%">
-          <v-tabs
-            v-model="tab"
-            align-with-title
-          >
-            <v-tab
-              key="interact"
-              href="#interact"
-            >
+      <portal to="app-bar-extension">
+        <div style="display: flex; flex-direction: row; width: 100%">
+          <v-tabs v-model="tab" align-with-title>
+            <v-tab key="interact" href="#interact">
               Interact
-              <v-icon x-small class="ml-1">
-                fa-arrow-pointer
-              </v-icon>
+              <v-icon x-small class="ml-1"> fa-arrow-pointer </v-icon>
             </v-tab>
-            <v-tab
-              key="file-browser"
-              href="#file-browser"
-            >
+            <v-tab key="file-browser" href="#file-browser">
               File Browser
-              <v-icon x-small class="ml-1">
-                fa-folder-open
-              </v-icon>
+              <v-icon x-small class="ml-1"> fa-folder-open </v-icon>
             </v-tab>
-            <v-tab
-              key="tasks"
-              href="#tasks"
-            >
+            <v-tab key="tasks" href="#tasks">
               Tasks
-              <v-icon x-small class="ml-1">
-                fa-sticky-note
-              </v-icon>
+              <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
             </v-tab>
-            <v-tab
-              key="view"
-              href="#view"
-            >
+            <v-tab key="view" href="#view">
               View
-              <v-icon x-small class="ml-1">
-                fa-eye
-              </v-icon>
+              <v-icon x-small class="ml-1"> fa-eye </v-icon>
             </v-tab>
           </v-tabs>
-          <div style="display: flex; flex-direction: row;">
+          <div style="display: flex; flex-direction: row">
             <!-- Keeping infra in place to add the split pane back -->
-            <v-btn
-              v-if="false"
-              icon
-              @click="toggleCollapsePane()"
-            >
-              <v-icon v-if="paneSize > 95">
-                fa-chevron-left
-              </v-icon>
-              <v-icon v-else>
-                fa-chevron-right
-              </v-icon>
+            <v-btn v-if="false" icon @click="toggleCollapsePane()">
+              <v-icon v-if="paneSize > 95"> fa-chevron-left </v-icon>
+              <v-icon v-else> fa-chevron-right </v-icon>
             </v-btn>
           </div>
         </div>
       </portal>
-      <portal
-        to="app-bar"
-      >
-        <div
-          class="v-toolbar__content"
-          style="width:100%"
-        >
+      <portal to="app-bar">
+        <div class="v-toolbar__content" style="width: 100%">
           <v-breadcrumbs :items="breads" />
-          <v-tooltip
-            v-if="agent.high_integrity"
-            bottom
-          >
+          <v-tooltip v-if="agent.high_integrity" bottom>
             <template #activator="{ on }">
-              <v-icon
-                small
-                v-on="on"
-              >
-                fa-user-cog
-              </v-icon>
+              <v-icon small v-on="on"> fa-user-cog </v-icon>
             </template>
             <span>Elevated Process</span>
           </v-tooltip>
-          <v-chip v-if="initialized && archived">
-            Archived
-          </v-chip>
+          <v-chip v-if="initialized && archived"> Archived </v-chip>
           <v-spacer />
           <div
             v-if="!errorState"
             class="pt-2"
-            style="display: flex; flex-direction: row; align-items: center;"
+            style="display: flex; flex-direction: row; align-items: center"
           >
             <agent-script-import-dialog
               v-model="scriptImportDialog"
@@ -163,71 +115,51 @@
         :resource-id="id"
         resource-type="agent"
       />
-      <div
-        v-if="!errorState"
-        :style="splitPaneHeight()"
-      >
-        <splitpanes
-          :disabled="true"
-          @resize="paneSize = $event[0].size"
-        >
-          <pane
-            min-size="30"
-            :size="paneSize"
-          >
-            <v-tabs-items
-              v-model="tab"
-              class="scrollable-pane"
-            >
+      <div v-if="!errorState" :style="splitPaneHeight()">
+        <splitpanes :disabled="true" @resize="paneSize = $event[0].size">
+          <pane min-size="30" :size="paneSize">
+            <v-tabs-items v-model="tab" class="scrollable-pane">
               <v-tab-item
                 key="interact"
                 :value="'interact'"
                 :transition="false"
                 :reverse-transition="false"
               >
-                <v-card
-                  v-if="initialized && !archived"
-                  flat
-                >
-                  <v-tabs
-                    v-model="interactTab"
-                    :height="30"
-                    align-with-title
-                  >
+                <v-card v-if="initialized && !archived" flat>
+                  <v-tabs v-model="interactTab" :height="30" align-with-title>
                     <v-tab key="form" href="#form">
                       Form
-                      <v-icon x-small class="ml-1">
-                        fa-list-check
-                      </v-icon>
+                      <v-icon x-small class="ml-1"> fa-list-check </v-icon>
                     </v-tab>
                     <v-tab key="terminal" href="#terminal">
                       Terminal (Beta)
-                      <v-icon x-small class="ml-1">
-                        fa-terminal
-                      </v-icon>
+                      <v-icon x-small class="ml-1"> fa-terminal </v-icon>
                     </v-tab>
                   </v-tabs>
                   <v-tabs-items v-model="interactTab">
-                    <v-tab-item key="form" :value="'form'" :transition="false" :reverse-transition="false">
+                    <v-tab-item
+                      key="form"
+                      :value="'form'"
+                      :transition="false"
+                      :reverse-transition="false"
+                    >
                       <agent-interact :agent="agent" />
                       <v-divider />
-                      <h4 class="pl-4 pt-2">
-                        Execute Module
-                      </h4>
+                      <h4 class="pl-4 pt-2">Execute Module</h4>
                       <agent-execute-module :agents="[agent.session_id]" />
                     </v-tab-item>
-                    <v-tab-item key="terminal" style="height: 75vh" :value="'terminal'" :transition="false" :reverse-transition="false">
-                      <agent-terminal
-                        class="mt-2"
-                        :agent="agent"
-                      />
+                    <v-tab-item
+                      key="terminal"
+                      style="height: 75vh"
+                      :value="'terminal'"
+                      :transition="false"
+                      :reverse-transition="false"
+                    >
+                      <agent-terminal class="mt-2" :agent="agent" />
                     </v-tab-item>
                   </v-tabs-items>
                 </v-card>
-                <v-card
-                  v-else-if="initialized && archived"
-                  flat
-                >
+                <v-card v-else-if="initialized && archived" flat>
                   <v-card-text>
                     <v-alert
                       type="error"
@@ -296,26 +228,26 @@
 </template>
 
 <script>
-import AgentForm from '@/components/agents/AgentForm.vue';
-import AgentInteract from '@/components/agents/AgentInteract.vue';
-import AgentTasksList from '@/components/agents/AgentTasksList.vue';
-import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
-import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
-import AgentTerminal from '@/components/agents/AgentTerminal.vue';
-import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
-import AgentScriptImportDialog from '@/components/agents/AgentScriptImportDialog.vue';
-import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
-import TooltipButton from '@/components/TooltipButton.vue';
-import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import { Pane, Splitpanes } from 'splitpanes';
-import * as agentApi from '@/api/agent-api';
-import * as agentTaskApi from '@/api/agent-task-api';
+import AgentForm from "@/components/agents/AgentForm.vue";
+import AgentInteract from "@/components/agents/AgentInteract.vue";
+import AgentTasksList from "@/components/agents/AgentTasksList.vue";
+import AgentExecuteModule from "@/components/agents/AgentExecuteModule.vue";
+import AgentFileBrowser from "@/components/agents/AgentFileBrowser.vue";
+import AgentTerminal from "@/components/agents/AgentTerminal.vue";
+import AgentUploadDialog from "@/components/agents/AgentUploadDialog.vue";
+import AgentScriptImportDialog from "@/components/agents/AgentScriptImportDialog.vue";
+import AgentDownloadDialog from "@/components/agents/AgentDownloadDialog.vue";
+import TooltipButton from "@/components/TooltipButton.vue";
+import TooltipButtonToggle from "@/components/TooltipButtonToggle.vue";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import { Pane, Splitpanes } from "splitpanes";
+import * as agentApi from "@/api/agent-api";
+import * as agentTaskApi from "@/api/agent-task-api";
 
-import 'splitpanes/dist/splitpanes.css';
+import "splitpanes/dist/splitpanes.css";
 
 export default {
-  name: 'AgentEdit',
+  name: "AgentEdit",
   components: {
     AgentForm,
     AgentInteract,
@@ -347,24 +279,24 @@ export default {
       errorState: false,
       paneSize: 100,
       rightPaneInitialized: false,
-      pathToFile: '',
+      pathToFile: "",
       isRefreshTasks: true,
-      interactTab: 'form',
+      interactTab: "form",
     };
   },
   computed: {
     breads() {
       return [
         {
-          text: 'Agents',
+          text: "Agents",
           disabled: this.isChild,
-          to: '/agents',
+          to: "/agents",
           exact: true,
         },
         {
           text: this.breadcrumbName,
           disabled: true,
-          to: '/agent-edit',
+          to: "/agent-edit",
         },
       ];
     },
@@ -389,7 +321,7 @@ export default {
         this.$router.replace({ query: { ...this.$route.query, tab } });
       },
       get() {
-        return this.$route.query.tab || 'interact';
+        return this.$route.query.tab || "interact";
       },
     },
   },
@@ -409,7 +341,7 @@ export default {
     },
     uploadDialog(val) {
       if (!val) {
-        this.pathToFile = '';
+        this.pathToFile = "";
       }
     },
   },
@@ -427,14 +359,19 @@ export default {
     splitPaneHeight() {
       /* Not the prettiest thing, but seems to cover most window sizes to avoid page scroll.
      That's 96vh - height of top bar (104) - height of footer (36px) */
-      return `height: calc(96vh - 104px ${this.isChild ? '' : '- 36px'})`;
+      return `height: calc(96vh - 104px ${this.isChild ? "" : "- 36px"})`;
     },
     popout() {
-      window.open(`${window.location.href}/?hideSideBar=true`, 'popup', 'width=600,height=600');
-      this.$router.push({ name: 'agents' });
+      window.open(
+        `${window.location.href}/?hideSideBar=true`,
+        "popup",
+        "width=600,height=600",
+      );
+      this.$router.push({ name: "agents" });
     },
     getAgent(id) {
-      agentApi.getAgent(id)
+      agentApi
+        .getAgent(id)
         .then((data) => {
           this.agent = data;
         })
@@ -448,7 +385,9 @@ export default {
       this.scriptImportLoading = true;
       try {
         await agentTaskApi.scriptImport(this.agent.session_id, file);
-        this.$snack.success(`Tasked agent ${this.agent.name} to import script ${file.filename}`);
+        this.$snack.success(
+          `Tasked agent ${this.agent.name} to import script ${file.filename}`,
+        );
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
@@ -456,25 +395,47 @@ export default {
       this.scriptImportDialog = false;
     },
     async killAgent() {
-      if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${this.agent.name}?`, { color: 'red' })) {
-        this.$store.dispatch('agent/killAgent', { sessionId: this.agent.session_id });
-        this.$snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
-        this.$router.push({ name: 'agents' });
+      if (
+        await this.$root.$confirm(
+          "Kill Agent",
+          `Do you want to kill agent ${this.agent.name}?`,
+          { color: "red" },
+        )
+      ) {
+        this.$store.dispatch("agent/killAgent", {
+          sessionId: this.agent.session_id,
+        });
+        this.$snack.success(
+          `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
+        );
+        this.$router.push({ name: "agents" });
       }
     },
     async clearQueue() {
-      const queuedTasks = await agentTaskApi.getTasks(this.agent.session_id, { limit: -1, page: 1, status: 'queued' });
+      const queuedTasks = await agentTaskApi.getTasks(this.agent.session_id, {
+        limit: -1,
+        page: 1,
+        status: "queued",
+      });
       const queuedIds = queuedTasks.records.map((el) => el.id);
       if (queuedIds.length === 0) {
-        this.$snack.info('No queued tasks to clear.');
+        this.$snack.info("No queued tasks to clear.");
         return;
       }
-      if (await this.$root.$confirm('', `Do you want to clear ${queuedIds.length} queued tasks?`, { color: 'red' })) {
-        this.$store.dispatch('agent/clearQueue', {
+      if (
+        await this.$root.$confirm(
+          "",
+          `Do you want to clear ${queuedIds.length} queued tasks?`,
+          { color: "red" },
+        )
+      ) {
+        this.$store.dispatch("agent/clearQueue", {
           name: this.agent.session_id,
           tasks: queuedIds,
         });
-        this.$snack.success(`Clearing queued tasks for Agent ${this.agent.session_id}.`);
+        this.$snack.success(
+          `Clearing queued tasks for Agent ${this.agent.session_id}.`,
+        );
       }
     },
     openUploadDialogPrefilled({ pathToFile }) {
@@ -482,12 +443,20 @@ export default {
       this.pathToFile = pathToFile;
     },
     async doUpload({ file, pathToFile }) {
-      if (this.uploadLoading || file == null || pathToFile == null || pathToFile.length < 1) return;
+      if (
+        this.uploadLoading ||
+        file == null ||
+        pathToFile == null ||
+        pathToFile.length < 1
+      )
+        return;
 
       this.uploadLoading = true;
       try {
         await agentTaskApi.uploadFile(this.agent.session_id, file, pathToFile);
-        this.$snack.success(`Tasked agent ${this.agent.name} to upload file to ${pathToFile}`);
+        this.$snack.success(
+          `Tasked agent ${this.agent.name} to upload file to ${pathToFile}`,
+        );
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
@@ -496,12 +465,15 @@ export default {
       this.uploadDialog = false;
     },
     async doDownload({ pathToFile }) {
-      if (this.downloadLoading || pathToFile == null || pathToFile.length < 1) return;
+      if (this.downloadLoading || pathToFile == null || pathToFile.length < 1)
+        return;
 
       this.downloadLoading = true;
       try {
         await agentTaskApi.downloadFile(this.agent.session_id, pathToFile);
-        this.$snack.success(`Tasked agent ${this.agent.name} to downloaded file ${pathToFile}`);
+        this.$snack.success(
+          `Tasked agent ${this.agent.name} to downloaded file ${pathToFile}`,
+        );
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
@@ -533,50 +505,65 @@ export default {
   background-color: inherit;
 }
 
-  .splitpanes__splitter {
-    background-color: #fff;
-    box-sizing: border-box;
-    position: relative;
-    flex-shrink: 0;
-    &:before, &:after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      background-color: rgba(0, 0, 0, .15);
-      transition: background-color 0.3s;
-    }
-    &:hover:before, &:hover:after {background-color: rgba(0, 0, 0, .25);}
-    &:first-child {cursor: auto;}
+.splitpanes__splitter {
+  background-color: #fff;
+  box-sizing: border-box;
+  position: relative;
+  flex-shrink: 0;
+  &:before,
+  &:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-color: rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s;
   }
-  .splitpanes .splitpanes .splitpanes__splitter {
-    z-index: 1;
+  &:hover:before,
+  &:hover:after {
+    background-color: rgba(0, 0, 0, 0.25);
   }
-  .splitpanes--vertical > .splitpanes__splitter,
-  .splitpanes--vertical > .splitpanes__splitter {
-    width: 7px;
-    border-left: 1px solid #eee;
-    margin-left: -1px;
-    &:before, &:after {
-      transform: translateY(-50%);
-      width: 1px;
-      height: 30px;
-    }
-    &:before {margin-left: -2px;}
-    &:after {margin-left: 1px;}
+  &:first-child {
+    cursor: auto;
   }
-  .splitpanes--horizontal > .splitpanes__splitter,
-  .splitpanes--horizontal > .splitpanes__splitter {
-    height: 7px;
-    border-top: 1px solid #eee;
-    margin-top: -1px;
-    &:before,
-    &:after {
-      transform: translateX(-50%);
-      width: 30px;
-      height: 1px;
-    }
-    &:before {margin-top: -2px;}
-    &:after {margin-top: 1px;}
+}
+.splitpanes .splitpanes .splitpanes__splitter {
+  z-index: 1;
+}
+.splitpanes--vertical > .splitpanes__splitter,
+.splitpanes--vertical > .splitpanes__splitter {
+  width: 7px;
+  border-left: 1px solid #eee;
+  margin-left: -1px;
+  &:before,
+  &:after {
+    transform: translateY(-50%);
+    width: 1px;
+    height: 30px;
   }
+  &:before {
+    margin-left: -2px;
+  }
+  &:after {
+    margin-left: 1px;
+  }
+}
+.splitpanes--horizontal > .splitpanes__splitter,
+.splitpanes--horizontal > .splitpanes__splitter {
+  height: 7px;
+  border-top: 1px solid #eee;
+  margin-top: -1px;
+  &:before,
+  &:after {
+    transform: translateX(-50%);
+    width: 30px;
+    height: 1px;
+  }
+  &:before {
+    margin-top: -2px;
+  }
+  &:after {
+    margin-top: 1px;
+  }
+}
 </style>

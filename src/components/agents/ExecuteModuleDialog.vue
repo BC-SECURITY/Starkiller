@@ -1,9 +1,5 @@
 <template>
-  <v-dialog
-    ref="downloadDialog"
-    v-model="show"
-    max-width="800px"
-  >
+  <v-dialog ref="downloadDialog" v-model="show" max-width="800px">
     <v-card>
       <v-card-title>
         <span class="headline" />
@@ -21,18 +17,8 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="error"
-          text
-          @click.stop="show = false"
-        >
-          Close
-        </v-btn>
-        <v-btn
-          color="primary"
-          :loading="loading"
-          @click="submit"
-        >
+        <v-btn color="error" text @click.stop="show = false"> Close </v-btn>
+        <v-btn color="primary" :loading="loading" @click="submit">
           Submit
         </v-btn>
       </v-card-actions>
@@ -41,7 +27,7 @@
 </template>
 
 <script>
-import AgentExecuteModule from './AgentExecuteModule.vue';
+import AgentExecuteModule from "./AgentExecuteModule.vue";
 
 export default {
   components: {
@@ -67,8 +53,7 @@ export default {
     },
   },
   data() {
-    return {
-    };
+    return {};
   },
   computed: {
     show: {
@@ -76,13 +61,15 @@ export default {
         return this.value;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit("input", value);
       },
     },
   },
   methods: {
     async submit() {
-      if (!this.$refs.executeform.validate()) { return; }
+      if (!this.$refs.executeform.validate()) {
+        return;
+      }
       this.$refs.executeform.create();
       this.show = false;
     },

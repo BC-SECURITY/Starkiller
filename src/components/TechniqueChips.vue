@@ -1,14 +1,8 @@
 <template>
-  <div
-    v-if="techniques.length > 0"
-    class="flex flex-row flex-wrap mb-2"
-  >
-    <span
-      v-if="showTitle"
-      class="mr-2"
-    >Techniques:</span>
+  <div v-if="techniques.length > 0" class="flex flex-row flex-wrap mb-2">
+    <span v-if="showTitle" class="mr-2">Techniques:</span>
     <v-chip
-      v-for="tech in techniques.filter(t => t !== '')"
+      v-for="tech in techniques.filter((t) => t !== '')"
       :key="tech"
       small
       :href="getTechniqueUrl(tech)"
@@ -24,7 +18,7 @@
 
 <script>
 export default {
-  name: 'TechniqueChips',
+  name: "TechniqueChips",
   props: {
     techniques: {
       type: Array,
@@ -37,8 +31,8 @@ export default {
   },
   methods: {
     getTechniqueUrl(tech) {
-      if (tech.includes('.')) {
-        const [main, sub] = tech.split('.');
+      if (tech.includes(".")) {
+        const [main, sub] = tech.split(".");
         return `https://attack.mitre.org/techniques/${main}/${sub}`;
       }
       return `https://attack.mitre.org/techniques/${tech}`;
@@ -47,6 +41,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

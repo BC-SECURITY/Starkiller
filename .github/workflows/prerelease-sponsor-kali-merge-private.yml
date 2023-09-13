@@ -11,12 +11,12 @@ on:
   workflow_dispatch:
     inputs:
       mergeKali:
-        description: 'Merge private-main branch into kali-main.'
+        description: "Merge private-main branch into kali-main."
         type: boolean
         default: true
         required: true
       mergeSponsors:
-        description: 'Merge private-main branch into sponsors-main.'
+        description: "Merge private-main branch into sponsors-main."
         type: boolean
         default: true
         required: true
@@ -32,15 +32,15 @@ jobs:
     # Already filtered above to closed PRs on private-main.
     if: ${{ github.repository == 'BC-Security/Starkiller-Sponsors' &&
       (github.event_name == 'workflow_dispatch' ||
-        (github.event.pull_request &&
-        github.event.pull_request.merged == true &&
-        contains(github.event.pull_request.labels.*.name, 'auto-merge-downstream'))) }}
+      (github.event.pull_request &&
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'auto-merge-downstream'))) }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v3
         with:
-          submodules: 'recursive'
+          submodules: "recursive"
           ref: private-main
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}

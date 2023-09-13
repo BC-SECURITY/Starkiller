@@ -1,11 +1,11 @@
-import * as agentApi from '@/api/agent-api';
-import * as agentTaskApi from '@/api/agent-task-api';
+import * as agentApi from "@/api/agent-api";
+import * as agentTaskApi from "@/api/agent-task-api";
 
 export default {
   namespaced: true,
   state: {
     agents: [],
-    status: 'success',
+    status: "success",
   },
   mutations: {
     setAgents(state, agents) {
@@ -20,19 +20,19 @@ export default {
   },
   actions: {
     async getAgents(context) {
-      context.commit('setStatus', 'loading');
+      context.commit("setStatus", "loading");
       const agents = await agentApi.getAgents(true);
-      await context.commit('setAgents', agents);
-      context.commit('setStatus', 'success');
+      await context.commit("setAgents", agents);
+      context.commit("setStatus", "success");
     },
     async getAgent(context, { sessionId }) {
       const agent = (await agentApi.getAgent(sessionId))[0];
-      context.dispatch('addAgent', agent);
+      context.dispatch("addAgent", agent);
     },
     async rename(context, { sessionId, newName }) {
       let { agents } = context.state;
       if (agents == null || agents.length === 0) {
-        await context.dispatch('getAgents');
+        await context.dispatch("getAgents");
         ({ agents } = context.state);
       }
       const agent = agents.find((el) => el.session_id === sessionId);
@@ -42,7 +42,7 @@ export default {
         agent.name = newName;
       }
 
-      context.commit('setAgents', agents);
+      context.commit("setAgents", agents);
       return agent.name;
     },
     async killAgent(context, { sessionId }) {
@@ -55,17 +55,19 @@ export default {
 
       await agentApi.killAgent(sessionId);
       agent.archived = true;
-      context.commit('setAgents', agents);
+      context.commit("setAgents", agents);
     },
     async addAgent(context, agent) {
       const { agents } = context.state;
-      const foundIndex = agents.findIndex((el) => el.session_id === agent.session_id);
+      const foundIndex = agents.findIndex(
+        (el) => el.session_id === agent.session_id,
+      );
 
       if (foundIndex >= 0) {
         agents.splice(foundIndex, 1, agent);
-        context.commit('setAgents', agents);
+        context.commit("setAgents", agents);
       } else {
-        context.commit('pushAgent', agent);
+        context.commit("pushAgent", agent);
       }
     },
     clearQueue(context, { name, tasks }) {

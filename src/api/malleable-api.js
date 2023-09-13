@@ -1,46 +1,53 @@
-import { axiosInstance as axios, handleError } from '@/api/axios-instance';
+import { axiosInstance as axios, handleError } from "@/api/axios-instance";
 
 /**
  * Returns a full list of malleable profiles.
  */
 export function getMalleableProfiles() {
-  return axios.get('/malleable-profiles')
+  return axios
+    .get("/malleable-profiles")
     .then(({ data }) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function createMalleableProfile(name, category, code) {
-  return axios.post('/malleable-profiles', { name, category, data: code })
+  return axios
+    .post("/malleable-profiles", { name, category, data: code })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateMalleableProfile(id, code) {
-  return axios.put(`/malleable-profiles/${id}`, { data: code })
+  return axios
+    .put(`/malleable-profiles/${id}`, { data: code })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getMalleableProfile(id) {
-  return axios.get(`/malleable-profiles/${id}`)
+  return axios
+    .get(`/malleable-profiles/${id}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteMalleableProfile(id) {
-  return axios.delete(`/malleable-profiles/${id}`)
+  return axios
+    .delete(`/malleable-profiles/${id}`)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function resetProfiles() {
-  return axios.post('/malleable-profiles/reset')
+  return axios
+    .post("/malleable-profiles/reset")
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function reloadProfiles() {
-  return axios.post('/malleable-profiles/reload')
+  return axios
+    .post("/malleable-profiles/reload")
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

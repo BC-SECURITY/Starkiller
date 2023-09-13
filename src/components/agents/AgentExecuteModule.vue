@@ -6,16 +6,12 @@
       resource-type="module"
       :message="errorStateMessage"
     />
-    <div
-      v-else
-      style="padding: 0 10px 10px 10px"
-    >
-      <info-viewer
-        class="info-viewer"
-        :info="moduleInfo"
-      />
+    <div v-else style="padding: 0 10px 10px 10px">
+      <info-viewer class="info-viewer" :info="moduleInfo" />
       <!-- todo could make this more friendly by looking up the "name" in the state in case it was changed -->
-      <span class="mr-2 mb-4">Executing on Agents: {{ agents.join(', ') }}</span>
+      <span class="mr-2 mb-4"
+        >Executing on Agents: {{ agents.join(", ") }}</span
+      >
       <technique-chips :techniques="selectedItem.techniques" />
       <v-autocomplete
         v-model="selectedModule"
@@ -27,20 +23,17 @@
         clearable
         @change="handleSelect"
       />
-      <v-alert
-        v-if="selectedItem.opsec_safe === false"
-        type="warning"
-      >
+      <v-alert v-if="selectedItem.opsec_safe === false" type="warning">
         <v-row align="center">
-          <v-col
-            class="grow"
-            style="word-wrap: word-break; width: 500px"
-          >
+          <v-col class="grow" style="word-wrap: word-break; width: 500px">
             This module is not opsec safe.
           </v-col>
         </v-row>
       </v-alert>
-      <div v-if="Object.keys(selectedItem).length > 0" style="display: flex; flex-direction: row;">
+      <div
+        v-if="Object.keys(selectedItem).length > 0"
+        style="display: flex; flex-direction: row"
+      >
         <v-checkbox
           v-model="ignoreAdminCheck"
           class="pa-1"
@@ -68,11 +61,7 @@
       >
         Submit
       </v-btn>
-      <v-dialog
-        ref="nameDialog"
-        v-model="showDialog"
-        max-width="900px"
-      >
+      <v-dialog ref="nameDialog" v-model="showDialog" max-width="900px">
         <v-card>
           <v-card-title>
             <span class="headline">Execution Result</span>
@@ -108,11 +97,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn
-              color="blue darken-1"
-              text
-              @click="showDialog = false"
-            >
+            <v-btn color="blue darken-1" text @click="showDialog = false">
               Okay
             </v-btn>
           </v-card-actions>
@@ -123,12 +108,12 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import InfoViewer from '@/components/InfoViewer.vue';
-import * as moduleApi from '@/api/module-api';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import GeneralForm from '../GeneralForm.vue';
-import TechniqueChips from '../TechniqueChips.vue';
+import { mapState } from "vuex";
+import InfoViewer from "@/components/InfoViewer.vue";
+import * as moduleApi from "@/api/module-api";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import GeneralForm from "../GeneralForm.vue";
+import TechniqueChips from "../TechniqueChips.vue";
 
 export default {
   components: {
@@ -148,7 +133,7 @@ export default {
     },
     moduleName: {
       type: String,
-      default: '',
+      default: "",
     },
     moduleOptionDefaults: {
       type: Object,
@@ -158,13 +143,13 @@ export default {
   data() {
     return {
       loading: false,
-      selectedModule: '',
+      selectedModule: "",
       selectedItem: {},
       results: [],
       reset: true,
       headers: [
-        { text: 'Agent', value: 'agent' },
-        { text: 'Result', value: 'result' },
+        { text: "Agent", value: "agent" },
+        { text: "Result", value: "result" },
       ],
       showDialog: false,
       form: {},
@@ -175,11 +160,12 @@ export default {
   },
   computed: {
     ...mapState({
-      modules: (state) => state.module.modules
-        .filter((el) => el.enabled === true),
-      selectOptions: (state) => state.module.modules
-        .filter((el) => el.enabled === true)
-        .map((el) => el.id),
+      modules: (state) =>
+        state.module.modules.filter((el) => el.enabled === true),
+      selectOptions: (state) =>
+        state.module.modules
+          .filter((el) => el.enabled === true)
+          .map((el) => el.id),
     }),
     moduleOptions() {
       let { options } = this.selectedItem;
@@ -206,12 +192,18 @@ export default {
         description: this.selectedItem.description,
         comments: this.selectedItem.comments,
         extraDetails: [
-          { key: 'Language', value: this.selectedItem.language },
-          { key: 'MinLanguageVersion', value: this.selectedItem.min_language_version },
-          { key: 'Background', value: this.selectedItem.background },
-          { key: 'OpsecSafe', value: this.selectedItem.opsec_safe },
-          { key: 'NeedsAdmin', value: this.selectedItem.needs_admin },
-          { key: 'OutputExtensions', value: this.selectedItem.output_extensions },
+          { key: "Language", value: this.selectedItem.language },
+          {
+            key: "MinLanguageVersion",
+            value: this.selectedItem.min_language_version,
+          },
+          { key: "Background", value: this.selectedItem.background },
+          { key: "OpsecSafe", value: this.selectedItem.opsec_safe },
+          { key: "NeedsAdmin", value: this.selectedItem.needs_admin },
+          {
+            key: "OutputExtensions",
+            value: this.selectedItem.output_extensions,
+          },
         ],
       };
     },
@@ -237,15 +229,17 @@ export default {
     },
   },
   async mounted() {
-    this.$store.dispatch('module/getModules');
+    this.$store.dispatch("module/getModules");
   },
   methods: {
     async handleSelect(item) {
       this.errorState = false;
-      if (item === '' || item == null) {
+      if (item === "" || item == null) {
         this.reset = false;
         this.selectedItem = {};
-        setTimeout(() => { this.reset = true; }, 500);
+        setTimeout(() => {
+          this.reset = true;
+        }, 500);
         return;
       }
       const results = this.modules.find((el) => el.id === item);
@@ -254,14 +248,16 @@ export default {
       if (Object.keys(this.selectedItem).length === 0) {
         this.errorState = true;
       }
-      setTimeout(() => { this.reset = true; }, 500);
+      setTimeout(() => {
+        this.reset = true;
+      }, 500);
     },
     rowClass(item) {
-      if (item.status === 'rejected') return 'red';
-      return '';
+      if (item.status === "rejected") return "red";
+      return "";
     },
     emitModuleChange(newVal) {
-      this.$emit('moduleChange', newVal);
+      this.$emit("moduleChange", newVal);
     },
     validate() {
       return this.$refs.generalform.$refs.form.validate();
@@ -273,37 +269,48 @@ export default {
 
       this.loading = true;
 
-      const result = await Promise.allSettled(this.agents
-        .map((agent) => moduleApi.executeModule(
-          this.selectedModule,
-          {
-            ...this.form,
-            Agent: agent,
-          },
-          this.ignoreAdminCheck,
-          this.ignoreLanguageCheck,
-        )));
+      const result = await Promise.allSettled(
+        this.agents.map((agent) =>
+          moduleApi.executeModule(
+            this.selectedModule,
+            {
+              ...this.form,
+              Agent: agent,
+            },
+            this.ignoreAdminCheck,
+            this.ignoreLanguageCheck,
+          ),
+        ),
+      );
 
-      if (result.some((item) => item.status === 'rejected')) {
-        const split = result.reduce((acc, val) => {
-          acc[val.status].push(val);
-          return acc;
-        }, { rejected: [], fulfilled: [] });
+      if (result.some((item) => item.status === "rejected")) {
+        const split = result.reduce(
+          (acc, val) => {
+            acc[val.status].push(val);
+            return acc;
+          },
+          { rejected: [], fulfilled: [] },
+        );
 
         if (this.agents.length > 1) {
-          this.$snack.warn(`Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`);
+          this.$snack.warn(
+            `Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`,
+          );
           this.results = result;
           this.showDialog = true;
         } else {
           this.$snack.error(`Error: ${result[0].reason.error}`);
         }
       } else {
-        const displayName = this.agents.length > 1 ? `${this.agents.length} agents.` : `${this.agents[0]}.`;
+        const displayName =
+          this.agents.length > 1
+            ? `${this.agents.length} agents.`
+            : `${this.agents[0]}.`;
         this.$snack.info(`Module execution queued for ${displayName}`);
         this.selectedItem = {};
-        this.selectedModule = '';
+        this.selectedModule = "";
         // emit a submitted event so ModuleExecute can clear agents list.
-        this.$emit('submitted');
+        this.$emit("submitted");
       }
 
       this.loading = false;

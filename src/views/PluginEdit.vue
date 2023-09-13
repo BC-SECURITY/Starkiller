@@ -1,30 +1,15 @@
 <template>
   <div class="p4">
-    <portal
-      to="app-bar-extension"
-    >
-      <div style="display: flex; flex-direction: row; width:100%">
-        <v-tabs
-          v-model="tab"
-          align-with-title
-        >
-          <v-tab
-            key="interact"
-            href="#interact"
-          >
+    <portal to="app-bar-extension">
+      <div style="display: flex; flex-direction: row; width: 100%">
+        <v-tabs v-model="tab" align-with-title>
+          <v-tab key="interact" href="#interact">
             Interact
-            <v-icon x-small class="ml-1">
-              fa-terminal
-            </v-icon>
+            <v-icon x-small class="ml-1"> fa-terminal </v-icon>
           </v-tab>
-          <v-tab
-            key="tasks"
-            href="#tasks"
-          >
+          <v-tab key="tasks" href="#tasks">
             Tasks
-            <v-icon x-small class="ml-1">
-              fa-sticky-note
-            </v-icon>
+            <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
           </v-tab>
         </v-tabs>
       </div>
@@ -51,25 +36,16 @@
       :resource-id="id"
       resource-type="plugin"
     />
-    <v-tabs-items
-      v-else
-      v-model="tab"
-      class="scrollable-pane"
-    >
+    <v-tabs-items v-else v-model="tab" class="scrollable-pane">
       <v-tab-item
         key="interact"
         :value="'interact'"
         :transition="false"
         :reverse-transition="false"
       >
-        <h4 class="pl-4 pb-4">
-          Execute Plugin
-        </h4>
+        <h4 class="pl-4 pb-4">Execute Plugin</h4>
         <v-card style="padding: 10px">
-          <info-viewer
-            class="info-viewer"
-            :info="pluginInfo"
-          />
+          <info-viewer class="info-viewer" :info="pluginInfo" />
           <technique-chips :techniques="plugin.TechniqueChips" />
           <general-form
             v-if="reset"
@@ -77,11 +53,7 @@
             v-model="form"
             :options="plugin.options"
           />
-          <v-btn
-            :loading="loading"
-            color="primary"
-            @click="submit"
-          >
+          <v-btn :loading="loading" color="primary" @click="submit">
             Submit
           </v-btn>
         </v-card>
@@ -101,17 +73,17 @@
 </template>
 
 <script>
-import GeneralForm from '@/components/GeneralForm.vue';
-import InfoViewer from '@/components/InfoViewer.vue';
-import * as pluginApi from '@/api/plugin-api';
-import TechniqueChips from '@/components/TechniqueChips.vue';
-import EditPageTop from '@/components/EditPageTop.vue';
-import PluginTasksList from '@/components/plugins/PluginTasksList.vue';
-import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
+import GeneralForm from "@/components/GeneralForm.vue";
+import InfoViewer from "@/components/InfoViewer.vue";
+import * as pluginApi from "@/api/plugin-api";
+import TechniqueChips from "@/components/TechniqueChips.vue";
+import EditPageTop from "@/components/EditPageTop.vue";
+import PluginTasksList from "@/components/plugins/PluginTasksList.vue";
+import TooltipButtonToggle from "@/components/TooltipButtonToggle.vue";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 
 export default {
-  name: 'PluginEdit',
+  name: "PluginEdit",
   components: {
     InfoViewer,
     GeneralForm,
@@ -135,22 +107,22 @@ export default {
     breads() {
       return [
         {
-          text: 'Plugins',
+          text: "Plugins",
           disabled: false,
-          to: '/plugins',
+          to: "/plugins",
           exact: true,
         },
         {
           text: this.breadcrumbName,
           disabled: true,
-          to: '/plugins/edit',
+          to: "/plugins/edit",
         },
       ];
     },
     breadcrumbName() {
       if (this.plugin.name) return this.plugin.name;
       if (this.id) return this.id;
-      return '';
+      return "";
     },
     pluginInfo() {
       if (Object.keys(this.plugin).length < 1) return {};
@@ -174,7 +146,7 @@ export default {
         this.$router.replace({ query: { ...this.$route.query, tab } });
       },
       get() {
-        return this.$route.query.tab || 'interact';
+        return this.$route.query.tab || "interact";
       },
     },
   },
@@ -190,7 +162,10 @@ export default {
       this.loading = true;
 
       try {
-        const response = await pluginApi.executePlugin(this.plugin.name, this.form);
+        const response = await pluginApi.executePlugin(
+          this.plugin.name,
+          this.form,
+        );
         this.$snack.success(`${response.detail}`);
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
@@ -199,12 +174,15 @@ export default {
       this.loading = false;
     },
     getPlugin(id) {
-      pluginApi.getPlugin(id)
+      pluginApi
+        .getPlugin(id)
         .then((data) => {
           this.reset = false;
 
           this.plugin = data;
-          setTimeout(() => { this.reset = true; }, 500);
+          setTimeout(() => {
+            this.reset = true;
+          }, 500);
         })
         .catch(() => {
           this.errorState = true;
@@ -221,5 +199,4 @@ export default {
 .v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
   background-color: inherit;
 }
-
 </style>

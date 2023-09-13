@@ -9,15 +9,11 @@
           {{ info.description }}
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <div style="text-align: left;">
-            <div
-              style="margin-bottom: 10px"
-            >
+          <div style="text-align: left">
+            <div style="margin-bottom: 10px">
               <span>
                 <b class="mr-2">Authors:</b>
-                <template
-                  v-for="author, index in info.authors"
-                >
+                <template v-for="(author, index) in info.authors">
                   <v-chip
                     v-if="author.link"
                     :key="index"
@@ -41,16 +37,11 @@
                 </template>
               </span>
             </div>
-            <div
-              style="margin-bottom: 10px"
-            >
+            <div style="margin-bottom: 10px">
               <span>
                 <b class="mr-2">Comments:</b>
                 <ul>
-                  <li
-                    v-for="comment, index in info.comments"
-                    :key="index"
-                  >
+                  <li v-for="(comment, index) in info.comments" :key="index">
                     {{ comment }}
                   </li>
                 </ul>
@@ -85,12 +76,14 @@ export default {
     formatDisplayName(author) {
       if (author.name && author.handle) {
         return `${author.name} (${author.handle})`;
-      } if (author.name) {
+      }
+      if (author.name) {
         return author.name;
-      } if (author.handle) {
+      }
+      if (author.handle) {
         return author.handle;
       }
-      return '';
+      return "";
     },
   },
 };

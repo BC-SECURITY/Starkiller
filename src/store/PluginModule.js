@@ -1,4 +1,4 @@
-import * as pluginApi from '@/api/plugin-api';
+import * as pluginApi from "@/api/plugin-api";
 
 export default {
   namespaced: true,
@@ -16,9 +16,8 @@ export default {
   actions: {
     async getPlugins(context) {
       const plugins = await pluginApi.getPlugins();
-      context.commit('setPlugins', plugins);
+      context.commit("setPlugins", plugins);
     },
   },
-  getters: {
-  },
+  getters: {},
 };

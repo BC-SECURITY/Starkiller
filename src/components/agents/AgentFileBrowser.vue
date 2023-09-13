@@ -1,11 +1,6 @@
 <template>
-  <div
-    v-if="agent.language === 'ironpython'"
-  >
-    <v-alert
-      prominent
-      type="error"
-    >
+  <div v-if="agent.language === 'ironpython'">
+    <v-alert prominent type="error">
       <v-row align="center">
         <v-col class="grow">
           The File Browser is not yet implemented for this agent language.
@@ -22,7 +17,7 @@
     />
     <v-icon
       v-if="loading"
-      style="width: 50px;"
+      style="width: 50px"
       class="fa-3x fas fa-spinner fa-spin"
     />
     <v-treeview
@@ -37,17 +32,17 @@
     >
       <template #label="{ item, open }">
         <v-btn
-          style="margin-left: -15px; width: 100%;"
+          style="margin-left: -15px; width: 100%"
           class="text-left"
           text
           @contextmenu="show(item, $event)"
         >
-          <div style="display: flex; justify-content: fle -start;">
+          <div style="display: flex; justify-content: fle -start">
             <v-icon v-if="!item.file">
-              {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
+              {{ open ? "mdi-folder-open" : "mdi-folder" }}
             </v-icon>
             <v-icon v-else>
-              {{ files[item.file] || 'mdi-file' }}
+              {{ files[item.file] || "mdi-file" }}
             </v-icon>
             <span class="ml-2">{{ item.name }}</span>
           </div>
@@ -76,12 +71,12 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import * as agentApi from '@/api/agent-api';
-import * as agentTaskApi from '@/api/agent-task-api';
-import debounce from 'lodash.debounce';
-import pause from '@/utils/pause';
-import ExecuteModuleDialog from './ExecuteModuleDialog.vue';
+import Vue from "vue";
+import * as agentApi from "@/api/agent-api";
+import * as agentTaskApi from "@/api/agent-task-api";
+import debounce from "lodash.debounce";
+import pause from "@/utils/pause";
+import ExecuteModuleDialog from "./ExecuteModuleDialog.vue";
 
 export default {
   components: {
@@ -103,22 +98,22 @@ export default {
        * Can add more common extensions here for icon prettiness.
        */
       files: {
-        html: 'mdi-language-html5',
-        js: 'mdi-nodejs',
-        json: 'mdi-json',
-        md: 'mdi-markdown',
-        pdf: 'mdi-file-pdf',
-        png: 'mdi-file-image',
-        txt: 'mdi-file-document-outline',
-        xls: 'mdi-file-excel',
-        xlsx: 'mdi-file-excel',
-        ppt: 'mdi-file-powerpoint',
-        pptx: 'mdi-file-powerpoint',
-        jpg: 'mdi-file-image',
-        jpeg: 'mdi-file-image',
-        gif: 'mdi-file-image',
-        doc: 'mdi-file-word',
-        docx: 'mdi-file-word',
+        html: "mdi-language-html5",
+        js: "mdi-nodejs",
+        json: "mdi-json",
+        md: "mdi-markdown",
+        pdf: "mdi-file-pdf",
+        png: "mdi-file-image",
+        txt: "mdi-file-document-outline",
+        xls: "mdi-file-excel",
+        xlsx: "mdi-file-excel",
+        ppt: "mdi-file-powerpoint",
+        pptx: "mdi-file-powerpoint",
+        jpg: "mdi-file-image",
+        jpeg: "mdi-file-image",
+        gif: "mdi-file-image",
+        doc: "mdi-file-word",
+        docx: "mdi-file-word",
       },
       /**
        * File nodes.
@@ -159,67 +154,77 @@ export default {
        */
       debouncedLoadChildren: null,
       executeDialog: false,
-      moduleName: '',
+      moduleName: "",
       moduleOptionDefaults: {},
     };
   },
   computed: {
     menuItems() {
-      return [{
-        id: 'close',
-        name: 'Close',
-        fileOption: false,
-        folderOption: true,
-      }, {
-        id: 'open',
-        name: 'Open',
-        fileOption: false,
-        folderOption: true,
-      }, {
-        id: 'refresh',
-        name: 'Refresh',
-        fileOption: false,
-        folderOption: true,
-      }, {
-        id: 'download',
-        name: 'Download to Empire',
-        fileOption: true,
-        folderOption: false,
-      }, {
-        id: 'zip',
-        name: 'Zip Folder',
-        fileOption: false,
-        folderOption: true,
-      }, {
-        id: 'upload',
-        name: 'Upload',
-        folderOption: true,
-        fileOption: false,
-      }].filter((el) => {
-        if (this.selected.file) {
-          return el.fileOption === true;
-        }
-        return el.folderOption === true;
-      }).filter((el) => {
-        if (el.id === 'zip') {
-          if (this.agent.language !== 'powershell') {
-            return false;
+      return [
+        {
+          id: "close",
+          name: "Close",
+          fileOption: false,
+          folderOption: true,
+        },
+        {
+          id: "open",
+          name: "Open",
+          fileOption: false,
+          folderOption: true,
+        },
+        {
+          id: "refresh",
+          name: "Refresh",
+          fileOption: false,
+          folderOption: true,
+        },
+        {
+          id: "download",
+          name: "Download to Empire",
+          fileOption: true,
+          folderOption: false,
+        },
+        {
+          id: "zip",
+          name: "Zip Folder",
+          fileOption: false,
+          folderOption: true,
+        },
+        {
+          id: "upload",
+          name: "Upload",
+          folderOption: true,
+          fileOption: false,
+        },
+      ]
+        .filter((el) => {
+          if (this.selected.file) {
+            return el.fileOption === true;
           }
-        }
-        return true;
-      }).filter((el) => {
-        if (el.id === 'open') {
-          if (this.open.find((id) => id === this.selected.id)) {
-            return false;
+          return el.folderOption === true;
+        })
+        .filter((el) => {
+          if (el.id === "zip") {
+            if (this.agent.language !== "powershell") {
+              return false;
+            }
           }
-        } else if (el.id === 'close' || el.id === 'refresh') {
-          if (!this.open.find((id) => id === this.selected.id)) {
-            return false;
+          return true;
+        })
+        .filter((el) => {
+          if (el.id === "open") {
+            if (this.open.find((id) => id === this.selected.id)) {
+              return false;
+            }
+          } else if (el.id === "close" || el.id === "refresh") {
+            if (!this.open.find((id) => id === this.selected.id)) {
+              return false;
+            }
           }
-        }
 
-        return true;
-      });
+          return true;
+        });
     },
   },
   watch: {
@@ -236,24 +241,27 @@ export default {
   },
   methods: {
     async initialize() {
-      this.debouncedLoadChildren = debounce(this.loadChildren, 500, { leading: true });
+      this.debouncedLoadChildren = debounce(this.loadChildren, 500, {
+        leading: true,
+      });
 
       this.loading = true;
       try {
-        const items = await agentApi.getDirectory(this.agent.session_id, '/');
+        const items = await agentApi.getDirectory(this.agent.session_id, "/");
         items.sort(this.sortFiles);
         this.tree = items.map((el) => this.transform(el));
-      } catch (err) { // directory not found.
+      } catch (err) {
+        // directory not found.
         if (this.readOnly) {
           this.loading = false;
           return;
         }
-        const task = await this.scrapeDirectory('/');
+        const task = await this.scrapeDirectory("/");
 
         let i = 0;
         let complete = 0;
         while (i < 10) {
-        // eslint-disable-next-line no-await-in-loop
+          // eslint-disable-next-line no-await-in-loop
           await pause(6000);
           // eslint-disable-next-line no-await-in-loop
           if (await this.checkTaskComplete(task.id)) {
@@ -264,26 +272,34 @@ export default {
         }
 
         if (!complete) {
-          this.$snack.error('Agent didn\'t respond in time. Please try again later.');
+          this.$snack.error(
+            "Agent didn't respond in time. Please try again later.",
+          );
         }
-        const items = await agentApi.getDirectory(this.agent.session_id, '/');
+        const items = await agentApi.getDirectory(this.agent.session_id, "/");
         items.sort(this.sortFiles);
         this.tree = items.map((el) => this.transform(el));
       }
       this.loading = false;
     },
     async clickAction(action) {
-      if (action === 'open') {
+      if (action === "open") {
         this.open.push(this.selected.id);
-      } else if (action === 'close') {
-        this.open.splice(this.open.findIndex((id) => id === this.selected.id), 1);
-      } else if (action === 'refresh') {
+      } else if (action === "close") {
+        this.open.splice(
+          this.open.findIndex((id) => id === this.selected.id),
+          1,
+        );
+      } else if (action === "refresh") {
         // Hackiness to get refreshes to work properly. Have to force the node to think it hasn't
         // been loaded. https://github.com/vuetifyjs/vuetify/issues/10587
         this.selected.children = [];
 
         const vueObj = this.$refs.treeview.nodes[this.selected.id];
-        this.open.splice(this.open.findIndex((id) => id === this.selected.id), 1);
+        this.open.splice(
+          this.open.findIndex((id) => id === this.selected.id),
+          1,
+        );
 
         await Vue.nextTick();
 
@@ -293,13 +309,15 @@ export default {
         await Vue.nextTick();
 
         this.open.push(this.selected.id);
-      } else if (action === 'download') {
+      } else if (action === "download") {
         agentTaskApi.downloadFile(this.agent.session_id, this.selected.path);
-        this.$snack.success(`Tasked ${this.agent.session_id} for download ${this.selected.path}`);
-      } else if (action === 'zip') {
+        this.$snack.success(
+          `Tasked ${this.agent.session_id} for download ${this.selected.path}`,
+        );
+      } else if (action === "zip") {
         this.prepareZip();
-      } else if (action === 'upload') {
-        this.$emit('openUploadDialog', { pathToFile: this.selected.path });
+      } else if (action === "upload") {
+        this.$emit("openUploadDialog", { pathToFile: this.selected.path });
       } else {
         // do nothing
       }
@@ -308,9 +326,11 @@ export default {
       const options = {
         agent: this.agent.session_id,
         Folder: this.selected.path,
-        ZipFileName: `${this.selected.path}\\${this.selected.path.split('\\').pop()}.zip`,
+        ZipFileName: `${this.selected.path}\\${this.selected.path
+          .split("\\")
+          .pop()}.zip`,
       };
-      this.moduleName = 'powershell/management/zipfolder';
+      this.moduleName = "powershell/management/zipfolder";
       this.moduleOptionDefaults = options;
       this.executeDialog = true;
     },
@@ -327,7 +347,10 @@ export default {
     },
     transform(serverElement) {
       return {
-        file: serverElement.is_file === true ? serverElement.name.split('.').pop() : false,
+        file:
+          serverElement.is_file === true
+            ? serverElement.name.split(".").pop()
+            : false,
         ...serverElement,
         children: serverElement.is_file === false ? [] : undefined,
       };
@@ -342,19 +365,22 @@ export default {
         this.removeFromCurrentlyLoading(a.id);
         a.children = files.map((el) => this.transform(el));
         return Promise.resolve();
-      } if (!stopTrying && !this.readOnly) {
+      }
+      if (!stopTrying && !this.readOnly) {
         console.log(stopTrying, this.readOnly);
-        this.$snack.success(`Attempting to retrieve directory: ${a.path} with id ${a.id}`);
+        this.$snack.success(
+          `Attempting to retrieve directory: ${a.path} with id ${a.id}`,
+        );
         const task = await this.scrapeDirectory(a.path);
 
         let i = 0;
         let complete = false;
         while (i < 10) {
-        // eslint-disable-next-line no-await-in-loop
+          // eslint-disable-next-line no-await-in-loop
           await pause(6000);
           // eslint-disable-next-line no-await-in-loop
           if (await this.checkTaskComplete(task.id)) {
-            console.log('task complete', task.id);
+            console.log("task complete", task.id);
             complete = true;
             break;
           }
@@ -362,7 +388,9 @@ export default {
         }
 
         if (!complete) {
-          this.$snack.error('Agent didn\'t respond in time. Please try again later.');
+          this.$snack.error(
+            "Agent didn't respond in time. Please try again later.",
+          );
         }
 
         this.removeFromForce(a.id);

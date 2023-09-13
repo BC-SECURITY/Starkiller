@@ -1,19 +1,11 @@
 <template>
-  <v-dialog
-    ref="uploadDialog"
-    v-model="show"
-    max-width="750px"
-  >
+  <v-dialog ref="uploadDialog" v-model="show" max-width="750px">
     <v-card>
       <v-card-title>
         <span class="headline">Upload To Empire Server</span>
       </v-card-title>
       <v-card-text>
-        <v-form
-          ref="form"
-          on-submit="return false;"
-          @submit.prevent
-        >
+        <v-form ref="form" on-submit="return false;" @submit.prevent>
           <v-container>
             <v-row>
               <v-col cols="12">
@@ -32,19 +24,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          text
-          @click.stop="show = false"
-        >
+        <v-btn color="blue darken-1" text @click.stop="show = false">
           Close
         </v-btn>
-        <v-btn
-          color="blue darken-1"
-          text
-          :loading="loading"
-          @click="submit"
-        >
+        <v-btn color="blue darken-1" text :loading="loading" @click="submit">
           Upload
         </v-btn>
       </v-card-actions>
@@ -53,12 +36,11 @@
 </template>
 
 <script>
-import * as downloadApi from '@/api/download-api';
+import * as downloadApi from "@/api/download-api";
 
 export default {
-  name: 'FileUploadDialog',
-  components: {
-  },
+  name: "FileUploadDialog",
+  components: {},
   props: {
     value: {
       type: Boolean,
@@ -81,25 +63,25 @@ export default {
         return this.value;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit("input", value);
       },
     },
   },
   methods: {
     async submit() {
-      if (!this.$refs.form.validate()) { return; }
+      if (!this.$refs.form.validate()) {
+        return;
+      }
 
       const formData = new FormData();
-      formData.append('file', this.file);
+      formData.append("file", this.file);
 
       const response = await downloadApi.createDownload(formData);
 
-      this.$emit('submit', { file: response.data });
+      this.$emit("submit", { file: response.data });
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

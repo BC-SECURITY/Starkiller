@@ -23,7 +23,13 @@
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
               <div>
                 <tooltip-button
                   :icon="item.expandedInput ? 'fa-minus' : 'fa-plus'"
@@ -43,21 +49,34 @@
             </div>
             <p><b>Task Input:</b></p>
             <p
-              :class="'mono ' + (expandedTasks[item.uniqueId].backgroundColor === 'white' ? 'font-black' : 'font-white') "
-              :style="'background-color: ' + expandedTasks[item.uniqueId].backgroundColor + ';'"
+              :class="
+                'mono ' +
+                (expandedTasks[item.uniqueId].backgroundColor === 'white'
+                  ? 'font-black'
+                  : 'font-white')
+              "
+              :style="
+                'background-color: ' +
+                expandedTasks[item.uniqueId].backgroundColor +
+                ';'
+              "
             >
-              {{ item.expandedInput ? expandedTasks[item.uniqueId].full_input : item.input }}
+              {{
+                item.expandedInput
+                  ? expandedTasks[item.uniqueId].full_input
+                  : item.input
+              }}
             </p>
             <p><b>Task Output:</b></p>
             <div
-              v-if="item.downloads.length > 0
-                && item.downloads.some(d => d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/))"
+              v-if="
+                item.downloads.length > 0 &&
+                item.downloads.some((d) =>
+                  d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/),
+                )
+              "
             >
-              <v-btn
-                text
-                x-small
-                @click="getImagesForTask(item)"
-              >
+              <v-btn text x-small @click="getImagesForTask(item)">
                 View Images
               </v-btn>
               <div>
@@ -72,11 +91,23 @@
               </div>
             </div>
             <div
-              :class="'mono ' + (expandedTasks[item.uniqueId].backgroundColor === 'white' ? 'font-black' : 'font-white') "
-              :style="'background-color: ' + expandedTasks[item.uniqueId].backgroundColor + ';'"
+              :class="
+                'mono ' +
+                (expandedTasks[item.uniqueId].backgroundColor === 'white'
+                  ? 'font-black'
+                  : 'font-white')
+              "
+              :style="
+                'background-color: ' +
+                expandedTasks[item.uniqueId].backgroundColor +
+                ';'
+              "
             >
               <!-- TODO Option for original output -->
-              <div v-if="expandedTasks[item.uniqueId].htmlOutput" v-html="expandedTasks[item.uniqueId].htmlOutput" />
+              <div
+                v-if="expandedTasks[item.uniqueId].htmlOutput"
+                v-html="expandedTasks[item.uniqueId].htmlOutput"
+              />
               <div v-else>
                 {{ item.output }}
               </div>
@@ -85,24 +116,16 @@
         </td>
       </template>
       <template #item.status="{ item }">
-        <v-icon
-          v-if="item.status === 'pulled'"
-          color="green"
-          small
-        >
+        <v-icon v-if="item.status === 'pulled'" color="green" small>
           fa-check-square
         </v-icon>
-        <v-icon
-          v-else-if="item.status === 'queued'"
-          color="orange"
-          small
-        >
+        <v-icon v-else-if="item.status === 'queued'" color="orange" small>
           fa-clock
         </v-icon>
       </template>
       <template v-if="!agent" #item.agent_id="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'agentEdit', params: { id: item.agent_id } }"
         >
           {{ item.agent_id }}
@@ -112,7 +135,9 @@
         <span>{{ truncateMessage(item.input) }}</span>
       </template>
       <template #item.task_name="{ item }">
-        <span>{{ item.module_name == null ? item.task_name : item.module_name }}</span>
+        <span>{{
+          item.module_name == null ? item.task_name : item.module_name
+        }}</span>
       </template>
       <template #item.updated_at="{ item }">
         <date-time-display :timestamp="item.updated_at" />
@@ -128,22 +153,12 @@
       <template #item.actions="{ item }">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
-            <v-btn
-              text
-              icon
-              x-small
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn text icon x-small v-bind="attrs" v-on="on">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
-            <v-list-item
-              key="downloadInput"
-              link
-              @click="downloadInput(item)"
-            >
+            <v-list-item key="downloadInput" link @click="downloadInput(item)">
               <v-list-item-title>
                 <v-icon>fa-download</v-icon>
                 Download Input
@@ -160,11 +175,7 @@
                 Download Output
               </v-list-item-title>
             </v-list-item>
-            <v-list-item
-              key="clipboardInput"
-              link
-              @click="copyInput(item)"
-            >
+            <v-list-item key="clipboardInput" link @click="copyInput(item)">
               <v-list-item-title>
                 <v-icon>fa-paperclip</v-icon>
                 Copy Input to Clipboard
@@ -201,20 +212,20 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import moment from 'moment';
-import debounce from 'lodash.debounce';
+import Vue from "vue";
+import moment from "moment";
+import debounce from "lodash.debounce";
 // eslint-disable-next-line import/no-named-default
-import { default as AnsiUp } from 'ansi_up';
-import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
-import TooltipButton from '@/components/TooltipButton.vue';
-import TagViewer from '@/components/TagViewer.vue';
-import DownloadMixin from '@/mixins/download-stager';
-import * as downloadApi from '@/api/download-api';
-import * as agentTaskApi from '@/api/agent-task-api';
+import { default as AnsiUp } from "ansi_up";
+import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
+import TooltipButton from "@/components/TooltipButton.vue";
+import TagViewer from "@/components/TagViewer.vue";
+import DownloadMixin from "@/mixins/download-stager";
+import * as downloadApi from "@/api/download-api";
+import * as agentTaskApi from "@/api/agent-task-api";
 
 export default {
-  name: 'AgentTasksTable',
+  name: "AgentTasksTable",
   components: {
     DateTimeDisplay,
     TagViewer,
@@ -249,7 +260,7 @@ export default {
     },
     search: {
       type: String,
-      default: '',
+      default: "",
     },
     noFilters: {
       type: Boolean,
@@ -265,7 +276,7 @@ export default {
       itemsPerPage: 10,
       loading: false,
       moment,
-      sortBy: 'updated_at',
+      sortBy: "updated_at",
       sortDesc: true,
       refreshInterval: null,
       expandedTasks: {},
@@ -275,19 +286,21 @@ export default {
   computed: {
     headers() {
       return [
-        { text: 'Task ID', value: 'id', sortable: true },
-        { text: 'Status', value: 'status', sortable: true },
-        { text: 'Agent', value: 'agent_id', sortable: true },
-        { text: 'Task Input', value: 'input', sortable: false },
-        { text: 'Task Name', value: 'task_name', sortable: false },
-        { text: 'User', value: 'username', sortable: false },
-        { text: 'Updated At', value: 'updated_at', sortable: true },
+        { text: "Task ID", value: "id", sortable: true },
+        { text: "Status", value: "status", sortable: true },
+        { text: "Agent", value: "agent_id", sortable: true },
+        { text: "Task Input", value: "input", sortable: false },
+        { text: "Task Name", value: "task_name", sortable: false },
+        { text: "User", value: "username", sortable: false },
+        { text: "Updated At", value: "updated_at", sortable: true },
         {
-          text: 'Tags', value: 'tags', sortable: false, width: 400,
+          text: "Tags",
+          value: "tags",
+          sortable: false,
+          width: 400,
         },
-        { text: 'Actions', value: 'actions', sortable: false },
-      ]
-        .filter((h) => !this.hideColumns.includes(h.value));
+        { text: "Actions", value: "actions", sortable: false },
+      ].filter((h) => !this.hideColumns.includes(h.value));
     },
   },
   watch: {
@@ -337,8 +350,11 @@ export default {
     // eslint-disable-next-line no-unused-vars
     // from https://github.com/xpl/ansicolor
     stripAnsi(text) {
-      // eslint-disable-next-line no-control-regex
-      return text.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-PRZcf-nqry=><]/g, ''); // hope V8 caches the regexp
+      return text.replace(
+        // eslint-disable-next-line no-control-regex
+        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-PRZcf-nqry=><]/g,
+        "",
+      ); // hope V8 caches the regexp
     },
     isAnsi(output) {
       return this.stripAnsi(output) !== output;
@@ -347,28 +363,35 @@ export default {
       return new AnsiUp().ansi_to_html(output);
     },
     deleteTag(task, tag) {
-      agentTaskApi.deleteTag(task.agent_id, task.id, tag.id)
+      agentTaskApi
+        .deleteTag(task.agent_id, task.id, tag.id)
         .then(() => {
-          this.$set(task, 'tags', task.tags.filter((t) => t.id !== tag.id));
-          this.$emit('refresh-tags');
+          this.$set(
+            task,
+            "tags",
+            task.tags.filter((t) => t.id !== tag.id),
+          );
+          this.$emit("refresh-tags");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     updateTag(task, tag) {
-      agentTaskApi.updateTag(task.agent_id, task.id, tag)
+      agentTaskApi
+        .updateTag(task.agent_id, task.id, tag)
         .then((t) => {
           const index = task.tags.findIndex((x) => x.id === t.id);
           task.tags.splice(index, 1, t);
-          this.$emit('refresh-tags');
-          this.$snack.success('Tag updated');
+          this.$emit("refresh-tags");
+          this.$snack.success("Tag updated");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     addTag(task, tag) {
-      agentTaskApi.addTag(task.agent_id, task.id, tag)
+      agentTaskApi
+        .addTag(task.agent_id, task.id, tag)
         .then((t) => {
-          this.$set(task, 'tags', [...task.tags, t]);
-          this.$emit('refresh-tags');
+          this.$set(task, "tags", [...task.tags, t]);
+          this.$emit("refresh-tags");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
@@ -376,13 +399,13 @@ export default {
       if (task) {
         return task.length > 30 ? `${task.substr(0, 30)}...` : task;
       }
-      return '';
+      return "";
     },
     updateTaskBackgroundColor(task) {
-      if (task.backgroundColor === 'black') {
-        task.backgroundColor = 'white';
+      if (task.backgroundColor === "black") {
+        task.backgroundColor = "white";
       } else {
-        task.backgroundColor = 'black';
+        task.backgroundColor = "black";
       }
       this.expandedTasks[task.uniqueId].backgroundColor = task.backgroundColor;
 
@@ -402,10 +425,16 @@ export default {
       if (task.input) {
         if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await agentTaskApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
+          this.expandedTasks[task.uniqueId] = {
+            ...this.expandedTasks[task.uniqueId],
+            ...data,
+          };
         }
 
-        this.downloadText(this.expandedTasks[task.uniqueId].full_input, `${task.uniqueId}-input.txt`);
+        this.downloadText(
+          this.expandedTasks[task.uniqueId].full_input,
+          `${task.uniqueId}-input.txt`,
+        );
       }
     },
     downloadOutput(task) {
@@ -417,13 +446,20 @@ export default {
       if (task.input) {
         if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await agentTaskApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
+          this.expandedTasks[task.uniqueId] = {
+            ...this.expandedTasks[task.uniqueId],
+            ...data,
+          };
         }
 
         try {
-          navigator.clipboard.writeText(this.expandedTasks[task.uniqueId].full_input);
+          navigator.clipboard.writeText(
+            this.expandedTasks[task.uniqueId].full_input,
+          );
         } catch (error) {
-          this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+          this.$snack.warn(
+            "Failed to copy to clipboard. You must be on HTTPS or localhost.",
+          );
         }
       }
     },
@@ -432,7 +468,9 @@ export default {
         try {
           navigator.clipboard.writeText(task.output);
         } catch (error) {
-          this.$snack.warn('Failed to copy to clipboard. You must be on HTTPS or localhost.');
+          this.$snack.warn(
+            "Failed to copy to clipboard. You must be on HTTPS or localhost.",
+          );
         }
       }
     },
@@ -449,14 +487,19 @@ export default {
     async getImagesForTask(task) {
       if (!this.expandedTasks[task.uniqueId].imagesRetrieved) {
         const data = await agentTaskApi.getTask(task.agent_id, task.id);
-        this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data };
+        this.expandedTasks[task.uniqueId] = {
+          ...this.expandedTasks[task.uniqueId],
+          ...data,
+        };
         this.expandedTasks[task.uniqueId].imagesRetrieved = true;
       }
 
       for (let i = 0; i < task.downloads.length; i++) {
         const download = task.downloads[i];
-        if (!this.expandedTasks[task.uniqueId].downloads[download.id]?.image
-          && download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)) {
+        if (
+          !this.expandedTasks[task.uniqueId].downloads[download.id]?.image &&
+          download.filename.match(/[^/]+(jpg|jpeg|png|gif)$/)
+        ) {
           // eslint-disable-next-line
           const url = await downloadApi.getDownloadAsUrl(download.id);
           this.expandedTasks[task.uniqueId].downloads[i].image = url;
@@ -467,7 +510,11 @@ export default {
     async toggleSeeFullInput(task) {
       if (!task.expandedInput) {
         const data = await agentTaskApi.getTask(task.agent_id, task.id);
-        this.expandedTasks[task.uniqueId] = { ...this.expandedTasks[task.uniqueId], ...data, expandedInput: true };
+        this.expandedTasks[task.uniqueId] = {
+          ...this.expandedTasks[task.uniqueId],
+          ...data,
+          expandedInput: true,
+        };
         task.expandedInput = true;
       } else {
         this.expandedTasks[task.uniqueId].expandedInput = false;
@@ -488,15 +535,15 @@ export default {
         this.sortBy = value.sortBy[0];
         this.sortDesc = value.sortDesc[0];
       } else {
-        this.sortBy = 'id';
+        this.sortBy = "id";
         this.sortDesc = true;
       }
       this.debouncedGetTasks();
     },
     async getTasks() {
       if (
-        !this.noFilters
-        && (this.selectedAgents.length === 0 || this.selectedUsers.length === 0)
+        !this.noFilters &&
+        (this.selectedAgents.length === 0 || this.selectedUsers.length === 0)
       ) {
         // seems weird to do this but it would be weirder to select all agents
         // when no agents are selected. Even though the api sees no agents as all agents.
@@ -515,7 +562,7 @@ export default {
         page: this.currentPage,
         limit: this.itemsPerPage,
         sortBy: this.sortBy,
-        sortOrder: this.sortDesc ? 'desc' : 'asc',
+        sortOrder: this.sortDesc ? "desc" : "asc",
         users: this.selectedUsers,
         tags: this.selectedTags,
         search: this.search,
@@ -537,11 +584,15 @@ export default {
           task.expandedInput = true;
         }
 
-        this.expandedTasks[task.uniqueId].backgroundColor = this.expandedTasks[task.uniqueId].backgroundColor || 'black';
-        task.backgroundColor = this.expandedTasks[task.uniqueId].backgroundColor;
+        this.expandedTasks[task.uniqueId].backgroundColor =
+          this.expandedTasks[task.uniqueId].backgroundColor || "black";
+        task.backgroundColor =
+          this.expandedTasks[task.uniqueId].backgroundColor;
 
-        if (this.isAnsi(task.output || '')) {
-          this.expandedTasks[task.uniqueId].htmlOutput = this.ansiToHtml(task.output);
+        if (this.isAnsi(task.output || "")) {
+          this.expandedTasks[task.uniqueId].htmlOutput = this.ansiToHtml(
+            task.output,
+          );
         }
 
         return task;
@@ -557,7 +608,10 @@ export default {
 <style>
 .mono {
   white-space: pre-wrap;
-  font: 1.1em 'Andale Mono', Consolas, 'Courier New';
+  font:
+    1.1em "Andale Mono",
+    Consolas,
+    "Courier New";
   font-weight: bold;
   line-height: 1.6em;
   text-align: left;

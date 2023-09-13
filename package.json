@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src"
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "format": "prettier .  --write"
   },
   "main": "background.js",
   "dependencies": {
@@ -36,7 +37,9 @@
     "@vitejs/plugin-vue2": "^2.2.0",
     "@vue/eslint-config-airbnb": "^7.0.0",
     "eslint": "^8.31.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-vue": "^9.8.0",
+    "prettier": "^3.0.2",
     "sass": "~1.32",
     "unplugin-vue-components": "^0.22.12",
     "vite": "^3"

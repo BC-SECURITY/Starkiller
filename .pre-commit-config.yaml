@@ -1,7 +1,20 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
   - repo: local
     hooks:
       - id: yarn-lint
         name: yarn-lint
         entry: bash -c 'yarn lint'
+        language: system
+      - id: yarn-format
+        name: yarn-format
+        entry: bash -c 'yarn format'
         language: system

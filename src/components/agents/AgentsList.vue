@@ -12,10 +12,7 @@
     />
     <advanced-table>
       <template #filters>
-        <v-switch
-          v-model="hideStaleAgentsCheckbox"
-          label="Hide Stale Agents"
-        />
+        <v-switch v-model="hideStaleAgentsCheckbox" label="Hide Stale Agents" />
         <v-switch
           v-model="hideArchivedAgentsCheckbox"
           class="pl-4"
@@ -46,16 +43,16 @@
 </template>
 
 <script>
-import moment from 'moment';
-import { mapState } from 'vuex';
-import ListPageTop from '@/components/ListPageTop.vue';
-import ExpansionPanelFilter from '@/components/tables/ExpansionPanelFilter.vue';
-import AgentsTable from '@/components/agents/AgentsTable.vue';
-import AdvancedTable from '@/components/tables/AdvancedTable.vue';
-import * as tagApi from '@/api/tag-api';
+import moment from "moment";
+import { mapState } from "vuex";
+import ListPageTop from "@/components/ListPageTop.vue";
+import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
+import AgentsTable from "@/components/agents/AgentsTable.vue";
+import AdvancedTable from "@/components/tables/AdvancedTable.vue";
+import * as tagApi from "@/api/tag-api";
 
 export default {
-  name: 'AgentsList',
+  name: "AgentsList",
   components: {
     AdvancedTable,
     ExpansionPanelFilter,
@@ -72,13 +69,14 @@ export default {
     return {
       breads: [
         {
-          text: 'Agents',
+          text: "Agents",
           disabled: true,
-          href: '/agents',
-        }, {
-          text: 'List',
+          href: "/agents",
+        },
+        {
+          text: "List",
           disabled: true,
-          href: '/agents?tab=list-view',
+          href: "/agents?tab=list-view",
         },
       ],
       selected: [],
@@ -118,7 +116,7 @@ export default {
     },
     hideStaleAgentsCheckbox: {
       set(val) {
-        this.$store.dispatch('application/hideStaleAgents', val);
+        this.$store.dispatch("application/hideStaleAgents", val);
       },
       get() {
         return this.hideStaleAgents;
@@ -126,7 +124,7 @@ export default {
     },
     hideArchivedAgentsCheckbox: {
       set(val) {
-        this.$store.dispatch('application/hideArchivedAgents', val);
+        this.$store.dispatch("application/hideArchivedAgents", val);
       },
       get() {
         return this.hideArchivedAgents;
@@ -138,11 +136,17 @@ export default {
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({ page: 1, limit: -1, sources: 'agent' });
+      const tags = await tagApi.getTags({
+        page: 1,
+        limit: -1,
+        sources: "agent",
+      });
 
       const dedupedTags = [];
       tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find((t) => t.name === tag.name && t.value === tag.value);
+        const existingTag = dedupedTags.find(
+          (t) => t.name === tag.name && t.value === tag.value,
+        );
         if (!existingTag) {
           dedupedTags.push(tag);
         }
@@ -151,11 +155,21 @@ export default {
       this.tags = dedupedTags;
     },
     async killAgents() {
-      if (await this.$root.$confirm('Kill Agent', `Do you want to kill ${this.selected.length} agents?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Kill Agent",
+          `Do you want to kill ${this.selected.length} agents?`,
+          { color: "red" },
+        )
+      ) {
         this.selected.forEach((agent) => {
-          this.$store.dispatch('agent/killAgent', { sessionId: agent.session_id });
+          this.$store.dispatch("agent/killAgent", {
+            sessionId: agent.session_id,
+          });
         });
-        this.$snack.success(`${this.selected.length} agents tasked to run TASK_EXIT.`);
+        this.$snack.success(
+          `${this.selected.length} agents tasked to run TASK_EXIT.`,
+        );
         this.selected = [];
       }
     },
@@ -163,8 +177,14 @@ export default {
       this.$refs.agentsTable.getAgents();
     },
     async killAgent(item) {
-      if (await this.$root.$confirm('Kill Agent', `Do you want to kill agent ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('agent/killAgent', { sessionId: item.session_id });
+      if (
+        await this.$root.$confirm(
+          "Kill Agent",
+          `Do you want to kill agent ${item.name}?`,
+          { color: "red" },
+        )
+      ) {
+        this.$store.dispatch("agent/killAgent", { sessionId: item.session_id });
         this.$snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
       }
     },
@@ -172,5 +192,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

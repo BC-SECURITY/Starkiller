@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import ExpansionPanelFilter from '@/components/tables/ExpansionPanelFilter.vue';
+import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 
 export default {
-  name: 'ExpansionPanelBoolean',
+  name: "ExpansionPanelBoolean",
   components: {
     ExpansionPanelFilter,
   },
@@ -35,19 +35,20 @@ export default {
   data() {
     return {
       selectedItems: [],
-      items: [{ value: true, label: 'True' }, { value: false, label: 'False' }],
+      items: [
+        { value: true, label: "True" },
+        { value: false, label: "False" },
+      ],
     };
   },
   watch: {
     selectedItems: {
       handler(val) {
-        this.$emit('input', val);
+        this.$emit("input", val);
       },
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

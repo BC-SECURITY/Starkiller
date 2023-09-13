@@ -8,11 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 -   Add an Agent terminal to the Interact tab
+-   Add Prettier for code formatting
 
 ## [2.5.3] - 2023-08-24
 
 -   Fix elevated process icon on agent page
--   Fix input and output downloads not working 
+-   Fix input and output downloads not working
 
 ## [2.5.2] - 2023-08-09
 
@@ -73,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Add a script import button to the agent page
 -   Add a script command checkbox to the agent page
--   Modules with a 'file' type option now get a file selector/uploader instead of a text box 
+-   Modules with a 'file' type option now get a file selector/uploader instead of a text box
 
 ## [2.2.0] - 2023-03-31
 
@@ -212,7 +213,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.0] - 2020-10-12
 
--   Added real-time notifications new listeners and agents [#49](https://github.com/BC-SECURITY/Starkiller/pull/49) 
+-   Added real-time notifications new listeners and agents [#49](https://github.com/BC-SECURITY/Starkiller/pull/49)
 
 ## [1.3.2] - 2020-07-29
 

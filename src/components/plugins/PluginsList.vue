@@ -8,14 +8,10 @@
       :show-refresh="true"
       @refresh="getPlugins"
     />
-    <v-data-table
-      :headers="headers"
-      :items="plugins"
-      dense
-    >
+    <v-data-table :headers="headers" :items="plugins" dense>
       <template #item.name="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'pluginEdit', params: { id: item.id } }"
         >
           {{ item.name }}
@@ -26,11 +22,11 @@
 </template>
 
 <script>
-import ListPageTop from '@/components/ListPageTop.vue';
-import { mapState } from 'vuex';
+import ListPageTop from "@/components/ListPageTop.vue";
+import { mapState } from "vuex";
 
 export default {
-  name: 'PluginsList',
+  name: "PluginsList",
   components: {
     ListPageTop,
   },
@@ -44,18 +40,19 @@ export default {
     return {
       breads: [
         {
-          text: 'Plugins',
+          text: "Plugins",
           disabled: true,
-          href: '/plugins',
-        }, {
-          text: 'List',
+          href: "/plugins",
+        },
+        {
+          text: "List",
           disabled: true,
-          href: '/plugins?tab=list-view',
+          href: "/plugins?tab=list-view",
         },
       ],
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Description', value: 'description' },
+        { text: "Name", value: "name" },
+        { text: "Description", value: "description" },
       ],
     };
   },
@@ -69,11 +66,10 @@ export default {
   },
   methods: {
     getPlugins() {
-      this.$store.dispatch('plugin/getPlugins');
+      this.$store.dispatch("plugin/getPlugins");
     },
   },
 };
 </script>
 
-  <style>
-  </style>
+<style></style>

@@ -1,46 +1,27 @@
 <template>
   <div>
-    <portal
-      to="app-bar-extension"
-    >
-      <div style="display: flex; flex-direction: row; width:100%">
-        <v-tabs
-          v-model="tab"
-          align-with-title
-        >
-          <v-tab
-            key="list-view"
-            href="#list-view"
-          >
+    <portal to="app-bar-extension">
+      <div style="display: flex; flex-direction: row; width: 100%">
+        <v-tabs v-model="tab" align-with-title>
+          <v-tab key="list-view" href="#list-view">
             List
-            <v-icon x-small class="ml-1">
-              fa-list
-            </v-icon>
+            <v-icon x-small class="ml-1"> fa-list </v-icon>
           </v-tab>
-          <v-tab
-            key="malleable-profiles"
-            href="#malleable-profiles"
-          >
+          <v-tab key="malleable-profiles" href="#malleable-profiles">
             Malleable Profiles
-            <v-icon x-small class="ml-1">
-              fa-random
-            </v-icon>
+            <v-icon x-small class="ml-1"> fa-random </v-icon>
           </v-tab>
         </v-tabs>
       </div>
     </portal>
-    <v-tabs-items
-      v-model="tab"
-    >
+    <v-tabs-items v-model="tab">
       <v-tab-item
         key="list-view"
         :value="'list-view'"
         :transition="false"
         :reverse-transition="false"
       >
-        <v-card
-          flat
-        >
+        <v-card flat>
           <listeners-list :active="tab === 'list-view'" />
         </v-card>
       </v-tab-item>
@@ -50,9 +31,7 @@
         :transition="false"
         :reverse-transition="false"
       >
-        <v-card
-          flat
-        >
+        <v-card flat>
           <malleable-profiles-list :active="tab === 'malleable-profiles'" />
         </v-card>
       </v-tab-item>
@@ -61,18 +40,17 @@
 </template>
 
 <script>
-import ListenersList from '@/components/listeners/ListenersList.vue';
-import MalleableProfilesList from '@/components/listeners/MalleableProfilesList.vue';
+import ListenersList from "@/components/listeners/ListenersList.vue";
+import MalleableProfilesList from "@/components/listeners/MalleableProfilesList.vue";
 
 export default {
-  name: 'Listeners',
+  name: "Listeners",
   components: {
     ListenersList,
     MalleableProfilesList,
   },
   data() {
-    return {
-    };
+    return {};
   },
   computed: {
     // https://jareklipski.medium.com/linking-to-a-specific-tab-in-vuetify-js-d978525f2e1a
@@ -81,7 +59,7 @@ export default {
         this.$router.replace({ query: { ...this.$route.query, tab } });
       },
       get() {
-        return this.$route.query.tab || 'list-view';
+        return this.$route.query.tab || "list-view";
       },
     },
   },
@@ -90,13 +68,12 @@ export default {
 
 <style lang="scss">
 .warning-row {
-  background-color: #FFCCCC;
+  background-color: #ffcccc;
 }
 
-.v-data-table.theme--dark
-  .warning-row {
-    background-color: #bd4c4c;
-  }
+.v-data-table.theme--dark .warning-row {
+  background-color: #bd4c4c;
+}
 
 // Overrides vuetify.css
 // Because we moved the tabs into a div, which made the color funky.

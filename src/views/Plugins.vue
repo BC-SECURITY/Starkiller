@@ -1,46 +1,27 @@
 <template>
   <div>
-    <portal
-      to="app-bar-extension"
-    >
-      <div style="display: flex; flex-direction: row; width:100%">
-        <v-tabs
-          v-model="tab"
-          align-with-title
-        >
-          <v-tab
-            key="list-view"
-            href="#list-view"
-          >
+    <portal to="app-bar-extension">
+      <div style="display: flex; flex-direction: row; width: 100%">
+        <v-tabs v-model="tab" align-with-title>
+          <v-tab key="list-view" href="#list-view">
             List
-            <v-icon x-small class="ml-1">
-              fa-list
-            </v-icon>
+            <v-icon x-small class="ml-1"> fa-list </v-icon>
           </v-tab>
-          <v-tab
-            key="tasks"
-            href="#tasks"
-          >
+          <v-tab key="tasks" href="#tasks">
             Tasks
-            <v-icon x-small class="ml-1">
-              fa-sticky-note
-            </v-icon>
+            <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
           </v-tab>
         </v-tabs>
       </div>
     </portal>
-    <v-tabs-items
-      v-model="tab"
-    >
+    <v-tabs-items v-model="tab">
       <v-tab-item
         key="list-view"
         :value="'list-view'"
         :transition="false"
         :reverse-transition="false"
       >
-        <v-card
-          flat
-        >
+        <v-card flat>
           <plugins-list :active="tab === 'list-view'" />
         </v-card>
       </v-tab-item>
@@ -50,9 +31,7 @@
         :transition="false"
         :reverse-transition="false"
       >
-        <v-card
-          flat
-        >
+        <v-card flat>
           <plugin-tasks-list :active="tab === 'tasks'" />
         </v-card>
       </v-tab-item>
@@ -61,11 +40,11 @@
 </template>
 
 <script>
-import PluginsList from '@/components/plugins/PluginsList.vue';
-import PluginTasksList from '@/components/plugins/PluginTasksList.vue';
+import PluginsList from "@/components/plugins/PluginsList.vue";
+import PluginTasksList from "@/components/plugins/PluginTasksList.vue";
 
 export default {
-  name: 'Plugins',
+  name: "Plugins",
   components: {
     PluginsList,
     PluginTasksList,
@@ -74,14 +53,14 @@ export default {
     return {
       breads: [
         {
-          text: 'Plugins',
+          text: "Plugins",
           disabled: true,
-          href: '/plugins',
+          href: "/plugins",
         },
       ],
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Description', value: 'description' },
+        { text: "Name", value: "name" },
+        { text: "Description", value: "description" },
       ],
     };
   },
@@ -92,7 +71,7 @@ export default {
         this.$router.replace({ query: { ...this.$route.query, tab } });
       },
       get() {
-        return this.$route.query.tab || 'list-view';
+        return this.$route.query.tab || "list-view";
       },
     },
   },

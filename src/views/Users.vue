@@ -8,15 +8,11 @@
       @create="create"
       @refresh="getUsers"
     />
-    <v-data-table
-      :headers="headers"
-      :items="users"
-      dense
-    >
+    <v-data-table :headers="headers" :items="users" dense>
       <template #item.username="{ item }">
         <router-link
           v-if="isAdmin"
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'userEdit', params: { id: item.id } }"
         >
           {{ item.username }}
@@ -24,22 +20,12 @@
         <span v-else>{{ item.username }}</span>
       </template>
       <template #item.is_admin="{ item }">
-        <v-simple-checkbox
-          v-model="item.is_admin"
-          disabled
-        />
+        <v-simple-checkbox v-model="item.is_admin" disabled />
       </template>
       <template #item.actions="{ item }">
-        <v-tooltip
-          v-if="isAdmin"
-          :disabled="!item.admin"
-          top
-        >
+        <v-tooltip v-if="isAdmin" :disabled="!item.admin" top>
           <template #activator="{ on }">
-            <div
-              style="max-width: 120px"
-              v-on="on"
-            >
+            <div style="max-width: 120px" v-on="on">
               <v-switch
                 v-model="item.enabled"
                 :disabled="item.admin"
@@ -57,13 +43,13 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
-import * as userApi from '@/api/user-api';
-import moment from 'moment';
-import ListPageTop from '@/components/ListPageTop.vue';
+import { mapState, mapGetters } from "vuex";
+import * as userApi from "@/api/user-api";
+import moment from "moment";
+import ListPageTop from "@/components/ListPageTop.vue";
 
 export default {
-  name: 'Users',
+  name: "Users",
   components: {
     ListPageTop,
   },
@@ -72,15 +58,15 @@ export default {
       moment,
       breads: [
         {
-          text: 'Users',
+          text: "Users",
           disabled: true,
-          href: '/users',
+          href: "/users",
         },
       ],
       headers: [
-        { text: 'Name', value: 'username' },
-        { text: 'Is Admin', value: 'is_admin' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: "Name", value: "username" },
+        { text: "Is Admin", value: "is_admin" },
+        { text: "Actions", value: "actions", sortable: false },
       ],
     };
   },
@@ -89,7 +75,7 @@ export default {
       users: (state) => state.user.users,
     }),
     ...mapGetters({
-      isAdmin: 'application/isAdmin',
+      isAdmin: "application/isAdmin",
     }),
   },
   mounted() {
@@ -97,22 +83,19 @@ export default {
   },
   methods: {
     create() {
-      this.$router.push({ name: 'userNew' });
+      this.$router.push({ name: "userNew" });
     },
     async disableUser(item) {
-      userApi.updateUser(item)
-        .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
-          item.enabled = !item.enabled;
-        });
+      userApi.updateUser(item).catch((err) => {
+        this.$snack.error(`Error: ${err}`);
+        item.enabled = !item.enabled;
+      });
     },
     getUsers() {
-      this.$store.dispatch('user/getUsers');
+      this.$store.dispatch("user/getUsers");
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

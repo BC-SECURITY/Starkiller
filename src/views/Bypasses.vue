@@ -25,7 +25,7 @@
     >
       <template #item.name="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'bypassEdit', params: { id: item.id } }"
         >
           {{ item.name }}
@@ -37,24 +37,15 @@
       <template #item.actions="{ item }">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
-            <v-btn
-              text
-              icon
-              x-small
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn text icon x-small v-bind="attrs" v-on="on">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
-            <v-list-item
-              key="view"
-              link
-            >
+            <v-list-item key="view" link>
               <router-link
                 class="text-decoration-none"
-                style="color: inherit;"
+                style="color: inherit"
                 :to="{ name: 'bypassEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
@@ -74,11 +65,7 @@
               </v-list-item-title>
             </v-list-item>
             <v-divider class="pb-4" />
-            <v-list-item
-              key="delete"
-              link
-              @click="deleteBypass(item)"
-            >
+            <v-list-item key="delete" link @click="deleteBypass(item)">
               <v-list-item-title>
                 <v-icon>fa-trash-alt</v-icon>
                 Delete
@@ -92,13 +79,13 @@
 </template>
 
 <script>
-import moment from 'moment';
-import { mapState } from 'vuex';
-import ListPageTop from '@/components/ListPageTop.vue';
-import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
+import moment from "moment";
+import { mapState } from "vuex";
+import ListPageTop from "@/components/ListPageTop.vue";
+import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 
 export default {
-  name: 'Bypasses',
+  name: "Bypasses",
   components: {
     DateTimeDisplay,
     ListPageTop,
@@ -107,17 +94,17 @@ export default {
     return {
       breads: [
         {
-          text: 'Bypasses',
+          text: "Bypasses",
           disabled: true,
-          href: '/bypasses',
+          href: "/bypasses",
         },
       ],
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Updated At', value: 'updated_at' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: "Name", value: "name" },
+        { text: "Updated At", value: "updated_at" },
+        { text: "Actions", value: "actions", sortable: false },
       ],
-      sortBy: 'name',
+      sortBy: "name",
       sortDesc: false,
       moment,
       selected: [],
@@ -136,23 +123,35 @@ export default {
   },
   methods: {
     getBypasses() {
-      this.$store.dispatch('bypass/getBypasses');
+      this.$store.dispatch("bypass/getBypasses");
     },
     create() {
-      this.$router.push({ name: 'bypassNew' });
+      this.$router.push({ name: "bypassNew" });
     },
     view(item) {
-      this.$router.push({ name: 'bypassEdit', params: { id: item.id } });
+      this.$router.push({ name: "bypassEdit", params: { id: item.id } });
     },
     async deleteBypass(item) {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete bypass ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('bypass/deleteBypass', item.id);
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete bypass ${item.name}?`,
+          { color: "red" },
+        )
+      ) {
+        this.$store.dispatch("bypass/deleteBypass", item.id);
       }
     },
     async deleteBypasses() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} bypasses?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete ${this.selected.length} bypasses?`,
+          { color: "red" },
+        )
+      ) {
         this.selected.forEach((bypass) => {
-          this.$store.dispatch('bypass/deleteBypass', bypass.id);
+          this.$store.dispatch("bypass/deleteBypass", bypass.id);
         });
       }
     },
@@ -160,5 +159,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

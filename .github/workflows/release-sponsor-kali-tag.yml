@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'yarn'
+          cache: "yarn"
       - name: Set application version as variable
         run: |
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
@@ -62,7 +62,7 @@ jobs:
           release_name: v${{ env.TAG_NAME }}
           body: |
             ${{ steps.extract_release_notes.outputs.release_notes }}
-            
+
             ### Sponsors Only
             ${{ steps.extract_release_notes_sponsors.outputs.release_notes }}
           draft: false

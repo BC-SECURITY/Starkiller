@@ -5,7 +5,7 @@
         v-for="(line, index) in outputLines"
         :key="index"
         :class="line.cssClasses"
-        style="white-space: pre-wrap;"
+        style="white-space: pre-wrap"
         v-html="ansiToHTML(line.content)"
       />
     </div>
@@ -19,7 +19,11 @@
         @keydown="handleKeyEvents"
       />
     </div>
-    <div v-show="suggestions.length" ref="suggestionList" class="autocomplete-suggestions">
+    <div
+      v-show="suggestions.length"
+      ref="suggestionList"
+      class="autocomplete-suggestions"
+    >
       <div
         v-for="(suggestion, index) in suggestions"
         :key="index"
@@ -35,20 +39,22 @@
 </template>
 
 <script>
-import pause from '@/utils/pause';
-import * as moduleApi from '@/api/module-api';
-import * as agentTaskApi from '@/api/agent-task-api';
-import AnsiUp from 'ansi_up';
-import { mapState } from 'vuex';
-import { table } from 'table';
+import pause from "@/utils/pause";
+import * as moduleApi from "@/api/module-api";
+import * as agentTaskApi from "@/api/agent-task-api";
+import AnsiUp from "ansi_up";
+import { mapState } from "vuex";
+import { table } from "table";
 
 function fuzzyMatch(query, string) {
   const q = Array.from(query);
-  return Array.from(string).some((_, i, a) => q.every((e, j) => e === a[i + j]));
+  return Array.from(string).some((_, i, a) =>
+    q.every((e, j) => e === a[i + j]),
+  );
 }
 
 export default {
-  name: 'AgentTerminal',
+  name: "AgentTerminal",
   props: {
     agent: {
       type: Object,
@@ -57,66 +63,157 @@ export default {
   },
   data() {
     return {
-      currentInput: '',
+      currentInput: "",
       outputLines: [],
       currentModule: null,
       moduleOptions: {},
       commandHistory: [],
       historyIndex: -1,
-      moduleName: '',
+      moduleName: "",
       currentOptions: {},
       suggestions: [],
       currentSuggestionIndex: -1,
       tableConfig: {
         border: {
-          topBody: '─',
-          topJoin: '┬',
-          topLeft: '┌',
-          topRight: '┐',
+          topBody: "─",
+          topJoin: "┬",
+          topLeft: "┌",
+          topRight: "┐",
 
-          bottomBody: '─',
-          bottomJoin: '┴',
-          bottomLeft: '└',
-          bottomRight: '┘',
+          bottomBody: "─",
+          bottomJoin: "┴",
+          bottomLeft: "└",
+          bottomRight: "┘",
 
-          bodyLeft: '│',
-          bodyRight: '│',
-          bodyJoin: '│',
+          bodyLeft: "│",
+          bodyRight: "│",
+          bodyJoin: "│",
 
-          joinBody: '─',
-          joinLeft: '├',
-          joinRight: '┤',
-          joinJoin: '┼',
+          joinBody: "─",
+          joinLeft: "├",
+          joinRight: "┤",
+          joinJoin: "┼",
         },
       },
       helpCommands: [
-        { command: 'help', description: 'Display the help menu for the current menu', usage: 'help' },
-        { command: 'clear', description: 'Clear the terminal output.', usage: 'clear' },
-        { command: 'back', description: 'Return to the main menu from a module.', usage: 'back' },
-        { command: 'usemodule', description: 'Use a specific module by name.', usage: 'usemodule <module_name>' },
-        { command: 'whoami', description: 'Display current user.', usage: 'whoami' },
-        { command: 'sysinfo', description: 'Tasks the specified agent to update sysinfo.', usage: 'sysinfo' },
-        { command: 'shell', description: 'Tasks the specified agent to execute a shell command.', usage: 'shell [--literal / -l] <shell_cmd>' },
-        { command: 'ps', description: "Display the processes running on the agent's system.", usage: 'ps' },
-        { command: 'sc', description: 'Run the powershell_collection_screenshot module with Ratio set to 80.', usage: 'sc' },
-        { command: 'sherlock', description: 'PowerShell script to quickly find missing software patches for local privilege escalation vulnerabilities.', usage: 'sherlock' },
-        { command: 'socks', description: 'Create a SOCKS proxy on the specified port', usage: 'socks 1080' },
-        { command: 'revtoself', description: 'Revert to self on the existing Agent', usage: 'revtoself' },
-        { command: 'sleep', description: 'Tasks specified agent to update delay (s) and jitter (0.0 - 1.0).', usage: 'sleep <delay> <jitter>' },
+        {
+          command: "help",
+          description: "Display the help menu for the current menu",
+          usage: "help",
+        },
+        {
+          command: "clear",
+          description: "Clear the terminal output.",
+          usage: "clear",
+        },
+        {
+          command: "back",
+          description: "Return to the main menu from a module.",
+          usage: "back",
+        },
+        {
+          command: "usemodule",
+          description: "Use a specific module by name.",
+          usage: "usemodule <module_name>",
+        },
+        {
+          command: "whoami",
+          description: "Display current user.",
+          usage: "whoami",
+        },
+        {
+          command: "sysinfo",
+          description: "Tasks the specified agent to update sysinfo.",
+          usage: "sysinfo",
+        },
+        {
+          command: "shell",
+          description: "Tasks the specified agent to execute a shell command.",
+          usage: "shell [--literal / -l] <shell_cmd>",
+        },
+        {
+          command: "ps",
+          description: "Display the processes running on the agent's system.",
+          usage: "ps",
+        },
+        {
+          command: "sc",
+          description:
+            "Run the powershell_collection_screenshot module with Ratio set to 80.",
+          usage: "sc",
+        },
+        {
+          command: "sherlock",
+          description:
+            "PowerShell script to quickly find missing software patches for local privilege escalation vulnerabilities.",
+          usage: "sherlock",
+        },
+        {
+          command: "socks",
+          description: "Create a SOCKS proxy on the specified port",
+          usage: "socks 1080",
+        },
+        {
+          command: "revtoself",
+          description: "Revert to self on the existing Agent",
+          usage: "revtoself",
+        },
+        {
+          command: "sleep",
+          description:
+            "Tasks specified agent to update delay (s) and jitter (0.0 - 1.0).",
+          usage: "sleep <delay> <jitter>",
+        },
       ],
       moduleHelpCommands: [
-        { command: 'execute', description: 'Execute the selected module', usage: 'execute' },
-        { command: 'generate', description: 'Generate the selected module', usage: 'generate' },
-        { command: 'help', description: 'Display the help menu for the current menu', usage: 'help' },
-        { command: 'info', description: 'Print default info on the current record.', usage: 'info' },
-        { command: 'options', description: 'Print the current record options', usage: 'options' },
-        { command: 'set', description: 'Set a field for the current record.', usage: 'set <key> <value>' },
-        { command: 'unset', description: 'Unset a record option', usage: 'unset <key>' },
-        { command: 'clear', description: 'Clear the terminal output.', usage: 'clear' },
-        { command: 'back', description: 'Return to the main menu from a module.', usage: 'back' },
+        {
+          command: "execute",
+          description: "Execute the selected module",
+          usage: "execute",
+        },
+        {
+          command: "generate",
+          description: "Generate the selected module",
+          usage: "generate",
+        },
+        {
+          command: "help",
+          description: "Display the help menu for the current menu",
+          usage: "help",
+        },
+        {
+          command: "info",
+          description: "Print default info on the current record.",
+          usage: "info",
+        },
+        {
+          command: "options",
+          description: "Print the current record options",
+          usage: "options",
+        },
+        {
+          command: "set",
+          description: "Set a field for the current record.",
+          usage: "set <key> <value>",
+        },
+        {
+          command: "unset",
+          description: "Unset a record option",
+          usage: "unset <key>",
+        },
+        {
+          command: "clear",
+          description: "Clear the terminal output.",
+          usage: "clear",
+        },
+        {
+          command: "back",
+          description: "Return to the main menu from a module.",
+          usage: "back",
+        },
       ],
       isShellMenu: false,
-      currentDir: 'loading...',
+      currentDir: "loading...",
     };
   },
   computed: {
@@ -124,15 +221,15 @@ export default {
       allModules: (state) => state.module.modules,
     }),
     currentPrompt() {
-      const prefix = this.colorizeText('(Empire: ', 'white');
-      const suffix = this.colorizeText(' )>', 'white');
-      let body = '';
+      const prefix = this.colorizeText("(Empire: ", "white");
+      const suffix = this.colorizeText(" )>", "white");
+      let body = "";
       if (this.currentModule) {
-        body = this.colorizeText(`usemodule/${this.currentModule.id}`, 'red');
+        body = this.colorizeText(`usemodule/${this.currentModule.id}`, "red");
       } else if (this.isShellMenu) {
-        body = this.colorizeText(this.currentDir, 'green');
+        body = this.colorizeText(this.currentDir, "green");
       } else {
-        body = this.colorizeText(this.agent.session_id, 'red');
+        body = this.colorizeText(this.agent.session_id, "red");
       }
       return prefix + body + suffix;
     },
@@ -151,7 +248,7 @@ export default {
     // Autofocus on the input field
     this.$refs.inputField.focus();
     if (this.allModules?.length === 0) {
-      this.$store.dispatch('module/getModules');
+      this.$store.dispatch("module/getModules");
     }
 
     // Load the command history from local storage
@@ -171,7 +268,7 @@ export default {
         this.isShellMenu = false;
       }
       this.addLine(`${this.currentPrompt} ${this.currentInput}`);
-      this.currentInput = '';
+      this.currentInput = "";
     },
     applySuggestion(suggestion) {
       this.currentInput = suggestion;
@@ -179,24 +276,25 @@ export default {
       this.currentSuggestionIndex = 0;
     },
     handleKeyEvents(event) {
-      if (event.code === 'ArrowUp') {
+      if (event.code === "ArrowUp") {
         event.preventDefault(); // Prevent cursor from moving to beginning of input
         if (this.historyIndex > 0) {
           this.historyIndex--;
           this.currentInput = this.commandHistory[this.historyIndex];
         }
-      } else if (event.code === 'ArrowDown') {
+      } else if (event.code === "ArrowDown") {
         if (this.historyIndex < this.commandHistory.length - 1) {
           this.historyIndex++;
           this.currentInput = this.commandHistory[this.historyIndex];
         }
-      } else if (event.code === 'Tab') {
-        if (this.currentInput === '') {
+      } else if (event.code === "Tab") {
+        if (this.currentInput === "") {
           this.generateSuggestions();
         }
         event.preventDefault();
         if (this.suggestions.length > 1) {
-          this.currentSuggestionIndex = (this.currentSuggestionIndex + 1) % this.suggestions.length;
+          this.currentSuggestionIndex =
+            (this.currentSuggestionIndex + 1) % this.suggestions.length;
         } else if (this.suggestions.length === 1) {
           this.currentInput = this.suggestions[0];
           this.suggestions = [];
@@ -205,18 +303,24 @@ export default {
         // This scrolls the suggestion list if the highlighted element is not visible
         this.$nextTick(() => {
           const listElement = this.$refs.suggestionList;
-          const highlightedElement = listElement.children[this.currentSuggestionIndex];
+          const highlightedElement =
+            listElement.children[this.currentSuggestionIndex];
 
           if (highlightedElement) {
-            if (highlightedElement.offsetTop + highlightedElement.clientHeight > listElement.clientHeight) {
-              listElement.scrollTop = highlightedElement.offsetTop
-                + highlightedElement.clientHeight - listElement.clientHeight;
+            if (
+              highlightedElement.offsetTop + highlightedElement.clientHeight >
+              listElement.clientHeight
+            ) {
+              listElement.scrollTop =
+                highlightedElement.offsetTop +
+                highlightedElement.clientHeight -
+                listElement.clientHeight;
             } else if (highlightedElement.offsetTop < listElement.scrollTop) {
               listElement.scrollTop = highlightedElement.offsetTop;
             }
           }
         });
-      } else if (event.code === 'Space') {
+      } else if (event.code === "Space") {
         if (this.currentSuggestionIndex !== -1) {
           event.preventDefault();
           this.currentInput = this.suggestions[this.currentSuggestionIndex];
@@ -232,21 +336,30 @@ export default {
       }
       const query = this.currentInput.toLowerCase().trim();
 
-      const queryParts = query.split(' ');
+      const queryParts = query.split(" ");
       let moduleSuggestions = [];
       let commandSuggestions = [];
 
-      if (query.startsWith('usemodule')) {
-        const partialModuleName = query.replace('usemodule', '').trim();
-        const matchingModules = this
-          .allModules
-          .filter((module) => fuzzyMatch(partialModuleName, module.id.toLowerCase()));
-        moduleSuggestions = matchingModules.map((module) => `usemodule ${module.id}`);
+      if (query.startsWith("usemodule")) {
+        const partialModuleName = query.replace("usemodule", "").trim();
+        const matchingModules = this.allModules.filter((module) =>
+          fuzzyMatch(partialModuleName, module.id.toLowerCase()),
+        );
+        moduleSuggestions = matchingModules.map(
+          (module) => `usemodule ${module.id}`,
+        );
       }
       if (this.currentModule) {
-        if (queryParts[0] === 'set' || queryParts[0] === 'unset') {
+        if (queryParts[0] === "set" || queryParts[0] === "unset") {
           moduleSuggestions = Object.keys(this.moduleOptions)
-            .filter((option) => option !== 'Agent' && fuzzyMatch((queryParts[1] || '').toLowerCase(), option.toLowerCase()))
+            .filter(
+              (option) =>
+                option !== "Agent" &&
+                fuzzyMatch(
+                  (queryParts[1] || "").toLowerCase(),
+                  option.toLowerCase(),
+                ),
+            )
             .map((option) => `${queryParts[0]} ${option}`);
         }
         commandSuggestions = this.moduleHelpCommands
@@ -260,7 +373,9 @@ export default {
           .map((command) => command);
       }
 
-      this.suggestions = [...new Set([...moduleSuggestions, ...commandSuggestions])];
+      this.suggestions = [
+        ...new Set([...moduleSuggestions, ...commandSuggestions]),
+      ];
     },
     processCommand() {
       // If the suggestion list is open, then apply the suggestion instead of processing the command
@@ -273,9 +388,9 @@ export default {
 
       // Check if the input is empty and just add an empty line if so
       if (!this.currentInput.trim()) {
-        this.addLine('');
+        this.addLine("");
         this.addLine(this.currentPrompt);
-        this.currentInput = '';
+        this.currentInput = "";
         return;
       }
 
@@ -284,71 +399,75 @@ export default {
 
       // First, display the current input in the terminal with the prompt
       this.addLine(`${this.currentPrompt} ${this.currentInput}`);
-      const commandParts = this.currentInput.split(' ');
+      const commandParts = this.currentInput.split(" ");
       const command = commandParts[0];
       const args = commandParts.slice(1);
 
       if (this.isShellMenu) {
         this.shellCommandOperator(this.currentInput);
-      } else if (command === 'back') {
+      } else if (command === "back") {
         if (this.currentModule) {
           this.currentModule = null;
         } else {
-          this.addLine('Already at the main menu.');
+          this.addLine("Already at the main menu.");
         }
-      } else if (this.currentInput === 'options') {
+      } else if (this.currentInput === "options") {
         if (this.currentModule) {
           this.displayAllOptionValues();
         } else {
-          this.addLine('No module is currently selected.');
+          this.addLine("No module is currently selected.");
         }
-      } else if (this.currentModule && Object.keys(this.moduleOptions).includes(this.currentInput)) {
+      } else if (
+        this.currentModule &&
+        Object.keys(this.moduleOptions).includes(this.currentInput)
+      ) {
         this.displayOptionValue(this.currentInput);
       } else if (!this.currentModule) {
         switch (command) {
-          case 'whoami':
-            this.runShellCommand('whoami');
+          case "whoami":
+            this.runShellCommand("whoami");
             break;
-          case 'usemodule':
+          case "usemodule":
             this.useModule(args[0]);
             break;
-          case 'sysinfo':
+          case "sysinfo":
             this.getSysInfo();
             break;
-          case 'shell':
+          case "shell":
             if (args.length < 1) {
               this.isShellMenu = true;
               this.updateCurrentDirectory();
               this.addInfo(`Shell session started on ${this.agent.session_id}`);
-              this.addInfo('Exit shell menu with Ctrl+C.');
+              this.addInfo("Exit shell menu with Ctrl+C.");
             } else {
-              this.runShellCommand(commandParts.slice(1).join(' '));
+              this.runShellCommand(commandParts.slice(1).join(" "));
             }
             break;
-          case 'ps':
-            this.runShellCommand('ps');
+          case "ps":
+            this.runShellCommand("ps");
             break;
-          case 'sc':
+          case "sc":
             this.executeScreenshotModule();
             break;
-          case 'set':
-            this.setModuleOption(args[0], args.slice(1).join(' '));
+          case "set":
+            this.setModuleOption(args[0], args.slice(1).join(" "));
             break;
-          case 'sherlock':
+          case "sherlock":
             this.executeSherlockModule();
             break;
-          case 'revtoself':
+          case "revtoself":
             this.executeRevToSelfModule();
             break;
-          case 'execute':
+          case "execute":
             this.executeCurrentModule();
             break;
-          case 'socks':
-            if (this.agent.language === 'ironpython') {
+          case "socks":
+            if (this.agent.language === "ironpython") {
               // Use port 1080 as a default if no argument is provided
               const port = args.length > 0 ? args[0] : 1080;
               // Execute the SOCKS proxy for IronPython agent
-              agentTaskApi.createSocksProxy(this.agent.session_id, port)
+              agentTaskApi
+                .createSocksProxy(this.agent.session_id, port)
                 .then(() => {
                   this.addInfo(`SOCKS proxy created on port ${port}`);
                 })
@@ -356,24 +475,28 @@ export default {
                   this.addError(`Error creating SOCKS proxy: ${error.message}`);
                 });
             } else {
-              this.addError('Use Invoke-Socks Proxy module for non-Ironpython Agents.');
+              this.addError(
+                "Use Invoke-Socks Proxy module for non-Ironpython Agents.",
+              );
             }
             break;
-          case 'sleep':
+          case "sleep":
             if (args.length < 2) {
-              this.addError('Invalid command. Usage: sleep <delay> <jitter>');
+              this.addError("Invalid command. Usage: sleep <delay> <jitter>");
             } else {
               const [delay, jitter] = args;
               agentTaskApi.updateSleep(this.agent.session_id, delay, jitter);
-              this.addLine(`Tasked agent to sleep delay/jitter ${delay}/${jitter}`);
+              this.addLine(
+                `Tasked agent to sleep delay/jitter ${delay}/${jitter}`,
+              );
             }
             break;
           default:
             switch (this.currentInput) {
-              case 'help':
+              case "help":
                 this.displayHelpMenu();
                 break;
-              case 'clear':
+              case "clear":
                 this.outputLines = [];
                 break;
               default:
@@ -384,24 +507,24 @@ export default {
       } else {
         // Module-specific commands
         switch (command) {
-          case 'set':
-            this.setModuleOption(args[0], args.slice(1).join(' '));
+          case "set":
+            this.setModuleOption(args[0], args.slice(1).join(" "));
             break;
-          case 'execute':
+          case "execute":
             this.executeCurrentModule();
             break;
-          case 'unset':
+          case "unset":
             this.unsetModuleOption(args[0]);
             break;
-          case 'generate':
+          case "generate":
             this.executeCurrentModule();
             break;
           default:
             switch (this.currentInput) {
-              case 'help':
+              case "help":
                 this.displayHelpMenu();
                 break;
-              case 'clear':
+              case "clear":
                 this.outputLines = [];
                 break;
               default:
@@ -415,15 +538,17 @@ export default {
         this.commandHistory.push(this.currentInput);
         this.historyIndex = this.commandHistory.length;
       }
-      this.currentInput = '';
+      this.currentInput = "";
     },
     unsetModuleOption(optionName) {
       if (!this.currentModule) {
-        this.addError('No module is currently selected.');
+        this.addError("No module is currently selected.");
         return;
       }
       if (!this.moduleOptions[optionName]) {
-        this.addError(`Option "${optionName}" not found in module ${this.currentModule.name}.`);
+        this.addError(
+          `Option "${optionName}" not found in module ${this.currentModule.name}.`,
+        );
         return;
       }
       this.moduleOptions[optionName].value = null;
@@ -433,7 +558,7 @@ export default {
       try {
         const agentName = this.agent.session_id;
         const task = await moduleApi.executeModule(
-          'powershell_credentials_tokens',
+          "powershell_credentials_tokens",
           {
             RevToSelf: true,
             Agent: agentName,
@@ -443,7 +568,7 @@ export default {
         );
 
         this.pollForResult(task.id);
-        this.addInfo('RevToSelf module executed');
+        this.addInfo("RevToSelf module executed");
       } catch (error) {
         this.addError(`Error executing command: ${error.message}`);
       }
@@ -452,7 +577,7 @@ export default {
       try {
         const agentName = this.agent.session_id;
         const task = await moduleApi.executeModule(
-          'powershell_privesc_sherlock',
+          "powershell_privesc_sherlock",
           {
             Agent: agentName,
           },
@@ -461,29 +586,37 @@ export default {
         );
 
         this.pollForResult(task.id);
-        this.addInfo('Sherlock module executed');
+        this.addInfo("Sherlock module executed");
       } catch (error) {
         this.addError(`Error executing command: ${error.message}`);
       }
     },
     async runShellCommand(command) {
       if (!this.agent || !this.agent.session_id) {
-        this.addError('Error: agent data is not available.');
+        this.addError("Error: agent data is not available.");
         return;
       }
 
-      const isLiteral = command.startsWith('--literal') || command.startsWith('-l');
+      const isLiteral =
+        command.startsWith("--literal") || command.startsWith("-l");
       if (isLiteral) {
-        command = command.replace('--literal', '').replace('-l', '').trim();
+        command = command.replace("--literal", "").replace("-l", "").trim();
       }
       try {
-        const task = await agentTaskApi.shell(this.agent.session_id, command, isLiteral);
+        const task = await agentTaskApi.shell(
+          this.agent.session_id,
+          command,
+          isLiteral,
+        );
         this.pollForResult(task.id);
       } catch (error) {
         this.addError(`Error executing command: ${error.message}`);
       }
     },
-    async pollForResult(taskId, config = { print: true, attempts: 30, delay: 5000 }) {
+    async pollForResult(
+      taskId,
+      config = { print: true, attempts: 30, delay: 5000 },
+    ) {
       if (!config.attempts) config.attempts = 30;
       if (!config.delay) config.delay = 5000;
       let res = null;
@@ -494,15 +627,15 @@ export default {
         // eslint-disable-next-line no-await-in-loop
         res = await this.checkTaskComplete(taskId);
         if (res) {
-          if (!res.toLowerCase().includes('job started')) {
+          if (!res.toLowerCase().includes("job started")) {
             if (config.print) {
-              this.addLine(res, 'indent-5-spaces');
+              this.addLine(res, "indent-5-spaces");
             }
             complete = true;
             break;
           } else if (!hasPrintedJobStarted) {
             // Print 'Job Started' only once
-            this.addLine(res, 'indent-5-spaces');
+            this.addLine(res, "indent-5-spaces");
             hasPrintedJobStarted = true;
           }
         }
@@ -519,44 +652,52 @@ export default {
       return res;
     },
     getDirectoryCommand() {
-      if (this.agent.language === 'python') {
-        return 'echo $PWD';
+      if (this.agent.language === "python") {
+        return "echo $PWD";
       }
-      if (this.agent.language === 'ironpython') {
-        return 'cd .';
+      if (this.agent.language === "ironpython") {
+        return "cd .";
       }
-      return '(Resolve-Path .\\).Path';
+      return "(Resolve-Path .\\).Path";
     },
     async updateCurrentDirectory() {
-      this.currentDir = 'loading...';
-      const response = await agentTaskApi
-        .shell(this.agent.session_id, this.getDirectoryCommand());
+      this.currentDir = "loading...";
+      const response = await agentTaskApi.shell(
+        this.agent.session_id,
+        this.getDirectoryCommand(),
+      );
 
       const complete = await this.pollForResult(response.id);
 
       if (complete) {
         // eslint-disable-next-line prefer-destructuring
-        this.currentDir = (await this.checkTaskComplete(response.id)).split('\r')[0];
+        this.currentDir = (await this.checkTaskComplete(response.id)).split(
+          "\r",
+        )[0];
       }
     },
     // This is for when in the shell menu.
     // The other function is for when not in the shell menu.
     async shellCommandOperator(stdin) {
       let response = null;
-      if (stdin.trim() === 'sysinfo') {
+      if (stdin.trim() === "sysinfo") {
         response = await agentTaskApi.sysinfo(this.agent.session_id);
       } else {
-        response = await agentTaskApi.shell(this.agent.session_id, stdin, false);
+        response = await agentTaskApi.shell(
+          this.agent.session_id,
+          stdin,
+          false,
+        );
       }
 
       const complete = await this.pollForResult(response.id, { print: false });
 
-      if (['cd', 'set-location'].includes(stdin.toLowerCase().split(' ')[0])) {
+      if (["cd", "set-location"].includes(stdin.toLowerCase().split(" ")[0])) {
         this.updateCurrentDirectory();
       }
 
       if (complete) {
-        this.addLine(complete, 'indent-5-spaces');
+        this.addLine(complete, "indent-5-spaces");
       }
     },
     async checkTaskComplete(taskId) {
@@ -571,15 +712,15 @@ export default {
         return false;
       }
     },
-    addLine(content, cssClasses = 'preserve-newlines') {
+    addLine(content, cssClasses = "preserve-newlines") {
       this.outputLines.push({ content, cssClasses });
       this.scrollToBottom();
     },
     addError(content) {
-      this.addLine(content, 'error-text');
+      this.addLine(content, "error-text");
     },
     addInfo(content) {
-      this.addLine(content, 'info-text');
+      this.addLine(content, "info-text");
     },
     scrollToBottom() {
       this.$nextTick(() => {
@@ -588,8 +729,8 @@ export default {
       });
     },
     displayTable(tableText) {
-      tableText.split('\n').forEach((line) => {
-        this.addLine(line, 'indent-5-spaces');
+      tableText.split("\n").forEach((line) => {
+        this.addLine(line, "indent-5-spaces");
       });
     },
     ansiToHTML(input) {
@@ -600,7 +741,9 @@ export default {
       return output;
     },
     async useModule(moduleName) {
-      const moduleData = this.allModules.find((module) => module.id === moduleName);
+      const moduleData = this.allModules.find(
+        (module) => module.id === moduleName,
+      );
 
       if (!moduleData) {
         this.addError(`Module with name '${moduleName}' not found.`);
@@ -611,26 +754,42 @@ export default {
       this.moduleOptions = moduleData.options || {};
       this.currentOptions = { ...this.moduleOptions };
 
-      this.addLine(`${this.colorizeText('Module:', 'green')} ${moduleData.name}`, 'indent-5-spaces');
-      this.addLine(`${this.colorizeText('Description:', 'green')} ${moduleData.description}`, 'indent-5-spaces');
+      this.addLine(
+        `${this.colorizeText("Module:", "green")} ${moduleData.name}`,
+        "indent-5-spaces",
+      );
+      this.addLine(
+        `${this.colorizeText("Description:", "green")} ${
+          moduleData.description
+        }`,
+        "indent-5-spaces",
+      );
       this.displayModuleOptions();
     },
     displayModuleOptions() {
       this.moduleOptions.Agent.value = this.agent.session_id;
 
-      const modifiedConfig = { ...this.tableConfig, columns: { 1: { width: 20 }, 2: { width: 8 }, 3: { width: 40 } } };
+      const modifiedConfig = {
+        ...this.tableConfig,
+        columns: { 1: { width: 20 }, 2: { width: 8 }, 3: { width: 40 } },
+      };
       const tableData = [
         [
-          this.colorizeText('Option Name', 'green'),
-          this.colorizeText('Value', 'green'),
-          this.colorizeText('Required', 'green'),
-          this.colorizeText('Description', 'green'),
+          this.colorizeText("Option Name", "green"),
+          this.colorizeText("Value", "green"),
+          this.colorizeText("Required", "green"),
+          this.colorizeText("Description", "green"),
         ],
       ];
 
       Object.entries(this.moduleOptions).forEach(([optionName, optionData]) => {
-        if (optionName !== 'Agent') {
-          tableData.push([optionName, optionData.value, optionData.required, optionData.description]);
+        if (optionName !== "Agent") {
+          tableData.push([
+            optionName,
+            optionData.value,
+            optionData.required,
+            optionData.description,
+          ]);
         }
       });
 
@@ -640,8 +799,8 @@ export default {
     },
     displayOptionValue(optionName) {
       const option = this.moduleOptions[optionName];
-      const value = option && option.value ? option.value : 'N/A';
-      this.addLine(`${this.colorizeText(optionName, 'green')}: ${value}`);
+      const value = option && option.value ? option.value : "N/A";
+      this.addLine(`${this.colorizeText(optionName, "green")}: ${value}`);
     },
     displayAllOptionValues() {
       Object.keys(this.currentOptions).forEach((optionName) => {
@@ -650,15 +809,17 @@ export default {
     },
     setModuleOption(optionName, value) {
       if (!this.currentModule) {
-        this.addError('No module is currently selected.');
+        this.addError("No module is currently selected.");
         return;
       }
       if (!this.moduleOptions[optionName]) {
-        this.addError(`Option "${optionName}" not found in module ${this.currentModule.name}.`);
+        this.addError(
+          `Option "${optionName}" not found in module ${this.currentModule.name}.`,
+        );
         return;
       }
-      if (optionName === 'Agent') {
-        this.addError('Error: Cannot set the Agent option.');
+      if (optionName === "Agent") {
+        this.addError("Error: Cannot set the Agent option.");
         return;
       }
       this.moduleOptions[optionName].value = value;
@@ -666,7 +827,7 @@ export default {
     },
     async executeCurrentModule() {
       if (!this.currentModule) {
-        this.addError('No module is currently selected.');
+        this.addError("No module is currently selected.");
         return;
       }
 
@@ -674,19 +835,27 @@ export default {
         .filter(([_, option]) => option.required && !option.value)
         .map(([optionName, _]) => optionName);
       if (missingOptions.length > 0) {
-        this.addError(`Missing required options: ${missingOptions.join(', ')}`);
+        this.addError(`Missing required options: ${missingOptions.join(", ")}`);
         return;
       }
 
       this.addInfo(`Executing module ${this.currentModule.name}...`);
       try {
-        const transformedOptions = Object.entries(this.moduleOptions).reduce((acc, [key, option]) => {
-          acc[key] = option.value;
-          return acc;
-        }, {});
+        const transformedOptions = Object.entries(this.moduleOptions).reduce(
+          (acc, [key, option]) => {
+            acc[key] = option.value;
+            return acc;
+          },
+          {},
+        );
         let task;
         try {
-          task = await moduleApi.executeModule(this.currentModule.id, transformedOptions, false, false);
+          task = await moduleApi.executeModule(
+            this.currentModule.id,
+            transformedOptions,
+            false,
+            false,
+          );
         } catch (error) {
           this.addError(`Error executing module: ${error.error}`);
           return;
@@ -707,12 +876,15 @@ export default {
         this.helpCommands = this.moduleHelpCommands;
       }
 
-      const modifiedConfig = { ...this.tableConfig, columns: { 1: { width: 40 }, 2: { width: 30 } } };
+      const modifiedConfig = {
+        ...this.tableConfig,
+        columns: { 1: { width: 40 }, 2: { width: 30 } },
+      };
       const tableData = [
         [
-          this.colorizeText('Command', 'green'),
-          this.colorizeText('Description', 'green'),
-          this.colorizeText('Usage', 'green'),
+          this.colorizeText("Command", "green"),
+          this.colorizeText("Description", "green"),
+          this.colorizeText("Usage", "green"),
         ],
       ];
 
@@ -721,24 +893,24 @@ export default {
       });
       this.displayTable(table(tableData, modifiedConfig));
     },
-    colorizeText(text, color = '') {
-      let colorCode = '';
-      const boldCode = '\u001b[1m';
+    colorizeText(text, color = "") {
+      let colorCode = "";
+      const boldCode = "\u001b[1m";
       switch (color.toLowerCase()) {
-        case 'red':
-          colorCode = '\u001b[91m';
+        case "red":
+          colorCode = "\u001b[91m";
           break;
-        case 'green':
-          colorCode = '\u001b[92m';
+        case "green":
+          colorCode = "\u001b[92m";
           break;
-        case 'blue':
-          colorCode = '\u001b[94m';
+        case "blue":
+          colorCode = "\u001b[94m";
           break;
-        case 'yellow':
-          colorCode = '\u001b[93m';
+        case "yellow":
+          colorCode = "\u001b[93m";
           break;
-        case 'white':
-          colorCode = '\u001b[97m';
+        case "white":
+          colorCode = "\u001b[97m";
           break;
         default:
           return text;
@@ -749,7 +921,7 @@ export default {
       try {
         const agentName = this.agent.session_id;
         const task = await moduleApi.executeModule(
-          'powershell_collection_screenshot',
+          "powershell_collection_screenshot",
           {
             Ratio: 80,
             Agent: agentName,
@@ -759,7 +931,7 @@ export default {
         );
 
         this.pollForResult(task.id);
-        this.addInfo('Screenshot saved to downloads');
+        this.addInfo("Screenshot saved to downloads");
       } catch (error) {
         this.addError(`Error executing command: ${error.message}`);
       }
@@ -770,13 +942,13 @@ export default {
 
 <style lang="scss" scoped>
 .terminal-container {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   font-size: 14px;
   max-height: 55vh;
   padding: 10px;
-  background-color: #424242FC;
+  background-color: #424242fc;
   color: white;
-  border: 1px solid #57D9A3;
+  border: 1px solid #57d9a3;
   overflow: auto;
 }
 
@@ -798,7 +970,7 @@ export default {
 }
 
 .error-text {
-  color: #FF0000;  /* ANSI red */
+  color: #ff0000; /* ANSI red */
   font-weight: bold;
   margin-right: 5px;
 }
@@ -807,7 +979,7 @@ export default {
 }
 
 .info-text {
-  color: #009dff;  /* ANSI red */
+  color: #009dff; /* ANSI red */
   font-weight: bold;
   margin-right: 5px;
 }
@@ -816,15 +988,15 @@ export default {
 }
 
 .prompt {
-  color: #FF0000;  /* ANSI red */
-  font-weight: bold;  /* make text bold */
+  color: #ff0000; /* ANSI red */
+  font-weight: bold; /* make text bold */
   margin-right: 5px;
 }
 
 .autocomplete-suggestions {
   position: absolute;
-  background-color: #3C3F43;
-  border: 1px solid #57D9A3;
+  background-color: #3c3f43;
+  border: 1px solid #57d9a3;
   border-radius: 5px;
   z-index: 1;
   max-height: 150px;
@@ -842,7 +1014,7 @@ export default {
 }
 
 .suggestion:hover {
-  background-color: #3C3F43;
+  background-color: #3c3f43;
 }
 
 .empire-text {
@@ -859,7 +1031,7 @@ export default {
 }
 
 .highlighted {
-  background-color: #007BFF;
+  background-color: #007bff;
   color: white;
 }
 </style>

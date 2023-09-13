@@ -1,19 +1,16 @@
 <template>
   <div>
-    <chat
-      v-if="socket && isChatWidget"
-      :socket="socket"
-    />
+    <chat v-if="socket && isChatWidget" :socket="socket" />
   </div>
 </template>
 
 <script>
-import io from 'socket.io-client';
-import { mapState, mapGetters } from 'vuex';
-import Chat from '@/components/Chat.vue';
+import io from "socket.io-client";
+import { mapState, mapGetters } from "vuex";
+import Chat from "@/components/Chat.vue";
 
 export default {
-  name: 'SocketNotifications',
+  name: "SocketNotifications",
   components: {
     Chat,
   },
@@ -28,10 +25,10 @@ export default {
       plugins: (state) => state.plugin.plugins,
     }),
     ...mapGetters({
-      isLoggedIn: 'application/isLoggedIn',
-      isChatWidget: 'application/isChatWidget',
-      socketUrl: 'application/socketUrl',
-      token: 'application/token',
+      isLoggedIn: "application/isLoggedIn",
+      isChatWidget: "application/isChatWidget",
+      socketUrl: "application/socketUrl",
+      token: "application/token",
     }),
   },
   watch: {
@@ -62,7 +59,7 @@ export default {
   },
   methods: {
     connect() {
-      console.log('Opening Socket');
+      console.log("Opening Socket");
       this.socket = io(`${this.socketUrl}`, {
         reconnection: true,
         reconnectionAttempts: 10,
@@ -74,37 +71,39 @@ export default {
       });
     },
     disconnect() {
-      console.log('Closing Socket');
+      console.log("Closing Socket");
       this.socket.close();
       this.socket = null;
     },
     setHandlers() {
-      console.warn('setting handlers');
-      this.socket.on('listeners/new', (data) => {
+      console.warn("setting handlers");
+      this.socket.on("listeners/new", (data) => {
         this.$snack.info({
           text: `New Listener '${data.name}' started!`,
-          buttonText: 'View',
+          buttonText: "View",
           showButton: true,
-          buttonAction: () => this.$router.push({
-            name: 'listenerEdit',
-            params: { id: data.name },
-          }),
+          buttonAction: () =>
+            this.$router.push({
+              name: "listenerEdit",
+              params: { id: data.name },
+            }),
           dismissable: true,
         });
-        this.$store.dispatch('listener/addListener', data);
+        this.$store.dispatch("listener/addListener", data);
       });
-      this.socket.on('agents/new', (data) => {
+      this.socket.on("agents/new", (data) => {
         this.$snack.info({
           text: `New Agent '${data.session_id}' callback!`,
-          buttonText: 'View',
+          buttonText: "View",
           showButton: true,
-          buttonAction: () => this.$router.push({
-            name: 'agentEdit',
-            params: { id: data.session_id },
-          }),
+          buttonAction: () =>
+            this.$router.push({
+              name: "agentEdit",
+              params: { id: data.session_id },
+            }),
           dismissable: true,
         });
-        this.$store.dispatch('agent/addAgent', data);
+        this.$store.dispatch("agent/addAgent", data);
       });
       this.plugins.forEach((plugin) => {
         this.socket.on(`plugins/${plugin.name}/notifications`, (data) => {
@@ -114,12 +113,12 @@ export default {
           });
         });
       });
-      this.socket.on('reconnect_failed', () => {
-        console.log('Failed to connect to SocketIO');
-        this.$snack.error('Failed to connect to SocketIO');
+      this.socket.on("reconnect_failed", () => {
+        console.log("Failed to connect to SocketIO");
+        this.$snack.error("Failed to connect to SocketIO");
       });
-      this.socket.on('connect_error', () => {
-        console.log('SocketIO Connection Error, retrying.');
+      this.socket.on("connect_error", () => {
+        console.log("SocketIO Connection Error, retrying.");
         // a bit too noisy to popup on every reconnect attempt.
         // this.$snack.warn('SocketIO Connection Error, retrying.');
       });
@@ -129,16 +128,19 @@ export default {
       // });
     },
     getColorForPluginMessage(message) {
-      if (message.startsWith('[!]')) {
-        return 'error';
-      } if (message.startsWith('[*]')) {
-        return '';
-      } if (message.startsWith('[>]')) {
-        return 'warning';
-      } if (message.startsWith('[+]')) {
-        return 'success';
+      if (message.startsWith("[!]")) {
+        return "error";
       }
-      return '';
+      if (message.startsWith("[*]")) {
+        return "";
+      }
+      if (message.startsWith("[>]")) {
+        return "warning";
+      }
+      if (message.startsWith("[+]")) {
+        return "success";
+      }
+      return "";
     },
   },
 };

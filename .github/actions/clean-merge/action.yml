@@ -1,14 +1,14 @@
-name: 'Clean Merge'
-description: 'Merge a branch into another branch without creating a merge commit. Fail if the merge would create merge conflicts.'
+name: "Clean Merge"
+description: "Merge a branch into another branch without creating a merge commit. Fail if the merge would create merge conflicts."
 inputs:
   from-branch:
-    description: 'The branch to merge from'
+    description: "The branch to merge from"
     required: true
   to-branch:
-    description: 'The branch to merge to'
+    description: "The branch to merge to"
     required: true
   push-repo:
-    description: 'The remote to push to'
+    description: "The remote to push to"
     required: true
 runs:
   using: "composite"
@@ -25,7 +25,7 @@ runs:
         git submodule foreach --recursive git reset --hard
         git submodule update --init --recursive
     - name: Merge ${{ inputs.from-branch }} branch to ${{ inputs.to-branch }}
-      shell: '/bin/bash {0}'
+      shell: "/bin/bash {0}"
       run: |
         git merge --no-edit ${{ inputs.from-branch }}
         if [ $? -ne 0 ]; then
