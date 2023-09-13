@@ -22,6 +22,7 @@
     "semver": "^7.3.5",
     "socket.io-client": "^4.1.2",
     "splitpanes": "^2.3.8",
+    "table": "^6.8.1",
     "uuid": "^8.3.2",
     "vue": "2.7",
     "vue-beautiful-chat": "^2.5.0",

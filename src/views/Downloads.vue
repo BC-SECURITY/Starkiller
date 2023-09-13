@@ -299,7 +299,6 @@ export default {
       this.$refs.uploader.click();
     },
     async onFileChanged(e) {
-      // eslint-disable-next-line prefer-destructuring
       this.selectedFile = e.target.files[0];
 
       const data = new FormData();
@@ -318,9 +317,7 @@ export default {
       this.itemsPerPage = value.itemsPerPage;
 
       if (value.sortBy.length > 0) {
-        // eslint-disable-next-line prefer-destructuring
         this.sortBy = value.sortBy[0];
-        // eslint-disable-next-line prefer-destructuring
         this.sortDesc = value.sortDesc[0];
       } else {
         this.sortBy = 'updated_at';

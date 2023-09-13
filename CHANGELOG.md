@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Add an Agent terminal to the Interact tab
+
 ## [2.5.3] - 2023-08-24
 
 -   Fix elevated process icon on agent page

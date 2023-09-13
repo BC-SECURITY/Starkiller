@@ -15,7 +15,7 @@
             >
               Interact
               <v-icon x-small class="ml-1">
-                fa-terminal
+                fa-arrow-pointer
               </v-icon>
             </v-tab>
             <v-tab
@@ -158,12 +158,6 @@
           </div>
         </div>
       </portal>
-      <tag-viewer
-        :tags="agent.tags"
-        @update-tag="updateTag"
-        @delete-tag="deleteTag"
-        @new-tag="addTag"
-      />
       <error-state-alert
         v-if="errorState"
         :resource-id="id"
@@ -195,12 +189,40 @@
                   v-if="initialized && !archived"
                   flat
                 >
-                  <agent-interact :agent="agent" />
-                  <v-divider />
-                  <h4 class="pl-4 pt-2">
-                    Execute Module
-                  </h4>
-                  <agent-execute-module :agents="[agent.session_id]" />
+                  <v-tabs
+                    v-model="interactTab"
+                    :height="30"
+                    align-with-title
+                  >
+                    <v-tab key="form" href="#form">
+                      Form
+                      <v-icon x-small class="ml-1">
+                        fa-list-check
+                      </v-icon>
+                    </v-tab>
+                    <v-tab key="terminal" href="#terminal">
+                      Terminal (Beta)
+                      <v-icon x-small class="ml-1">
+                        fa-terminal
+                      </v-icon>
+                    </v-tab>
+                  </v-tabs>
+                  <v-tabs-items v-model="interactTab">
+                    <v-tab-item key="form" :value="'form'" :transition="false" :reverse-transition="false">
+                      <agent-interact :agent="agent" />
+                      <v-divider />
+                      <h4 class="pl-4 pt-2">
+                        Execute Module
+                      </h4>
+                      <agent-execute-module :agents="[agent.session_id]" />
+                    </v-tab-item>
+                    <v-tab-item key="terminal" style="height: 75vh" :value="'terminal'" :transition="false" :reverse-transition="false">
+                      <agent-terminal
+                        class="mt-2"
+                        :agent="agent"
+                      />
+                    </v-tab-item>
+                  </v-tabs-items>
                 </v-card>
                 <v-card
                   v-else-if="initialized && archived"
@@ -254,6 +276,7 @@
                   <agent-form
                     :read-only="initialized && archived"
                     :agent="agent"
+                    @refresh-agent="getAgent(id)"
                   />
                 </v-card>
               </v-tab-item>
@@ -278,13 +301,13 @@ import AgentInteract from '@/components/agents/AgentInteract.vue';
 import AgentTasksList from '@/components/agents/AgentTasksList.vue';
 import AgentExecuteModule from '@/components/agents/AgentExecuteModule.vue';
 import AgentFileBrowser from '@/components/agents/AgentFileBrowser.vue';
+import AgentTerminal from '@/components/agents/AgentTerminal.vue';
 import AgentUploadDialog from '@/components/agents/AgentUploadDialog.vue';
 import AgentScriptImportDialog from '@/components/agents/AgentScriptImportDialog.vue';
 import AgentDownloadDialog from '@/components/agents/AgentDownloadDialog.vue';
 import TooltipButton from '@/components/TooltipButton.vue';
 import TooltipButtonToggle from '@/components/TooltipButtonToggle.vue';
 import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import TagViewer from '@/components/TagViewer.vue';
 import { Pane, Splitpanes } from 'splitpanes';
 import * as agentApi from '@/api/agent-api';
 import * as agentTaskApi from '@/api/agent-task-api';
@@ -294,12 +317,12 @@ import 'splitpanes/dist/splitpanes.css';
 export default {
   name: 'AgentEdit',
   components: {
-    TagViewer,
     AgentForm,
     AgentInteract,
     AgentExecuteModule,
     AgentFileBrowser,
     AgentTasksList,
+    AgentTerminal,
     AgentUploadDialog,
     AgentScriptImportDialog,
     AgentDownloadDialog,
@@ -326,6 +349,7 @@ export default {
       rightPaneInitialized: false,
       pathToFile: '',
       isRefreshTasks: true,
+      interactTab: 'form',
     };
   },
   computed: {
@@ -393,29 +417,6 @@ export default {
     this.getAgent(this.$route.params.id);
   },
   methods: {
-    deleteTag(tag) {
-      agentApi.deleteTag(this.agent.session_id, tag.id)
-        .then(() => {
-          this.agent.tags = this.agent.tags.filter((t) => t.id !== tag.id);
-        })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    updateTag(tag) {
-      agentApi.updateTag(this.agent.session_id, tag)
-        .then((t) => {
-          const index = this.agent.tags.findIndex((x) => x.id === t.id);
-          this.agent.tags.splice(index, 1, t);
-          this.$snack.success('Tag updated');
-        })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
-    addTag(tag) {
-      agentApi.addTag(this.agent.session_id, tag)
-        .then((t) => {
-          this.agent.tags.push(t);
-        })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
-    },
     toggleCollapsePane() {
       if (this.paneSize > 95) {
         this.paneSize = 50;

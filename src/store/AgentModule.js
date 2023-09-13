@@ -33,7 +33,7 @@ export default {
       let { agents } = context.state;
       if (agents == null || agents.length === 0) {
         await context.dispatch('getAgents');
-        agents = context.state.agents;
+        ({ agents } = context.state);
       }
       const agent = agents.find((el) => el.session_id === sessionId);
 

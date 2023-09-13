@@ -67,6 +67,14 @@ export function shell(sessionId, command, literal = false) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
+export function createSocksProxy(sessionId, portNumber) {
+  return axios.post(`/agents/${sessionId}/tasks/socks`, {
+    port: portNumber,
+  })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
 /**
  * Task an agent to run sysinfo.
  * @param {*} sessionId agent sessionId

@@ -485,9 +485,7 @@ export default {
       this.itemsPerPage = value.itemsPerPage;
 
       if (value.sortBy.length > 0) {
-        // eslint-disable-next-line prefer-destructuring
         this.sortBy = value.sortBy[0];
-        // eslint-disable-next-line prefer-destructuring
         this.sortDesc = value.sortDesc[0];
       } else {
         this.sortBy = 'id';

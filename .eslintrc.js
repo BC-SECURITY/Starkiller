@@ -38,6 +38,7 @@ module.exports = {
       varsIgnorePattern: '^_',
       caughtErrorsIgnorePattern: '^_',
     }],
+    'prefer-destructuring': ['error', { object: true, array: false }],
   },
   settings: {
     ...createAliasSetting({

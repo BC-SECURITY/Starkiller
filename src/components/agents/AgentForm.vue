@@ -1,5 +1,11 @@
 <template>
   <div style="padding: 10px">
+    <tag-viewer
+      :tags="agent.tags"
+      @update-tag="updateTag"
+      @delete-tag="deleteTag"
+      @new-tag="addTag"
+    />
     <v-form
       v-if="agent.session_id"
       ref="form"
@@ -133,13 +139,15 @@
 
 <script>
 import Vue from 'vue';
-import moment from 'moment';
 import { mapState } from 'vuex';
+import moment from 'moment';
+import TagViewer from '@/components/TagViewer.vue';
+import ClickToEdit from '@/components/ClickToEdit.vue';
 import * as agentTaskApi from '@/api/agent-task-api';
-import ClickToEdit from '../ClickToEdit.vue';
+import * as agentApi from '@/api/agent-api';
 
 export default {
-  components: { ClickToEdit },
+  components: { TagViewer, ClickToEdit },
   props: {
     /**
      * The agent object to populate the form fields.
@@ -229,6 +237,28 @@ export default {
     this.$store.dispatch('listener/getListeners');
   },
   methods: {
+    deleteTag(tag) {
+      agentApi.deleteTag(this.agent.session_id, tag.id)
+        .then(() => {
+          this.$emit('refresh-agent');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    updateTag(tag) {
+      agentApi.updateTag(this.agent.session_id, tag)
+        .then(() => {
+          this.$emit('refresh-agent');
+          this.$snack.success('Tag updated');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
+    addTag(tag) {
+      agentApi.addTag(this.agent.session_id, tag)
+        .then(() => {
+          this.$emit('refresh-agent');
+        })
+        .catch((err) => this.$snack.error(`Error: ${err}`));
+    },
     async updateName() {
       if (this.agent.name === this.form.name) return;
 
