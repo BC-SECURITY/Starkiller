@@ -53,3 +53,12 @@ export function updatePassword(id, password) {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function uploadAvatar(userId, data) {
+  return axios({
+    method: "post",
+    url: `/users/${userId}/avatar`,
+    data,
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+}

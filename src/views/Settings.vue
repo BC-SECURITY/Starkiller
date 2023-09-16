@@ -2,8 +2,27 @@
   <div>
     <list-page-top :breads="breads" />
     <div class="page">
-      <div class="first-part">
-        <span>{{ user.username }}</span>
+      <div
+        class="first-part point"
+        style="display: flex; flex-direction: row; align-items: center"
+      >
+        <v-avatar class="ma-2" @click="handleFileImport">
+          <v-img v-if="user.avatar" :src="avatarUrl" />
+          <v-img
+            v-else
+            :src="`https://ui-avatars.com/api/?background=random&name=${user.username}`"
+          />
+        </v-avatar>
+        <input
+          ref="uploader"
+          class="d-none"
+          type="file"
+          aria-label="uploader"
+          @change="onFileChanged"
+        />
+        <span class="ma-2">{{ user.username }}</span>
+
+        <v-spacer />
         <v-btn color="primary" text @click="logout"> Logout </v-btn>
       </div>
       <v-divider />
@@ -184,6 +203,7 @@ import * as moduleApi from "@/api/module-api";
 import * as malleableApi from "@/api/malleable-api";
 import * as pluginApi from "@/api/plugin-api";
 import * as userApi from "@/api/user-api";
+import * as downloadApi from "@/api/download-api";
 import { mapState } from "vuex";
 import ListPageTop from "@/components/ListPageTop.vue";
 
@@ -231,6 +251,7 @@ export default {
           href: "/settings",
         },
       ],
+      avatarUrl: "",
     };
   },
   computed: {
@@ -268,7 +289,47 @@ export default {
       },
     },
   },
+  watch: {
+    "user.avatar": {
+      async handler() {
+        if (!this.user.avatar) {
+          return;
+        }
+        this.avatarUrl = await this.getDownloadUrl(this.user.avatar);
+      },
+      immediate: true,
+    },
+  },
   methods: {
+    async getDownloadUrl(avatar) {
+      const url = await downloadApi.getDownloadAsUrl(avatar.id);
+      return url;
+    },
+    handleFileImport() {
+      this.isSelecting = true;
+
+      // After obtaining the focus when closing the FilePicker, return the button state to normal
+      window.addEventListener(
+        "focus",
+        () => {
+          this.isSelecting = false;
+        },
+        { once: true },
+      );
+
+      // Trigger click on the FileInput
+      this.$refs.uploader.click();
+    },
+    async onFileChanged(e) {
+      const selectedFile = e.target.files[0];
+
+      const data = new FormData();
+      data.append("file", selectedFile);
+
+      await userApi.uploadAvatar(this.userId, data);
+      await this.$store.dispatch("application/refreshMe");
+      this.$snack.success("Upload complete");
+    },
     async logout() {
       if (
         await this.$root.$confirm("", "Are you sure you want to logout?", {

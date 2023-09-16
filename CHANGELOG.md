@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Add an Agent terminal to the Interact tab
     -   Run modules and shell commands from a terminal-like interface
 -   Add Prettier for code formatting
+-   Add user avatar uploads to the settings page, use the avatars in the chat widget
 -   Add a notification page and notification bell
     -   Most notifications that were previously showing in the bottom corner will now show up in the notification bell
     -   Agent task results now show up as notifications

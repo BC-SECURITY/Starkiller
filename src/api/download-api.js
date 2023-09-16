@@ -53,7 +53,14 @@ export function createDownload(data) {
 
 export function getDownload(id) {
   return axios
-    .get(`/downloads/${id}/download`, { responseType: "blob" })
+    .get(`/downloads/${id}/download`, {
+      responseType: "blob",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    })
     .then((response) => {
       const blob = new Blob([response.data], {
         type: response.headers["content-type"],

@@ -82,6 +82,9 @@ export default {
     setAgentHeaders(state, val) {
       state.agentHeaders = val;
     },
+    setMe(state, val) {
+      state.user = val;
+    },
     setNotifications(state, val) {
       state.notifications = val;
     },
@@ -123,6 +126,12 @@ export default {
         }
         context.commit("setLoginError", message);
       }
+    },
+    async refreshMe(context) {
+      const user = await axios.get(`${context.state.url}/api/v2/users/me`, {
+        headers: { Authorization: `Bearer ${context.state.token}` },
+      });
+      context.commit("setMe", user.data);
     },
     addNotification(context, notification) {
       context.commit("addNotification", notification);

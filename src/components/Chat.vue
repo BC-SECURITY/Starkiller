@@ -29,6 +29,8 @@
           class="sc-message--avatar"
           :style="{
             backgroundImage: `url(${user.imageUrl})`,
+            width: '40px',
+            height: '40px',
           }"
         >
           <div
@@ -98,8 +100,7 @@ export default {
         const user2 = this.mapUser(user);
         // if it exists in the rawParticipants array then they are online
         user2.online =
-          this.rawParticipants.find((p) => p.username === user2.name) !==
-          undefined;
+          this.rawParticipants.find((p) => p === user2.name) !== undefined;
         return user2;
       });
       return temp;
@@ -157,14 +158,11 @@ export default {
       // leverage pagination for loading another page of messages
     },
     addUser(user) {
-      if (this.rawParticipants.find((u) => u.username === user.username))
-        return;
+      if (this.rawParticipants.find((u) => u === user.username)) return;
       this.rawParticipants.push(user);
     },
     removeUser(user) {
-      const index = this.rawParticipants.findIndex(
-        (u) => u.username === user.username,
-      );
+      const index = this.rawParticipants.findIndex((u) => u === user.username);
       if (index > -1) {
         this.rawParticipants.splice(index, 1);
         this.rawParticipants = [...this.rawParticipants];
@@ -178,7 +176,9 @@ export default {
       return {
         id: user.username,
         name: user.username,
-        imageUrl: `https://ui-avatars.com/api/?background=random&name=${user.username}`,
+        imageUrl:
+          user.avatarUrl ||
+          `https://ui-avatars.com/api/?background=random&name=${user.username}`,
       };
     },
   },
