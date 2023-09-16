@@ -14,16 +14,22 @@ export default {
     hideStaleAgents: false,
     hideArchivedAgents: true,
     filterOnlyMyStagers: true,
+    autoSubscribeAgents: true,
     agentHeaders: [],
     connectionError: 0,
+    notifications: [],
   },
   mutations: {
-    setApplicationState(state, { token, url, socketUrl, user, version }) {
+    setApplicationState(
+      state,
+      { token, url, socketUrl, user, version, notifications },
+    ) {
       state.token = token;
       state.url = url;
       state.socketUrl = socketUrl;
       state.user = user;
       state.empireVersion = version;
+      state.notifications = notifications;
       setInstance(url, token);
     },
     setLoginError(state, error) {
@@ -38,6 +44,7 @@ export default {
       state.socketUrl = "";
       state.user = {};
       state.empireVersion = "";
+      state.notifications = [];
     },
     clearState(state) {
       state.token = "";
@@ -50,7 +57,9 @@ export default {
       state.hideStaleAgents = false;
       state.hideArchivedAgents = true;
       state.filterOnlyMyStagers = true;
+      state.autoSubscribeAgents = true;
       state.agentHeaders = [];
+      state.notifications = [];
     },
     setDarkMode(state, val) {
       state.darkMode = val;
@@ -67,8 +76,17 @@ export default {
     setFilterOnlyMyStagers(state, val) {
       state.filterOnlyMyStagers = val;
     },
+    setAutoSubscribeAgents(state, val) {
+      state.autoSubscribeAgents = val;
+    },
     setAgentHeaders(state, val) {
       state.agentHeaders = val;
+    },
+    setNotifications(state, val) {
+      state.notifications = val;
+    },
+    addNotification(state, notification) {
+      state.notifications = [notification, ...state.notifications];
     },
   },
   actions: {
@@ -92,6 +110,7 @@ export default {
           socketUrl,
           user: user.data,
           version: version.data.version,
+          notifications: [],
         });
       } catch (err) {
         let message = "";
@@ -104,6 +123,20 @@ export default {
         }
         context.commit("setLoginError", message);
       }
+    },
+    addNotification(context, notification) {
+      context.commit("addNotification", notification);
+    },
+    markAllNotificationsAsRead(context) {
+      const notifications = context.state.notifications.map((n) => {
+        const notification = n;
+        notification.read = true;
+        return notification;
+      });
+      context.commit("setNotifications", notifications);
+    },
+    clearNotifications(context) {
+      context.commit("setNotifications", []);
     },
     connectionError(context) {
       context.commit("setConnectionError");
@@ -129,6 +162,9 @@ export default {
     filterOnlyMyStagers(context, val) {
       context.commit("setFilterOnlyMyStagers", val);
     },
+    autoSubscribeAgents(context, val) {
+      context.commit("setAutoSubscribeAgents", val);
+    },
     agentHeaders(context, val) {
       context.commit("setAgentHeaders", val);
     },
@@ -145,6 +181,9 @@ export default {
     },
     isChatWidget(state) {
       return state.chatWidget;
+    },
+    isAutoSubscribeAgents(state) {
+      return state.autoSubscribeAgents;
     },
     token(state) {
       return state.token;

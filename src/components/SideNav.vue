@@ -34,7 +34,7 @@
             :to="{ name: item.pathName }"
           >
             <v-list-item-icon>
-              <v-icon :class="item.class">
+              <v-icon style="width: 21px; height: 24px">
                 {{ item.icon }}
               </v-icon>
             </v-list-item-icon>
@@ -43,16 +43,6 @@
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-          <!-- <v-list-item>
-            <v-list-item-icon>
-              <v-btn
-                icon
-                @click.stop="toggle"
-              >
-                <v-icon>mdi-page-last</v-icon>
-              </v-btn>
-            </v-list-item-icon>
-          </v-list-item> -->
         </v-list>
       </v-list>
     </v-navigation-drawer>
@@ -70,12 +60,7 @@ export default {
       mini: true,
       items: [
         { title: "Listeners", pathName: "listeners", icon: "fa-headphones" },
-        {
-          title: "Stagers",
-          pathName: "stagers",
-          icon: "fa-suitcase-rolling",
-          class: "pl-1",
-        },
+        { title: "Stagers", pathName: "stagers", icon: "fa-suitcase-rolling" },
         { title: "Agents", pathName: "agents", icon: "fa-link" },
         { title: "Modules", pathName: "modules", icon: "fa-grip-horizontal" },
         { title: "Obfuscation", pathName: "obfuscation", icon: "fa-magic" },
@@ -84,6 +69,7 @@ export default {
         { title: "Plugins", pathName: "plugins", icon: "fa-plug" },
         { title: "Downloads", pathName: "downloads", icon: "fa-download" },
         { title: "Users", pathName: "users", icon: "fa-user" },
+        { title: "Notifications", pathName: "notifications", icon: "fa-bell" },
         { title: "Settings", pathName: "settings", icon: "fa-cog" },
         { title: "About", pathName: "about", icon: "fa-info-circle" },
       ],

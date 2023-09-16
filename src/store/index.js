@@ -36,7 +36,7 @@ export default new Vuex.Store({
   },
   plugins: [
     createPersistedState({
-      paths: ["application"],
+      paths: ["application", "agent"],
       rehydrated: ({ state }) => {
         setInstance(state.application.url, state.application.token);
       },

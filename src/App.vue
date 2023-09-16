@@ -21,6 +21,10 @@
           <portal-target name="app-bar-extension" slim />
         </template>
         <portal-target name="app-bar" multiple slim />
+        <notification-bell
+          v-show="$route.name !== 'notifications'"
+          ref="bell"
+        />
       </v-app-bar>
       <!-- Sizes your content based upon application components -->
       <v-main>
@@ -72,10 +76,12 @@ import SideNav from "@/components/SideNav.vue";
 import Confirm from "@/components/Confirm.vue";
 import SocketNotifications from "@/components/SocketNotifications.vue";
 import StarkillerSnackbar from "@/components/StarkillerSnackbar.vue";
+import NotificationBell from "@/components/NotificationBell.vue";
 
 export default {
   name: "App",
   components: {
+    NotificationBell,
     SideNav,
     Confirm,
     SocketNotifications,
@@ -150,6 +156,9 @@ export default {
 
     // register global snackbar
     Vue.prototype.$snack = this.$refs.snack;
+
+    // register global notification bell
+    Vue.prototype.$bell = this.$refs.bell;
   },
   methods: {
     versionSatisfies(version) {

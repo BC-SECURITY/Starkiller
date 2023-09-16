@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 -   Add an Agent terminal to the Interact tab
+    -   Run modules and shell commands from a terminal-like interface
 -   Add Prettier for code formatting
+-   Add a notification page and notification bell
+    -   Most notifications that were previously showing in the bottom corner will now show up in the notification bell
+    -   Agent task results now show up as notifications
+    -   Can subscribe/unsubscribe to specific agent notifications
 
 ## [2.5.3] - 2023-08-24
 

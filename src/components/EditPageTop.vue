@@ -1,9 +1,11 @@
 <template>
   <portal to="app-bar">
-    <div class="v-toolbar__content" style="width: 100%">
+    <div class="v-toolbar__content pt-2" style="width: 100%">
       <v-breadcrumbs :items="breads" />
       <v-spacer />
-      <slot name="extra-stuff" />
+      <div class="pt-2">
+        <slot name="extra-stuff" />
+      </div>
       <v-btn
         v-if="showDelete && !smallDelete"
         color="error"

@@ -42,7 +42,7 @@
           <v-chip v-if="initialized && archived"> Archived </v-chip>
           <v-spacer />
           <div
-            v-if="!errorState"
+            v-if="!errorState && initialized && !archived"
             class="pt-2"
             style="display: flex; flex-direction: row; align-items: center"
           >
@@ -64,32 +64,27 @@
               @submit="doDownload"
             />
             <tooltip-button-toggle
-              v-if="initialized && !archived"
               v-model="isRefreshTasks"
               icon="fa-redo"
               :button-text="isRefreshTasks ? 'On' : 'Off'"
               text="Auto-refresh tasks"
             />
             <tooltip-button
-              v-if="initialized && !archived"
               icon="fa-calendar-times"
               text="Clear Queued Tasks"
               @click="clearQueue"
             />
             <tooltip-button
-              v-if="initialized && !archived"
               icon="fa-upload"
               text="Upload"
               @click="uploadDialog = true"
             />
             <tooltip-button
-              v-if="initialized && !archived"
               icon="fa-download"
               text="Download"
               @click="downloadDialog = true"
             />
             <tooltip-button
-              v-if="initialized && !archived"
               icon="fa-file-import"
               text="Import Script"
               @click="scriptImportDialog = true"
@@ -99,6 +94,18 @@
               icon="fa-external-link-alt"
               text="Popout"
               @click="popout"
+            />
+            <tooltip-button
+              v-if="!subscribed"
+              icon="fa-bell"
+              text="Subscribe to Notifications"
+              @click="subscribe"
+            />
+            <tooltip-button
+              v-else
+              icon="fa-bell-slash"
+              text="Unsubscribe from Notifications"
+              @click="unsubscribe"
             />
             <tooltip-button
               v-if="initialized && !archived"
@@ -146,8 +153,8 @@
                       <agent-interact :agent="agent" />
                       <v-divider />
                       <h4 class="pl-4 pt-2">Execute Module</h4>
-                      <agent-execute-module :agents="[agent.session_id]" />
-                    </v-tab-item>
+                      <agent-execute-module :agents="[agent.session_id]"
+                    /></v-tab-item>
                     <v-tab-item
                       key="terminal"
                       style="height: 75vh"
@@ -245,6 +252,7 @@ import * as agentApi from "@/api/agent-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 
 import "splitpanes/dist/splitpanes.css";
+import { mapGetters } from "vuex";
 
 export default {
   name: "AgentEdit",
@@ -285,6 +293,12 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      subscribedAgents: "agent/subscribed",
+    }),
+    subscribed() {
+      return this.subscribedAgents[this.id] || false;
+    },
     breads() {
       return [
         {
@@ -349,6 +363,12 @@ export default {
     this.getAgent(this.$route.params.id);
   },
   methods: {
+    subscribe() {
+      this.$store.dispatch("agent/subscribe", { sessionId: this.id });
+    },
+    unsubscribe() {
+      this.$store.dispatch("agent/unsubscribe", { sessionId: this.id });
+    },
     toggleCollapsePane() {
       if (this.paneSize > 95) {
         this.paneSize = 50;
@@ -399,7 +419,9 @@ export default {
         await this.$root.$confirm(
           "Kill Agent",
           `Do you want to kill agent ${this.agent.name}?`,
-          { color: "red" },
+          {
+            color: "red",
+          },
         )
       ) {
         this.$store.dispatch("agent/killAgent", {
@@ -426,7 +448,9 @@ export default {
         await this.$root.$confirm(
           "",
           `Do you want to clear ${queuedIds.length} queued tasks?`,
-          { color: "red" },
+          {
+            color: "red",
+          },
         )
       ) {
         this.$store.dispatch("agent/clearQueue", {

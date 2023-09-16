@@ -6,6 +6,7 @@ export default {
   state: {
     agents: [],
     status: "success",
+    subscribed: {},
   },
   mutations: {
     setAgents(state, agents) {
@@ -17,6 +18,9 @@ export default {
     setStatus(state, status) {
       state.status = status;
     },
+    setSubscribed(state, subscribed) {
+      state.subscribed = subscribed;
+    },
   },
   actions: {
     async getAgents(context) {
@@ -24,6 +28,15 @@ export default {
       const agents = await agentApi.getAgents(true);
       await context.commit("setAgents", agents);
       context.commit("setStatus", "success");
+
+      const { autoSubscribeAgents } = context.rootState.application;
+      if (autoSubscribeAgents) {
+        agents.forEach((agent) => {
+          if (!context.state.subscribed[agent.session_id]) {
+            context.dispatch("subscribe", { sessionId: agent.session_id });
+          }
+        });
+      }
     },
     async getAgent(context, { sessionId }) {
       const agent = (await agentApi.getAgent(sessionId))[0];
@@ -69,11 +82,34 @@ export default {
       } else {
         context.commit("pushAgent", agent);
       }
+
+      const { autoSubscribeAgents } = context.rootState.application;
+      if (autoSubscribeAgents) {
+        context.dispatch("subscribe", { sessionId: agent.session_id });
+      }
     },
     clearQueue(context, { name, tasks }) {
       tasks.forEach((task) => {
         agentTaskApi.deleteTask(name, task);
       });
     },
+    async subscribe(context, { sessionId }) {
+      const { subscribed } = context.state;
+      subscribed[sessionId] = true;
+      context.commit("setSubscribed", { ...subscribed });
+    },
+    async unsubscribe(context, { sessionId }) {
+      const { subscribed } = context.state;
+      subscribed[sessionId] = false;
+      context.commit("setSubscribed", { ...subscribed });
+    },
+    async clear(context) {
+      context.commit("setAgents", []);
+      context.commit("setSubscribed", {});
+    },
+  },
+  getters: {
+    subscribed: (state) => state.subscribed,
+    agents: (state) => state.agents,
   },
 };

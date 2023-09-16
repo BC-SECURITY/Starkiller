@@ -57,6 +57,16 @@
           submit
         </v-btn>
       </v-form>
+      <div class="headers pl-0 mt-2">
+        <div>
+          <h4>Auto-Subscribe to Agents</h4>
+          <span>
+            This will automatically subscribe to agent notifications.<br />
+            Turning this off will require you to manually subscribe to agents.
+          </span>
+        </div>
+        <v-switch v-model="autoSubscribeSwitch" color="primary" />
+      </div>
       <v-divider />
       <div class="headers pl-0 mt-2">
         <div>
@@ -228,6 +238,7 @@ export default {
       user: (state) => state.application.user,
       darkMode: (state) => state.application.darkMode,
       chatWidget: (state) => state.application.chatWidget,
+      autoSubscribeAgents: (state) => state.application.autoSubscribeAgents,
     }),
     userId() {
       return this.user.id;
@@ -248,6 +259,14 @@ export default {
         return this.chatWidget;
       },
     },
+    autoSubscribeSwitch: {
+      set(val) {
+        this.$store.dispatch("application/autoSubscribeAgents", val);
+      },
+      get() {
+        return this.autoSubscribeAgents;
+      },
+    },
   },
   methods: {
     async logout() {
@@ -261,6 +280,7 @@ export default {
     },
     clearState() {
       this.$store.dispatch("application/clear");
+      this.$store.dispatch("agent/clear");
     },
     submit() {
       if (this.password.loading || !this.$refs.form.validate()) {
