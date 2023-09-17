@@ -125,6 +125,7 @@ Starkiller’s new features occasionally depend on new functionality within Empi
 | 2.2.x, 2.3.x | 5.2.0 | Requires the new plugin task endpoints
 | 2.4.x | 5.5.0 | For sponsors, requires the checkin endpoints
 | 2.5.x | 5.6.0 | Requires the tags endpoints
+| 2.6.x | 5.7.0 | Requires the user avatar endpoints and fixes for the agent task socketio events
 
 ## Changelog
 
