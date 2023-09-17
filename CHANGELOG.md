@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2023-09-17
+
 -   Add an Agent terminal to the Interact tab
     -   Run modules and shell commands from a terminal-like interface
 -   Add Prettier for code formatting
@@ -300,7 +302,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.3...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.0...HEAD
+
+[2.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.3...v2.6.0
 
 [2.5.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.2...v2.5.3
 
