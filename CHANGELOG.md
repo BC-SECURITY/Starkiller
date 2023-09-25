@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.1] - 2023-09-25
+
 -   Make notification bell menu scrollable with a max height
 -   Fix the Listener buttons overflowing out of the toolbar
 
@@ -305,7 +307,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.1...HEAD
+
+[2.6.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.0...v2.6.1
 
 [2.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.5.3...v2.6.0
 
