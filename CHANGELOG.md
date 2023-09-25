@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Make notification bell menu scrollable with a max height
+-   Fix the Listener buttons overflowing out of the toolbar
+
 ## [2.6.0] - 2023-09-17
 
 -   Add an Agent terminal to the Interact tab

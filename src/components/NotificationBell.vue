@@ -9,7 +9,7 @@
           <v-icon v-else> mdi-bell-outline </v-icon>
         </v-btn>
       </template>
-      <v-list>
+      <v-list style="max-height: 400px; overflow-y: auto">
         <v-list-item
           v-for="(item, index) in notifications"
           :key="index"
@@ -27,14 +27,17 @@
             </v-btn>
           </v-list-item-action>
         </v-list-item>
+        <v-list-item v-if="notifications.length === 0">
+          <v-list-item-content>
+            <v-list-item-title>No notifications</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <v-divider />
+      <v-list>
         <v-list-item v-if="notifications.length > 0">
           <v-list-item-content style="cursor: pointer" @click="toNotifications">
             <v-list-item-title>View All</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item v-else>
-          <v-list-item-content>
-            <v-list-item-title>No notifications</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>

@@ -13,7 +13,7 @@
       @submit="submit"
       @delete="deleteStager"
     >
-      <template slot="extra-stuff">
+      <template #extra-stuff>
         <tooltip-button
           v-if="id > 0 && initialLoad && isDownload(stager)"
           color="success"
