@@ -4,12 +4,7 @@
       {{ title }}
     </v-expansion-panel-header>
     <v-expansion-panel-content>
-      <v-checkbox
-        v-model="selectedAll"
-        x-small
-        dense
-        label="Select All"
-      />
+      <v-checkbox v-model="selectedAll" x-small dense label="Select All" />
       <v-divider class="pb-4" />
       <v-checkbox
         v-for="item in items"
@@ -26,7 +21,7 @@
 
 <script>
 export default {
-  name: 'ExpansionPanelFilter',
+  name: "ExpansionPanelFilter",
   props: {
     value: {
       type: Array,
@@ -79,7 +74,7 @@ export default {
   watch: {
     selectedItems: {
       handler(val) {
-        this.$emit('input', val);
+        this.$emit("input", val);
       },
     },
     items: {
@@ -102,6 +97,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

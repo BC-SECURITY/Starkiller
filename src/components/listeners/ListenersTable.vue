@@ -15,14 +15,11 @@
       show-select
     >
       <template #item.enabled="{ item }">
-        <v-badge
-          dot
-          :color="item.enabled === true ? 'green' : 'red'"
-        />
+        <v-badge dot :color="item.enabled === true ? 'green' : 'red'" />
       </template>
       <template #item.name="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'listenerEdit', params: { id: item.id } }"
         >
           {{ item.name }}
@@ -42,24 +39,15 @@
       <template #item.actions="{ item }">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
-            <v-btn
-              text
-              icon
-              x-small
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn text icon x-small v-bind="attrs" v-on="on">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
-            <v-list-item
-              key="view"
-              link
-            >
+            <v-list-item key="view" link>
               <router-link
                 class="text-decoration-none"
-                style="color: inherit;"
+                style="color: inherit"
                 :to="{ name: 'listenerEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
@@ -79,11 +67,7 @@
               </v-list-item-title>
             </v-list-item>
             <v-divider class="pb-4" />
-            <v-list-item
-              key="delete"
-              link
-              @click="killListener(item)"
-            >
+            <v-list-item key="delete" link @click="killListener(item)">
               <v-list-item-title>
                 <v-icon>fa-trash-alt</v-icon>
                 Delete
@@ -97,14 +81,14 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import moment from 'moment';
-import TagViewer from '@/components/TagViewer.vue';
-import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
-import * as listenerApi from '@/api/listener-api';
+import { mapState } from "vuex";
+import moment from "moment";
+import TagViewer from "@/components/TagViewer.vue";
+import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
+import * as listenerApi from "@/api/listener-api";
 
 export default {
-  name: 'ListenersTable',
+  name: "ListenersTable",
   components: {
     DateTimeDisplay,
     TagViewer,
@@ -124,15 +108,19 @@ export default {
       moment,
       headers: [
         {
-          text: '', align: 'start', sortable: false, width: '5px', value: 'enabled',
+          text: "",
+          align: "start",
+          sortable: false,
+          width: "5px",
+          value: "enabled",
         },
-        { text: 'Name', value: 'name' },
-        { text: 'Template', value: 'template' },
-        { text: 'Host', value: 'options.Host' },
-        { text: 'Port', value: 'options.Port' },
-        { text: 'Created At', value: 'created_at' },
-        { text: 'Tags', value: 'tags', sortable: false },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: "Name", value: "name" },
+        { text: "Template", value: "template" },
+        { text: "Host", value: "options.Host" },
+        { text: "Port", value: "options.Port" },
+        { text: "Created At", value: "created_at" },
+        { text: "Tags", value: "tags", sortable: false },
+        { text: "Actions", value: "actions", sortable: false },
       ],
       selected: [],
     };
@@ -162,7 +150,7 @@ export default {
       this.getListeners();
     },
     selected(val) {
-      this.$emit('input', val);
+      this.$emit("input", val);
     },
   },
   mounted() {
@@ -170,40 +158,42 @@ export default {
   },
   methods: {
     deleteTag(listener, tag) {
-      listenerApi.deleteTag(listener.id, tag.id)
+      listenerApi
+        .deleteTag(listener.id, tag.id)
         .then(() => {
           listener.tags = listener.tags.filter((t) => t.id !== tag.id);
-          this.$emit('refresh-tags');
+          this.$emit("refresh-tags");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     updateTag(listener, tag) {
-      listenerApi.updateTag(listener.id, tag)
+      listenerApi
+        .updateTag(listener.id, tag)
         .then((t) => {
           const index = listener.tags.findIndex((x) => x.id === t.id);
           listener.tags.splice(index, 1, t);
-          this.$emit('refresh-tags');
-          this.$snack.success('Tag updated');
+          this.$emit("refresh-tags");
+          this.$snack.success("Tag updated");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     addTag(listener, tag) {
-      listenerApi.addTag(listener.id, tag)
+      listenerApi
+        .addTag(listener.id, tag)
         .then((t) => {
           listener.tags.push(t);
-          this.$emit('refresh-tags');
+          this.$emit("refresh-tags");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     async killListener(item) {
-      this.$emit('kill-listener', item);
+      this.$emit("kill-listener", item);
     },
     getListeners() {
-      this.$store.dispatch('listener/getListeners');
+      this.$store.dispatch("listener/getListeners");
     },
   },
 };
 </script>
 
-<style>
-</style>
+<style></style>

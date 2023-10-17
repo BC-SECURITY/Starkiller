@@ -25,10 +25,7 @@
       :resource-id="id"
       resource-type="credential"
     />
-    <v-card
-      v-else
-      style="padding: 10px"
-    >
+    <v-card v-else style="padding: 10px">
       <general-form
         v-if="reset"
         ref="generalform"
@@ -41,14 +38,14 @@
 </template>
 
 <script>
-import GeneralForm from '@/components/GeneralForm.vue';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import EditPageTop from '@/components/EditPageTop.vue';
-import TagViewer from '@/components/TagViewer.vue';
-import * as credentialApi from '@/api/credential-api';
+import GeneralForm from "@/components/GeneralForm.vue";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import EditPageTop from "@/components/EditPageTop.vue";
+import TagViewer from "@/components/TagViewer.vue";
+import * as credentialApi from "@/api/credential-api";
 
 export default {
-  name: 'CredentialEdit',
+  name: "CredentialEdit",
   components: {
     TagViewer,
     GeneralForm,
@@ -69,28 +66,28 @@ export default {
     breads() {
       return [
         {
-          text: 'Credentials',
+          text: "Credentials",
           disabled: false,
-          to: '/credentials',
+          to: "/credentials",
           exact: true,
         },
         {
-          text: this.id && !this.isCopy ? `${this.id}` : 'New',
+          text: this.id && !this.isCopy ? `${this.id}` : "New",
           disabled: true,
-          to: '/credential-edit',
+          to: "/credential-edit",
         },
       ];
     },
     isNew() {
-      return this.$route.name === 'credentialNew';
+      return this.$route.name === "credentialNew";
     },
     isCopy() {
       return this.$route.params.copy === true;
     },
     mode() {
-      if (this.isCopy) return 'Copy';
-      if (this.isNew) return 'New';
-      return 'Edit';
+      if (this.isCopy) return "Copy";
+      if (this.isNew) return "New";
+      return "Edit";
     },
     canEdit() {
       // if we want to introduce separate view/edit modes, we can do that here.
@@ -100,7 +97,8 @@ export default {
       return this.isCopy ? 0 : this.$route.params.id;
     },
     copyLink() {
-      if (this.id > 0) return { name: 'credentialNew', params: { copy: true, id: this.id } };
+      if (this.id > 0)
+        return { name: "credentialNew", params: { copy: true, id: this.id } };
       return {};
     },
     options() {
@@ -108,9 +106,7 @@ export default {
         credtype: {
           required: true,
           strict: true,
-          suggested_values: [
-            'plaintext', 'hash',
-          ],
+          suggested_values: ["plaintext", "hash"],
         },
         domain: { required: true },
         username: { required: true },
@@ -121,7 +117,7 @@ export default {
         notes: { required: false },
       };
       Object.keys(this.credential).forEach((field) => {
-        if (field !== 'id' && op[field]) {
+        if (field !== "id" && op[field]) {
           op[field].value = this.credential[field];
         }
       });
@@ -139,23 +135,26 @@ export default {
   },
   methods: {
     deleteTag(tag) {
-      credentialApi.deleteTag(this.credential.id, tag.id)
+      credentialApi
+        .deleteTag(this.credential.id, tag.id)
         .then(() => {
           this.credential.tags = this.credential.tags.filter((t) => t !== tag);
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     updateTag(tag) {
-      credentialApi.updateTag(this.credential.id, tag)
+      credentialApi
+        .updateTag(this.credential.id, tag)
         .then((t) => {
           const index = this.credential.tags.findIndex((x) => x.id === t.id);
           this.credential.tags.splice(index, 1, t);
-          this.$snack.success('Tag updated');
+          this.$snack.success("Tag updated");
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     addTag(tag) {
-      credentialApi.addTag(this.credential.id, tag)
+      credentialApi
+        .addTag(this.credential.id, tag)
         .then((t) => {
           this.credential.tags.push(t);
         })
@@ -168,7 +167,8 @@ export default {
 
       this.loading = true;
       if (this.id > 0) {
-        credentialApi.updateCredential(this.id, this.form)
+        credentialApi
+          .updateCredential(this.id, this.form)
           .then(() => {
             this.loading = false;
           })
@@ -177,10 +177,11 @@ export default {
             this.loading = false;
           });
       } else {
-        credentialApi.createCredential(this.form)
+        credentialApi
+          .createCredential(this.form)
           .then(({ id }) => {
             this.loading = false;
-            this.$router.push({ name: 'credentialEdit', params: { id } });
+            this.$router.push({ name: "credentialEdit", params: { id } });
           })
           .catch((err) => {
             this.$snack.error(`Error: ${err}`);
@@ -190,23 +191,32 @@ export default {
       this.loading = false;
     },
     async deleteCredential() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete credential ${this.id}?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete credential ${this.id}?`,
+          { color: "red" },
+        )
+      ) {
         try {
-          this.$store.dispatch('credential/deleteCredential', this.id);
-          this.$router.push({ name: 'credentials' });
+          this.$store.dispatch("credential/deleteCredential", this.id);
+          this.$router.push({ name: "credentials" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);
         }
       }
     },
     getCredential(id) {
-      credentialApi.getCredential(id)
+      credentialApi
+        .getCredential(id)
         .then((data) => {
           this.reset = false;
 
           this.credential = data;
           this.initialLoad = true;
-          setTimeout(() => { this.reset = true; }, 500);
+          setTimeout(() => {
+            this.reset = true;
+          }, 500);
         })
         .catch(() => {
           this.errorState = true;
@@ -216,6 +226,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

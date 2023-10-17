@@ -1,7 +1,5 @@
 <template>
-  <v-tooltip
-    bottom
-  >
+  <v-tooltip bottom>
     <template #activator="{ on }">
       <v-btn
         :color="flat ? '' : color"
@@ -13,9 +11,7 @@
         v-on="on"
         @click="$emit('click')"
       >
-        <v-icon
-          :style="padLeft !== 0 ? `padding-left: ${padLeft}px` : ''"
-        >
+        <v-icon :style="padLeft !== 0 ? `padding-left: ${padLeft}px` : ''">
           {{ icon }}
         </v-icon>
       </v-btn>
@@ -26,7 +22,7 @@
 
 <script>
 export default {
-  name: 'TooltipButton',
+  name: "TooltipButton",
   props: {
     icon: {
       type: String,
@@ -42,7 +38,7 @@ export default {
     },
     color: {
       type: String,
-      default: '',
+      default: "",
     },
     flat: {
       type: Boolean,
@@ -60,6 +56,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

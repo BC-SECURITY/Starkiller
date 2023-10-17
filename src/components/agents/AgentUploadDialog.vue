@@ -1,9 +1,5 @@
 <template>
-  <v-dialog
-    ref="agentUploadDialog"
-    v-model="show"
-    max-width="750px"
-  >
+  <v-dialog ref="agentUploadDialog" v-model="show" max-width="750px">
     <v-card>
       <v-card-title>
         <span class="headline">Upload To Agent</span>
@@ -28,11 +24,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          text
-          @click.stop="show = false"
-        >
+        <v-btn color="blue darken-1" text @click.stop="show = false">
           Close
         </v-btn>
         <v-btn
@@ -50,8 +42,8 @@
 </template>
 
 <script>
-import FileInput from '@/components/FileInput.vue';
-import formatBytes from '@/utils/format-bytes';
+import FileInput from "@/components/FileInput.vue";
+import formatBytes from "@/utils/format-bytes";
 
 const MAX_BYTES = 1048576;
 
@@ -61,7 +53,7 @@ export default {
     value: Boolean,
     language: {
       type: String,
-      default: '',
+      default: "",
     },
     loading: {
       type: Boolean,
@@ -69,7 +61,7 @@ export default {
     },
     pathToFile: {
       type: String,
-      default: '',
+      default: "",
     },
   },
   data() {
@@ -81,12 +73,12 @@ export default {
       internalPathToFile: this.pathToFile,
       file: null,
       rules: {
-        pathToFile: [
-          (v) => !!v || 'PathToFile is required',
-        ],
+        pathToFile: [(v) => !!v || "PathToFile is required"],
         fileInput: [
-          (v) => !!v || 'File required',
-          (v) => (!!v && v.size < MAX_BYTES) || `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
+          (v) => !!v || "File required",
+          (v) =>
+            (!!v && v.size < MAX_BYTES) ||
+            `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
         ],
       },
     };
@@ -97,14 +89,14 @@ export default {
         return this.value;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit("input", value);
       },
     },
     fileName() {
-      return this.file ? this.file.filename : '';
+      return this.file ? this.file.filename : "";
     },
     fileId() {
-      return this.file ? this.file.id : '';
+      return this.file ? this.file.id : "";
     },
     submitDisabled() {
       return !this.file || !this.internalPathToFile || this.loading;
@@ -122,16 +114,20 @@ export default {
     },
     fileName(val) {
       if (val) {
-        if (['python', 'ironpython'].includes(this.language.toLowerCase())) {
+        if (["python", "ironpython"].includes(this.language.toLowerCase())) {
           // always use the passed in pathToFile if it exists
           if (this.pathToFile) {
-            this.internalPathToFile = this.addTrailingSlash(this.pathToFile) + val;
+            this.internalPathToFile =
+              this.addTrailingSlash(this.pathToFile) + val;
           } else {
             this.internalPathToFile = `/tmp/${val}`;
           }
-        } else if (['powershell', 'csharp'].includes(this.language.toLowerCase())) {
+        } else if (
+          ["powershell", "csharp"].includes(this.language.toLowerCase())
+        ) {
           if (this.pathToFile) {
-            this.internalPathToFile = this.addTrailingSlash(this.pathToFile) + val;
+            this.internalPathToFile =
+              this.addTrailingSlash(this.pathToFile) + val;
           } else {
             this.internalPathToFile = `C:\\tmp\\${val}`;
           }
@@ -141,10 +137,10 @@ export default {
   },
   methods: {
     addTrailingSlash(val) {
-      if (val.endsWith('/') || val.endsWith('\\')) {
+      if (val.endsWith("/") || val.endsWith("\\")) {
         return val;
       }
-      if (['python', 'ironpython'].includes(this.language.toLowerCase())) {
+      if (["python", "ironpython"].includes(this.language.toLowerCase())) {
         return `${val}/`;
       }
 
@@ -152,7 +148,10 @@ export default {
       return `${val}\\`;
     },
     async submit() {
-      this.$emit('submit', { file: this.fileId, pathToFile: this.internalPathToFile });
+      this.$emit("submit", {
+        file: this.fileId,
+        pathToFile: this.internalPathToFile,
+      });
     },
   },
 };

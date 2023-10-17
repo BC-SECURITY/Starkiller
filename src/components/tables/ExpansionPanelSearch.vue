@@ -17,7 +17,7 @@
 
 <script>
 export default {
-  name: 'ExpansionPanelSearch',
+  name: "ExpansionPanelSearch",
   props: {
     value: {
       type: String,
@@ -34,13 +34,13 @@ export default {
   },
   data() {
     return {
-      internalValue: '',
+      internalValue: "",
     };
   },
   watch: {
     internalValue: {
       handler(val) {
-        this.$emit('input', val);
+        this.$emit("input", val);
       },
     },
   },
@@ -50,6 +50,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

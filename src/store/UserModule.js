@@ -1,10 +1,11 @@
-import * as userApi from '@/api/user-api';
+import * as userApi from "@/api/user-api";
+import * as downloadApi from "@/api/download-api";
 
 export default {
   namespaced: true,
   state: {
-    token: '',
-    url: '',
+    token: "",
+    url: "",
     users: [],
   },
   mutations: {
@@ -15,9 +16,17 @@ export default {
   actions: {
     async getUsers(context) {
       const response = await userApi.getUsers();
-      context.commit('setUsers', response);
+
+      await Promise.all(
+        response.map(async (user) => {
+          if (user.avatar) {
+            user.avatarUrl = await downloadApi.getDownloadAsUrl(user.avatar.id);
+          }
+        }),
+      );
+
+      context.commit("setUsers", response);
     },
   },
-  getters: {
-  },
+  getters: {},
 };

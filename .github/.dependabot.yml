@@ -6,4 +6,3 @@ updates:
       interval: "weekly"
       day: "sunday"
     target-branch: "dev"
-

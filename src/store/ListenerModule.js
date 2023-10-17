@@ -1,4 +1,4 @@
-import * as listenerApi from '@/api/listener-api';
+import * as listenerApi from "@/api/listener-api";
 
 export default {
   namespaced: true,
@@ -11,7 +11,7 @@ export default {
      * The status of the listeners request. This can be used to determine if the
      * request is still in progress.
      */
-    status: 'success',
+    status: "success",
     /**
      * Full array of listener template objects
      */
@@ -39,24 +39,24 @@ export default {
   },
   actions: {
     async getListeners(context) {
-      context.commit('setStatus', 'loading');
+      context.commit("setStatus", "loading");
       const listeners = await listenerApi.getListeners();
-      await context.commit('setListeners', listeners);
-      context.commit('setStatus', 'success');
+      await context.commit("setListeners", listeners);
+      context.commit("setStatus", "success");
     },
     async getListenerTemplates(context) {
       const templates = await listenerApi.getListenerTemplates();
-      context.commit('setTemplates', templates);
+      context.commit("setTemplates", templates);
     },
     async killListener(context, id) {
       await listenerApi.killListener(id);
-      context.commit('removeListener', id);
+      context.commit("removeListener", id);
     },
     async addListener(context, listener) {
       const found = context.state.listeners.find((el) => el.id === listener.id);
 
       if (!found) {
-        context.commit('pushListener', listener);
+        context.commit("pushListener", listener);
       }
     },
   },

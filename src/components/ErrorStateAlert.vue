@@ -1,16 +1,11 @@
 <template>
-  <v-alert
-    prominent
-    type="error"
-  >
+  <v-alert prominent type="error">
     <v-row align="center">
       <v-col class="grow">
         {{ message }}
       </v-col>
       <v-col class="shrink">
-        <v-btn @click="$router.go(-1)">
-          Go back
-        </v-btn>
+        <v-btn @click="$router.go(-1)"> Go back </v-btn>
       </v-col>
     </v-row>
   </v-alert>
@@ -18,7 +13,7 @@
 
 <script>
 export default {
-  name: 'ErrorStateAlert',
+  name: "ErrorStateAlert",
   props: {
     resourceType: {
       type: String,
@@ -30,12 +25,12 @@ export default {
     },
     message: {
       type: String,
-      default() { return `The resource '${this.resourceType}/${this.resourceId}' Not Found.`; },
+      default() {
+        return `The resource '${this.resourceType}/${this.resourceId}' Not Found.`;
+      },
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

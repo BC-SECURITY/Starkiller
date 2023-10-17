@@ -23,12 +23,8 @@
         </v-icon>
       </v-chip>
     </template>
-    <v-card width="400" style="display: flex; flex-direction: row-reverse;">
-      <v-btn
-        icon
-        class="mt-2 mr-2"
-        @click="menu = false"
-      >
+    <v-card width="400" style="display: flex; flex-direction: row-reverse">
+      <v-btn icon class="mt-2 mr-2" @click="menu = false">
         <v-icon>mdi-close-circle</v-icon>
       </v-btn>
       <v-form ref="form">
@@ -60,11 +56,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            color="green"
-            text
-            @click="updateTag(internalTag)"
-          >
+          <v-btn color="green" text @click="updateTag(internalTag)">
             Update
           </v-btn>
         </v-card-actions>
@@ -75,7 +67,7 @@
 
 <script>
 export default {
-  name: 'TagChip',
+  name: "TagChip",
   props: {
     isNew: {
       type: Boolean,
@@ -83,7 +75,7 @@ export default {
     },
     tag: {
       type: Object,
-      default: () => ({ name: 'New Tag', value: '', color: '#2196F3' }),
+      default: () => ({ name: "New Tag", value: "", color: "#2196F3" }),
     },
     close: {
       type: Boolean,
@@ -100,8 +92,8 @@ export default {
       internalTag: this.tag,
       rules: {
         noColon: [
-          (value) => !!value || 'Required.',
-          (value) => !value.includes(':') || 'Cannot contain a colon.',
+          (value) => !!value || "Required.",
+          (value) => !value.includes(":") || "Cannot contain a colon.",
         ],
       },
     };
@@ -110,7 +102,7 @@ export default {
     menu(val) {
       if (val) {
         if (this.isNew) {
-          this.internalTag = { name: '', value: '', color: '#2196F3' };
+          this.internalTag = { name: "", value: "", color: "#2196F3" };
         }
         this.$nextTick(() => {
           this.$refs.form.resetValidation();
@@ -127,13 +119,13 @@ export default {
   },
   methods: {
     deleteTag(tag) {
-      this.$emit('delete-tag', tag);
+      this.$emit("delete-tag", tag);
     },
     updateTag(tag) {
       if (!this.$refs.form.validate()) {
         return;
       }
-      this.$emit('update-tag', tag);
+      this.$emit("update-tag", tag);
       this.menu = false;
       this.$refs.form.resetValidation();
     },
@@ -141,6 +133,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

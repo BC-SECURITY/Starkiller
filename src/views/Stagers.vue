@@ -29,16 +29,16 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import moment from 'moment';
-import DownloadMixin from '@/mixins/download-stager';
-import CopyMixin from '@/mixins/copy-stager';
-import ListPageTop from '@/components/ListPageTop.vue';
-import StagersTable from '@/components/stagers/StagersTable.vue';
-import AdvancedTable from '@/components/tables/AdvancedTable.vue';
+import { mapState } from "vuex";
+import moment from "moment";
+import DownloadMixin from "@/mixins/download-stager";
+import CopyMixin from "@/mixins/copy-stager";
+import ListPageTop from "@/components/ListPageTop.vue";
+import StagersTable from "@/components/stagers/StagersTable.vue";
+import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 
 export default {
-  name: 'Stagers',
+  name: "Stagers",
   components: {
     AdvancedTable,
     ListPageTop,
@@ -50,9 +50,9 @@ export default {
       moment,
       breads: [
         {
-          text: 'Stagers',
+          text: "Stagers",
           disabled: true,
-          href: '/stagers',
+          href: "/stagers",
         },
       ],
       selected: [],
@@ -60,14 +60,15 @@ export default {
   },
   computed: {
     ...mapState({
-      filterOnlyMyStagersCheckbox: (state) => state.application.filterOnlyMyStagers,
+      filterOnlyMyStagersCheckbox: (state) =>
+        state.application.filterOnlyMyStagers,
     }),
     showDelete() {
       return this.selected.length > 0;
     },
     filterOnlyMyStagersCheckbox: {
       set(val) {
-        this.$store.dispatch('application/filterOnlyMyStagers', val);
+        this.$store.dispatch("application/filterOnlyMyStagers", val);
       },
       get() {
         return this.filterOnlyMyStagers;
@@ -76,17 +77,29 @@ export default {
   },
   methods: {
     create() {
-      this.$router.push({ name: 'stagerNew' });
+      this.$router.push({ name: "stagerNew" });
     },
     async deleteStager(item) {
-      if (await this.$root.$confirm('Delete', 'Are you sure you want to delete this stager?', { color: 'red' })) {
-        this.$store.dispatch('stager/deleteStager', item.id);
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          "Are you sure you want to delete this stager?",
+          { color: "red" },
+        )
+      ) {
+        this.$store.dispatch("stager/deleteStager", item.id);
       }
     },
     async deleteStagers() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} stagers?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete ${this.selected.length} stagers?`,
+          { color: "red" },
+        )
+      ) {
         this.selected.forEach((stager) => {
-          this.$store.dispatch('stager/deleteStager', stager.id);
+          this.$store.dispatch("stager/deleteStager", stager.id);
         });
         this.selected = [];
       }
@@ -98,6 +111,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

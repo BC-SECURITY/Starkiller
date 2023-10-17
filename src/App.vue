@@ -1,34 +1,29 @@
 <template>
   <div id="app">
     <v-app :dark="isDarkMode">
-      <side-nav
-        v-if="isLoggedIn && !hideSideBar"
-      />
+      <side-nav v-if="isLoggedIn && !hideSideBar" />
       <confirm ref="confirm" />
-      <socket-notifications v-if="isLoggedIn && versionSatisfies('>=4.0') && !hideSideBar" />
+      <socket-notifications
+        v-if="isLoggedIn && versionSatisfies('>=4.0') && !hideSideBar"
+      />
       <starkiller-snackbar ref="snack" />
-      <v-app-bar
-        v-if="isLoggedIn"
-        elevate-on-scroll
-        app
-      >
+      <v-app-bar v-if="isLoggedIn" elevate-on-scroll app>
         <template
-          v-if="$route.name === 'agentEdit'
-            || $route.name === 'agents'
-            || $route.name === 'pluginEdit'
-            || $route.name === 'plugins'
-            || $route.name === 'listeners'"
+          v-if="
+            $route.name === 'agentEdit' ||
+            $route.name === 'agents' ||
+            $route.name === 'pluginEdit' ||
+            $route.name === 'plugins' ||
+            $route.name === 'listeners'
+          "
           #extension
         >
-          <portal-target
-            name="app-bar-extension"
-            slim
-          />
+          <portal-target name="app-bar-extension" slim />
         </template>
-        <portal-target
-          name="app-bar"
-          multiple
-          slim
+        <portal-target name="app-bar" multiple slim />
+        <notification-bell
+          v-show="$route.name !== 'notifications'"
+          ref="bell"
         />
       </v-app-bar>
       <!-- Sizes your content based upon application components -->
@@ -40,48 +35,53 @@
         </v-container>
       </v-main>
 
-      <v-footer
-        v-if="!hideSideBar"
-        app
-      >
+      <v-footer v-if="!hideSideBar" app>
         <span class="mr-2">Copyright (c) 2023 BC Security |</span>
         <a
           class="mr-2"
           target="_blank"
           rel="noopener noreferrer"
           href="https://github.com/bc-security/starkiller"
-        > Starkiller </a>
+        >
+          Starkiller
+        </a>
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
           rel="noopener noreferrer"
           href="https://github.com/bc-security/empire"
-        > Empire</a>
+        >
+          Empire</a
+        >
         <span class="mr-2">|</span>
         <a
           class="mr-2"
           target="_blank"
           rel="noopener noreferrer"
           href="https://github.com/sponsors/BC-SECURITY"
-        > Sponsor for extra features</a>
+        >
+          Sponsor for extra features</a
+        >
       </v-footer>
     </v-app>
   </div>
 </template>
 <script>
-import Vue from 'vue';
-import semver from 'semver';
-import { mapGetters, mapState } from 'vuex';
+import Vue from "vue";
+import semver from "semver";
+import { mapGetters, mapState } from "vuex";
 
-import SideNav from '@/components/SideNav.vue';
-import Confirm from '@/components/Confirm.vue';
-import SocketNotifications from '@/components/SocketNotifications.vue';
-import StarkillerSnackbar from '@/components/StarkillerSnackbar.vue';
+import SideNav from "@/components/SideNav.vue";
+import Confirm from "@/components/Confirm.vue";
+import SocketNotifications from "@/components/SocketNotifications.vue";
+import StarkillerSnackbar from "@/components/StarkillerSnackbar.vue";
+import NotificationBell from "@/components/NotificationBell.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
+    NotificationBell,
     SideNav,
     Confirm,
     SocketNotifications,
@@ -89,15 +89,15 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isLoggedIn: 'application/isLoggedIn',
-      isDarkMode: 'application/isDarkMode',
+      isLoggedIn: "application/isLoggedIn",
+      isDarkMode: "application/isDarkMode",
     }),
     ...mapState({
       empireVersion: (state) => state.application.empireVersion,
       connectionError: (state) => state.application.connectionError,
     }),
     isLoginPage() {
-      return this.$route.name === 'home';
+      return this.$route.name === "home";
     },
     hideSideBar() {
       return this.$route.query.hideSideBar;
@@ -108,9 +108,9 @@ export default {
       immediate: true,
       handler(val) {
         if (val === true && this.isLoggedIn === true) {
-          this.$router.push({ name: 'listeners' });
+          this.$router.push({ name: "listeners" });
         } else if (val === false && this.isLoggedIn === false) {
-          this.$router.push({ name: 'home' });
+          this.$router.push({ name: "home" });
         }
       },
     },
@@ -126,19 +126,19 @@ export default {
     },
     isLoggedIn(val) {
       if (val === false && !this.isLoginPage) {
-        this.$router.push({ name: 'home' });
-      } else if (val === true && this.$route.name !== 'listeners') {
-        this.$router.push({ name: 'listeners' });
+        this.$router.push({ name: "home" });
+      } else if (val === true && this.$route.name !== "listeners") {
+        this.$router.push({ name: "listeners" });
       }
     },
     empireVersion: {
       async handler(val) {
         if (val.length > 0) {
-          if (semver.satisfies(val.split(' ')[0].split('-')[0], '<5.2')) {
+          if (semver.satisfies(val.split(" ")[0].split("-")[0], "<5.2")) {
             await this.$nextTick();
             this.$snack.warn(
-              'This version of Starkiller is recommended to be used with Empire 5.2 or greater.'
-              + ' Some features may not work properly.',
+              "This version of Starkiller is recommended to be used with Empire 5.2 or greater." +
+                " Some features may not work properly.",
             );
           }
         }
@@ -147,7 +147,7 @@ export default {
     },
     connectionError(val) {
       if (val > 0) {
-        this.$snack.error('Could not reach Empire server');
+        this.$snack.error("Could not reach Empire server");
       }
     },
   },
@@ -156,16 +156,22 @@ export default {
 
     // register global snackbar
     Vue.prototype.$snack = this.$refs.snack;
+
+    // register global notification bell
+    Vue.prototype.$bell = this.$refs.bell;
   },
   methods: {
     versionSatisfies(version) {
-      return semver.satisfies(this.empireVersion.split(' ')[0].split('-')[0], version);
+      return semver.satisfies(
+        this.empireVersion.split(" ")[0].split("-")[0],
+        version,
+      );
     },
   },
 };
 </script>
 <style lang="scss">
-@import 'app.scss';
+@import "app.scss";
 
 #app {
   -webkit-font-smoothing: antialiased;

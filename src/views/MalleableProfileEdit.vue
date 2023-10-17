@@ -21,10 +21,7 @@
       :resource-id="id"
       resource-type="malleableProfile"
     />
-    <v-card
-      v-else
-      style="padding: 10px"
-    >
+    <v-card v-else style="padding: 10px">
       <v-form
         ref="form"
         v-model="valid"
@@ -64,13 +61,13 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import EditPageTop from '@/components/EditPageTop.vue';
-import * as malleableApi from '@/api/malleable-api';
+import Vue from "vue";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import EditPageTop from "@/components/EditPageTop.vue";
+import * as malleableApi from "@/api/malleable-api";
 
 export default {
-  name: 'MalleableProfileEdit',
+  name: "MalleableProfileEdit",
   components: {
     ErrorStateAlert,
     EditPageTop,
@@ -80,15 +77,12 @@ export default {
       form: {},
       rules: {
         name: [
-          (v) => !!v || 'Name is required',
-          (v) => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
+          (v) => !!v || "Name is required",
+          (v) =>
+            (!!v && v.length > 3) || "Name must be larger than 3 characters",
         ],
-        category: [
-          (v) => !!v || 'Category is required',
-        ],
-        code: [
-          (v) => !!v || 'Code is required',
-        ],
+        category: [(v) => !!v || "Category is required"],
+        code: [(v) => !!v || "Code is required"],
       },
       malleableProfile: {},
       valid: true,
@@ -99,15 +93,15 @@ export default {
   },
   computed: {
     isNew() {
-      return this.$route.name === 'malleableProfileNew';
+      return this.$route.name === "malleableProfileNew";
     },
     isCopy() {
       return this.$route.params.copy === true;
     },
     mode() {
-      if (this.isCopy) return 'Copy';
-      if (this.isNew) return 'New';
-      return 'View';
+      if (this.isCopy) return "Copy";
+      if (this.isNew) return "New";
+      return "View";
     },
     canEdit() {
       return true;
@@ -116,35 +110,39 @@ export default {
       return this.isCopy ? 0 : this.$route.params.id;
     },
     copyLink() {
-      if (this.id > 0) return { name: 'malleableProfileNew', params: { copy: true, id: this.id } };
+      if (this.id > 0)
+        return {
+          name: "malleableProfileNew",
+          params: { copy: true, id: this.id },
+        };
       return {};
     },
     breads() {
       return [
         {
-          text: 'Listeners',
+          text: "Listeners",
           disabled: true,
-          to: '/listeners',
+          to: "/listeners",
           exact: true,
         },
         {
-          text: 'Malleable Profiles',
+          text: "Malleable Profiles",
           disabled: false,
-          to: '/listeners?tab=malleable-profiles',
+          to: "/listeners?tab=malleable-profiles",
           exact: true,
         },
         {
           text: this.breadcrumbName,
           disabled: true,
-          to: '/malleable-profiles-edit',
+          to: "/malleable-profiles-edit",
         },
       ];
     },
     breadcrumbName() {
-      if (this.isCopy) return 'New';
+      if (this.isCopy) return "New";
       if (this.malleableProfile.name) return this.malleableProfile.name;
       if (this.id) return this.id;
-      return 'New';
+      return "New";
     },
   },
   watch: {
@@ -171,9 +169,10 @@ export default {
 
       this.loading = true;
       if (this.id > 0) {
-        malleableApi.updateMalleableProfile(this.id, this.form.data)
+        malleableApi
+          .updateMalleableProfile(this.id, this.form.data)
           .then(() => {
-            this.$snack.success('Malleable Profile updated');
+            this.$snack.success("Malleable Profile updated");
             this.loading = false;
           })
           .catch((err) => {
@@ -181,11 +180,16 @@ export default {
             this.loading = false;
           });
       } else {
-        malleableApi.createMalleableProfile(this.form.name, this.form.category, this.form.data)
+        malleableApi
+          .createMalleableProfile(
+            this.form.name,
+            this.form.category,
+            this.form.data,
+          )
           .then(({ id }) => {
-            this.$snack.success('Malleable Profile created');
+            this.$snack.success("Malleable Profile created");
             this.loading = false;
-            this.$router.push({ name: 'malleableProfileEdit', params: { id } });
+            this.$router.push({ name: "malleableProfileEdit", params: { id } });
           })
           .catch((err) => {
             this.$snack.error(`Error: ${err}`);
@@ -194,21 +198,31 @@ export default {
       }
     },
     async deleteMalleableProfile() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete profile ${this.form.name}?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete profile ${this.form.name}?`,
+          { color: "red" },
+        )
+      ) {
         try {
-          await this.$store.dispatch('malleable/deleteMalleableProfile', this.form.name);
-          this.$router.push({ name: 'malleableProfiles' });
+          await this.$store.dispatch(
+            "malleable/deleteMalleableProfile",
+            this.form.name,
+          );
+          this.$router.push({ name: "malleableProfiles" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);
         }
       }
     },
     getMalleableProfile(id) {
-      malleableApi.getMalleableProfile(id)
+      malleableApi
+        .getMalleableProfile(id)
         .then((data) => {
           this.malleableProfile = data;
           this.initialLoad = true;
-          Vue.set(this, 'form', { ...data });
+          Vue.set(this, "form", { ...data });
         })
         .catch(() => {
           this.errorState = true;
@@ -218,6 +232,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

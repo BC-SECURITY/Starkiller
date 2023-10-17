@@ -29,9 +29,13 @@
           class="sc-message--avatar"
           :style="{
             backgroundImage: `url(${user.imageUrl})`,
+            width: '40px',
+            height: '40px',
           }"
         >
-          <div :class="user.online ? 'online-indicator' : 'offline-indicator'" />
+          <div
+            :class="user.online ? 'online-indicator' : 'offline-indicator'"
+          />
         </div>
       </template>
     </beautiful-chat>
@@ -39,10 +43,10 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
-  name: 'Chat',
+  name: "Chat",
   props: {
     socket: {
       type: Object,
@@ -55,7 +59,7 @@ export default {
       messageList: [],
       newMessagesCount: 0,
       isChatOpen: false,
-      showTypingIndicator: '',
+      showTypingIndicator: "",
       alwaysScrollToBottom: false,
       // enables *bold* /emph/ _underline_ and such (more info at github.com/mattezza/msgdown)
       messageStyling: true,
@@ -70,23 +74,23 @@ export default {
     colors() {
       if (this.darkMode) {
         return {
-          header: { bg: '#F37C22', text: '#FFFFFF' },
-          launcher: { bg: '#F37C22' },
-          messageList: { bg: '#1E1E1E' },
-          userList: { bg: '#1E1E1E' },
-          sentMessage: { bg: '#1F89FB', text: '#FFFFFF' },
-          receivedMessage: { bg: '#3B3B3D', text: '#E1E1E1' },
-          userInput: { bg: '#1C1C1C', text: '#D7D7D7' },
+          header: { bg: "#F37C22", text: "#FFFFFF" },
+          launcher: { bg: "#F37C22" },
+          messageList: { bg: "#1E1E1E" },
+          userList: { bg: "#1E1E1E" },
+          sentMessage: { bg: "#1F89FB", text: "#FFFFFF" },
+          receivedMessage: { bg: "#3B3B3D", text: "#E1E1E1" },
+          userInput: { bg: "#1C1C1C", text: "#D7D7D7" },
         };
       }
       return {
-        header: { bg: '#F37C22', text: '#FFFFFF' },
-        launcher: { bg: '#F37C22' },
-        messageList: { bg: '#FFFFFF' },
-        userList: { bg: '#FFFFFF' },
-        sentMessage: { bg: '#1E87FB', text: '#FFFFFF' },
-        receivedMessage: { bg: '#E9E9EB', text: '#242424' },
-        userInput: { bg: '#FFFFFF', text: '#3A3A3A' },
+        header: { bg: "#F37C22", text: "#FFFFFF" },
+        launcher: { bg: "#F37C22" },
+        messageList: { bg: "#FFFFFF" },
+        userList: { bg: "#FFFFFF" },
+        sentMessage: { bg: "#1E87FB", text: "#FFFFFF" },
+        receivedMessage: { bg: "#E9E9EB", text: "#242424" },
+        userInput: { bg: "#FFFFFF", text: "#3A3A3A" },
       };
     },
     participants() {
@@ -95,45 +99,52 @@ export default {
         // convert it to a a participant
         const user2 = this.mapUser(user);
         // if it exists in the rawParticipants array then they are online
-        user2.online = this.rawParticipants.find((p) => p.username === user2.name) !== undefined;
+        user2.online =
+          this.rawParticipants.find((p) => p === user2.name) !== undefined;
         return user2;
       });
       return temp;
     },
   },
   mounted() {
-    this.$store.dispatch('user/getUsers');
-    this.socket.on('chat/join', (data) => {
+    this.$store.dispatch("user/getUsers");
+    this.socket.on("chat/join", (data) => {
       if (!this.isChatOpen) this.newMessagesCount++;
-      const message = { type: 'system', data: { text: data.message } };
+      const message = { type: "system", data: { text: data.message } };
       this.messageList = [...this.messageList, message];
       this.addUser(data.user);
     });
-    this.socket.on('chat/leave', (data) => {
+    this.socket.on("chat/leave", (data) => {
       if (!this.isChatOpen) this.newMessagesCount++;
-      const message = { type: 'system', data: { text: data.message } };
+      const message = { type: "system", data: { text: data.message } };
       this.messageList = [...this.messageList, message];
       this.removeUser(data.user);
     });
-    this.socket.on('chat/message', (data) => {
+    this.socket.on("chat/message", (data) => {
       if (!this.isChatOpen) this.newMessagesCount++;
-      if (data.username === this.me) { data.username = 'me'; }
-      const message = { type: 'text', author: data.username, data: { text: data.message } };
+      if (data.username === this.me) {
+        data.username = "me";
+      }
+      const message = {
+        type: "text",
+        author: data.username,
+        data: { text: data.message },
+      };
       this.messageList = [...this.messageList, message];
     });
-    this.socket.on('chat/participants', (data) => {
+    this.socket.on("chat/participants", (data) => {
       this.setUsers(data);
     });
-    this.socket.emit('chat/join');
-    this.socket.emit('chat/history');
-    this.socket.emit('chat/participants');
+    this.socket.emit("chat/join");
+    this.socket.emit("chat/history");
+    this.socket.emit("chat/participants");
   },
   destroyed() {
-    this.socket.emit('chat/leave');
+    this.socket.emit("chat/leave");
   },
   methods: {
     onMessageWasSent(message) {
-      this.socket.emit('chat/message', { message: message.data.text });
+      this.socket.emit("chat/message", { message: message.data.text });
     },
     openChat() {
       this.isChatOpen = true;
@@ -147,11 +158,11 @@ export default {
       // leverage pagination for loading another page of messages
     },
     addUser(user) {
-      if (this.rawParticipants.find((u) => u.username === user.username)) return;
+      if (this.rawParticipants.find((u) => u === user.username)) return;
       this.rawParticipants.push(user);
     },
     removeUser(user) {
-      const index = this.rawParticipants.findIndex((u) => u.username === user.username);
+      const index = this.rawParticipants.findIndex((u) => u === user.username);
       if (index > -1) {
         this.rawParticipants.splice(index, 1);
         this.rawParticipants = [...this.rawParticipants];
@@ -165,7 +176,9 @@ export default {
       return {
         id: user.username,
         name: user.username,
-        imageUrl: `https://ui-avatars.com/api/?background=random&name=${user.username}`,
+        imageUrl:
+          user.avatarUrl ||
+          `https://ui-avatars.com/api/?background=random&name=${user.username}`,
       };
     },
   },
@@ -183,21 +196,21 @@ export default {
   margin-bottom: 0px !important; /* Overriding the v-application paragraph margin */
 }
 .online-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background-color: #9dff00;
-    -webkit-box-shadow: 0px 0px 0px 1px rgba(112,112,112,1);
-    -moz-box-shadow: 0px 0px 0px 1px rgba(112,112,112,1);
-    box-shadow: 0px 0px 0px 1px rgba(112,112,112,1);
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #9dff00;
+  -webkit-box-shadow: 0px 0px 0px 1px rgba(112, 112, 112, 1);
+  -moz-box-shadow: 0px 0px 0px 1px rgba(112, 112, 112, 1);
+  box-shadow: 0px 0px 0px 1px rgba(112, 112, 112, 1);
 }
 .offline-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background-color: #f52a0f;
-    -webkit-box-shadow: 0px 0px 0px 1px rgba(112,112,112,1);
-    -moz-box-shadow: 0px 0px 0px 1px rgba(112,112,112,1);
-    box-shadow: 0px 0px 0px 1px rgba(112,112,112,1);
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #f52a0f;
+  -webkit-box-shadow: 0px 0px 0px 1px rgba(112, 112, 112, 1);
+  -moz-box-shadow: 0px 0px 0px 1px rgba(112, 112, 112, 1);
+  box-shadow: 0px 0px 0px 1px rgba(112, 112, 112, 1);
 }
 </style>

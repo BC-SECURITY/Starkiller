@@ -17,7 +17,7 @@
           outlined
           dense
           label="Search"
-          style="max-width: 250px; padding-top: 25px;"
+          style="max-width: 250px; padding-top: 25px"
         />
       </template>
     </list-page-top>
@@ -38,7 +38,7 @@
     >
       <template #item.name="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'malleableProfileEdit', params: { id: item.id } }"
         >
           {{ item.name }}
@@ -50,24 +50,15 @@
       <template #item.actions="{ item }">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
-            <v-btn
-              text
-              icon
-              x-small
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn text icon x-small v-bind="attrs" v-on="on">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
-            <v-list-item
-              key="view"
-              link
-            >
+            <v-list-item key="view" link>
               <router-link
                 class="text-decoration-none"
-                style="color: inherit;"
+                style="color: inherit"
                 :to="{ name: 'malleableProfileEdit', params: { id: item.id } }"
               >
                 <v-list-item-title>
@@ -78,7 +69,10 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'malleableProfileNew', params: { copy: true, id: item.id } }"
+              :to="{
+                name: 'malleableProfileNew',
+                params: { copy: true, id: item.id },
+              }"
               link
             >
               <v-list-item-title>
@@ -105,13 +99,13 @@
 </template>
 
 <script>
-import moment from 'moment';
-import { mapState } from 'vuex';
-import ListPageTop from '@/components/ListPageTop.vue';
-import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
+import moment from "moment";
+import { mapState } from "vuex";
+import ListPageTop from "@/components/ListPageTop.vue";
+import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 
 export default {
-  name: 'MalleableProfiles',
+  name: "MalleableProfiles",
   components: {
     DateTimeDisplay,
     ListPageTop,
@@ -126,26 +120,26 @@ export default {
     return {
       breads: [
         {
-          text: 'Listeners',
+          text: "Listeners",
           disabled: true,
-          href: '/listeners',
+          href: "/listeners",
         },
         {
-          text: 'Malleable Profiles',
+          text: "Malleable Profiles",
           disabled: true,
-          href: '/malleable-profiles',
+          href: "/malleable-profiles",
         },
       ],
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Category', value: 'category' },
-        { text: 'Updated At', value: 'updated_at' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: "Name", value: "name" },
+        { text: "Category", value: "category" },
+        { text: "Updated At", value: "updated_at" },
+        { text: "Actions", value: "actions", sortable: false },
       ],
-      sortBy: 'name',
+      sortBy: "name",
       sortDesc: false,
       moment,
-      filter: '',
+      filter: "",
       selected: [],
     };
   },
@@ -162,23 +156,38 @@ export default {
   },
   methods: {
     getMalleableProfiles() {
-      this.$store.dispatch('malleable/getMalleableProfiles');
+      this.$store.dispatch("malleable/getMalleableProfiles");
     },
     create() {
-      this.$router.push({ name: 'malleableProfileNew' });
+      this.$router.push({ name: "malleableProfileNew" });
     },
     view(item) {
-      this.$router.push({ name: 'malleableProfileEdit', params: { id: item.id } });
+      this.$router.push({
+        name: "malleableProfileEdit",
+        params: { id: item.id },
+      });
     },
     async deleteMalleableProfile(item) {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete profile ${item.name}?`, { color: 'red' })) {
-        this.$store.dispatch('malleable/deleteMalleableProfile', item.id);
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete profile ${item.name}?`,
+          { color: "red" },
+        )
+      ) {
+        this.$store.dispatch("malleable/deleteMalleableProfile", item.id);
       }
     },
     async deleteMalleableProfiles() {
-      if (await this.$root.$confirm('Delete', `Are you sure you want to delete ${this.selected.length} profiles?`, { color: 'red' })) {
+      if (
+        await this.$root.$confirm(
+          "Delete",
+          `Are you sure you want to delete ${this.selected.length} profiles?`,
+          { color: "red" },
+        )
+      ) {
         this.selected.forEach((profile) => {
-          this.$store.dispatch('malleable/deleteMalleableProfile', profile.id);
+          this.$store.dispatch("malleable/deleteMalleableProfile", profile.id);
         });
         this.selected = [];
       }
@@ -187,5 +196,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

@@ -60,20 +60,20 @@
 </template>
 
 <script>
-import moment from 'moment';
-import debounce from 'lodash.debounce';
-import { mapState } from 'vuex';
+import moment from "moment";
+import debounce from "lodash.debounce";
+import { mapState } from "vuex";
 
-import PluginTasksTable from '@/components/plugins/PluginTasksTable.vue';
-import ListPageTop from '@/components/ListPageTop.vue';
-import DownloadMixin from '@/mixins/download-stager';
-import ExpansionPanelFilter from '@/components/tables/ExpansionPanelFilter.vue';
-import ExpansionPanelSearch from '@/components/tables/ExpansionPanelSearch.vue';
-import AdvancedTable from '@/components/tables/AdvancedTable.vue';
-import * as tagApi from '@/api/tag-api';
+import PluginTasksTable from "@/components/plugins/PluginTasksTable.vue";
+import ListPageTop from "@/components/ListPageTop.vue";
+import DownloadMixin from "@/mixins/download-stager";
+import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
+import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
+import AdvancedTable from "@/components/tables/AdvancedTable.vue";
+import * as tagApi from "@/api/tag-api";
 
 export default {
-  name: 'PluginTasksList',
+  name: "PluginTasksList",
   components: {
     AdvancedTable,
     ExpansionPanelFilter,
@@ -101,17 +101,18 @@ export default {
     return {
       breads: [
         {
-          text: 'Plugins',
+          text: "Plugins",
           disabled: true,
-          href: '/plugins',
-        }, {
-          text: 'Tasks',
+          href: "/plugins",
+        },
+        {
+          text: "Tasks",
           disabled: true,
-          href: '/plugins?tab=tasks',
+          href: "/plugins?tab=tasks",
         },
       ],
       tasks: [],
-      search: '',
+      search: "",
       loading: false,
       moment,
       selectedPlugins: [],
@@ -128,7 +129,7 @@ export default {
         const u = state.user.users;
         u.push({
           id: 0,
-          username: 'Non-User',
+          username: "Non-User",
         });
         return u;
       },
@@ -146,18 +147,24 @@ export default {
   },
   async mounted() {
     await Promise.all([
-      this.$store.dispatch('plugin/getPlugins'),
-      this.$store.dispatch('user/getUsers'),
+      this.$store.dispatch("plugin/getPlugins"),
+      this.$store.dispatch("user/getUsers"),
       this.getTags(),
     ]);
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({ page: 1, limit: -1, sources: 'plugin_task' });
+      const tags = await tagApi.getTags({
+        page: 1,
+        limit: -1,
+        sources: "plugin_task",
+      });
 
       const dedupedTags = [];
       tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find((t) => t.name === tag.name && t.value === tag.value);
+        const existingTag = dedupedTags.find(
+          (t) => t.name === tag.name && t.value === tag.value,
+        );
         if (!existingTag) {
           dedupedTags.push(tag);
         }
@@ -172,5 +179,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

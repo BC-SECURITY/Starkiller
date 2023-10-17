@@ -6,7 +6,7 @@ export default {
      * @param {*} outFile the name of the file according to Empire
      */
     async downloadStager(output, outFile) {
-      const fileName = outFile.split('/')[outFile.split('/').length - 1];
+      const fileName = outFile.split("/")[outFile.split("/").length - 1];
       if (fileName.length === 0) {
         return;
       }
@@ -17,23 +17,23 @@ export default {
         const bytes = new Uint8Array(binaryString.length);
         const arrayBuffer = bytes.map((byte, i) => binaryString.charCodeAt(i));
         const blob = new Blob([arrayBuffer]);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', fileName);
-        link.style.visibility = 'hidden';
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = "hidden";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       }
     },
     async downloadText(output, fileName) {
-      const blob = new Blob([output], { type: 'text/plain' });
-      const link = document.createElement('a');
+      const blob = new Blob([output], { type: "text/plain" });
+      const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', fileName);
-      link.style.visibility = 'hidden';
+      link.setAttribute("href", url);
+      link.setAttribute("download", fileName);
+      link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

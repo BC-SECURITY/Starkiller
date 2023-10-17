@@ -13,7 +13,7 @@
     >
       <template #item.id="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'moduleExecute', params: { id: item.id } }"
         >
           {{ item.id }}
@@ -21,35 +21,23 @@
       </template>
       <template #item.name="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'moduleExecute', params: { id: item.id } }"
         >
           {{ item.name }}
         </router-link>
       </template>
       <template #item.techniques="{ item }">
-        <technique-chips
-          :techniques="item.techniques"
-          :show-title="false"
-        />
+        <technique-chips :techniques="item.techniques" :show-title="false" />
       </template>
       <template #item.needs_admin="{ item }">
-        <v-simple-checkbox
-          v-model="item.needs_admin"
-          disabled
-        />
+        <v-simple-checkbox v-model="item.needs_admin" disabled />
       </template>
       <template #item.opsec_safe="{ item }">
-        <v-simple-checkbox
-          v-model="item.opsec_safe"
-          disabled
-        />
+        <v-simple-checkbox v-model="item.opsec_safe" disabled />
       </template>
       <template #item.background="{ item }">
-        <v-simple-checkbox
-          v-model="item.background"
-          disabled
-        />
+        <v-simple-checkbox v-model="item.background" disabled />
       </template>
       <template #expanded-item="{ headers, item }">
         <td :colspan="headers.length">
@@ -64,11 +52,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import TechniqueChips from '@/components/TechniqueChips.vue';
+import { mapState } from "vuex";
+import TechniqueChips from "@/components/TechniqueChips.vue";
 
 export default {
-  name: 'ModulesTable',
+  name: "ModulesTable",
   components: {
     TechniqueChips,
   },
@@ -79,7 +67,7 @@ export default {
     },
     search: {
       type: String,
-      default: '',
+      default: "",
     },
     needsAdmin: {
       type: Array,
@@ -99,8 +87,7 @@ export default {
     },
   },
   data() {
-    return {
-    };
+    return {};
   },
   computed: {
     ...mapState({
@@ -108,31 +95,31 @@ export default {
     }),
     languagesUnique() {
       return [
-        ...new Set(
-          this.modules
-            .map((mod) => mod.language.toLowerCase()),
-        ),
+        ...new Set(this.modules.map((mod) => mod.language.toLowerCase())),
       ];
     },
     headers() {
       const headers = [
         {
-          text: 'Name',
-          value: 'name',
+          text: "Name",
+          value: "name",
         },
-        { text: 'Language', value: 'language', sort: this.sortLanguage },
-        { text: 'Needs Admin', value: 'needs_admin', width: '75px' },
-        { text: 'Opsec Safe', value: 'opsec_safe', width: '75px' },
-        { text: 'Background', value: 'background', width: '75px' },
+        { text: "Language", value: "language", sort: this.sortLanguage },
+        { text: "Needs Admin", value: "needs_admin", width: "75px" },
+        { text: "Opsec Safe", value: "opsec_safe", width: "75px" },
+        { text: "Background", value: "background", width: "75px" },
         {
-          text: 'Techniques', value: 'techniques', width: '300px', sortable: false,
+          text: "Techniques",
+          value: "techniques",
+          width: "300px",
+          sortable: false,
         },
       ];
       if (this.showIds) {
         headers.unshift({
-          text: 'id',
-          align: 'start',
-          value: 'id',
+          text: "id",
+          align: "start",
+          value: "id",
         });
       }
 
@@ -144,10 +131,12 @@ export default {
       if (this.search) {
         mods = mods.filter((mod) => {
           const search = this.search.toLowerCase();
-          return mod.name.toLowerCase().includes(search)
-            || mod.id.toLowerCase().includes(search)
-            || mod.language.toLowerCase().includes(search)
-            || mod.description.toLowerCase().includes(search);
+          return (
+            mod.name.toLowerCase().includes(search) ||
+            mod.id.toLowerCase().includes(search) ||
+            mod.language.toLowerCase().includes(search) ||
+            mod.description.toLowerCase().includes(search)
+          );
         });
       }
 
@@ -155,24 +144,27 @@ export default {
         .filter((mod) => this.needsAdmin.includes(mod.needs_admin))
         .filter((mod) => this.opsecSafe.includes(mod.opsec_safe))
         .filter((mod) => this.background.includes(mod.background))
-        .filter((mod) => this.selectedLanguages.includes(mod.language.toLowerCase()));
+        .filter((mod) =>
+          this.selectedLanguages.includes(mod.language.toLowerCase()),
+        );
 
       return mods;
     },
   },
   watch: {
     languagesUnique(val) {
-      this.$emit('languages-changed', val);
+      this.$emit("languages-changed", val);
     },
   },
   mounted() {
-    this.$store.dispatch('module/getModules');
+    this.$store.dispatch("module/getModules");
   },
   methods: {
     sortLanguage(a, b) {
       if (a == null) {
         return -1;
-      } if (b == null) {
+      }
+      if (b == null) {
         return 1;
       }
       return a.toLowerCase().localeCompare(b.toLowerCase());
@@ -181,6 +173,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

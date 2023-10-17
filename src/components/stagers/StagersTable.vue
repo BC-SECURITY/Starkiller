@@ -15,7 +15,7 @@
     >
       <template #item.name="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'stagerEdit', params: { id: item.id } }"
         >
           {{ item.name }}
@@ -23,7 +23,7 @@
       </template>
       <template #item.options.Listener="{ item }">
         <router-link
-          style="color: inherit;"
+          style="color: inherit"
           :to="{ name: 'listenerEdit', params: { id: item.id } }"
         >
           {{ item.options.Listener }}
@@ -35,13 +35,7 @@
       <template #item.actions="{ item }">
         <v-menu offset-y>
           <template #activator="{ on, attrs }">
-            <v-btn
-              text
-              icon
-              x-small
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn text icon x-small v-bind="attrs" v-on="on">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
@@ -79,11 +73,7 @@
               </v-list-item-title>
             </v-list-item>
             <v-divider class="pb-4" />
-            <v-list-item
-              key="delete"
-              link
-              @click="deleteStager(item)"
-            >
+            <v-list-item key="delete" link @click="deleteStager(item)">
               <v-list-item-title>
                 <v-icon>fa-trash-alt</v-icon>
                 Delete
@@ -97,15 +87,15 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import moment from 'moment';
-import DownloadMixin from '@/mixins/download-stager';
-import CopyMixin from '@/mixins/copy-stager';
-import DateTimeDisplay from '@/components/DateTimeDisplay.vue';
-import * as downloadApi from '@/api/download-api';
+import { mapState } from "vuex";
+import moment from "moment";
+import DownloadMixin from "@/mixins/download-stager";
+import CopyMixin from "@/mixins/copy-stager";
+import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
+import * as downloadApi from "@/api/download-api";
 
 export default {
-  name: 'StagersTable',
+  name: "StagersTable",
   components: {
     DateTimeDisplay,
   },
@@ -124,12 +114,12 @@ export default {
     return {
       moment,
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Listener', value: 'options.Listener' },
-        { text: 'Type', value: 'template' },
-        { text: 'Language', value: 'options.Language' },
-        { text: 'Created At', value: 'created_at' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: "Name", value: "name" },
+        { text: "Listener", value: "options.Listener" },
+        { text: "Type", value: "template" },
+        { text: "Language", value: "options.Language" },
+        { text: "Created At", value: "created_at" },
+        { text: "Actions", value: "actions", sortable: false },
       ],
       selected: [],
     };
@@ -150,7 +140,7 @@ export default {
   },
   watch: {
     selected(val) {
-      this.$emit('input', val);
+      this.$emit("input", val);
     },
   },
   mounted() {
@@ -167,7 +157,9 @@ export default {
       // later on we could display multiple files, but at the moment,
       // i think it makes sense to just get the last one.
       const lastIndex = stager.downloads.length - 1;
-      return this.copyStager(await downloadApi.getDownloadAsText(stager.downloads[lastIndex].id));
+      return this.copyStager(
+        await downloadApi.getDownloadAsText(stager.downloads[lastIndex].id),
+      );
     },
     async download(stager) {
       // later on we could display multiple files, but at the moment,
@@ -176,15 +168,13 @@ export default {
       return downloadApi.getDownload(stager.downloads[lastIndex].id);
     },
     async deleteStager(item) {
-      this.$emit('delete-stager', item);
+      this.$emit("delete-stager", item);
     },
     getStagers() {
-      this.$store.dispatch('stager/getStagers');
+      this.$store.dispatch("stager/getStagers");
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

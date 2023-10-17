@@ -1,4 +1,4 @@
-import * as obfuscationApi from '@/api/obfuscation-api';
+import * as obfuscationApi from "@/api/obfuscation-api";
 
 export default {
   namespaced: true,
@@ -26,17 +26,16 @@ export default {
   actions: {
     async getKeywords(context) {
       const keywords = await obfuscationApi.getKeywords();
-      context.commit('setKeywords', keywords);
+      context.commit("setKeywords", keywords);
     },
     async deleteKeyword(context, id) {
       await obfuscationApi.deleteKeyword(id);
-      context.commit('removeKeyword', id);
+      context.commit("removeKeyword", id);
     },
     async getConfigs(context) {
       const configs = await obfuscationApi.getObfuscationConfigs();
-      context.commit('setConfigs', configs);
+      context.commit("setConfigs", configs);
     },
   },
-  getters: {
-  },
+  getters: {},
 };

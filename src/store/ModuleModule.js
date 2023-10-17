@@ -1,4 +1,4 @@
-import * as moduleApi from '@/api/module-api';
+import * as moduleApi from "@/api/module-api";
 
 export default {
   namespaced: true,
@@ -13,9 +13,8 @@ export default {
   actions: {
     async getModules(context) {
       const modules = await moduleApi.getModules();
-      context.commit('setModules', modules);
+      context.commit("setModules", modules);
     },
   },
-  getters: {
-  },
+  getters: {},
 };

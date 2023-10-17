@@ -1,18 +1,11 @@
 <template>
-  <v-dialog
-    ref="downloadDialog"
-    v-model="show"
-    max-width="500px"
-  >
+  <v-dialog ref="downloadDialog" v-model="show" max-width="500px">
     <v-card>
       <v-card-title>
         <span class="headline">Download</span>
       </v-card-title>
       <v-card-text>
-        <v-form
-          ref="form"
-          @submit.prevent
-        >
+        <v-form ref="form" @submit.prevent>
           <v-container>
             <v-row>
               <v-col cols="12">
@@ -31,19 +24,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="blue darken-1"
-          text
-          @click.stop="show = false"
-        >
+        <v-btn color="blue darken-1" text @click.stop="show = false">
           Close
         </v-btn>
-        <v-btn
-          color="blue darken-1"
-          text
-          :loading="loading"
-          @click="submit"
-        >
+        <v-btn color="blue darken-1" text :loading="loading" @click="submit">
           Save
         </v-btn>
       </v-card-actions>
@@ -62,11 +46,9 @@ export default {
   },
   data() {
     return {
-      pathToFile: '',
+      pathToFile: "",
       rules: {
-        pathToFile: [
-          (v) => !!v || 'PathToFile is required',
-        ],
+        pathToFile: [(v) => !!v || "PathToFile is required"],
       },
     };
   },
@@ -76,7 +58,7 @@ export default {
         return this.value;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit("input", value);
       },
     },
   },
@@ -89,9 +71,11 @@ export default {
   },
   methods: {
     async submit() {
-      if (!this.$refs.form.validate()) { return; }
+      if (!this.$refs.form.validate()) {
+        return;
+      }
 
-      this.$emit('submit', { pathToFile: this.pathToFile });
+      this.$emit("submit", { pathToFile: this.pathToFile });
     },
   },
 };

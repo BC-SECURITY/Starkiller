@@ -1,25 +1,33 @@
 <template>
   <div>
-    <list-page-top
-      :breads="breads"
-    />
+    <list-page-top :breads="breads" />
     <div class="page">
-      <div class="first-part">
-        <span>{{ user.username }}</span>
-        <v-btn
-          color="primary"
-          text
-          @click="logout"
-        >
-          Logout
-        </v-btn>
+      <div
+        class="first-part point"
+        style="display: flex; flex-direction: row; align-items: center"
+      >
+        <v-avatar class="ma-2" @click="handleFileImport">
+          <v-img v-if="user.avatar" :src="avatarUrl" />
+          <v-img
+            v-else
+            :src="`https://ui-avatars.com/api/?background=random&name=${user.username}`"
+          />
+        </v-avatar>
+        <input
+          ref="uploader"
+          class="d-none"
+          type="file"
+          aria-label="uploader"
+          @change="onFileChanged"
+        />
+        <span class="ma-2">{{ user.username }}</span>
+
+        <v-spacer />
+        <v-btn color="primary" text @click="logout"> Logout </v-btn>
       </div>
       <v-divider />
-      <div style="display: flex; flex-direction: row;">
-        <v-switch
-          v-model="darkModeSwitch"
-          :label="`Dark Mode`"
-        />
+      <div style="display: flex; flex-direction: row">
+        <v-switch v-model="darkModeSwitch" :label="`Dark Mode`" />
         <v-switch
           v-model="chatWidgetSwitch"
           class="pl-8"
@@ -68,26 +76,34 @@
           submit
         </v-btn>
       </v-form>
+      <div class="headers pl-0 mt-2">
+        <div>
+          <h4>Auto-Subscribe to Agents</h4>
+          <span>
+            This will automatically subscribe to agent notifications.<br />
+            Turning this off will require you to manually subscribe to agents.
+          </span>
+        </div>
+        <v-switch v-model="autoSubscribeSwitch" color="primary" />
+      </div>
       <v-divider />
       <div class="headers pl-0 mt-2">
         <div>
-          <h4> Clear Application State </h4>
-          <span> This will clear UI preferences and other localstorage data.</span>
+          <h4>Clear Application State</h4>
+          <span>
+            This will clear UI preferences and other localstorage data.</span
+          >
         </div>
-        <v-btn
-          color="error"
-          @click="clearState"
-        >
-          Clear
-        </v-btn>
+        <v-btn color="error" @click="clearState"> Clear </v-btn>
       </div>
       <v-divider />
       <div class="headers pl-0 mt-2">
         <div>
           <h4>Reload Malleable Profiles</h4>
           <span>
-            Reload will check for and load new profile configurations.<br>
-            Reset will do the same but also reset all database records to defaults.
+            Reload will check for and load new profile configurations.<br />
+            Reset will do the same but also reset all database records to
+            defaults.
           </span>
         </div>
         <div class="d-flex justify-end">
@@ -114,8 +130,9 @@
         <div>
           <h4>Reload Modules</h4>
           <span>
-            Reload will check for and load new module configurations.<br>
-            Reset will do the same but also reset all database records to defaults.
+            Reload will check for and load new module configurations.<br />
+            Reset will do the same but also reset all database records to
+            defaults.
           </span>
         </div>
         <div class="d-flex justify-end">
@@ -142,8 +159,9 @@
         <div>
           <h4>Reload Bypasses</h4>
           <span>
-            Reload will check for and load new bypass configurations.<br>
-            Reset will do the same but also reset all database records to defaults.
+            Reload will check for and load new bypass configurations.<br />
+            Reset will do the same but also reset all database records to
+            defaults.
           </span>
         </div>
         <div class="d-flex justify-end">
@@ -171,11 +189,7 @@
           <h4>Reload Plugins</h4>
           <span>Reload will check for and load new plugins.</span>
         </div>
-        <v-btn
-          :loading="plugins.loading"
-          color="error"
-          @click="reloadPlugins"
-        >
+        <v-btn :loading="plugins.loading" color="error" @click="reloadPlugins">
           Reload
         </v-btn>
       </div>
@@ -184,13 +198,14 @@
 </template>
 
 <script>
-import * as bypassApi from '@/api/bypass-api';
-import * as moduleApi from '@/api/module-api';
-import * as malleableApi from '@/api/malleable-api';
-import * as pluginApi from '@/api/plugin-api';
-import * as userApi from '@/api/user-api';
-import { mapState } from 'vuex';
-import ListPageTop from '@/components/ListPageTop.vue';
+import * as bypassApi from "@/api/bypass-api";
+import * as moduleApi from "@/api/module-api";
+import * as malleableApi from "@/api/malleable-api";
+import * as pluginApi from "@/api/plugin-api";
+import * as userApi from "@/api/user-api";
+import * as downloadApi from "@/api/download-api";
+import { mapState } from "vuex";
+import ListPageTop from "@/components/ListPageTop.vue";
 
 export default {
   components: {
@@ -204,12 +219,14 @@ export default {
       },
       rules: {
         password: [
-          (v) => !!v || 'Password is required',
-          (v) => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
+          (v) => !!v || "Password is required",
+          (v) =>
+            (!!v && v.length > 5) ||
+            "Password must be larger than 5 characters",
         ],
         confirmPassword: [
-          (v) => !!v || 'Confirmation is required',
-          (v) => v === this.password.form.password || 'Password must match',
+          (v) => !!v || "Confirmation is required",
+          (v) => v === this.password.form.password || "Password must match",
         ],
       },
       modules: {
@@ -229,11 +246,12 @@ export default {
       valid: false,
       breads: [
         {
-          text: 'Settings',
+          text: "Settings",
           disabled: true,
-          href: '/settings',
+          href: "/settings",
         },
       ],
+      avatarUrl: "",
     };
   },
   computed: {
@@ -241,13 +259,14 @@ export default {
       user: (state) => state.application.user,
       darkMode: (state) => state.application.darkMode,
       chatWidget: (state) => state.application.chatWidget,
+      autoSubscribeAgents: (state) => state.application.autoSubscribeAgents,
     }),
     userId() {
       return this.user.id;
     },
     darkModeSwitch: {
       set(val) {
-        this.$store.dispatch('application/darkMode', val);
+        this.$store.dispatch("application/darkMode", val);
       },
       get() {
         return this.darkMode;
@@ -255,21 +274,74 @@ export default {
     },
     chatWidgetSwitch: {
       set(val) {
-        this.$store.dispatch('application/chatWidget', val);
+        this.$store.dispatch("application/chatWidget", val);
       },
       get() {
         return this.chatWidget;
       },
     },
+    autoSubscribeSwitch: {
+      set(val) {
+        this.$store.dispatch("application/autoSubscribeAgents", val);
+      },
+      get() {
+        return this.autoSubscribeAgents;
+      },
+    },
+  },
+  watch: {
+    "user.avatar": {
+      async handler() {
+        if (!this.user.avatar) {
+          return;
+        }
+        this.avatarUrl = await this.getDownloadUrl(this.user.avatar);
+      },
+      immediate: true,
+    },
   },
   methods: {
+    async getDownloadUrl(avatar) {
+      const url = await downloadApi.getDownloadAsUrl(avatar.id);
+      return url;
+    },
+    handleFileImport() {
+      this.isSelecting = true;
+
+      // After obtaining the focus when closing the FilePicker, return the button state to normal
+      window.addEventListener(
+        "focus",
+        () => {
+          this.isSelecting = false;
+        },
+        { once: true },
+      );
+
+      // Trigger click on the FileInput
+      this.$refs.uploader.click();
+    },
+    async onFileChanged(e) {
+      const selectedFile = e.target.files[0];
+
+      const data = new FormData();
+      data.append("file", selectedFile);
+
+      await userApi.uploadAvatar(this.userId, data);
+      await this.$store.dispatch("application/refreshMe");
+      this.$snack.success("Upload complete");
+    },
     async logout() {
-      if (await this.$root.$confirm('', 'Are you sure you want to logout?', { color: 'green' })) {
-        this.$store.dispatch('application/logout');
+      if (
+        await this.$root.$confirm("", "Are you sure you want to logout?", {
+          color: "green",
+        })
+      ) {
+        this.$store.dispatch("application/logout");
       }
     },
     clearState() {
-      this.$store.dispatch('application/clear');
+      this.$store.dispatch("application/clear");
+      this.$store.dispatch("agent/clear");
     },
     submit() {
       if (this.password.loading || !this.$refs.form.validate()) {
@@ -277,9 +349,10 @@ export default {
       }
 
       this.password.loading = true;
-      userApi.updatePassword(this.user.id, this.password.form.password)
+      userApi
+        .updatePassword(this.user.id, this.password.form.password)
         .then(() => {
-          this.$snack.success('Password updated');
+          this.$snack.success("Password updated");
           this.password.form = {};
           this.$refs.form.resetValidation();
         })
@@ -292,9 +365,10 @@ export default {
     },
     resetProfiles() {
       this.profiles.loading = true;
-      malleableApi.resetProfiles()
+      malleableApi
+        .resetProfiles()
         .then(() => {
-          this.$snack.success('Profiles reset successful');
+          this.$snack.success("Profiles reset successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
@@ -305,9 +379,10 @@ export default {
     },
     reloadProfiles() {
       this.profiles.loading = true;
-      malleableApi.reloadProfiles()
+      malleableApi
+        .reloadProfiles()
         .then(() => {
-          this.$snack.success('Profiles reload successful');
+          this.$snack.success("Profiles reload successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
@@ -318,9 +393,10 @@ export default {
     },
     reloadModules() {
       this.modules.loading = true;
-      moduleApi.reloadModules()
+      moduleApi
+        .reloadModules()
         .then(() => {
-          this.$snack.success('Module reload successful');
+          this.$snack.success("Module reload successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
@@ -331,9 +407,10 @@ export default {
     },
     resetModules() {
       this.modules.loading = true;
-      moduleApi.resetModules()
+      moduleApi
+        .resetModules()
         .then(() => {
-          this.$snack.success('Module reset successful');
+          this.$snack.success("Module reset successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
@@ -344,9 +421,10 @@ export default {
     },
     reloadBypasses() {
       this.bypasses.loading = true;
-      bypassApi.reloadBypasses()
+      bypassApi
+        .reloadBypasses()
         .then(() => {
-          this.$snack.success('Bypass reload successful');
+          this.$snack.success("Bypass reload successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
@@ -357,9 +435,10 @@ export default {
     },
     resetBypasses() {
       this.bypasses.loading = true;
-      bypassApi.resetBypasses()
+      bypassApi
+        .resetBypasses()
         .then(() => {
-          this.$snack.success('Bypass reset successful');
+          this.$snack.success("Bypass reset successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);
@@ -370,9 +449,10 @@ export default {
     },
     reloadPlugins() {
       this.plugins.loading = true;
-      pluginApi.reloadPlugins()
+      pluginApi
+        .reloadPlugins()
         .then(() => {
-          this.$snack.success('Plugin reload successful');
+          this.$snack.success("Plugin reload successful");
         })
         .catch((err) => {
           this.$snack.error(`Error: ${err}`);

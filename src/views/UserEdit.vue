@@ -8,16 +8,13 @@
       :submit-loading="loading"
       @submit="submit"
     />
-    <h3>{{ id ? 'Edit' : 'New' }} User</h3>
+    <h3>{{ id ? "Edit" : "New" }} User</h3>
     <error-state-alert
       v-if="errorState"
       :resource-id="id"
       resource-type="user"
     />
-    <v-card
-      v-else
-      style="padding: 10px"
-    >
+    <v-card v-else style="padding: 10px">
       <v-form
         ref="form"
         v-model="valid"
@@ -59,29 +56,21 @@
           required
           @click:append="showConfirm = !showConfirm"
         />
-        <v-switch
-          v-if="isAdmin"
-          v-model="form.is_admin"
-          label="Admin"
-        />
-        <v-switch
-          v-if="!isNew"
-          v-model="form.enabled"
-          label="Enabled"
-        />
+        <v-switch v-if="isAdmin" v-model="form.is_admin" label="Admin" />
+        <v-switch v-if="!isNew" v-model="form.enabled" label="Enabled" />
       </v-form>
     </v-card>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import * as userApi from '@/api/user-api';
-import ErrorStateAlert from '@/components/ErrorStateAlert.vue';
-import EditPageTop from '@/components/EditPageTop.vue';
+import { mapGetters } from "vuex";
+import * as userApi from "@/api/user-api";
+import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import EditPageTop from "@/components/EditPageTop.vue";
 
 export default {
-  name: 'UserEdit',
+  name: "UserEdit",
   components: {
     ErrorStateAlert,
     EditPageTop,
@@ -89,23 +78,26 @@ export default {
   data() {
     return {
       form: {
-        username: '',
-        password: '',
-        confirm_password: '',
+        username: "",
+        password: "",
+        confirm_password: "",
         is_admin: false,
       },
       rules: {
         name: [
-          (v) => !!v || 'Name is required',
-          (v) => (!!v && v.length > 3) || 'Name must be larger than 3 characters',
+          (v) => !!v || "Name is required",
+          (v) =>
+            (!!v && v.length > 3) || "Name must be larger than 3 characters",
         ],
         password: [
-          (v) => !!v || 'Password is required',
-          (v) => (!!v && v.length > 5) || 'Password must be larger than 5 characters',
+          (v) => !!v || "Password is required",
+          (v) =>
+            (!!v && v.length > 5) ||
+            "Password must be larger than 5 characters",
         ],
         confirmPassword: [
-          (v) => !!v || 'Confirmation is required',
-          (v) => v === this.form.password || 'Password must match',
+          (v) => !!v || "Confirmation is required",
+          (v) => v === this.form.password || "Password must match",
         ],
       },
       user: {},
@@ -118,30 +110,30 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'application/isAdmin',
+      isAdmin: "application/isAdmin",
     }),
     breads() {
       return [
         {
-          text: 'Users',
+          text: "Users",
           disabled: false,
-          to: '/users',
+          to: "/users",
           exact: true,
         },
         {
           text: this.breadcrumbName,
           disabled: true,
-          to: '/users-edit',
+          to: "/users-edit",
         },
       ];
     },
     breadcrumbName() {
       if (this.user.username) return this.user.username;
       if (this.id) return this.id;
-      return 'New';
+      return "New";
     },
     isNew() {
-      return this.$route.name === 'userNew';
+      return this.$route.name === "userNew";
     },
     id() {
       return this.$route.params.id;
@@ -160,9 +152,10 @@ export default {
 
       this.loading = true;
       if (this.id > 0) {
-        userApi.updateUser(this.form)
+        userApi
+          .updateUser(this.form)
           .then(() => {
-            this.$snack.success('User updated');
+            this.$snack.success("User updated");
             this.loading = false;
           })
           .catch((err) => {
@@ -170,11 +163,12 @@ export default {
             this.loading = false;
           });
       } else {
-        userApi.createUser(this.form)
+        userApi
+          .createUser(this.form)
           .then(({ id }) => {
-            this.$snack.success('User created');
+            this.$snack.success("User created");
             this.loading = false;
-            this.$router.push({ name: 'userEdit', params: { id } });
+            this.$router.push({ name: "userEdit", params: { id } });
           })
           .catch((err) => {
             this.$snack.error(`Error: ${err}`);
@@ -183,7 +177,8 @@ export default {
       }
     },
     getUser(id) {
-      userApi.getUser(id)
+      userApi
+        .getUser(id)
         .then((data) => {
           this.user = data;
           this.form = data;
@@ -196,6 +191,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

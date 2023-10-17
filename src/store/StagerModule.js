@@ -1,11 +1,11 @@
-import * as stagerApi from '@/api/stager-api';
+import * as stagerApi from "@/api/stager-api";
 
 export default {
   namespaced: true,
   state: {
     stagers: [],
     templates: [],
-    status: 'success',
+    status: "success",
   },
   mutations: {
     setStagers(state, stagers) {
@@ -29,24 +29,24 @@ export default {
   },
   actions: {
     async getStagers(context) {
-      context.commit('setStatus', 'loading');
+      context.commit("setStatus", "loading");
       const stagers = await stagerApi.getStagers();
-      await context.commit('setStagers', stagers);
-      context.commit('setStatus', 'success');
+      await context.commit("setStagers", stagers);
+      context.commit("setStatus", "success");
     },
     async getStagerTemplates(context) {
       const templates = await stagerApi.getStagerTemplates();
-      context.commit('setTemplates', templates);
+      context.commit("setTemplates", templates);
     },
     async deleteStager(context, id) {
       await stagerApi.deleteStager(id);
-      context.commit('removeStager', id);
+      context.commit("removeStager", id);
     },
     async addStager(context, stager) {
       const found = context.state.stagers.find((el) => el.ID === stager.id);
 
       if (!found) {
-        context.commit('pushStager', stager);
+        context.commit("pushStager", stager);
       }
     },
   },

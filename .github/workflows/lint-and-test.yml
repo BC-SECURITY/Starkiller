@@ -3,7 +3,7 @@ name: Lint and Test
 on:
   pull_request:
     paths-ignore:
-      - '**.md'
+      - "**.md"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -18,12 +18,13 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'yarn'
+          cache: "yarn"
       - name: Get app version
         run: |
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Install modules
         run: yarn
       - name: Run ESLint
-        if: ${{ !startsWith(env.APP_VERSION, '1') }}
         run: yarn lint
+      - name: Run Prettier
+        run: yarn format --check

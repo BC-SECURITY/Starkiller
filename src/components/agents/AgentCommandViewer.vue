@@ -2,7 +2,7 @@
   <div class="agent-command-viewer">
     <v-icon
       v-if="!initialized"
-      style="width: 50px;"
+      style="width: 50px"
       class="fa-3x fas fa-spinner fa-spin"
     />
     <ul class="shell-body">
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import AgentCommandViewerEntry from './AgentCommandViewerEntry.vue';
+import AgentCommandViewerEntry from "./AgentCommandViewerEntry.vue";
 
 export default {
   components: { AgentCommandViewerEntry },
@@ -42,20 +42,26 @@ export default {
   computed: {
     agentResults() {
       return this.taskResults.length > 0
-        ? this.taskResults.map((res) => ({
-          id: res.id,
-          input: res.input,
-          output: res.output ? res.output.split('\\n') : '',
-          ogOutput: res.output ? res.output.split('\\n').join('\n') : '',
-          username: res.username ? res.username : 'unknown',
-          updatedAt: res.updated_at,
-        })).slice(-10)
+        ? this.taskResults
+            .map((res) => ({
+              id: res.id,
+              input: res.input,
+              output: res.output ? res.output.split("\\n") : "",
+              ogOutput: res.output ? res.output.split("\\n").join("\n") : "",
+              username: res.username ? res.username : "unknown",
+              updatedAt: res.updated_at,
+            }))
+            .slice(-10)
         : [];
     },
     totalLength() {
       return [
-        ...this.agentResults.map((el) => el.input).filter((input) => input.length > 0),
-        ...this.agentResults.map((el) => el.output).filter((output) => output.length > 0),
+        ...this.agentResults
+          .map((el) => el.input)
+          .filter((input) => input.length > 0),
+        ...this.agentResults
+          .map((el) => el.output)
+          .filter((output) => output.length > 0),
       ];
     },
   },
@@ -66,7 +72,7 @@ export default {
     totalLength(val, oldVal) {
       if (val.length !== oldVal.length) {
         this.$nextTick(() => {
-          this.$emit('new-results');
+          this.$emit("new-results");
         });
       }
     },
@@ -88,8 +94,11 @@ export default {
   padding: 5px;
   list-style: none;
   background: #141414;
-  color: #45D40C;
-  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+  color: #45d40c;
+  font:
+    0.8em "Andale Mono",
+    Consolas,
+    "Courier New";
   line-height: 1.6em;
 
   -webkit-border-bottom-right-radius: 3px;

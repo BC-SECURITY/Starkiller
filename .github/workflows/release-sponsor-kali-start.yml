@@ -41,7 +41,7 @@ jobs:
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - name: Get release branch name
         run: |
-            echo "RELEASE_BRANCH=release/$APP_VERSION-sponsors" >> $GITHUB_ENV
+          echo "RELEASE_BRANCH=release/$APP_VERSION-sponsors" >> $GITHUB_ENV
       - name: Create release branch
         run: git checkout -b ${{ env.RELEASE_BRANCH }}
       - name: Push new branch

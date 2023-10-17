@@ -8,27 +8,15 @@
     />
     <advanced-table>
       <template #filters>
-        <v-switch
-          v-model="showIds"
-          label="Show IDs"
-        />
+        <v-switch v-model="showIds" label="Show IDs" />
         <expansion-panel-search
           v-model="search"
           title="Search"
           label="Search"
         />
-        <expansion-panel-boolean
-          v-model="needsAdmin"
-          title="Needs Admin"
-        />
-        <expansion-panel-boolean
-          v-model="opsecSafe"
-          title="Opsec Safe"
-        />
-        <expansion-panel-boolean
-          v-model="background"
-          title="Background"
-        />
+        <expansion-panel-boolean v-model="needsAdmin" title="Needs Admin" />
+        <expansion-panel-boolean v-model="opsecSafe" title="Opsec Safe" />
+        <expansion-panel-boolean v-model="background" title="Background" />
         <expansion-panel-filter
           v-model="languages"
           title="Language"
@@ -54,14 +42,14 @@
 </template>
 
 <script>
-import ListPageTop from '@/components/ListPageTop.vue';
-import ModulesTable from '@/components/modules/ModulesTable.vue';
-import AdvancedTable from '@/components/tables/AdvancedTable.vue';
-import ExpansionPanelFilter from '@/components/tables/ExpansionPanelFilter.vue';
-import ExpansionPanelBoolean from '@/components/tables/ExpansionPanelBoolean.vue';
+import ListPageTop from "@/components/ListPageTop.vue";
+import ModulesTable from "@/components/modules/ModulesTable.vue";
+import AdvancedTable from "@/components/tables/AdvancedTable.vue";
+import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
+import ExpansionPanelBoolean from "@/components/tables/ExpansionPanelBoolean.vue";
 
 export default {
-  name: 'Modules',
+  name: "Modules",
   components: {
     ExpansionPanelBoolean,
     ExpansionPanelFilter,
@@ -71,12 +59,12 @@ export default {
   },
   data() {
     return {
-      search: '',
+      search: "",
       breads: [
         {
-          text: 'Modules',
+          text: "Modules",
           disabled: true,
-          href: '/modules',
+          href: "/modules",
         },
       ],
       showIds: false,
@@ -98,6 +86,4 @@ export default {
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

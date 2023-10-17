@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       bumpType:
-        description: 'Bump type to use for the release branch.'
+        description: "Bump type to use for the release branch."
         type: choice
         default: patch
         options:
@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ env.TARGET_BRANCH }}
-          submodules: 'recursive'
+          submodules: "recursive"
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
       - name: Initialize mandatory git config
@@ -41,7 +41,7 @@ jobs:
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Get release branch name
         run: |
-            echo "RELEASE_BRANCH=release/$APP_VERSION-private" >> $GITHUB_ENV
+          echo "RELEASE_BRANCH=release/$APP_VERSION-private" >> $GITHUB_ENV
       - name: Create release branch
         run: git checkout -b ${{ env.RELEASE_BRANCH }}
       - name: Update Changelog

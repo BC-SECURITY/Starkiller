@@ -1,4 +1,4 @@
-import * as credentialApi from '@/api/credential-api';
+import * as credentialApi from "@/api/credential-api";
 
 export default {
   namespaced: true,
@@ -22,11 +22,11 @@ export default {
   actions: {
     async getCredentials(context) {
       const credentials = await credentialApi.getCredentials();
-      context.commit('setCredentials', credentials);
+      context.commit("setCredentials", credentials);
     },
     async deleteCredential(context, id) {
       await credentialApi.deleteCredential(id);
-      context.commit('removeCredential', id);
+      context.commit("removeCredential", id);
     },
   },
   getters: {
