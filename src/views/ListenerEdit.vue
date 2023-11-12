@@ -104,7 +104,7 @@ import InfoViewer from "@/components/InfoViewer.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import TagViewer from "@/components/TagViewer.vue";
-import { useListenerStore } from "@/store/listener-module";
+import { useListenerStore } from "@/stores/listener-module";
 
 export default {
   name: "ListenerEdit",

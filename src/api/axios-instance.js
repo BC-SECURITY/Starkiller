@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 // eslint-disable-next-line import/no-mutable-exports
 export let axiosInstance = null;

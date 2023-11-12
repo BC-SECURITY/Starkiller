@@ -189,7 +189,7 @@
 <script>
 import * as obfuscationApi from "@/api/obfuscation-api";
 import ListPageTop from "@/components/ListPageTop.vue";
-import { useObfuscationStore } from "@/store/obfuscation-module";
+import { useObfuscationStore } from "@/stores/obfuscation-module";
 import { mapState } from "pinia";
 
 export default {

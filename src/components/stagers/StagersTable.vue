@@ -92,8 +92,8 @@ import DownloadMixin from "@/mixins/download-stager";
 import CopyMixin from "@/mixins/copy-stager";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import * as downloadApi from "@/api/download-api";
-import { useStagerStore } from "@/store/stager-module";
-import { useApplicationStore } from "@/store/application-module";
+import { useStagerStore } from "@/stores/stager-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "StagersTable",

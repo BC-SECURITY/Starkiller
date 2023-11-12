@@ -50,7 +50,7 @@
 
 <script>
 import ListPageTop from "@/components/ListPageTop.vue";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Notifications",

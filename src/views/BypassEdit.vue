@@ -59,7 +59,7 @@ import Vue from "vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as bypassApi from "@/api/bypass-api";
-import { useBypassStore } from "@/store/bypass-module";
+import { useBypassStore } from "@/stores/bypass-module";
 
 export default {
   name: "BypassEdit",

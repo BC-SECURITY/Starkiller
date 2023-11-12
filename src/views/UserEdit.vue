@@ -68,7 +68,7 @@ import { mapState } from "pinia";
 import * as userApi from "@/api/user-api";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "UserEdit",

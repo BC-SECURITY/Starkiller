@@ -131,7 +131,7 @@ import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import * as tagApi from "@/api/tag-api";
 import * as credentialApi from "@/api/credential-api";
-import { useCredentialStore } from "@/store/credential-module";
+import { useCredentialStore } from "@/stores/credential-module";
 
 export default {
   name: "Credentials",

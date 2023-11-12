@@ -43,7 +43,7 @@ import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import * as credentialApi from "@/api/credential-api";
-import { useCredentialStore } from "@/store/credential-module";
+import { useCredentialStore } from "@/stores/credential-module";
 
 export default {
   name: "CredentialEdit",

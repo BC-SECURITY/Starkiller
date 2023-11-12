@@ -45,10 +45,10 @@
 
 <script>
 import Vue from "vue";
-import { useListenerStore } from "@/store/listener-module";
-import { useBypassStore } from "@/store/bypass-module";
-import { useCredentialStore } from "@/store/credential-module";
-import { useMalleableProfileStore } from "@/store/malleable-module";
+import { useListenerStore } from "@/stores/listener-module";
+import { useBypassStore } from "@/stores/bypass-module";
+import { useCredentialStore } from "@/stores/credential-module";
+import { useMalleableProfileStore } from "@/stores/malleable-module";
 import DynamicFormInput from "./DynamicFormInput.vue";
 
 export default {

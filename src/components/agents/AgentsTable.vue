@@ -132,8 +132,8 @@ import moment from "moment";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import * as agentApi from "@/api/agent-api";
-import { useAgentStore } from "@/store/agent-module";
-import { useApplicationStore } from "@/store/application-module";
+import { useAgentStore } from "@/stores/agent-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "AgentsTable",

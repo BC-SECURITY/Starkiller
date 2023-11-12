@@ -23,7 +23,7 @@
 
 <script>
 import ListPageTop from "@/components/ListPageTop.vue";
-import { usePluginStore } from "@/store/plugin-module";
+import { usePluginStore } from "@/stores/plugin-module";
 
 export default {
   name: "PluginsList",

@@ -8,10 +8,10 @@
 import io from "socket.io-client";
 import { mapState } from "pinia";
 import Chat from "@/components/Chat.vue";
-import { useListenerStore } from "@/store/listener-module";
-import { usePluginStore } from "@/store/plugin-module";
-import { useApplicationStore } from "@/store/application-module";
-import { useAgentStore } from "@/store/agent-module";
+import { useListenerStore } from "@/stores/listener-module";
+import { usePluginStore } from "@/stores/plugin-module";
+import { useApplicationStore } from "@/stores/application-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "SocketNotifications",

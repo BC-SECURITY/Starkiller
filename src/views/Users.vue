@@ -47,8 +47,8 @@ import { mapState } from "pinia";
 import * as userApi from "@/api/user-api";
 import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
-import { useUserStore } from "@/store/user-module";
-import { useApplicationStore } from "@/store/application-module";
+import { useUserStore } from "@/stores/user-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Users",

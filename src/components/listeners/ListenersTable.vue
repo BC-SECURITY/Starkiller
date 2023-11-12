@@ -85,7 +85,7 @@ import moment from "moment";
 import TagViewer from "@/components/TagViewer.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import * as listenerApi from "@/api/listener-api";
-import { useListenerStore } from "@/store/listener-module";
+import { useListenerStore } from "@/stores/listener-module";
 
 export default {
   name: "ListenersTable",

@@ -44,7 +44,7 @@ import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 import AnsiUp from "ansi_up";
 import { table } from "table";
-import { useModuleStore } from "@/store/module-module";
+import { useModuleStore } from "@/stores/module-module";
 
 function fuzzyMatch(query, string) {
   const q = Array.from(query);

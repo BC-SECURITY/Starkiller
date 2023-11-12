@@ -65,7 +65,7 @@ import Vue from "vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as malleableApi from "@/api/malleable-api";
-import { useMalleableProfileStore } from "@/store/malleable-module";
+import { useMalleableProfileStore } from "@/stores/malleable-module";
 
 export default {
   name: "MalleableProfileEdit",

@@ -53,7 +53,7 @@
 
 <script>
 import TechniqueChips from "@/components/TechniqueChips.vue";
-import { useModuleStore } from "@/store/module-module";
+import { useModuleStore } from "@/stores/module-module";
 
 export default {
   name: "ModulesTable",

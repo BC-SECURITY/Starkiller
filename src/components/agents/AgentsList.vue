@@ -52,8 +52,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AgentsTable from "@/components/agents/AgentsTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
-import { useAgentStore } from "@/store/agent-module";
-import { useApplicationStore } from "@/store/application-module";
+import { useAgentStore } from "@/stores/agent-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "AgentsList",

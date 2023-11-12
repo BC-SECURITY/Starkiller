@@ -136,8 +136,8 @@ import TagViewer from "@/components/TagViewer.vue";
 import ClickToEdit from "@/components/ClickToEdit.vue";
 import * as agentTaskApi from "@/api/agent-task-api";
 import * as agentApi from "@/api/agent-api";
-import { useListenerStore } from "@/store/listener-module";
-import { useAgentStore } from "@/store/agent-module";
+import { useListenerStore } from "@/stores/listener-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   components: { TagViewer, ClickToEdit },

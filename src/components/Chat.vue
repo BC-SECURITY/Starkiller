@@ -43,8 +43,8 @@
 </template>
 
 <script>
-import { useUserStore } from "@/store/user-module";
-import { useApplicationStore } from "@/store/application-module";
+import { useUserStore } from "@/stores/user-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Chat",

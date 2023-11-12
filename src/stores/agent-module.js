@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import * as agentApi from "@/api/agent-api";
 import * as agentTaskApi from "@/api/agent-task-api";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 // eslint-disable-next-line import/prefer-default-export
 export const useAgentStore = defineStore("agent", {

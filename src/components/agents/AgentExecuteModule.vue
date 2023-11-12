@@ -111,7 +111,7 @@
 import InfoViewer from "@/components/InfoViewer.vue";
 import * as moduleApi from "@/api/module-api";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
-import { useModuleStore } from "@/store/module-module";
+import { useModuleStore } from "@/stores/module-module";
 import GeneralForm from "../GeneralForm.vue";
 import TechniqueChips from "../TechniqueChips.vue";
 

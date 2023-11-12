@@ -77,7 +77,7 @@ import Confirm from "@/components/Confirm.vue";
 import SocketNotifications from "@/components/SocketNotifications.vue";
 import StarkillerSnackbar from "@/components/StarkillerSnackbar.vue";
 import NotificationBell from "@/components/NotificationBell.vue";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "App",

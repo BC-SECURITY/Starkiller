@@ -29,7 +29,7 @@
 <script>
 import AgentExecuteModule from "@/components/agents/AgentExecuteModule.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
-import { useAgentStore } from "@/store/agent-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "ModuleExecute",

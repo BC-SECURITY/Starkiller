@@ -70,8 +70,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
-import { usePluginStore } from "@/store/plugin-module";
-import { useUserStore } from "@/store/user-module";
+import { usePluginStore } from "@/stores/plugin-module";
+import { useUserStore } from "@/stores/user-module";
 
 export default {
   name: "PluginTasksList",

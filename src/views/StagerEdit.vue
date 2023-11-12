@@ -85,7 +85,7 @@ import EditPageTop from "@/components/EditPageTop.vue";
 import * as downloadApi from "@/api/download-api";
 import CopyMixin from "@/mixins/copy-stager";
 import TooltipButton from "@/components/TooltipButton.vue";
-import { useStagerStore } from "@/store/stager-module";
+import { useStagerStore } from "@/stores/stager-module";
 import * as stagerApi from "@/api/stager-api";
 
 export default {

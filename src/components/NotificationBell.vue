@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "NotificationBell",

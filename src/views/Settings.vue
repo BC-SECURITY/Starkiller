@@ -208,9 +208,9 @@ import * as pluginApi from "@/api/plugin-api";
 import * as userApi from "@/api/user-api";
 import * as downloadApi from "@/api/download-api";
 import ListPageTop from "@/components/ListPageTop.vue";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 import { mapState } from "pinia";
-import { useAgentStore } from "@/store/agent-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   components: {

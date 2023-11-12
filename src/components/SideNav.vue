@@ -51,7 +51,7 @@
 
 <script>
 import { mapState } from "pinia";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 import { version } from "../../package.json";
 
 export default {

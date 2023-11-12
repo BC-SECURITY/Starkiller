@@ -71,8 +71,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
-import { useUserStore } from "@/store/user-module";
-import { useAgentStore } from "@/store/agent-module";
+import { useUserStore } from "@/stores/user-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "AgentTasksList",

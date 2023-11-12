@@ -99,7 +99,7 @@
 <script>
 import { mapState } from "pinia";
 import moment from "moment";
-import { useApplicationStore } from "@/store/application-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   components: {},

@@ -82,7 +82,7 @@
 import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
-import { useBypassStore } from "@/store/bypass-module";
+import { useBypassStore } from "@/stores/bypass-module";
 import { mapState } from "pinia";
 
 export default {

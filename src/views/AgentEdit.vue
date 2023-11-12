@@ -252,7 +252,7 @@ import * as agentApi from "@/api/agent-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 
 import "splitpanes/dist/splitpanes.css";
-import { useAgentStore } from "@/store/agent-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "AgentEdit",

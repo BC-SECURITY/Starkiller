@@ -102,7 +102,7 @@
 import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
-import { useMalleableProfileStore } from "@/store/malleable-module";
+import { useMalleableProfileStore } from "@/stores/malleable-module";
 
 export default {
   name: "MalleableProfiles",

@@ -35,8 +35,8 @@ import CopyMixin from "@/mixins/copy-stager";
 import ListPageTop from "@/components/ListPageTop.vue";
 import StagersTable from "@/components/stagers/StagersTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
-import { useStagerStore } from "@/store/stager-module";
-import { useApplicationStore } from "@/store/application-module";
+import { useStagerStore } from "@/stores/stager-module";
+import { useApplicationStore } from "@/stores/application-module";
 import app from "@/App.vue";
 
 export default {

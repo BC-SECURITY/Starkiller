@@ -42,7 +42,7 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import ListenersTable from "@/components/listeners/ListenersTable.vue";
 import * as tagApi from "@/api/tag-api";
-import { useListenerStore } from "@/store/listener-module";
+import { useListenerStore } from "@/stores/listener-module";
 
 export default {
   name: "Listeners",
