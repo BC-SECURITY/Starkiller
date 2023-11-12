@@ -131,12 +131,13 @@
 
 <script>
 import Vue from "vue";
-import { mapState } from "vuex";
 import moment from "moment";
 import TagViewer from "@/components/TagViewer.vue";
 import ClickToEdit from "@/components/ClickToEdit.vue";
 import * as agentTaskApi from "@/api/agent-task-api";
 import * as agentApi from "@/api/agent-api";
+import { useListenerStore } from "@/store/listener-module";
+import { useAgentStore } from "@/store/agent-module";
 
 export default {
   components: { TagViewer, ClickToEdit },
@@ -182,9 +183,15 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      listeners: (state) => state.listener.listeners,
-    }),
+    agentStore() {
+      return useAgentStore();
+    },
+    listenerStore() {
+      return useListenerStore();
+    },
+    listeners() {
+      return this.listenerStore.listeners;
+    },
     fields() {
       // stale comes back as a boolean, while no other property does and el-input
       // doesn't accept booleans so this will do.
@@ -229,7 +236,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("listener/getListeners");
+    this.listenerStore.getListeners();
   },
   methods: {
     deleteTag(tag) {
@@ -261,7 +268,7 @@ export default {
       if (this.agent.name === this.form.name) return;
 
       try {
-        await this.$store.dispatch("agent/rename", {
+        await this.agentStore.rename({
           sessionId: this.agent.session_id,
           newName: this.form.name,
         });
@@ -286,9 +293,7 @@ export default {
       this.$snack.info(
         `Tasked agent to change listener to: ${this.form.listener}`,
       );
-      await this.$store.dispatch("agent/getAgent", {
-        sessionId: this.form.name,
-      });
+      await this.agentStore.getAgent({ sessionId: this.form.name });
     },
     async updateKillDate() {
       let date = "";
@@ -304,7 +309,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change kill date to: ${date}`);
-      this.$store.dispatch("agent/getAgent", { sessionId: this.form.name });
+      await this.agentStore.getAgent({ sessionId: this.form.name });
     },
     async updateWorkingHours() {
       if (this.agent.working_hours === this.form.working_hours) return;

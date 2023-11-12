@@ -100,9 +100,9 @@
 
 <script>
 import moment from "moment";
-import { mapState } from "vuex";
 import ListPageTop from "@/components/ListPageTop.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
+import { useMalleableProfileStore } from "@/store/malleable-module";
 
 export default {
   name: "MalleableProfiles",
@@ -144,9 +144,12 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      malleableProfiles: (state) => state.malleable.malleableProfiles,
-    }),
+    malleableProfileStore() {
+      return useMalleableProfileStore();
+    },
+    malleableProfiles() {
+      return this.malleableProfileStore.malleableProfiles;
+    },
     showDelete() {
       return this.selected.length > 0;
     },
@@ -156,7 +159,7 @@ export default {
   },
   methods: {
     getMalleableProfiles() {
-      this.$store.dispatch("malleable/getMalleableProfiles");
+      this.malleableProfileStore.getMalleableProfiles();
     },
     create() {
       this.$router.push({ name: "malleableProfileNew" });
@@ -175,7 +178,7 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("malleable/deleteMalleableProfile", item.id);
+        await this.malleableProfileStore.deleteMalleableProfile(item.id);
       }
     },
     async deleteMalleableProfiles() {
@@ -187,7 +190,7 @@ export default {
         )
       ) {
         this.selected.forEach((profile) => {
-          this.$store.dispatch("malleable/deleteMalleableProfile", profile.id);
+          this.malleableProfileStore.deleteMalleableProfile(profile.id);
         });
         this.selected = [];
       }

@@ -45,7 +45,10 @@
 
 <script>
 import Vue from "vue";
-import { mapGetters } from "vuex";
+import { useListenerStore } from "@/store/listener-module";
+import { useBypassStore } from "@/store/bypass-module";
+import { useCredentialStore } from "@/store/credential-module";
+import { useMalleableProfileStore } from "@/store/malleable-module";
 import DynamicFormInput from "./DynamicFormInput.vue";
 
 export default {
@@ -73,12 +76,30 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      listeners: "listener/listenerNames",
-      bypasses: "bypass/bypassNames",
-      malleableProfiles: "malleable/profileNames",
-      credentials: "credential/credentials",
-    }),
+    listenerStore() {
+      return useListenerStore();
+    },
+    bypassStore() {
+      return useBypassStore();
+    },
+    credentialStore() {
+      return useCredentialStore();
+    },
+    malleableProfileStore() {
+      return useMalleableProfileStore();
+    },
+    listeners() {
+      return this.listenerStore.listenerNames;
+    },
+    bypasses() {
+      return this.bypassStore.bypassNames;
+    },
+    credentials() {
+      return this.credentialStore.credentials;
+    },
+    malleableProfiles() {
+      return this.malleableProfileStore.profileNames;
+    },
     /**
      * Fields that go in the "Optional" section
      */
@@ -166,16 +187,16 @@ export default {
   },
   mounted() {
     if (this.listeners?.length === 0) {
-      this.$store.dispatch("listener/getListeners");
+      this.listenerStore.getListeners();
     }
     if (this.bypasses?.length === 0) {
-      this.$store.dispatch("bypass/getBypasses");
+      this.bypassStore.getBypasses();
     }
     if (this.malleableProfiles?.length === 0) {
-      this.$store.dispatch("malleable/getMalleableProfiles");
+      this.malleableProfileStore.getMalleableProfiles();
     }
     if (this.credentials?.length === 0) {
-      this.$store.dispatch("credential/getCredentials");
+      this.credentialStore.getCredentials();
     }
   },
   methods: {

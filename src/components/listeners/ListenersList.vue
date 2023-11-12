@@ -36,13 +36,13 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import ListenersTable from "@/components/listeners/ListenersTable.vue";
 import * as tagApi from "@/api/tag-api";
+import { useListenerStore } from "@/store/listener-module";
 
 export default {
   name: "Listeners",
@@ -79,10 +79,13 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      listeners: (state) => state.listener.listeners,
-      listenersStatus: (state) => state.listener.status,
-    }),
+    // mapStore breaks autocomplete
+    listenerStore() {
+      return useListenerStore();
+    },
+    listenersStatus() {
+      return this.listenerStore.status;
+    },
     showDelete() {
       return this.selected.length > 0;
     },
@@ -122,7 +125,7 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("listener/killListener", item.id);
+        await this.listenerStore.killListener(item.id);
       }
     },
     async killListeners() {
@@ -134,7 +137,7 @@ export default {
         )
       ) {
         this.selected.forEach((listener) => {
-          this.$store.dispatch("listener/killListener", listener.id);
+          this.listenerStore.killListener(listener.id);
         });
         this.selected = [];
       }

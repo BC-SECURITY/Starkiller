@@ -43,8 +43,8 @@ import pause from "@/utils/pause";
 import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 import AnsiUp from "ansi_up";
-import { mapState } from "vuex";
 import { table } from "table";
+import { useModuleStore } from "@/store/module-module";
 
 function fuzzyMatch(query, string) {
   const q = Array.from(query);
@@ -217,9 +217,12 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      allModules: (state) => state.module.modules,
-    }),
+    moduleStore() {
+      return useModuleStore();
+    },
+    allModules() {
+      return this.moduleStore.modules;
+    },
     currentPrompt() {
       const prefix = this.colorizeText("(Empire: ", "white");
       const suffix = this.colorizeText(" )>", "white");
@@ -248,7 +251,7 @@ export default {
     // Autofocus on the input field
     this.$refs.inputField.focus();
     if (this.allModules?.length === 0) {
-      this.$store.dispatch("module/getModules");
+      await this.moduleStore.getModules();
     }
 
     // Load the command history from local storage

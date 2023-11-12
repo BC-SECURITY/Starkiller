@@ -27,9 +27,9 @@
       </div>
       <v-divider />
       <div style="display: flex; flex-direction: row">
-        <v-switch v-model="darkModeSwitch" :label="`Dark Mode`" />
+        <v-switch v-model="applicationStore.darkMode" :label="`Dark Mode`" />
         <v-switch
-          v-model="chatWidgetSwitch"
+          v-model="applicationStore.chatWidget"
           class="pl-8"
           :label="`Chat Widget`"
         />
@@ -84,7 +84,10 @@
             Turning this off will require you to manually subscribe to agents.
           </span>
         </div>
-        <v-switch v-model="autoSubscribeSwitch" color="primary" />
+        <v-switch
+          v-model="applicationStore.autoSubscribeAgents"
+          color="primary"
+        />
       </div>
       <v-divider />
       <div class="headers pl-0 mt-2">
@@ -204,8 +207,10 @@ import * as malleableApi from "@/api/malleable-api";
 import * as pluginApi from "@/api/plugin-api";
 import * as userApi from "@/api/user-api";
 import * as downloadApi from "@/api/download-api";
-import { mapState } from "vuex";
 import ListPageTop from "@/components/ListPageTop.vue";
+import { useApplicationStore } from "@/store/application-module";
+import { mapState } from "pinia";
+import { useAgentStore } from "@/store/agent-module";
 
 export default {
   components: {
@@ -255,38 +260,15 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      user: (state) => state.application.user,
-      darkMode: (state) => state.application.darkMode,
-      chatWidget: (state) => state.application.chatWidget,
-      autoSubscribeAgents: (state) => state.application.autoSubscribeAgents,
-    }),
+    ...mapState(useApplicationStore, ["user"]),
+    applicationStore() {
+      return useApplicationStore();
+    },
+    agentStore() {
+      return useAgentStore();
+    },
     userId() {
       return this.user.id;
-    },
-    darkModeSwitch: {
-      set(val) {
-        this.$store.dispatch("application/darkMode", val);
-      },
-      get() {
-        return this.darkMode;
-      },
-    },
-    chatWidgetSwitch: {
-      set(val) {
-        this.$store.dispatch("application/chatWidget", val);
-      },
-      get() {
-        return this.chatWidget;
-      },
-    },
-    autoSubscribeSwitch: {
-      set(val) {
-        this.$store.dispatch("application/autoSubscribeAgents", val);
-      },
-      get() {
-        return this.autoSubscribeAgents;
-      },
     },
   },
   watch: {
@@ -327,7 +309,7 @@ export default {
       data.append("file", selectedFile);
 
       await userApi.uploadAvatar(this.userId, data);
-      await this.$store.dispatch("application/refreshMe");
+      this.applicationStore.refreshMe();
       this.$snack.success("Upload complete");
     },
     async logout() {
@@ -336,12 +318,12 @@ export default {
           color: "green",
         })
       ) {
-        this.$store.dispatch("application/logout");
+        this.applicationStore.logout();
       }
     },
     clearState() {
-      this.$store.dispatch("application/clear");
-      this.$store.dispatch("agent/clear");
+      this.applicationStore.clear();
+      this.agentStore.clear();
     },
     submit() {
       if (this.password.loading || !this.$refs.form.validate()) {

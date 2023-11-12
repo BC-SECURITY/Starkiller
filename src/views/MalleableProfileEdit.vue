@@ -65,6 +65,7 @@ import Vue from "vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as malleableApi from "@/api/malleable-api";
+import { useMalleableProfileStore } from "@/store/malleable-module";
 
 export default {
   name: "MalleableProfileEdit",
@@ -92,6 +93,9 @@ export default {
     };
   },
   computed: {
+    malleableProfileStore() {
+      return useMalleableProfileStore();
+    },
     isNew() {
       return this.$route.name === "malleableProfileNew";
     },
@@ -206,11 +210,11 @@ export default {
         )
       ) {
         try {
-          await this.$store.dispatch(
-            "malleable/deleteMalleableProfile",
-            this.form.name,
-          );
-          this.$router.push({ name: "malleableProfiles" });
+          await this.malleableProfileStore.deleteMalleableProfile(this.id);
+          this.$router.push({
+            name: "listeners",
+            query: { tab: "malleable-profiles" },
+          });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);
         }

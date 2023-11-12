@@ -50,22 +50,25 @@
 
 <script>
 import ListPageTop from "@/components/ListPageTop.vue";
-import { mapState } from "vuex";
+import { useApplicationStore } from "@/store/application-module";
 
 export default {
   name: "Notifications",
   components: { ListPageTop },
   computed: {
-    ...mapState({
-      notifications: (state) => state.application.notifications,
-    }),
+    applicationStore() {
+      return useApplicationStore();
+    },
+    notifications() {
+      return this.applicationStore.notifications;
+    },
   },
   beforeDestroy() {
-    this.$store.dispatch("application/markAllNotificationsAsRead");
+    this.applicationStore.markAllNotificationsAsRead();
   },
   methods: {
     clearNotifications() {
-      this.$store.dispatch("application/clearNotifications");
+      this.applicationStore.clearNotifications();
     },
   },
 };

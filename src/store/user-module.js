@@ -1,20 +1,16 @@
+import { defineStore } from "pinia";
 import * as userApi from "@/api/user-api";
 import * as downloadApi from "@/api/download-api";
 
-export default {
-  namespaced: true,
-  state: {
+// eslint-disable-next-line import/prefer-default-export
+export const useUserStore = defineStore("user", {
+  state: () => ({
     token: "",
     url: "",
     users: [],
-  },
-  mutations: {
-    setUsers(state, users) {
-      state.users = users;
-    },
-  },
+  }),
   actions: {
-    async getUsers(context) {
+    async getUsers() {
       const response = await userApi.getUsers();
 
       await Promise.all(
@@ -25,8 +21,8 @@ export default {
         }),
       );
 
-      context.commit("setUsers", response);
+      this.users = response;
     },
   },
   getters: {},
-};
+});

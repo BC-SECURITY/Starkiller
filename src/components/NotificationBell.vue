@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { useApplicationStore } from "@/store/application-module";
 
 export default {
   name: "NotificationBell",
@@ -56,9 +56,12 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      notifications: (state) => state.application.notifications,
-    }),
+    applicationStore() {
+      return useApplicationStore();
+    },
+    notifications() {
+      return this.applicationStore.notifications;
+    },
     unreadCount() {
       return this.notifications.filter((n) => !n.read).length;
     },
@@ -76,12 +79,12 @@ export default {
       this.$router.push({ name: "notifications" });
     },
     markAsRead() {
-      this.$store.dispatch("application/markAllNotificationsAsRead");
+      this.applicationStore.markAllNotificationsAsRead();
     },
     push(notification) {
       notification.buttonText = notification.buttonText || "View";
       notification.read = false;
-      this.$store.dispatch("application/addNotification", notification);
+      this.applicationStore.addNotification(notification);
     },
   },
 };

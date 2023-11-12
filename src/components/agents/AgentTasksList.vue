@@ -62,7 +62,7 @@
 <script>
 import moment from "moment";
 import debounce from "lodash.debounce";
-import { mapState } from "vuex";
+import { mapState } from "pinia";
 
 import AgentTasksTable from "@/components/agents/AgentTasksTable.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
@@ -71,6 +71,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
+import { useUserStore } from "@/store/user-module";
+import { useAgentStore } from "@/store/agent-module";
 
 export default {
   name: "AgentTasksList",
@@ -123,17 +125,23 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      agents: (state) => state.agent.agents,
-      users: (state) => {
-        const u = state.user.users;
-        u.push({
+    agentStore() {
+      return useAgentStore();
+    },
+    userStore() {
+      return useUserStore();
+    },
+    users() {
+      const u = this.userStore.users;
+      return [
+        ...u,
+        {
           id: 0,
           username: "Non-User",
-        });
-        return u;
-      },
-    }),
+        },
+      ];
+    },
+    ...mapState(useAgentStore, ["agents"]),
   },
   watch: {
     agent: {
@@ -147,8 +155,8 @@ export default {
   },
   async mounted() {
     await Promise.all([
-      this.$store.dispatch("agent/getAgents"),
-      this.$store.dispatch("user/getUsers"),
+      this.agentStore.getAgents(),
+      this.userStore.getUsers(),
       this.getTags(),
     ]);
   },

@@ -78,8 +78,6 @@
 </template>
 
 <script>
-import * as stagerApi from "@/api/stager-api";
-import { mapGetters } from "vuex";
 import InfoViewer from "@/components/InfoViewer.vue";
 import GeneralForm from "@/components/GeneralForm.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
@@ -87,6 +85,8 @@ import EditPageTop from "@/components/EditPageTop.vue";
 import * as downloadApi from "@/api/download-api";
 import CopyMixin from "@/mixins/copy-stager";
 import TooltipButton from "@/components/TooltipButton.vue";
+import { useStagerStore } from "@/store/stager-module";
+import * as stagerApi from "@/api/stager-api";
 
 export default {
   name: "StagerEdit",
@@ -112,9 +112,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      stagerTemplateIds: "stager/templateIds",
-    }),
+    stagerStore() {
+      return useStagerStore();
+    },
+    stagerTemplateIds() {
+      return this.stagerStore.templateIds;
+    },
     isNew() {
       return this.$route.name === "stagerNew";
     },
@@ -216,7 +219,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("stager/getStagerTemplates");
+    this.stagerStore.getStagerTemplates();
 
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
@@ -273,7 +276,7 @@ export default {
         )
       ) {
         try {
-          await this.$store.dispatch("stager/deleteStager", this.id);
+          await this.stagerStore.deleteStager(this.id);
           this.$router.push({ name: "stagers" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);

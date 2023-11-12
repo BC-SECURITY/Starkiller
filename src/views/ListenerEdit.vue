@@ -99,12 +99,12 @@
 
 <script>
 import * as listenerApi from "@/api/listener-api";
-import { mapGetters } from "vuex";
 import GeneralForm from "@/components/GeneralForm.vue";
 import InfoViewer from "@/components/InfoViewer.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import TagViewer from "@/components/TagViewer.vue";
+import { useListenerStore } from "@/store/listener-module";
 
 export default {
   name: "ListenerEdit",
@@ -137,9 +137,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      listenerTemplateIds: "listener/templateIds",
-    }),
+    listenerStore() {
+      return useListenerStore();
+    },
+    listenerTemplateIds() {
+      return this.listenerStore.templateIds;
+    },
     isNew() {
       return this.$route.name === "listenerNew";
     },
@@ -233,7 +236,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("listener/getListenerTemplates");
+    this.listenerStore.getListenerTemplates();
 
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
@@ -328,7 +331,7 @@ export default {
         )
       ) {
         try {
-          await this.$store.dispatch("listener/killListener", this.id);
+          await this.listenerStore.killListener(this.id);
           this.$router.push({ name: "listeners" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);

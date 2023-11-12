@@ -59,6 +59,7 @@ import Vue from "vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as bypassApi from "@/api/bypass-api";
+import { useBypassStore } from "@/store/bypass-module";
 
 export default {
   name: "BypassEdit",
@@ -90,6 +91,9 @@ export default {
     };
   },
   computed: {
+    bypassStore() {
+      return useBypassStore();
+    },
     isNew() {
       return this.$route.name === "bypassNew";
     },
@@ -196,7 +200,7 @@ export default {
         )
       ) {
         try {
-          await this.$store.dispatch("bypass/deleteBypass", this.form.id);
+          this.bypassStore.deleteBypass(this.form.id);
           this.$router.push({ name: "bypasses" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);

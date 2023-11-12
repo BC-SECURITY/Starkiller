@@ -129,10 +129,11 @@
 
 <script>
 import moment from "moment";
-import { mapState } from "vuex";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import * as agentApi from "@/api/agent-api";
+import { useAgentStore } from "@/store/agent-module";
+import { useApplicationStore } from "@/store/application-module";
 
 export default {
   name: "AgentsTable",
@@ -249,11 +250,18 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      agents: (state) => state.agent.agents,
-      agentsStatus: (state) => state.agent.status,
-      selectedHeadersState: (state) => state.application.agentHeaders,
-    }),
+    agentStore() {
+      return useAgentStore();
+    },
+    applicationStore() {
+      return useApplicationStore();
+    },
+    agents() {
+      return this.agentStore.agents;
+    },
+    agentsStatus() {
+      return this.agentStore.status;
+    },
     selectedAll: {
       set(val) {
         this.selectedHeadersTemp = [...this.staticHeaders];
@@ -271,7 +279,9 @@ export default {
       return this.headersFull
         .filter(
           (h) =>
-            this.selectedHeaders.findIndex((h2) => h2.text === h.text) > -1,
+            this.applicationStore.agentHeaders.findIndex(
+              (h2) => h2.text === h.text,
+            ) > -1,
         )
         .sort((a, b) => a.order - b.order);
     },
@@ -301,14 +311,6 @@ export default {
 
       return sorted;
     },
-    selectedHeaders: {
-      set(val) {
-        this.$store.dispatch("application/agentHeaders", val);
-      },
-      get() {
-        return this.selectedHeadersState;
-      },
-    },
   },
   watch: {
     selectedTags() {
@@ -320,12 +322,12 @@ export default {
   },
   async mounted() {
     this.getAgents();
-    if (this.selectedHeaders.length === 0) {
-      this.selectedHeaders = this.headersFull.filter(
+    if (this.applicationStore.agentHeaders.length === 0) {
+      this.applicationStore.agentHeaders = this.headersFull.filter(
         (h) => h.defaultHeader === true,
       );
     }
-    this.selectedHeadersTemp = [...this.selectedHeaders];
+    this.selectedHeadersTemp = [...this.applicationStore.agentHeaders];
   },
   methods: {
     deleteTag(agent, tag) {
@@ -358,11 +360,11 @@ export default {
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     submitHeaderForm() {
-      this.selectedHeaders = [...this.selectedHeadersTemp];
+      this.applicationStore.agentHeaders = [...this.selectedHeadersTemp];
       this.showHeaderMenu = false;
     },
     getAgents() {
-      this.$store.dispatch("agent/getAgents");
+      this.agentStore.getAgents();
     },
     async killAgent(item) {
       this.$emit("killAgent", item);

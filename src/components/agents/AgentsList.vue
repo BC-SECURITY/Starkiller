@@ -12,9 +12,12 @@
     />
     <advanced-table>
       <template #filters>
-        <v-switch v-model="hideStaleAgentsCheckbox" label="Hide Stale Agents" />
         <v-switch
-          v-model="hideArchivedAgentsCheckbox"
+          v-model="applicationStore.hideStaleAgents"
+          label="Hide Stale Agents"
+        />
+        <v-switch
+          v-model="applicationStore.hideArchivedAgents"
           class="pl-4"
           label="Hide Archived Agents"
         />
@@ -32,8 +35,8 @@
         <agents-table
           ref="agentsTable"
           v-model="selected"
-          :hide-stale-agents="hideStaleAgentsCheckbox"
-          :hide-archived-agents="hideArchivedAgentsCheckbox"
+          :hide-stale-agents="applicationStore.hideStaleAgents"
+          :hide-archived-agents="applicationStore.hideArchivedAgents"
           :selected-tags="selectedTags"
           @refresh-tags="getTags"
         />
@@ -44,12 +47,13 @@
 
 <script>
 import moment from "moment";
-import { mapState } from "vuex";
 import ListPageTop from "@/components/ListPageTop.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AgentsTable from "@/components/agents/AgentsTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
+import { useAgentStore } from "@/store/agent-module";
+import { useApplicationStore } from "@/store/application-module";
 
 export default {
   name: "AgentsList",
@@ -86,11 +90,15 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      agents: (state) => state.agent.agents,
-      hideStaleAgents: (state) => state.application.hideStaleAgents,
-      hideArchivedAgents: (state) => state.application.hideArchivedAgents,
-    }),
+    agentStore() {
+      return useAgentStore();
+    },
+    applicationStore() {
+      return useApplicationStore();
+    },
+    agents() {
+      return this.agentStore.agents;
+    },
     sortedAgents() {
       let sorted = this.agents.slice();
       sorted.sort((a, b) => -a.lastseen_time.localeCompare(b.lastseen_time));
@@ -113,22 +121,6 @@ export default {
     },
     showDelete() {
       return this.selected.length > 0;
-    },
-    hideStaleAgentsCheckbox: {
-      set(val) {
-        this.$store.dispatch("application/hideStaleAgents", val);
-      },
-      get() {
-        return this.hideStaleAgents;
-      },
-    },
-    hideArchivedAgentsCheckbox: {
-      set(val) {
-        this.$store.dispatch("application/hideArchivedAgents", val);
-      },
-      get() {
-        return this.hideArchivedAgents;
-      },
     },
   },
   async mounted() {
@@ -163,9 +155,7 @@ export default {
         )
       ) {
         this.selected.forEach((agent) => {
-          this.$store.dispatch("agent/killAgent", {
-            sessionId: agent.session_id,
-          });
+          this.agentStore.killAgent({ sessionId: agent.session_id });
         });
         this.$snack.success(
           `${this.selected.length} agents tasked to run TASK_EXIT.`,
@@ -184,7 +174,7 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("agent/killAgent", { sessionId: item.session_id });
+        this.agentStore.killAgent({ sessionId: item.session_id });
         this.$snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
       }
     },

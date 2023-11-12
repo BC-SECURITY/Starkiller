@@ -18,6 +18,8 @@
     "axios": "^0.24.0",
     "lodash.debounce": "^4.0.8",
     "moment": "^2.29.1",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.0",
     "portal-vue": "^2.1.7",
     "qs": "^6.10.3",
     "semver": "^7.3.5",
@@ -28,9 +30,7 @@
     "vue": "2.7",
     "vue-beautiful-chat": "^2.5.0",
     "vue-router": "^3.5.1",
-    "vuetify": "^2.6.0",
-    "vuex": "^3.6.2",
-    "vuex-persistedstate": "^3.0.1"
+    "vuetify": "^2.6.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
@@ -42,6 +42,6 @@
     "prettier": "^3.0.2",
     "sass": "~1.32",
     "unplugin-vue-components": "^0.22.12",
-    "vite": "^3"
+    "vite": "^4"
   }
 }

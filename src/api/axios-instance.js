@@ -1,7 +1,5 @@
 import axios from "axios";
-
-// I don't like this cyclic dependency, but struggling to find a better way atm.
-import store from "@/store/index";
+import { useApplicationStore } from "@/store/application-module";
 
 // eslint-disable-next-line import/no-mutable-exports
 export let axiosInstance = null;
@@ -20,12 +18,13 @@ export function setInstance(url, token) {
     (response) => response,
     (err) => {
       if (!err?.response) {
-        store.dispatch("application/connectionError");
+        useApplicationStore().connectionError += 1;
       }
 
       if (err?.response?.status === 401 || err?.response?.status === 403) {
-        store.dispatch("application/logout");
+        useApplicationStore().logout();
       }
+
       return Promise.reject(err);
     },
   );

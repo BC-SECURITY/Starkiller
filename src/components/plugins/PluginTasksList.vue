@@ -62,7 +62,6 @@
 <script>
 import moment from "moment";
 import debounce from "lodash.debounce";
-import { mapState } from "vuex";
 
 import PluginTasksTable from "@/components/plugins/PluginTasksTable.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
@@ -71,6 +70,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
+import { usePluginStore } from "@/store/plugin-module";
+import { useUserStore } from "@/store/user-module";
 
 export default {
   name: "PluginTasksList",
@@ -123,17 +124,25 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      plugins: (state) => state.plugin.plugins,
-      users: (state) => {
-        const u = state.user.users;
-        u.push({
+    pluginStore() {
+      return usePluginStore();
+    },
+    userStore() {
+      return useUserStore();
+    },
+    plugins() {
+      return this.pluginStore.plugins;
+    },
+    users() {
+      const u = this.userStore.users;
+      return [
+        ...u,
+        {
           id: 0,
           username: "Non-User",
-        });
-        return u;
-      },
-    }),
+        },
+      ];
+    },
   },
   watch: {
     plugin: {
@@ -147,8 +156,8 @@ export default {
   },
   async mounted() {
     await Promise.all([
-      this.$store.dispatch("plugin/getPlugins"),
-      this.$store.dispatch("user/getUsers"),
+      this.pluginStore.getPlugins(),
+      this.userStore.getUsers(),
       this.getTags(),
     ]);
   },
