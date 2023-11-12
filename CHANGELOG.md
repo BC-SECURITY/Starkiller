@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 -   Migrate from Vuex to Pinia
+-   Remove unused AgentCommandViewer component
 
 ## [2.6.1] - 2023-09-25
 

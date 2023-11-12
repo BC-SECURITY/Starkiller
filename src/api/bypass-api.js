@@ -3,7 +3,6 @@ import { axiosInstance as axios, handleError } from "@/api/axios-instance";
 /**
  * Returns a full list of bypasses.
  */
-// eslint-disable-next-line import/prefer-default-export
 export function getBypasses() {
   return axios
     .get("/bypasses")

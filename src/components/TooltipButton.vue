@@ -4,6 +4,7 @@
       <v-btn
         :color="flat ? '' : color"
         :to="to"
+        :disabled="disabled"
         class="mr-5"
         icon
         :small="!xSmall"
@@ -12,7 +13,7 @@
         @click="$emit('click')"
       >
         <v-icon :style="padLeft !== 0 ? `padding-left: ${padLeft}px` : ''">
-          {{ icon }}
+          {{ icon }} {{ rotate ? "fa-spin" : "" }}
         </v-icon>
       </v-btn>
     </template>
@@ -51,6 +52,19 @@ export default {
     xSmall: {
       type: Boolean,
       default: false,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    rotate: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  methods: {
+    style() {
+      return this.padLeft !== 0 ? `padding-left: ${this.padLeft}px` : "";
     },
   },
 };
