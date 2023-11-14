@@ -49,6 +49,7 @@ import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
 import { useCredentialStore } from "@/stores/credential-module";
 import { useMalleableProfileStore } from "@/stores/malleable-module";
+import { useAgentStore } from "@/stores/agent-module";
 import DynamicFormInput from "./DynamicFormInput.vue";
 
 export default {
@@ -76,6 +77,9 @@ export default {
     };
   },
   computed: {
+    agentStore() {
+      return useAgentStore();
+    },
     listenerStore() {
       return useListenerStore();
     },
@@ -87,6 +91,9 @@ export default {
     },
     malleableProfileStore() {
       return useMalleableProfileStore();
+    },
+    agents() {
+      return this.agentStore.agents;
     },
     listeners() {
       return this.listenerStore.listenerNames;
@@ -186,21 +193,17 @@ export default {
     },
   },
   mounted() {
-    if (this.listeners?.length === 0) {
-      this.listenerStore.getListeners();
-    }
-    if (this.bypasses?.length === 0) {
-      this.bypassStore.getBypasses();
-    }
-    if (this.malleableProfiles?.length === 0) {
-      this.malleableProfileStore.getMalleableProfiles();
-    }
-    if (this.credentials?.length === 0) {
-      this.credentialStore.getCredentials();
-    }
+    this.agentStore.getAgents();
+    this.listenerStore.getListeners();
+    this.bypassStore.getBypasses();
+    this.malleableProfileStore.getMalleableProfiles();
+    this.credentialStore.getCredentials();
   },
   methods: {
     suggestedValuesForField(field) {
+      if (field.name === "Agent") {
+        return this.agents;
+      }
       if (["Listener", "RedirectListener"].includes(field.name)) {
         return this.listeners;
       }

@@ -6,7 +6,11 @@
       :show-create="false"
       :show-refresh="true"
       :show-delete="showDelete"
+      :is-auto-refresh="true"
+      :auto-refresh="autoRefresh"
+      refresh-text="Auto-refresh Agents"
       delete-text="Kill"
+      @update:auto-refresh="autoRefresh = $event"
       @delete="killAgents"
       @refresh="getAgents"
     />
@@ -38,6 +42,7 @@
           :hide-stale-agents="applicationStore.hideStaleAgents"
           :hide-archived-agents="applicationStore.hideArchivedAgents"
           :selected-tags="selectedTags"
+          :refresh-agents="autoRefresh"
           @refresh-tags="getTags"
         />
       </template>
@@ -87,6 +92,7 @@ export default {
       selectedTags: [],
       tags: [],
       moment,
+      autoRefresh: true,
     };
   },
   computed: {

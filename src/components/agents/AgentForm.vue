@@ -277,6 +277,7 @@ export default {
         return;
       }
       this.$snack.info(`Agent ${this.agent.name} name updated`);
+      this.$emit("refresh-agent");
     },
     async updateListener() {
       if (this.agent.listener === this.form.listener) return;
@@ -293,7 +294,7 @@ export default {
       this.$snack.info(
         `Tasked agent to change listener to: ${this.form.listener}`,
       );
-      await this.agentStore.getAgent({ sessionId: this.form.name });
+      this.$emit("refresh-agent");
     },
     async updateKillDate() {
       let date = "";
@@ -309,7 +310,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change kill date to: ${date}`);
-      await this.agentStore.getAgent({ sessionId: this.form.name });
+      this.$emit("refresh-agent");
     },
     async updateWorkingHours() {
       if (this.agent.working_hours === this.form.working_hours) return;
@@ -326,6 +327,7 @@ export default {
       this.$snack.info(
         `Tasked agent to change working hours to: ${this.form.working_hours}`,
       );
+      this.$emit("refresh-agent");
     },
     async updateDelay() {
       if (this.agent.delay === this.form.delay) return;
@@ -341,6 +343,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change delay to: ${this.form.delay}`);
+      this.$emit("refresh-agent");
     },
     async updateJitter() {
       if (this.agent.jitter === this.form.jitter) return;
@@ -356,6 +359,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change jitter to: ${this.form.jitter}`);
+      this.$emit("refresh-agent");
     },
     fieldExists(name) {
       return this.fields.filter((el) => el.name === name).length > 0;

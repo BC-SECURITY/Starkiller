@@ -245,6 +245,9 @@ export default {
             this.$snack.success("Stager updated");
             this.loading = false;
           })
+          .then(() => {
+            this.getStager(this.id);
+          })
           .catch((err) => {
             this.$snack.error(`Error: ${err}`);
             this.loading = false;

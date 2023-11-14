@@ -47,10 +47,12 @@ import ModulesTable from "@/components/modules/ModulesTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelBoolean from "@/components/tables/ExpansionPanelBoolean.vue";
+import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 
 export default {
   name: "Modules",
   components: {
+    ExpansionPanelSearch,
     ExpansionPanelBoolean,
     ExpansionPanelFilter,
     AdvancedTable,

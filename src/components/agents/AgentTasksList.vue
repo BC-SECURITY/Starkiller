@@ -1,11 +1,15 @@
 <template>
   <div>
     <list-page-top
-      v-if="active"
+      v-if="active && useHeader"
       :breads="breads"
       :show-create="false"
       :show-refresh="true"
       :show-delete="false"
+      :is-auto-refresh="true"
+      :auto-refresh="useHeader ? autoRefresh : refreshTasks"
+      refresh-text="Auto-refresh Tasks"
+      @update:auto-refresh="autoRefresh = $event"
       @refresh="getTasks"
     />
     <advanced-table>
@@ -46,7 +50,7 @@
         <agent-tasks-table
           ref="agentTasksTable"
           :agent="agent"
-          :refresh-tasks="refreshTasks"
+          :refresh-tasks="useHeader ? autoRefresh : refreshTasks"
           :hide-columns="['id', 'task_name']"
           :selected-agents="selectedAgents"
           :selected-users="selectedUsers"
@@ -61,7 +65,6 @@
 
 <script>
 import moment from "moment";
-import debounce from "lodash.debounce";
 import { mapState } from "pinia";
 
 import AgentTasksTable from "@/components/agents/AgentTasksTable.vue";
@@ -90,6 +93,12 @@ export default {
       required: false,
       default: null,
     },
+    // Whether the list-page-top component should be used.
+    useHeader: {
+      type: Boolean,
+      default: false,
+    },
+    // If useHeader is true, this will be ignored.
     refreshTasks: {
       type: Boolean,
       default: false,
@@ -121,7 +130,7 @@ export default {
       selectedUsers: [],
       selectedTags: [],
       tags: [],
-      debouncedGetTasks: debounce(this.getTasks, 500),
+      autoRefresh: true,
     };
   },
   computed: {

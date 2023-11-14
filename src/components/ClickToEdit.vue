@@ -86,7 +86,7 @@
           dense
           required
           @blur="update"
-          @keyup.enter="update"
+          @keyup.enter.native="update"
         />
       </template>
       <span v-else class="ml-3">

@@ -158,6 +158,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    refreshAgents: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -246,6 +250,7 @@ export default {
       selectedHeadersTemp: [],
       selected: [],
       showHeaderMenu: false,
+      refreshInterval: null,
       moment,
     };
   },
@@ -319,6 +324,23 @@ export default {
     selected(val) {
       this.$emit("input", val);
     },
+    refreshAgents: {
+      handler(newVal) {
+        if (newVal) {
+          this.getAgents();
+          this.refreshInterval = setInterval(() => {
+            this.getAgents();
+          }, 8000);
+        } else {
+          console.log("Clearing interval");
+          clearInterval(this.refreshInterval);
+        }
+      },
+      immediate: true,
+    },
+  },
+  beforeDestroy() {
+    clearInterval(this.refreshInterval);
   },
   async mounted() {
     this.getAgents();

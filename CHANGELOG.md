@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Migrate from Vuex to Pinia
 -   Remove unused AgentCommandViewer component
+-   Add agent dropdown when Agent is a field in a form
+-   Fix form dropdowns getting out of sync with reality by refreshing the store on load
+-   Making edits to an Agent on the 'View' tab now properly updates the parent Agent page
+-   Updating an agent's name no longer refreshes the page on submit
+-   After updating a stager, the download/clipboard of the stager now reflects the changes without requiring the page to be reloaded
+-   Add auto-refresh on Agents / Agents Tasks page
+-   Add auto-refresh on Plugins Tasks page
 
 ## [2.6.1] - 2023-09-25
 
