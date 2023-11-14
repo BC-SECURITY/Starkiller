@@ -129,22 +129,24 @@ export default {
     stagerStore() {
       return useStagerStore();
     },
+    applicationStore() {
+      return useApplicationStore();
+    },
     stagers() {
       return this.stagerStore.stagers;
     },
     stagersStatus() {
       return this.stagerStore.status;
     },
-    user() {
-      return useApplicationStore().user.id;
+    userId() {
+      return this.applicationStore.user.id;
     },
     filteredStagers() {
-      return this.stagers.filter((stager) => {
-        if (this.onlyMyStagers) {
-          return stager.user_id === this.user.id;
-        }
-        return true;
-      });
+      if (this.onlyMyStagers) {
+        return this.stagers.filter((stager) => stager.user_id === this.userId);
+      }
+
+      return this.stagers;
     },
   },
   watch: {
