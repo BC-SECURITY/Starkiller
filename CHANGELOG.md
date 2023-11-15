@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2023-11-15
+
 -   Migrate from Vuex to Pinia
 -   Remove unused AgentCommandViewer component
 -   Add agent dropdown when Agent is a field in a form
@@ -317,7 +319,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.0...HEAD
+
+[2.7.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.1...v2.7.0
 
 [2.6.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.0...v2.6.1
 
