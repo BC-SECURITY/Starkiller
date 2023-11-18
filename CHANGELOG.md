@@ -5,19 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+**Added** for new features.
+**Changed** for changes in existing functionality.
+**Deprecated** for soon-to-be removed features.
+**Removed** for now removed features.
+**Fixed** for any bug fixes.
+**Security** in case of vulnerabilities.
+
 ## [Unreleased]
 
 ## [2.7.0] - 2023-11-15
 
--   Migrate from Vuex to Pinia
--   Remove unused AgentCommandViewer component
+### Added
+
 -   Add agent dropdown when Agent is a field in a form
+-   Add auto-refresh on Agents / Agents Tasks page
+-   Add auto-refresh on Plugins Tasks page
+
+### Changed
+
+-   Migrate from Vuex to Pinia
+
+### Fixed
+
 -   Fix form dropdowns getting out of sync with reality by refreshing the store on load
 -   Making edits to an Agent on the 'View' tab now properly updates the parent Agent page
 -   Updating an agent's name no longer refreshes the page on submit
 -   After updating a stager, the download/clipboard of the stager now reflects the changes without requiring the page to be reloaded
--   Add auto-refresh on Agents / Agents Tasks page
--   Add auto-refresh on Plugins Tasks page
+
+### Removed
+
+-   Remove unused AgentCommandViewer component
 
 ## [2.6.1] - 2023-09-25
 
