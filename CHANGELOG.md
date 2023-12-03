@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.1] - 2023-12-03
+
 ### Changed
 
 -   Remove Interactive Agent Shell from README
@@ -341,7 +343,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.1...HEAD
+
+[2.7.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.0...v2.7.1
 
 [2.7.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.1...v2.7.0
 
