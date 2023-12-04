@@ -1,1 +1,0 @@
-import{a2 as n,a3 as d,a4 as c}from"./index.85262dd3.js";function g({page:r,limit:e,sortBy:t="updated_at",sortOrder:s="desc",query:i,sources:o}){return n.get("/tags",{params:{page:r,limit:e,query:i,sources:o,order_by:t,order_direction:s},paramsSerializer:a=>d.stringify(a,{arrayFormat:"repeat",skipNulls:!0})}).then(a=>a.data).catch(a=>Promise.reject(c(a)))}export{g};
