@@ -87,12 +87,13 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import moment from "moment";
 import DownloadMixin from "@/mixins/download-stager";
 import CopyMixin from "@/mixins/copy-stager";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import * as downloadApi from "@/api/download-api";
+import { useStagerStore } from "@/stores/stager-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "StagersTable",
@@ -125,17 +126,27 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      stagers: (state) => state.stager.stagers,
-      stagersStatus: (state) => state.stager.status,
-    }),
+    stagerStore() {
+      return useStagerStore();
+    },
+    applicationStore() {
+      return useApplicationStore();
+    },
+    stagers() {
+      return this.stagerStore.stagers;
+    },
+    stagersStatus() {
+      return this.stagerStore.status;
+    },
+    userId() {
+      return this.applicationStore.user.id;
+    },
     filteredStagers() {
-      return this.stagers.filter((stager) => {
-        if (this.onlyMyStagers) {
-          return stager.user_id === this.user.id;
-        }
-        return true;
-      });
+      if (this.onlyMyStagers) {
+        return this.stagers.filter((stager) => stager.user_id === this.userId);
+      }
+
+      return this.stagers;
     },
   },
   watch: {
@@ -171,7 +182,7 @@ export default {
       this.$emit("delete-stager", item);
     },
     getStagers() {
-      this.$store.dispatch("stager/getStagers");
+      this.stagerStore.getStagers();
     },
   },
 };

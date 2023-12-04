@@ -31,6 +31,17 @@
     />
 
     <v-autocomplete
+      v-else-if="name === 'Agent'"
+      v-model="internalValue"
+      :items="suggestedValues"
+      :label="name"
+      outlined
+      dense
+      item-value="session_id"
+      item-text="name"
+    />
+
+    <v-autocomplete
       v-else-if="name === 'CredID'"
       v-model="internalValue"
       :items="suggestedValues"

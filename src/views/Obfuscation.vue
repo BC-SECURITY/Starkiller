@@ -187,9 +187,10 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import * as obfuscationApi from "@/api/obfuscation-api";
 import ListPageTop from "@/components/ListPageTop.vue";
+import { useObfuscationStore } from "@/stores/obfuscation-module";
+import { mapState } from "pinia";
 
 export default {
   components: {
@@ -230,16 +231,22 @@ export default {
         },
       ],
       rules: {
-        keyword: [(v) => !!v || "Keyword is required"],
-        replacement: [(v) => !!v || "Replacement is required"],
+        keyword: [
+          (v) => !!v || "Keyword is required",
+          (v) => v.length >= 3 || "Keyword must be at least 3 characters",
+        ],
+        replacement: [
+          (v) => !!v || "Replacement is required",
+          (v) => v.length >= 3 || "Replacement must be at least 3 characters",
+        ],
       },
     };
   },
   computed: {
-    ...mapState({
-      keywords: (state) => state.obfuscation.keywords,
-      configs: (state) => state.obfuscation.configs,
-    }),
+    obfuscationStore() {
+      return useObfuscationStore();
+    },
+    ...mapState(useObfuscationStore, ["keywords", "configs"]),
   },
   mounted() {
     this.refresh();
@@ -250,10 +257,10 @@ export default {
       this.refreshConfigs();
     },
     refreshKeywords() {
-      this.$store.dispatch("obfuscation/getKeywords");
+      this.obfuscationStore.getKeywords();
     },
     refreshConfigs() {
-      this.$store.dispatch("obfuscation/getConfigs");
+      this.obfuscationStore.getConfigs();
     },
     toggleEditing(item) {
       console.log("editing");
@@ -301,7 +308,7 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("obfuscation/deleteKeyword", item.id);
+        await this.obfuscationStore.deleteKeyword(item.id);
       }
     },
     async editConfig(config) {

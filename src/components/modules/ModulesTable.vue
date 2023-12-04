@@ -52,8 +52,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import TechniqueChips from "@/components/TechniqueChips.vue";
+import { useModuleStore } from "@/stores/module-module";
 
 export default {
   name: "ModulesTable",
@@ -90,9 +90,12 @@ export default {
     return {};
   },
   computed: {
-    ...mapState({
-      modules: (state) => state.module.modules,
-    }),
+    moduleStore() {
+      return useModuleStore();
+    },
+    modules() {
+      return this.moduleStore.modules;
+    },
     languagesUnique() {
       return [
         ...new Set(this.modules.map((mod) => mod.language.toLowerCase())),
@@ -157,7 +160,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("module/getModules");
+    this.moduleStore.getModules();
   },
   methods: {
     sortLanguage(a, b) {

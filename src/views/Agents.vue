@@ -32,7 +32,7 @@
         :reverse-transition="false"
       >
         <v-card flat>
-          <agent-tasks-list :active="tab === 'tasks'" />
+          <agent-tasks-list :active="tab === 'tasks'" :use-header="true" />
         </v-card>
       </v-tab-item>
     </v-tabs-items>

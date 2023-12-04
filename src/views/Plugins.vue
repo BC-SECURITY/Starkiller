@@ -32,7 +32,7 @@
         :reverse-transition="false"
       >
         <v-card flat>
-          <plugin-tasks-list :active="tab === 'tasks'" />
+          <plugin-tasks-list :active="tab === 'tasks'" :use-header="true" />
         </v-card>
       </v-tab-item>
     </v-tabs-items>
@@ -50,19 +50,7 @@ export default {
     PluginTasksList,
   },
   data() {
-    return {
-      breads: [
-        {
-          text: "Plugins",
-          disabled: true,
-          href: "/plugins",
-        },
-      ],
-      headers: [
-        { text: "Name", value: "name" },
-        { text: "Description", value: "description" },
-      ],
-    };
+    return {};
   },
   computed: {
     // https://jareklipski.medium.com/linking-to-a-specific-tab-in-vuetify-js-d978525f2e1a

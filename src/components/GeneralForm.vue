@@ -45,7 +45,11 @@
 
 <script>
 import Vue from "vue";
-import { mapGetters } from "vuex";
+import { useListenerStore } from "@/stores/listener-module";
+import { useBypassStore } from "@/stores/bypass-module";
+import { useCredentialStore } from "@/stores/credential-module";
+import { useMalleableProfileStore } from "@/stores/malleable-module";
+import { useAgentStore } from "@/stores/agent-module";
 import DynamicFormInput from "./DynamicFormInput.vue";
 
 export default {
@@ -73,12 +77,36 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      listeners: "listener/listenerNames",
-      bypasses: "bypass/bypassNames",
-      malleableProfiles: "malleable/profileNames",
-      credentials: "credential/credentials",
-    }),
+    agentStore() {
+      return useAgentStore();
+    },
+    listenerStore() {
+      return useListenerStore();
+    },
+    bypassStore() {
+      return useBypassStore();
+    },
+    credentialStore() {
+      return useCredentialStore();
+    },
+    malleableProfileStore() {
+      return useMalleableProfileStore();
+    },
+    agents() {
+      return this.agentStore.agents;
+    },
+    listeners() {
+      return this.listenerStore.listenerNames;
+    },
+    bypasses() {
+      return this.bypassStore.bypassNames;
+    },
+    credentials() {
+      return this.credentialStore.credentials;
+    },
+    malleableProfiles() {
+      return this.malleableProfileStore.profileNames;
+    },
     /**
      * Fields that go in the "Optional" section
      */
@@ -165,21 +193,17 @@ export default {
     },
   },
   mounted() {
-    if (this.listeners?.length === 0) {
-      this.$store.dispatch("listener/getListeners");
-    }
-    if (this.bypasses?.length === 0) {
-      this.$store.dispatch("bypass/getBypasses");
-    }
-    if (this.malleableProfiles?.length === 0) {
-      this.$store.dispatch("malleable/getMalleableProfiles");
-    }
-    if (this.credentials?.length === 0) {
-      this.$store.dispatch("credential/getCredentials");
-    }
+    this.agentStore.getAgents();
+    this.listenerStore.getListeners();
+    this.bypassStore.getBypasses();
+    this.malleableProfileStore.getMalleableProfiles();
+    this.credentialStore.getCredentials();
   },
   methods: {
     suggestedValuesForField(field) {
+      if (field.name === "Agent") {
+        return this.agents;
+      }
       if (["Listener", "RedirectListener"].includes(field.name)) {
         return this.listeners;
       }

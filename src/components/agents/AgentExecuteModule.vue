@@ -108,10 +108,10 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import InfoViewer from "@/components/InfoViewer.vue";
 import * as moduleApi from "@/api/module-api";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
+import { useModuleStore } from "@/stores/module-module";
 import GeneralForm from "../GeneralForm.vue";
 import TechniqueChips from "../TechniqueChips.vue";
 
@@ -159,14 +159,15 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      modules: (state) =>
-        state.module.modules.filter((el) => el.enabled === true),
-      selectOptions: (state) =>
-        state.module.modules
-          .filter((el) => el.enabled === true)
-          .map((el) => el.id),
-    }),
+    moduleStore() {
+      return useModuleStore();
+    },
+    modules() {
+      return this.moduleStore.modules.filter((el) => el.enabled === true);
+    },
+    selectOptions() {
+      return this.modules.map((el) => el.id);
+    },
     moduleOptions() {
       let { options } = this.selectedItem;
       options = options || {};
@@ -229,7 +230,7 @@ export default {
     },
   },
   async mounted() {
-    this.$store.dispatch("module/getModules");
+    await this.moduleStore.getModules();
   },
   methods: {
     async handleSelect(item) {

@@ -23,7 +23,7 @@
 
 <script>
 import ListPageTop from "@/components/ListPageTop.vue";
-import { mapState } from "vuex";
+import { usePluginStore } from "@/stores/plugin-module";
 
 export default {
   name: "PluginsList",
@@ -57,16 +57,19 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      plugins: (state) => state.plugin.plugins,
-    }),
+    pluginStore() {
+      return usePluginStore();
+    },
+    plugins() {
+      return this.pluginStore.plugins;
+    },
   },
   mounted() {
     this.getPlugins();
   },
   methods: {
     getPlugins() {
-      this.$store.dispatch("plugin/getPlugins");
+      this.pluginStore.getPlugins();
     },
   },
 };

@@ -43,7 +43,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { useUserStore } from "@/stores/user-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Chat",
@@ -66,11 +67,21 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      me: (state) => state.application.user.username,
-      allUsers: (state) => state.user.users,
-      darkMode: (state) => state.application.darkMode,
-    }),
+    userStore() {
+      return useUserStore();
+    },
+    allUsers() {
+      return this.userStore.users;
+    },
+    applicationStore() {
+      return useApplicationStore();
+    },
+    me() {
+      return this.applicationStore.user.username;
+    },
+    darkMode() {
+      return this.applicationStore.darkMode;
+    },
     colors() {
       if (this.darkMode) {
         return {
@@ -107,7 +118,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("user/getUsers");
+    this.userStore.getUsers();
     this.socket.on("chat/join", (data) => {
       if (!this.isChatOpen) this.newMessagesCount++;
       const message = { type: "system", data: { text: data.message } };

@@ -81,11 +81,11 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import moment from "moment";
 import TagViewer from "@/components/TagViewer.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import * as listenerApi from "@/api/listener-api";
+import { useListenerStore } from "@/stores/listener-module";
 
 export default {
   name: "ListenersTable",
@@ -126,12 +126,14 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      listeners: (state) => state.listener.listeners,
-      listenersStatus: (state) => state.listener.status,
-    }),
+    listenerStore() {
+      return useListenerStore();
+    },
+    listenersStatus() {
+      return this.listenerStore.status;
+    },
     sortedListeners() {
-      let sorted = this.listeners.slice();
+      let sorted = this.listenerStore.listeners.slice();
 
       if (this.selectedTags.length === 0) {
         return sorted;
@@ -190,7 +192,7 @@ export default {
       this.$emit("kill-listener", item);
     },
     getListeners() {
-      this.$store.dispatch("listener/getListeners");
+      this.listenerStore.getListeners();
     },
   },
 };

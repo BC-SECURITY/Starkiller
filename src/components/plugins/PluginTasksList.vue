@@ -1,11 +1,15 @@
 <template>
   <div>
     <list-page-top
-      v-if="active"
+      v-if="active && useHeader"
       :breads="breads"
       :show-create="false"
       :show-refresh="true"
       :show-delete="false"
+      :is-auto-refresh="true"
+      :auto-refresh="useHeader ? autoRefresh : refreshTasks"
+      refresh-text="Auto-refresh Tasks"
+      @update:auto-refresh="autoRefresh = $event"
       @refresh="getTasks"
     />
     <advanced-table>
@@ -46,7 +50,7 @@
         <plugin-tasks-table
           ref="pluginTaskTable"
           :plugin="plugin"
-          :refresh-tasks="refreshTasks"
+          :refresh-tasks="useHeader ? autoRefresh : refreshTasks"
           :hide-columns="['id', 'task_name']"
           :selected-plugins="selectedPlugins"
           :selected-users="selectedUsers"
@@ -61,8 +65,7 @@
 
 <script>
 import moment from "moment";
-import debounce from "lodash.debounce";
-import { mapState } from "vuex";
+import { mapState } from "pinia";
 
 import PluginTasksTable from "@/components/plugins/PluginTasksTable.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
@@ -71,6 +74,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
+import { usePluginStore } from "@/stores/plugin-module";
+import { useUserStore } from "@/stores/user-module";
 
 export default {
   name: "PluginTasksList",
@@ -88,6 +93,12 @@ export default {
       required: false,
       default: null,
     },
+    // Whether the list-page-top component should be used.
+    useHeader: {
+      type: Boolean,
+      default: false,
+    },
+    // If useHeader is true, this will be ignored.
     refreshTasks: {
       type: Boolean,
       default: false,
@@ -119,21 +130,27 @@ export default {
       selectedUsers: [],
       selectedTags: [],
       tags: [],
-      debouncedGetTasks: debounce(this.getTasks, 500),
+      autoRefresh: true,
     };
   },
   computed: {
-    ...mapState({
-      plugins: (state) => state.plugin.plugins,
-      users: (state) => {
-        const u = state.user.users;
-        u.push({
+    pluginStore() {
+      return usePluginStore();
+    },
+    userStore() {
+      return useUserStore();
+    },
+    users() {
+      const u = this.userStore.users;
+      return [
+        ...u,
+        {
           id: 0,
           username: "Non-User",
-        });
-        return u;
-      },
-    }),
+        },
+      ];
+    },
+    ...mapState(usePluginStore, ["plugins"]),
   },
   watch: {
     plugin: {
@@ -147,8 +164,8 @@ export default {
   },
   async mounted() {
     await Promise.all([
-      this.$store.dispatch("plugin/getPlugins"),
-      this.$store.dispatch("user/getUsers"),
+      this.pluginStore.getPlugins(),
+      this.userStore.getUsers(),
       this.getTags(),
     ]);
   },

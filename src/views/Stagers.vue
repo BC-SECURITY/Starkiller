@@ -12,7 +12,7 @@
     <advanced-table>
       <template #filters>
         <v-switch
-          v-model="filterOnlyMyStagersCheckbox"
+          v-model="applicationStore.filterOnlyMyStagers"
           label="Only My Stagers"
         />
       </template>
@@ -20,7 +20,7 @@
         <stagers-table
           ref="stagersTable"
           v-model="selected"
-          :only-my-stagers="filterOnlyMyStagersCheckbox"
+          :only-my-stagers="applicationStore.filterOnlyMyStagers"
           @delete-stager="deleteStager"
         />
       </template>
@@ -29,13 +29,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import moment from "moment";
 import DownloadMixin from "@/mixins/download-stager";
 import CopyMixin from "@/mixins/copy-stager";
 import ListPageTop from "@/components/ListPageTop.vue";
 import StagersTable from "@/components/stagers/StagersTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
+import { useStagerStore } from "@/stores/stager-module";
+import { useApplicationStore } from "@/stores/application-module";
+import app from "@/App.vue";
 
 export default {
   name: "Stagers",
@@ -59,20 +61,17 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      filterOnlyMyStagersCheckbox: (state) =>
-        state.application.filterOnlyMyStagers,
-    }),
+    app() {
+      return app;
+    },
+    stagerStore() {
+      return useStagerStore();
+    },
+    applicationStore() {
+      return useApplicationStore();
+    },
     showDelete() {
       return this.selected.length > 0;
-    },
-    filterOnlyMyStagersCheckbox: {
-      set(val) {
-        this.$store.dispatch("application/filterOnlyMyStagers", val);
-      },
-      get() {
-        return this.filterOnlyMyStagers;
-      },
     },
   },
   methods: {
@@ -87,7 +86,7 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("stager/deleteStager", item.id);
+        await this.stagerStore.deleteStager(item.id);
       }
     },
     async deleteStagers() {
@@ -99,7 +98,7 @@ export default {
         )
       ) {
         this.selected.forEach((stager) => {
-          this.$store.dispatch("stager/deleteStager", stager.id);
+          this.stagerStore.deleteStager(stager.id);
         });
         this.selected = [];
       }

@@ -50,7 +50,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from "pinia";
+import { useApplicationStore } from "@/stores/application-module";
 import { version } from "../../package.json";
 
 export default {
@@ -76,9 +77,7 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      empireVersion: (state) => state.application.empireVersion,
-    }),
+    ...mapState(useApplicationStore, ["empireVersion"]),
     expandOnHover() {
       return this.mini;
     },

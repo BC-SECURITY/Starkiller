@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import store from "@/store/index";
+import { useApplicationStore } from "@/stores/application-module";
 import Home from "../views/Home.vue";
 
 Vue.use(VueRouter);
@@ -166,11 +166,11 @@ const router = new VueRouter({
 });
 
 function isAuthenticated() {
-  return store.getters["application/token"].length > 0;
+  return useApplicationStore().token.length > 0;
 }
 
 function isAdmin() {
-  return store.getters["application/isAdmin"] === true;
+  return useApplicationStore().isAdmin;
 }
 
 // Auth

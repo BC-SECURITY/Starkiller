@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Login",
@@ -38,12 +38,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      isLoggedIn: "application/isLoggedIn",
-    }),
-    ...mapState({
-      loginError: (state) => state.application.loginError,
-    }),
+    applicationStore() {
+      return useApplicationStore();
+    },
+    isLoggedIn() {
+      return this.applicationStore.isLoggedIn;
+    },
+    loginError() {
+      return this.applicationStore.loginError;
+    },
   },
   watch: {
     loginError(val) {
@@ -84,7 +87,7 @@ export default {
         socketUrl = `wss://${host}`;
       }
 
-      this.$store.dispatch("application/login", {
+      this.applicationStore.login({
         url: cleanedUrl,
         socketUrl,
         username: this.form.username,

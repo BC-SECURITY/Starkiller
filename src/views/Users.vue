@@ -43,10 +43,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "pinia";
 import * as userApi from "@/api/user-api";
 import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
+import { useUserStore } from "@/stores/user-module";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Users",
@@ -71,12 +73,13 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      users: (state) => state.user.users,
-    }),
-    ...mapGetters({
-      isAdmin: "application/isAdmin",
-    }),
+    userStore() {
+      return useUserStore();
+    },
+    users() {
+      return this.userStore.users;
+    },
+    ...mapState(useApplicationStore, ["isAdmin"]),
   },
   mounted() {
     this.getUsers();
@@ -92,7 +95,7 @@ export default {
       });
     },
     getUsers() {
-      this.$store.dispatch("user/getUsers");
+      this.userStore.getUsers();
     },
   },
 };

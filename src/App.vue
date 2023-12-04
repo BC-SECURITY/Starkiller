@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app :dark="isDarkMode">
+    <v-app :dark="darkMode">
       <side-nav v-if="isLoggedIn && !hideSideBar" />
       <confirm ref="confirm" />
       <socket-notifications
@@ -70,13 +70,14 @@
 <script>
 import Vue from "vue";
 import semver from "semver";
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "pinia";
 
 import SideNav from "@/components/SideNav.vue";
 import Confirm from "@/components/Confirm.vue";
 import SocketNotifications from "@/components/SocketNotifications.vue";
 import StarkillerSnackbar from "@/components/StarkillerSnackbar.vue";
 import NotificationBell from "@/components/NotificationBell.vue";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "App",
@@ -88,14 +89,12 @@ export default {
     StarkillerSnackbar,
   },
   computed: {
-    ...mapGetters({
-      isLoggedIn: "application/isLoggedIn",
-      isDarkMode: "application/isDarkMode",
-    }),
-    ...mapState({
-      empireVersion: (state) => state.application.empireVersion,
-      connectionError: (state) => state.application.connectionError,
-    }),
+    ...mapState(useApplicationStore, [
+      "isLoggedIn",
+      "darkMode",
+      "empireVersion",
+      "connectionError",
+    ]),
     isLoginPage() {
       return this.$route.name === "home";
     },
@@ -114,7 +113,7 @@ export default {
         }
       },
     },
-    isDarkMode: {
+    darkMode: {
       immediate: true,
       handler(val) {
         if (val === true) {

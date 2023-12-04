@@ -5,7 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+**Added** for new features.
+**Changed** for changes in existing functionality.
+**Deprecated** for soon-to-be removed features.
+**Removed** for now removed features.
+**Fixed** for any bug fixes.
+**Security** in case of vulnerabilities.
+
 ## [Unreleased]
+
+## [2.7.1] - 2023-12-03
+
+### Changed
+
+-   Remove Interactive Agent Shell from README
+
+## [2.7.0] - 2023-11-15
+
+### Added
+
+-   Add agent dropdown when Agent is a field in a form
+-   Add auto-refresh on Agents / Agents Tasks page
+-   Add auto-refresh on Plugins Tasks page
+
+### Changed
+
+-   Migrate from Vuex to Pinia
+
+### Fixed
+
+-   Fix form dropdowns getting out of sync with reality by refreshing the store on load
+-   Making edits to an Agent on the 'View' tab now properly updates the parent Agent page
+-   Updating an agent's name no longer refreshes the page on submit
+-   After updating a stager, the download/clipboard of the stager now reflects the changes without requiring the page to be reloaded
+
+### Removed
+
+-   Remove unused AgentCommandViewer component
 
 ## [2.6.1] - 2023-09-25
 
@@ -307,7 +343,11 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.1...HEAD
+
+[2.7.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.0...v2.7.1
+
+[2.7.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.1...v2.7.0
 
 [2.6.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.6.0...v2.6.1
 

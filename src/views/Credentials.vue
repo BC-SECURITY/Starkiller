@@ -7,8 +7,8 @@
       :show-refresh="true"
       :show-delete="showDelete"
       @create="create"
-      @refresh="getCredentials"
       @delete="deleteCredentials"
+      @refresh="getCredentials"
     />
     <div style="display: flex; flex-direction: row; flex-wrap: wrap">
       <v-card
@@ -131,6 +131,7 @@ import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import * as tagApi from "@/api/tag-api";
 import * as credentialApi from "@/api/credential-api";
+import { useCredentialStore } from "@/stores/credential-module";
 
 export default {
   name: "Credentials",
@@ -162,13 +163,16 @@ export default {
       selected: [],
       selectedTags: [],
       tags: [],
-      credentials: [],
       search: "",
+      credentials: [],
       debouncedGetCredentials: debounce(this.getCredentials, 500),
       loading: false,
     };
   },
   computed: {
+    credentialStore() {
+      return useCredentialStore();
+    },
     showDelete() {
       return this.selected.length > 0;
     },
@@ -236,10 +240,11 @@ export default {
     },
     async getCredentials() {
       this.loading = true;
+
       try {
         this.credentials = await credentialApi.getCredentials({
-          tags: this.selectedTags,
           search: this.search,
+          tags: this.selectedTags,
         });
       } finally {
         this.loading = false;
@@ -256,7 +261,8 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("credential/deleteCredential", item.id);
+        await this.credentialStore.deleteCredential(item.id);
+        this.debouncedGetCredentials();
       }
     },
     async deleteCredentials() {
@@ -267,9 +273,10 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.forEach((credential) => {
-          this.$store.dispatch("credential/deleteCredential", credential.id);
+        this.selected.map(async (credential) => {
+          await this.credentialStore.deleteCredential(credential.id);
         });
+        this.debouncedGetCredentials();
       }
     },
     async copyToClipboard(val) {

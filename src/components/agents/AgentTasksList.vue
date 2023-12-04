@@ -1,11 +1,15 @@
 <template>
   <div>
     <list-page-top
-      v-if="active"
+      v-if="active && useHeader"
       :breads="breads"
       :show-create="false"
       :show-refresh="true"
       :show-delete="false"
+      :is-auto-refresh="true"
+      :auto-refresh="useHeader ? autoRefresh : refreshTasks"
+      refresh-text="Auto-refresh Tasks"
+      @update:auto-refresh="autoRefresh = $event"
       @refresh="getTasks"
     />
     <advanced-table>
@@ -46,7 +50,7 @@
         <agent-tasks-table
           ref="agentTasksTable"
           :agent="agent"
-          :refresh-tasks="refreshTasks"
+          :refresh-tasks="useHeader ? autoRefresh : refreshTasks"
           :hide-columns="['id', 'task_name']"
           :selected-agents="selectedAgents"
           :selected-users="selectedUsers"
@@ -61,8 +65,7 @@
 
 <script>
 import moment from "moment";
-import debounce from "lodash.debounce";
-import { mapState } from "vuex";
+import { mapState } from "pinia";
 
 import AgentTasksTable from "@/components/agents/AgentTasksTable.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
@@ -71,6 +74,8 @@ import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import * as tagApi from "@/api/tag-api";
+import { useUserStore } from "@/stores/user-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "AgentTasksList",
@@ -88,6 +93,12 @@ export default {
       required: false,
       default: null,
     },
+    // Whether the list-page-top component should be used.
+    useHeader: {
+      type: Boolean,
+      default: false,
+    },
+    // If useHeader is true, this will be ignored.
     refreshTasks: {
       type: Boolean,
       default: false,
@@ -119,21 +130,27 @@ export default {
       selectedUsers: [],
       selectedTags: [],
       tags: [],
-      debouncedGetTasks: debounce(this.getTasks, 500),
+      autoRefresh: true,
     };
   },
   computed: {
-    ...mapState({
-      agents: (state) => state.agent.agents,
-      users: (state) => {
-        const u = state.user.users;
-        u.push({
+    agentStore() {
+      return useAgentStore();
+    },
+    userStore() {
+      return useUserStore();
+    },
+    users() {
+      const u = this.userStore.users;
+      return [
+        ...u,
+        {
           id: 0,
           username: "Non-User",
-        });
-        return u;
-      },
-    }),
+        },
+      ];
+    },
+    ...mapState(useAgentStore, ["agents"]),
   },
   watch: {
     agent: {
@@ -147,8 +164,8 @@ export default {
   },
   async mounted() {
     await Promise.all([
-      this.$store.dispatch("agent/getAgents"),
-      this.$store.dispatch("user/getUsers"),
+      this.agentStore.getAgents(),
+      this.userStore.getUsers(),
       this.getTags(),
     ]);
   },

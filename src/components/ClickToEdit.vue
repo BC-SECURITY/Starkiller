@@ -86,7 +86,7 @@
           dense
           required
           @blur="update"
-          @keyup.enter="update"
+          @keyup.enter.native="update"
         />
       </template>
       <span v-else class="ml-3">
@@ -97,8 +97,9 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState } from "pinia";
 import moment from "moment";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   components: {},
@@ -145,9 +146,7 @@ export default {
     dirty() {
       return this.original !== this.internalValue;
     },
-    ...mapGetters({
-      isDarkMode: "application/isDarkMode",
-    }),
+    ...mapState(useApplicationStore, ["darkMode"]),
   },
   watch: {
     internalValue(val) {
@@ -197,7 +196,7 @@ export default {
     },
     getColClass() {
       if (this.editing === false && this.editable === true) {
-        if (this.isDarkMode) {
+        if (this.darkMode) {
           return "column-not-editing-dark";
         }
         return "column-not-editing";

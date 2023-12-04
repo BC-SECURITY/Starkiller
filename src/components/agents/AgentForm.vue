@@ -131,12 +131,13 @@
 
 <script>
 import Vue from "vue";
-import { mapState } from "vuex";
 import moment from "moment";
 import TagViewer from "@/components/TagViewer.vue";
 import ClickToEdit from "@/components/ClickToEdit.vue";
 import * as agentTaskApi from "@/api/agent-task-api";
 import * as agentApi from "@/api/agent-api";
+import { useListenerStore } from "@/stores/listener-module";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   components: { TagViewer, ClickToEdit },
@@ -182,9 +183,15 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      listeners: (state) => state.listener.listeners,
-    }),
+    agentStore() {
+      return useAgentStore();
+    },
+    listenerStore() {
+      return useListenerStore();
+    },
+    listeners() {
+      return this.listenerStore.listeners;
+    },
     fields() {
       // stale comes back as a boolean, while no other property does and el-input
       // doesn't accept booleans so this will do.
@@ -229,7 +236,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("listener/getListeners");
+    this.listenerStore.getListeners();
   },
   methods: {
     deleteTag(tag) {
@@ -261,7 +268,7 @@ export default {
       if (this.agent.name === this.form.name) return;
 
       try {
-        await this.$store.dispatch("agent/rename", {
+        await this.agentStore.rename({
           sessionId: this.agent.session_id,
           newName: this.form.name,
         });
@@ -270,6 +277,7 @@ export default {
         return;
       }
       this.$snack.info(`Agent ${this.agent.name} name updated`);
+      this.$emit("refresh-agent");
     },
     async updateListener() {
       if (this.agent.listener === this.form.listener) return;
@@ -286,9 +294,7 @@ export default {
       this.$snack.info(
         `Tasked agent to change listener to: ${this.form.listener}`,
       );
-      await this.$store.dispatch("agent/getAgent", {
-        sessionId: this.form.name,
-      });
+      this.$emit("refresh-agent");
     },
     async updateKillDate() {
       let date = "";
@@ -304,7 +310,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change kill date to: ${date}`);
-      this.$store.dispatch("agent/getAgent", { sessionId: this.form.name });
+      this.$emit("refresh-agent");
     },
     async updateWorkingHours() {
       if (this.agent.working_hours === this.form.working_hours) return;
@@ -321,6 +327,7 @@ export default {
       this.$snack.info(
         `Tasked agent to change working hours to: ${this.form.working_hours}`,
       );
+      this.$emit("refresh-agent");
     },
     async updateDelay() {
       if (this.agent.delay === this.form.delay) return;
@@ -336,6 +343,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change delay to: ${this.form.delay}`);
+      this.$emit("refresh-agent");
     },
     async updateJitter() {
       if (this.agent.jitter === this.form.jitter) return;
@@ -351,6 +359,7 @@ export default {
         return;
       }
       this.$snack.info(`Tasked agent to change jitter to: ${this.form.jitter}`);
+      this.$emit("refresh-agent");
     },
     fieldExists(name) {
       return this.fields.filter((el) => el.name === name).length > 0;

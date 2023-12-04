@@ -43,6 +43,7 @@ import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import * as credentialApi from "@/api/credential-api";
+import { useCredentialStore } from "@/stores/credential-module";
 
 export default {
   name: "CredentialEdit",
@@ -77,6 +78,9 @@ export default {
           to: "/credential-edit",
         },
       ];
+    },
+    credentialStore() {
+      return useCredentialStore();
     },
     isNew() {
       return this.$route.name === "credentialNew";
@@ -122,6 +126,13 @@ export default {
         }
       });
       return op;
+    },
+  },
+  watch: {
+    id(val) {
+      if (val) {
+        this.getCredential(val);
+      }
     },
   },
   mounted() {
@@ -199,7 +210,7 @@ export default {
         )
       ) {
         try {
-          this.$store.dispatch("credential/deleteCredential", this.id);
+          this.credentialStore.deleteCredential(this.id);
           this.$router.push({ name: "credentials" });
         } catch (err) {
           this.$snack.error(`Error: ${err}`);

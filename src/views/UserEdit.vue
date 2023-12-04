@@ -64,10 +64,11 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState } from "pinia";
 import * as userApi from "@/api/user-api";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
+import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "UserEdit",
@@ -109,9 +110,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      isAdmin: "application/isAdmin",
-    }),
+    ...mapState(useApplicationStore, ["isAdmin"]),
     breads() {
       return [
         {

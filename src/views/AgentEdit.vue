@@ -252,7 +252,7 @@ import * as agentApi from "@/api/agent-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 
 import "splitpanes/dist/splitpanes.css";
-import { mapGetters } from "vuex";
+import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "AgentEdit",
@@ -293,9 +293,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      subscribedAgents: "agent/subscribed",
-    }),
+    agentStore() {
+      return useAgentStore();
+    },
+    subscribedAgents() {
+      return this.agentStore.subscribed;
+    },
     subscribed() {
       return this.subscribedAgents[this.id] || false;
     },
@@ -364,10 +367,10 @@ export default {
   },
   methods: {
     subscribe() {
-      this.$store.dispatch("agent/subscribe", { sessionId: this.id });
+      this.agentStore.subscribe({ sessionId: this.id });
     },
     unsubscribe() {
-      this.$store.dispatch("agent/unsubscribe", { sessionId: this.id });
+      this.agentStore.unsubscribe({ sessionId: this.id });
     },
     toggleCollapsePane() {
       if (this.paneSize > 95) {
@@ -424,9 +427,7 @@ export default {
           },
         )
       ) {
-        this.$store.dispatch("agent/killAgent", {
-          sessionId: this.agent.session_id,
-        });
+        this.agentStore.killAgent({ sessionId: this.agent.session_id });
         this.$snack.success(
           `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
         );
@@ -453,8 +454,8 @@ export default {
           },
         )
       ) {
-        this.$store.dispatch("agent/clearQueue", {
-          name: this.agent.session_id,
+        this.agentStore.clearQueue({
+          sessionId: this.agent.session_id,
           tasks: queuedIds,
         });
         this.$snack.success(

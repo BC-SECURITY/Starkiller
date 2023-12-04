@@ -80,9 +80,10 @@
 
 <script>
 import moment from "moment";
-import { mapState } from "vuex";
 import ListPageTop from "@/components/ListPageTop.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
+import { useBypassStore } from "@/stores/bypass-module";
+import { mapState } from "pinia";
 
 export default {
   name: "Bypasses",
@@ -111,9 +112,10 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      bypasses: (state) => state.bypass.bypasses,
-    }),
+    bypassStore() {
+      return useBypassStore();
+    },
+    ...mapState(useBypassStore, ["bypasses"]),
     showDelete() {
       return this.selected.length > 0;
     },
@@ -123,7 +125,7 @@ export default {
   },
   methods: {
     getBypasses() {
-      this.$store.dispatch("bypass/getBypasses");
+      this.bypassStore.getBypasses();
     },
     create() {
       this.$router.push({ name: "bypassNew" });
@@ -139,7 +141,7 @@ export default {
           { color: "red" },
         )
       ) {
-        this.$store.dispatch("bypass/deleteBypass", item.id);
+        await this.bypassStore.deleteBypass(item.id);
       }
     },
     async deleteBypasses() {
@@ -151,7 +153,7 @@ export default {
         )
       ) {
         this.selected.forEach((bypass) => {
-          this.$store.dispatch("bypass/deleteBypass", bypass.id);
+          this.bypassStore.deleteBypass(bypass.id);
         });
       }
     },
