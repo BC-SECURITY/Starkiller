@@ -44,6 +44,7 @@
           :selected-tags="selectedTags"
           :refresh-agents="autoRefresh"
           @refresh-tags="getTags"
+          @kill-agent="killAgent"
         />
       </template>
     </advanced-table>

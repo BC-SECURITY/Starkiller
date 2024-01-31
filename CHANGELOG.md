@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-   Deleting agent from the action menu on the table now works
+
 ## [2.7.1] - 2023-12-03
 
 ### Changed
