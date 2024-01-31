@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.2] - 2024-01-31
+
+### Fixed
+
+-   Deleting agent from the action menu on the table now works
+
 ## [2.7.1] - 2023-12-03
 
 ### Changed
@@ -343,7 +349,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.2...HEAD
+
+[2.7.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.1...v2.7.2
 
 [2.7.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.0...v2.7.1
 

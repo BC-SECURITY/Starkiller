@@ -389,7 +389,7 @@ export default {
       this.agentStore.getAgents();
     },
     async killAgent(item) {
-      this.$emit("killAgent", item);
+      this.$emit("kill-agent", item);
     },
     popout(item) {
       window.open(
