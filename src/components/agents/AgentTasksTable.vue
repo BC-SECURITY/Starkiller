@@ -62,9 +62,11 @@
               "
             >
               {{
-                addBlankLines(item.expandedInput
-                  ?
-                  expandedTasks[item.uniqueId].full_input : item.input)
+                addBlankLines(
+                  item.expandedInput
+                    ? expandedTasks[item.uniqueId].full_input
+                    : item.input,
+                )
               }}
             </p>
             <p><b>Task Output:</b></p>
@@ -109,9 +111,7 @@
                 v-html="expandedTasks[item.uniqueId].htmlOutput"
               />
               <div v-else>
-                {{
-                  addBlankLines(item.output)
-                }}
+                {{ addBlankLines(item.output) }}
               </div>
             </div>
           </div>
@@ -389,7 +389,7 @@ export default {
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
     addBlankLines(text) {
-      return `\n${  text  }\n`;
+      return `\n${text}\n`;
     },
     addTag(task, tag) {
       agentTaskApi

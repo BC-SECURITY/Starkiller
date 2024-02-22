@@ -306,7 +306,7 @@ export default {
     },
     sortedAgents() {
       let sorted = this.agents.slice();
-      sorted.sort((a, b) => -a.lastseen_time.localeCompare(b.lastseen_time));
+      sorted.sort((a, b) => a.checkin_time.localeCompare(b.checkin_time));
       if (this.hideStaleAgents) {
         sorted = sorted.filter((agent) => !agent.stale);
       }
@@ -401,7 +401,9 @@ export default {
         await agentTaskApi.sysinfo(agent.session_id);
         this.$snack.success(`SysInfo reload queued for ${agent.name}`);
       } catch (error) {
-        this.$snack.error(`Error reloading SysInfo for ${agent.name}: ${error.message}`);
+        this.$snack.error(
+          `Error reloading SysInfo for ${agent.name}: ${error.message}`,
+        );
       }
     },
     async killAgent(item) {

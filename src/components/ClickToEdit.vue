@@ -4,12 +4,7 @@
       <span class="text--bold">{{ label }}</span>
       <v-tooltip v-if="infoText" bottom>
         <template #activator="{ on, attrs }">
-          <v-icon
-            small
-            class="ml-2"
-            v-bind="attrs"
-            v-on="on"
-          >
+          <v-icon small class="ml-2" v-bind="attrs" v-on="on">
             mdi-information-outline
           </v-icon>
         </template>
@@ -131,7 +126,7 @@ export default {
     },
     infoText: {
       type: String,
-      default: ""
+      default: "",
     },
     dataType: {
       type: String,

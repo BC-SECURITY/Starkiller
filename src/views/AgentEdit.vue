@@ -382,7 +382,9 @@ export default {
         await agentTaskApi.sysinfo(this.agent.session_id);
         this.$snack.success(`SysInfo reload queued for ${this.agent.name}`);
       } catch (error) {
-        this.$snack.error(`Error reloading SysInfo for ${this.agent.name}: ${error.message}`);
+        this.$snack.error(
+          `Error reloading SysInfo for ${this.agent.name}: ${error.message}`,
+        );
       }
     },
     toggleCollapsePane() {
