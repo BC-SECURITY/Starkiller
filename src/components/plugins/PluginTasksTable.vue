@@ -62,9 +62,9 @@
               "
             >
               {{
-                item.expandedInput
-                  ? expandedTasks[item.uniqueId].full_input
-                  : item.input
+                addBlankLines(item.expandedInput
+                  ?
+                  expandedTasks[item.uniqueId].full_input : item.input)
               }}
             </p>
             <p><b>Task Output:</b></p>
@@ -109,7 +109,7 @@
                 v-html="expandedTasks[item.uniqueId].htmlOutput"
               />
               <div v-else>
-                {{ item.output }}
+                addBlankLines(item.output)
               </div>
             </div>
           </div>
@@ -348,6 +348,9 @@ export default {
     },
     ansiToHtml(output) {
       return new AnsiUp().ansi_to_html(output);
+    },
+    addBlankLines(text) {
+      return `\n${  text  }\n`;
     },
     deleteTag(task, tag) {
       pluginApi

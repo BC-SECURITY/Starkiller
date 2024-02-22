@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+-   Removed extra space being added in front of Task Input and Output by append/prepend new line (@Cx01N)
+
 ## [2.7.2] - 2024-01-31
 
 ### Fixed
