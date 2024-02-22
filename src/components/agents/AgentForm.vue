@@ -42,6 +42,7 @@
       <click-to-edit
         v-model="form.listener"
         label="Listener"
+        info-text="The listener to task the agent to use"
         data-type="string"
         :suggested-values="listeners.map((l) => l.name)"
         :strict="true"
@@ -52,12 +53,14 @@
         v-model="form.kill_date"
         label="Kill Date"
         data-type="date"
+        info-text="Date format: YYYY-MM-DD"
         :editable="!readOnly"
         @update="updateKillDate"
       />
       <click-to-edit
         v-model="form.working_hours"
         label="Working Hours"
+        info-text="Format: 00:00-24:00"
         :rules="workingHoursRules"
         :editable="!readOnly"
         @update="updateWorkingHours"
@@ -75,6 +78,7 @@
       <click-to-edit
         v-model="form.delay"
         label="Delay"
+        info-text="Delay in seconds before the agent checks in"
         data-type="number"
         :rules="delayRules"
         :editable="!readOnly"
@@ -83,6 +87,7 @@
       <click-to-edit
         v-model="form.jitter"
         label="Jitter"
+        info-text="Randomness in delay as a decimal between 0 and 1"
         data-type="number"
         :rules="jitterRules"
         :editable="!readOnly"

@@ -1,7 +1,15 @@
 <template>
   <v-row class="pb-5">
-    <v-col cols="4">
+    <v-col cols="4" class="d-flex align-center justify-start">
       <span class="text--bold">{{ label }}</span>
+      <v-tooltip v-if="infoText" bottom>
+        <template #activator="{ on, attrs }">
+          <v-icon small class="ml-2" v-bind="attrs" v-on="on">
+            mdi-information-outline
+          </v-icon>
+        </template>
+        <span>{{ infoText }}</span>
+      </v-tooltip>
     </v-col>
     <v-col cols="6" :class="getColClass()" @click="clicked">
       <template v-if="editing && editable">
@@ -114,6 +122,10 @@ export default {
     },
     value: {
       type: [String, Number],
+      default: "",
+    },
+    infoText: {
+      type: String,
       default: "",
     },
     dataType: {

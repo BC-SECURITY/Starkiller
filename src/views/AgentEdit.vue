@@ -67,7 +67,7 @@
               v-model="isRefreshTasks"
               icon="fa-redo"
               :button-text="isRefreshTasks ? 'On' : 'Off'"
-              text="Auto-refresh tasks"
+              text="Auto-refresh Tasks"
             />
             <tooltip-button
               icon="fa-calendar-times"
@@ -106,6 +106,11 @@
               icon="fa-bell-slash"
               text="Unsubscribe from Notifications"
               @click="unsubscribe"
+            />
+            <tooltip-button
+              icon="fa-sync"
+              text="Reload SysInfo"
+              @click="reloadSysInfo"
             />
             <tooltip-button
               v-if="initialized && !archived"
@@ -371,6 +376,16 @@ export default {
     },
     unsubscribe() {
       this.agentStore.unsubscribe({ sessionId: this.id });
+    },
+    async reloadSysInfo() {
+      try {
+        await agentTaskApi.sysinfo(this.agent.session_id);
+        this.$snack.success(`SysInfo reload queued for ${this.agent.name}`);
+      } catch (error) {
+        this.$snack.error(
+          `Error reloading SysInfo for ${this.agent.name}: ${error.message}`,
+        );
+      }
     },
     toggleCollapsePane() {
       if (this.paneSize > 95) {

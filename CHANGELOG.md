@@ -14,6 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.3] - 2024-02-22
+
+### Added
+
+-   Added buttons to reload sysinfo to agents pages
+-   Add info button on View tab to clarify what options do
+
+### Changed
+
+-   Removed extra space being added in front of Task Input and Output by append/prepend new line
+-   Changed default sort on agents page to be "first seen" instead of "last seen"
+
 ## [2.7.2] - 2024-01-31
 
 ### Fixed
@@ -349,7 +361,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.3...HEAD
+
+[2.7.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.2...v2.7.3
 
 [2.7.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.1...v2.7.2
 

@@ -27,7 +27,7 @@
           v-model="isRefreshTasks"
           icon="fa-redo"
           :button-text="isRefreshTasks ? 'On' : 'Off'"
-          text="Auto-refresh tasks"
+          text="Auto-refresh Tasks"
         />
       </template>
     </edit-page-top>
