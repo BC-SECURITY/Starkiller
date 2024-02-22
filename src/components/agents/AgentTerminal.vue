@@ -621,7 +621,8 @@ export default {
       config = { print: true, attempts: 30, delay: 5000 },
     ) {
       if (!config.attempts) config.attempts = 30;
-      if (!config.delay) config.delay = 5000;
+      if (!config.delay) config.delay = this.agent.delay != null ? this.agent.delay * 1000 : 5000;
+
       let res = null;
       let hasPrintedJobStarted = false;
       let i = 0;
@@ -670,7 +671,7 @@ export default {
         this.getDirectoryCommand(),
       );
 
-      const complete = await this.pollForResult(response.id);
+      const complete = await this.pollForResult(response.id, { print: false });
 
       if (complete) {
         // eslint-disable-next-line prefer-destructuring
@@ -697,6 +698,7 @@ export default {
 
       if (["cd", "set-location"].includes(stdin.toLowerCase().split(" ")[0])) {
         this.updateCurrentDirectory();
+        return;
       }
 
       if (complete) {
