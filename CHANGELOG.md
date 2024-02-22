@@ -14,9 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   Add info button on View tab to clarify what options do
+
 ### Changed
 
--   Removed extra space being added in front of Task Input and Output by append/prepend new line (@Cx01N)
+-   Removed extra space being added in front of Task Input and Output by append/prepend new line
 
 ## [2.7.2] - 2024-01-31
 
