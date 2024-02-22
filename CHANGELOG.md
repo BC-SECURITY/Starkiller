@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+-   Added buttons to reload sysinfo to agents pages
 -   Add info button on View tab to clarify what options do
 
 ### Changed

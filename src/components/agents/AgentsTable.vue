@@ -114,6 +114,13 @@
               </v-list-item-title>
             </v-list-item>
             <v-divider class="pb-4" />
+            <v-list-item @click="reloadSysInfo(item)">
+              <v-list-item-title>
+                <v-icon>fa-sync</v-icon>
+                Reload SysInfo
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider class="pb-4" />
             <v-list-item key="delete" link @click="killAgent(item)">
               <v-list-item-title>
                 <v-icon>fa-trash-alt</v-icon>
@@ -134,6 +141,7 @@ import TagViewer from "@/components/TagViewer.vue";
 import * as agentApi from "@/api/agent-api";
 import { useAgentStore } from "@/stores/agent-module";
 import { useApplicationStore } from "@/stores/application-module";
+import * as agentTaskApi from "@/api/agent-task-api";
 
 export default {
   name: "AgentsTable",
@@ -387,6 +395,14 @@ export default {
     },
     getAgents() {
       this.agentStore.getAgents();
+    },
+    async reloadSysInfo(agent) {
+      try {
+        await agentTaskApi.sysinfo(agent.session_id);
+        this.$snack.success(`SysInfo reload queued for ${agent.name}`);
+      } catch (error) {
+        this.$snack.error(`Error reloading SysInfo for ${agent.name}: ${error.message}`);
+      }
     },
     async killAgent(item) {
       this.$emit("kill-agent", item);
