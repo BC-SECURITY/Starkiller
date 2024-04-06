@@ -116,7 +116,21 @@
         </td>
       </template>
       <template #item.status="{ item }">
-        {{ item.status }}
+        <v-icon v-if="item.status === 'started'" color="blue" small>
+          fa-check-square
+        </v-icon>
+        <v-icon v-else-if="item.status === 'queued'" color="orange" small>
+          fa-clock
+        </v-icon>
+        <v-icon v-else-if="item.status === 'completed'" color="green" small>
+          fa-check-circle
+        </v-icon>
+        <v-icon v-else-if="item.status === 'error'" color="red" small>
+          fa-times-circle
+        </v-icon>
+        <v-icon v-else-if="item.status === 'continuous'" color="purple" small>
+          fa-infinity
+        </v-icon>
       </template>
       <template #item.input="{ item }">
         <span>{{ truncateMessage(item.input) }}</span>

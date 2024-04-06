@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   Added completed, error, continuous statuses to taskings
+
 ## [2.7.3] - 2024-02-22
 
 ### Added

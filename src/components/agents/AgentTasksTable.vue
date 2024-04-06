@@ -118,11 +118,20 @@
         </td>
       </template>
       <template #item.status="{ item }">
-        <v-icon v-if="item.status === 'pulled'" color="green" small>
+        <v-icon v-if="item.status === 'pulled'" color="blue" small>
           fa-check-square
         </v-icon>
         <v-icon v-else-if="item.status === 'queued'" color="orange" small>
           fa-clock
+        </v-icon>
+        <v-icon v-else-if="item.status === 'completed'" color="green" small>
+          fa-check-circle
+        </v-icon>
+        <v-icon v-else-if="item.status === 'error'" color="red" small>
+          fa-times-circle
+        </v-icon>
+        <v-icon v-else-if="item.status === 'continuous'" color="purple" small>
+          fa-infinity
         </v-icon>
       </template>
       <template v-if="!agent" #item.agent_id="{ item }">
