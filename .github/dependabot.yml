@@ -1,8 +1,7 @@
 version: 2
 updates:
-  - package_manager: "npm"
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "sunday"
-    target-branch: "dev"
+    target-branch: "private-main"
