@@ -15,7 +15,7 @@ jobs:
         run: |
           echo "TAG_NAME=$(echo ${{ github.head_ref }} | sed 's/release\///')" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.base_ref }}
           token: ${{ secrets.RELEASE_TOKEN }}
@@ -23,7 +23,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: "yarn"

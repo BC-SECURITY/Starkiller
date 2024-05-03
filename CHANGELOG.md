@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0] - 2024-04-08
+
+### Added
+
+-   Added completed, error, continuous statuses to taskings
+
 ## [2.7.3] - 2024-02-22
 
 ### Added
@@ -361,7 +367,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.3...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.0...HEAD
+
+[2.8.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.3...v2.8.0
 
 [2.7.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.2...v2.7.3
 

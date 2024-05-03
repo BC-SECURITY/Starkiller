@@ -20,7 +20,7 @@ jobs:
       - name: Set target branch
         run: echo "TARGET_BRANCH=private-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_BRANCH }}
           submodules: "recursive"
@@ -30,7 +30,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
       - name: Change version number
@@ -58,7 +58,7 @@ jobs:
       - name: Push new branch
         run: git push origin ${{ env.RELEASE_BRANCH }}
       - name: Create pull request into ${{ env.TARGET_BRANCH }}
-        uses: thomaseizinger/create-pull-request@1.0.0
+        uses: thomaseizinger/create-pull-request@1.3.1
         with:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           head: ${{ env.RELEASE_BRANCH }}
