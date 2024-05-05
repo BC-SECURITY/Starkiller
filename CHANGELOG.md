@@ -14,7 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.1] - 2024-05-05
+
 ### Fixed
+
 -   Fixed issue where plugin task responses were not being displayed
 
 ## [2.8.0] - 2024-04-08
@@ -370,7 +373,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.1...HEAD
+
+[2.8.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.0...v2.8.1
 
 [2.8.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.7.3...v2.8.0
 

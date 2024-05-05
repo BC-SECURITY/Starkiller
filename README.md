@@ -29,15 +29,19 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 As of Empire 5.0 and Starkiller 2.0, you no longer need to install Starkiller or build it from source.
 It is prepackaged in Empire as a submodule and served via Empire's API.
 
-## Sponsors
+[//]: # (## Sponsors)
 
-<div align="center">
+[//]: # ()
+[//]: # (<div align="center">)
 
-[<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/f273f4b0-400c-49ce-b62f-521239a86754" width="100"/>](https://www.cybrary.it/)
+[//]: # ()
+[//]: # ([<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/f273f4b0-400c-49ce-b62f-521239a86754" width="100"/>]&#40;https://www.cybrary.it/&#41;)
 
-[<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/d14af000-80d2-4f67-b70c-b62ac42b6a52" width="100"/>](https://twitter.com/joehelle)
+[//]: # ()
+[//]: # ([<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/d14af000-80d2-4f67-b70c-b62ac42b6a52" width="100"/>]&#40;https://twitter.com/joehelle&#41;)
 
-</div>
+[//]: # ()
+[//]: # (</div>)
 
 # Sponsorship and extra features
 
