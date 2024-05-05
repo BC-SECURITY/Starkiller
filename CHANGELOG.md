@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+-   Fixed issue where plugin task responses were not being displayed
+
 ## [2.8.0] - 2024-04-08
 
 ### Added
