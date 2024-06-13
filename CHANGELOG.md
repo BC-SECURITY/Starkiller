@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+-   Added request for job/task list from agents
+
 ## [2.8.1] - 2024-05-05
 
 ### Fixed

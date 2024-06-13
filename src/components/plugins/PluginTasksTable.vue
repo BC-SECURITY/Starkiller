@@ -20,8 +20,8 @@
       show-expand
       @update:options="handleOptionsChange"
     >
-      <template #expanded-item="{ headers, item }">
-        <td :colspan="headers.length">
+      <template #expanded-item="{ headers: scopedHeader, item }">
+        <td :colspan="scopedHeader.length">
           <div>
             <div
               style="
@@ -106,6 +106,7 @@
               "
             >
               <!-- TODO Option for original output -->
+              <!-- eslint-disable vue/no-v-html -->
               <div
                 v-if="expandedTasks[item.uniqueId].htmlOutput"
                 v-html="expandedTasks[item.uniqueId].htmlOutput"

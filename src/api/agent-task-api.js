@@ -172,6 +172,12 @@ export function scriptImport(sessionId, file) {
     .then((response) => response.data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+export function getJobs(sessionId) {
+  return axios
+    .post(`/agents/${sessionId}/tasks/jobs`)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
 
 export function scriptCommand(sessionId, command) {
   return axios

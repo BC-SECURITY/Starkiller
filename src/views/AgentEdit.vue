@@ -113,6 +113,11 @@
               @click="reloadSysInfo"
             />
             <tooltip-button
+              icon="fa-tasks"
+              text="Get Agent Task Status List"
+              @click="getAgentTasks"
+            />
+            <tooltip-button
               v-if="initialized && !archived"
               icon="fa-trash-alt"
               text="Kill Agent"
@@ -384,6 +389,16 @@ export default {
       } catch (error) {
         this.$snack.error(
           `Error reloading SysInfo for ${this.agent.name}: ${error.message}`,
+        );
+      }
+    },
+    async getAgentTasks() {
+      try {
+        await agentTaskApi.getJobs(this.agent.session_id);
+        this.$snack.success(`Task list queued for ${this.agent.name}`);
+      } catch (error) {
+        this.$snack.error(
+          `Error getting jobs for ${this.agent.name}: ${error.message}`,
         );
       }
     },
