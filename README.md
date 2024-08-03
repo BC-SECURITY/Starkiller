@@ -12,10 +12,6 @@
 [![Twitter URL](https://img.shields.io/twitter/follow/BCSecurity?style=plastic&logo=twitter)](https://twitter.com/BCSecurity)
 [![Twitter URL](https://img.shields.io/twitter/follow/EmpireC2Project?style=plastic&logo=twitter)](https://twitter.com/EmpireC2Project)
 [![YouTube URL](https://img.shields.io/youtube/channel/views/UCIV4xSntF1h1bvFt8SUfzZg?style=plastic&logo=youtube)](https://www.youtube.com/channel/UCIV4xSntF1h1bvFt8SUfzZg)
-![Mastodon Follow](https://img.shields.io/mastodon/follow/109299433521243792?domain=https%3A%2F%2Finfosec.exchange%2F&style=plastic&logo=mastodon)
-![Mastodon Follow](https://img.shields.io/mastodon/follow/109384907460361134?domain=https%3A%2F%2Finfosec.exchange%2F&style=plastic&logo=mastodon)
-[![Threads](https://img.shields.io/badge/follow%20@BCSecurity0-grey?style=plastic&logo=threads&logoColor=#000000)](https://www.threads.net/@bcsecurity0)
-[![Threads](https://img.shields.io/badge/follow%20@EmpireC2Project-grey?style=plastic&logo=threads&logoColor=#000000)](https://www.threads.net/@empirec2project)
 [![LinkedIn](https://img.shields.io/badge/Linkedin-blue?style=plastic&logo=linkedin&logoColor=#0A66C2)](https://www.linkedin.com/company/bc-security/)
 
 </div>
@@ -29,19 +25,14 @@ Starkiller is a Frontend for [Powershell Empire](https://github.com/BC-SECURITY/
 As of Empire 5.0 and Starkiller 2.0, you no longer need to install Starkiller or build it from source.
 It is prepackaged in Empire as a submodule and served via Empire's API.
 
-[//]: # (## Sponsors)
+## Sponsors
+<div align="center">
 
-[//]: # ()
-[//]: # (<div align="center">)
-
-[//]: # ()
-[//]: # ([<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/f273f4b0-400c-49ce-b62f-521239a86754" width="100"/>]&#40;https://www.cybrary.it/&#41;)
-
-[//]: # ()
-[//]: # ([<img src="https://github.com/BC-SECURITY/Empire/assets/9831420/d14af000-80d2-4f67-b70c-b62ac42b6a52" width="100"/>]&#40;https://twitter.com/joehelle&#41;)
-
-[//]: # ()
-[//]: # (</div>)
+[<img src="https://github.com/user-attachments/assets/604fbb97-4641-4a15-a6ba-039f67694f15" width="200"/>](https://www.route4me.com//)
+</div>
+<!---https://github-production-user-asset-6210df.s3.amazonaws.com/20302208/354655875-3497ee72-324a-4b8a-a14b-37748115997d.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240802%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240802T160658Z&X-Amz-Expires=300&X-Amz-Signature=68f78dde4457cc5bc6642dce601e1fd439252e2796b3ebe8d8d47e17625acd9a&X-Amz-SignedHeaders=host&actor_id=20302208&key_id=0&repo_id=276544505" width="100"/>](https://twitter.com/joehelle)
+</div>
+--->
 
 # Sponsorship and extra features
 
