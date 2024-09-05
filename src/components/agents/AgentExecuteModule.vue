@@ -8,10 +8,9 @@
     />
     <div v-else style="padding: 0 10px 10px 10px">
       <info-viewer class="info-viewer" :info="moduleInfo" />
-      <!-- todo could make this more friendly by looking up the "name" in the state in case it was changed -->
-      <span class="mr-2 mb-4"
-      >Executing on Agents: {{ agents.join(", ") }}</span
-      >
+      <span class="mr-2 mb-4">
+        Executing on Agents: {{ agents.join(", ") }}
+      </span>
       <technique-chips :techniques="selectedItem.techniques" />
       <v-autocomplete
         v-model="selectedModule"
@@ -25,7 +24,10 @@
       />
       <v-alert v-if="selectedItem.opsec_safe === false" type="warning">
         <v-row align="center">
-          <v-col class="grow" style="word-wrap: word-break; width: 500px">
+          <v-col
+            class="grow"
+            style="word-wrap: break-word; word-break: break-word; width: 500px"
+          >
             This module is not opsec safe.
           </v-col>
         </v-row>
@@ -137,7 +139,7 @@ export default {
     },
     moduleOptionDefaults: {
       type: Object,
-      default: () => {},
+      default: () => ({}),
     },
   },
   data() {
@@ -169,46 +171,18 @@ export default {
       return this.modules.map((el) => el.id);
     },
     moduleOptions() {
-      let { options } = this.selectedItem;
-      options = options || {};
+      const options = this.selectedItem.options || {};
 
       if (options && options.Agent) {
         delete options.Agent;
       }
 
-      // Set the default values
       Object.keys(this.moduleOptionDefaults || {}).forEach((key) => {
-        if (options[key]) {
+        if (options[key] && options[key].value === undefined) {
           options[key].value = this.moduleOptionDefaults[key];
         }
       });
-
-      // Log the current Language value
-      console.log("Current Language Value:", options.Language?.value);
-
-      // Filter options based on `depends_on`
-      const filteredOptions = Object.keys(options).reduce((filtered, key) => {
-        const option = options[key];
-
-        // Check if the option has dependencies
-        if (option.depends_on && Array.isArray(option.depends_on)) {
-          const shouldShow = option.depends_on.every(dep => {
-            const dependentValue = options[dep.name]?.value;
-            return dep.values.includes(dependentValue);
-          });
-
-          if (shouldShow) {
-            filtered[key] = option;
-          }
-        } else {
-          filtered[key] = option; // No dependencies, include the option
-        }
-
-        return filtered;
-      }, {});
-
-      console.log("Filtered options:", filteredOptions);
-      return filteredOptions;
+      return options;
     },
     moduleInfo() {
       if (Object.keys(this.selectedItem).length === 0) {
@@ -245,23 +219,19 @@ export default {
         this.handleSelect(this.moduleName);
       }
     },
-    selectedModule(newVal) {
-      this.emitModuleChange(newVal);
+    selectedModule(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.emitModuleChange(newVal);
+      }
     },
     moduleName: {
       immediate: true,
-      handler(newVal) {
-        this.selectedModule = newVal;
-        this.handleSelect(newVal);
-      },
-    },
-    'form.Language': {
       handler(newVal, oldVal) {
-        console.log("Language changed from", oldVal, "to", newVal);
-        this.$forceUpdate(); // Force re-render to recompute moduleOptions
+        if (newVal !== oldVal) {
+          this.selectedModule = newVal;
+          this.handleSelect(newVal);
+        }
       },
-      immediate: true,
-      deep: true,
     },
   },
   async mounted() {
@@ -270,7 +240,7 @@ export default {
   methods: {
     async handleSelect(item) {
       this.errorState = false;
-      if (item === "" || item == null) {
+      if (!item) {
         this.reset = false;
         this.selectedItem = {};
         setTimeout(() => {
@@ -281,7 +251,7 @@ export default {
       const results = this.modules.find((el) => el.id === item);
       this.reset = false;
       this.selectedItem = results || {};
-      if (Object.keys(this.selectedItem).length === 0) {
+      if (!Object.keys(this.selectedItem).length) {
         this.errorState = true;
       }
       setTimeout(() => {
@@ -345,7 +315,6 @@ export default {
         this.$snack.info(`Module execution queued for ${displayName}`);
         this.selectedItem = {};
         this.selectedModule = "";
-        // emit a submitted event so ModuleExecute can clear agents list.
         this.$emit("submitted");
       }
 

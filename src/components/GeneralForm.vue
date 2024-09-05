@@ -5,7 +5,13 @@
     :readonly="readonly"
     @submit.prevent.native="submit"
   >
-    <v-row v-for="field in requiredFields" :key="field.name">
+    <!-- Rendering required fields -->
+    <!-- eslint-disable -->
+    <v-row
+      v-for="field in requiredFields"
+      :key="field.name"
+      v-if="isFieldVisible(field.name)"
+    >
       <v-col cols="6">
         <dynamic-form-input
           v-model="form[field.name]"
@@ -17,15 +23,18 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader> {{ field.description }} </v-subheader>
+        <v-subheader>{{ field.description }}</v-subheader>
       </v-col>
     </v-row>
 
-    <v-subheader v-if="optionalFields.length > 0">
-      Optional Fields
-    </v-subheader>
+    <!-- Optional fields -->
+    <v-subheader v-if="optionalFields.length > 0">Optional Fields</v-subheader>
     <v-divider v-if="optionalFields.length > 0" class="mb-8" />
-    <v-row v-for="field in optionalFields" :key="field.name">
+    <v-row
+      v-for="field in optionalFields"
+      :key="field.name"
+      v-if="isFieldVisible(field.name)"
+    >
       <v-col cols="6">
         <dynamic-form-input
           v-model="form[field.name]"
@@ -37,14 +46,16 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader> {{ field.description }} </v-subheader>
+        <v-subheader>{{ field.description }}</v-subheader>
       </v-col>
     </v-row>
+    <!-- eslint-enable -->
   </v-form>
 </template>
 
 <script>
 import Vue from "vue";
+import debounce from "lodash/debounce";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
 import { useCredentialStore } from "@/stores/credential-module";
@@ -74,9 +85,12 @@ export default {
     return {
       form: {},
       valid: true,
+      visibleFields: {}, // Tracks visibility state of fields
+      debouncedHandler: debounce(this.filteredFieldsHandler, 300),
     };
   },
   computed: {
+    // Store-related properties
     agentStore() {
       return useAgentStore();
     },
@@ -107,33 +121,35 @@ export default {
     malleableProfiles() {
       return this.malleableProfileStore.profileNames;
     },
-    /**
-     * Fields that go in the "Optional" section
-     */
     optionalFields() {
-      return this.fields
-        .filter((el) => el.required === false)
-        .map((el) => ({ ...el, type: this.fieldType(el) }));
+      return this.filteredFields.filter((el) => el.required === false);
     },
-    /**
-     * All the fields that are marked required by the API
-     */
     requiredFields() {
-      return this.fields
-        .filter((el) => el.required === true)
-        .map((el) => ({ ...el, type: this.fieldType(el) }));
+      return this.filteredFields.filter((el) => el.required === true);
     },
-    /**
-     * The fields from the API to dynamically generate the form.
-     * If items are in the `priority` list, they will be moved to the top of
-     * their respective sections.
-     */
-    fields() {
+    filteredFields() {
+      // Build field objects and apply filtering
       const fields = Object.keys(this.options).map((key) => ({
         name: key,
         ...this.options[key],
       }));
 
+      // Filter based on visibility conditions
+      fields.forEach((field) => {
+        const isVisible = this.shouldFieldBeVisible(field);
+        this.$set(this.visibleFields, field.name, isVisible);
+
+        // Set default value when revealing the field
+        if (
+          isVisible &&
+          !this.form[field.name] &&
+          this.options[field.name]?.value !== undefined
+        ) {
+          Vue.set(this.form, field.name, this.options[field.name].value);
+        }
+      });
+
+      // Prioritize fields based on input priority list
       this.priority
         .slice()
         .reverse()
@@ -145,20 +161,17 @@ export default {
           }
         });
 
-      return fields;
+      return fields.map((el) => ({
+        ...el,
+        type: this.fieldType(el),
+      }));
     },
-    /**
-     * The rules for the form, currently this is only to check for empty required fields.
-     */
     rules() {
-      return this.fields.reduce((map, field) => {
+      return this.filteredFields.reduce((map, field) => {
         map[field.name] = [];
         if (field.required === true) {
-          map[field.name].push(
-            (v) => !!v || v === 0 || `${field.name} is required`,
-          );
+          map[field.name].push((v) => !!v || `${field.name} is required`);
         }
-
         return map;
       }, {});
     },
@@ -167,28 +180,17 @@ export default {
     form: {
       handler(val) {
         const form2 = { ...val };
-        if (form2.Bypasses) {
+        if (Array.isArray(form2.Bypasses)) {
           form2.Bypasses = form2.Bypasses.join(" ");
         }
         this.$emit("input", form2);
       },
       deep: true,
     },
-    /**
-     * When the fields change, we update the form map and set it for reactivity to take place.
-     */
-    fields: {
+    filteredFields: {
       immediate: true,
-      handler(arr) {
-        const map2 = arr.reduce((map, obj) => {
-          if (obj.name === "Bypasses" && !Array.isArray(obj.value)) {
-            map[obj.name] = obj.value.split(" ") || [];
-          } else {
-            map[obj.name] = obj.value == null ? "" : obj.value;
-          }
-          return map;
-        }, {});
-        Vue.set(this, "form", map2);
+      handler(arr, oldArr) {
+        this.debouncedHandler(arr, oldArr);
       },
     },
   },
@@ -219,33 +221,78 @@ export default {
       return field.suggested_values;
     },
     strictForField(field) {
-      if (field.name === "Listener") {
-        return true;
-      }
-      if (field.name === "Bypasses") {
-        return true;
-      }
-      if (field.name === "Profile") {
-        return true;
-      }
-      if (field.name === "CredID") {
-        return true;
-      }
-      return field.strict;
-    },
-    fieldExists(name) {
-      return this.fields.find((el) => el.name === name);
+      return ["Listener", "Bypasses", "Profile", "CredID"].includes(field.name)
+        ? true
+        : field.strict;
     },
     fieldType(el) {
-      if (el.value_type === "INTEGER") return "number";
-      if (el.value_type === "FLOAT") return "float";
-      if (el.value_type === "BOOLEAN") return "boolean";
-      if (el.value_type === "STRING") return "string";
-      if (el.value_type === "FILE") return "file";
-      return "string";
+      return (
+        {
+          INTEGER: "number",
+          FLOAT: "float",
+          BOOLEAN: "boolean",
+          STRING: "string",
+          FILE: "file",
+        }[el.value_type] || "string"
+      );
+    },
+    filteredFieldsHandler(arr, oldArr = []) {
+      if (!Array.isArray(arr)) {
+        console.error(
+          "filteredFieldsHandler expected an array for arr, but received:",
+          arr,
+        );
+        return;
+      }
+
+      if (arr.length !== oldArr.length) {
+        const map2 = arr.reduce((map, obj) => {
+          if (obj.name === "Bypasses" && typeof obj.value === "string") {
+            map[obj.name] = obj.value.split(" ") || [];
+          } else {
+            map[obj.name] = obj.value == null ? "" : obj.value;
+          }
+          return map;
+        }, {});
+
+        Vue.set(this, "form", map2);
+
+        this.updateDependentFields();
+      }
+    },
+    updateDependentFields() {
+      this.filteredFields.forEach((field) => {
+        const isVisible = this.shouldFieldBeVisible(field);
+        this.$set(this.visibleFields, field.name, isVisible);
+
+        if (
+          isVisible &&
+          !this.form[field.name] &&
+          this.options[field.name]?.value !== undefined
+        ) {
+          // Set default value when revealing the field
+          Vue.set(this.form, field.name, this.options[field.name].value);
+        }
+      });
+    },
+    shouldFieldBeVisible(field) {
+      if (field.depends_on && Array.isArray(field.depends_on)) {
+        return field.depends_on.every((dependency) => {
+          const dependentValue = this.form[dependency.name];
+          return dependency.values.includes(dependentValue);
+        });
+      }
+      return true;
+    },
+    isFieldVisible(fieldName) {
+      return this.visibleFields[fieldName] !== false;
     },
   },
 };
 </script>
 
-<style></style>
+<style scoped>
+.mb-8 {
+  margin-bottom: 8px;
+}
+</style>
