@@ -179,13 +179,6 @@ export function getJobs(sessionId) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function scriptCommand(sessionId, command) {
-  return axios
-    .post(`/agents/${sessionId}/tasks/script_command`, { command })
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function updateProxies(sessionId, proxies) {
   return axios
     .post(`/agents/${sessionId}/tasks/proxy_list`, proxies)

@@ -6,19 +6,6 @@
           <v-col cols="10">
             <div style="display: flex">
               <v-checkbox
-                v-model="form.scriptCommand"
-                class="pr-2"
-                label="Script Command"
-              />
-              <v-tooltip bottom>
-                <template #activator="{ on }">
-                  <v-icon small class="pr-2" v-on="on">
-                    fa-question-circle
-                  </v-icon>
-                </template>
-                <p>{{ scriptCommand.tooltipText }}</p>
-              </v-tooltip>
-              <v-checkbox
                 v-model="form.literal"
                 class="pr-2"
                 label="Literal"
@@ -67,32 +54,16 @@ export default {
       form: {
         command: "",
         literal: false,
-        scriptCommand: false,
       },
       literal: {
         disabled: false,
         tooltipText:
           "This will ensure that aliased commands such as whoami or ps do not execute the built-in agent aliases.",
       },
-      scriptCommand: {
-        tooltipText:
-          'Execute a script command. The function being executing should first be loading via the "Script Import" functionality.',
-      },
       commands: [],
     };
   },
-  watch: {
-    "form.scriptCommand": {
-      handler(val) {
-        if (val) {
-          this.form.literal = false;
-          this.literal.disabled = true;
-        } else {
-          this.literal.disabled = false;
-        }
-      },
-    },
-  },
+  watch: {},
   methods: {
     async submit() {
       if (this.form.command.length < 1) {
@@ -103,11 +74,6 @@ export default {
 
       if (this.form.command.trim() === "sysinfo") {
         await agentTaskApi.sysinfo(this.agent.session_id);
-      } else if (this.form.scriptCommand) {
-        await agentTaskApi.scriptCommand(
-          this.agent.session_id,
-          this.form.command,
-        );
       } else {
         await agentTaskApi.shell(
           this.agent.session_id,

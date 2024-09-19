@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-  Removed import script button from agent page
+-  Removed script command checkbox from agent page
+-  Added dynamic options for form fields
+
 ## [2.8.2] - 2024-09-22
 
 ### Added
