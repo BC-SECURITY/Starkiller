@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.2] - 2024-09-22
+
+### Added
+
+-   Added request for job/task list from agents
+-   Added Route4Me to sponsorship section
+
+### Fixed
+
+-   Fixed agent id not being automatically set in terminal
+
 ## [2.8.1] - 2024-05-05
 
 ### Fixed
@@ -373,7 +384,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...HEAD
+
+[2.8.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.1...v2.8.2
 
 [2.8.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.0...v2.8.1
 

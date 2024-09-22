@@ -30,16 +30,16 @@
       :open.sync="open"
       :items="tree"
     >
-      <template #label="{ item, open }">
+      <template #label="{ item, open: isOpen }">
         <v-btn
           style="margin-left: -15px; width: 100%"
           class="text-left"
           text
           @contextmenu="show(item, $event)"
         >
-          <div style="display: flex; justify-content: fle -start">
+          <div style="display: flex; justify-content: flex-start">
             <v-icon v-if="!item.file">
-              {{ open ? "mdi-folder-open" : "mdi-folder" }}
+              {{ isOpen ? "mdi-folder-open" : "mdi-folder" }}
             </v-icon>
             <v-icon v-else>
               {{ files[item.file] || "mdi-file" }}

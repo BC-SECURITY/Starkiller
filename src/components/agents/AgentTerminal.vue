@@ -1,6 +1,7 @@
 <template>
   <div class="terminal-container">
     <div ref="output" class="terminal-output">
+      <!-- eslint-disable vue/no-v-html -->
       <div
         v-for="(line, index) in outputLines"
         :key="index"
@@ -163,6 +164,12 @@ export default {
           description:
             "Tasks specified agent to update delay (s) and jitter (0.0 - 1.0).",
           usage: "sleep <delay> <jitter>",
+        },
+        {
+          command: "jobs",
+          description:
+            "Task the agent to return back a list of all previous tasks and their status",
+          usage: "jobs",
         },
       ],
       moduleHelpCommands: [
@@ -436,6 +443,9 @@ export default {
           case "sysinfo":
             this.getSysInfo();
             break;
+          case "jobs":
+            this.pollJobsEndpoint();
+            break;
           case "shell":
             if (args.length < 1) {
               this.isShellMenu = true;
@@ -594,6 +604,17 @@ export default {
         this.addError(`Error executing command: ${error.message}`);
       }
     },
+
+    async pollJobsEndpoint() {
+      try {
+        const task = await agentTaskApi.getJobs(this.agent.session_id);
+        this.pollForResult(task.id);
+        this.addInfo("Polling jobs endpoint...");
+      } catch (error) {
+        this.addError(`Error polling jobs endpoint: ${error.message}`);
+      }
+    },
+
     async runShellCommand(command) {
       if (!this.agent || !this.agent.session_id) {
         this.addError("Error: agent data is not available.");
@@ -836,6 +857,13 @@ export default {
       if (!this.currentModule) {
         this.addError("No module is currently selected.");
         return;
+      }
+
+      if (!this.moduleOptions.Agent || !this.moduleOptions.Agent.value) {
+        this.moduleOptions.Agent = {
+          value: this.agent.session_id,
+          required: true,
+        };
       }
 
       const missingOptions = Object.entries(this.moduleOptions)

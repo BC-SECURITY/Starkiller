@@ -39,8 +39,8 @@
       <template #item.background="{ item }">
         <v-simple-checkbox v-model="item.background" disabled />
       </template>
-      <template #expanded-item="{ headers, item }">
-        <td :colspan="headers.length">
+      <template #expanded-item="{ headers: scopedHeader, item }">
+        <td :colspan="scopedHeader.length">
           <div class="d-flex flex-column">
             <b>Description:</b>
             {{ item.description }}
