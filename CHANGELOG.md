@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added request for job/task list from agents
 -   Added Route4Me to sponsorship section
 
+### Fixed
+-   Fixed agent id not being automatically set in terminal
+
 ## [2.8.1] - 2024-05-05
 
 ### Fixed

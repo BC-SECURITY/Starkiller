@@ -859,6 +859,13 @@ export default {
         return;
       }
 
+      if (!this.moduleOptions.Agent || !this.moduleOptions.Agent.value) {
+        this.moduleOptions.Agent = {
+          value: this.agent.session_id,
+          required: true,
+        };
+      }
+
       const missingOptions = Object.entries(this.moduleOptions)
         .filter(([_, option]) => option.required && !option.value)
         .map(([optionName, _]) => optionName);
