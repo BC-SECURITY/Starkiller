@@ -31,6 +31,7 @@
     "vue": "2.7",
     "vue-beautiful-chat": "^2.5.0",
     "vue-router": "^3.5.1",
+    "vuedraggable": "^2.24.3",
     "vuetify": "^2.6.0"
   },
   "devDependencies": {

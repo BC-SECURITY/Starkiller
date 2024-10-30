@@ -182,7 +182,32 @@ export default {
           options[key].value = this.moduleOptionDefaults[key];
         }
       });
-      return options;
+      // Log the current Language value
+      console.log("Current Language Value:", options.Language?.value);
+
+      // Filter options based on `depends_on`
+      const filteredOptions = Object.keys(options).reduce((filtered, key) => {
+        const option = options[key];
+
+        // Check if the option has dependencies
+        if (option.depends_on && Array.isArray(option.depends_on)) {
+          const shouldShow = option.depends_on.every((dep) => {
+            const dependentValue = options[dep.name]?.value;
+            return dep.values.includes(dependentValue);
+          });
+
+          if (shouldShow) {
+            filtered[key] = option;
+          }
+        } else {
+          filtered[key] = option; // No dependencies, include the option
+        }
+
+        return filtered;
+      }, {});
+
+      console.log("Filtered options:", filteredOptions);
+      return filteredOptions;
     },
     moduleInfo() {
       if (Object.keys(this.selectedItem).length === 0) {
@@ -232,6 +257,14 @@ export default {
           this.handleSelect(newVal);
         }
       },
+    },
+    "form.Language": {
+      handler(newVal, oldVal) {
+        console.log("Language changed from", oldVal, "to", newVal);
+        this.$forceUpdate(); // Force re-render to recompute moduleOptions
+      },
+      immediate: true,
+      deep: true,
     },
   },
   async mounted() {

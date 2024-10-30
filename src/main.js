@@ -14,8 +14,8 @@ Vue.use(Chat);
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 Vue.use(pinia);
-
 Vue.config.productionTip = false;
+
 new Vue({
   router,
   vuetify,

@@ -1,5 +1,18 @@
 <template>
   <div>
+    <div style="display: flex; flex-direction: row; width: 100%">
+      <v-tabs v-model="tab" align-with-title>
+        <v-tab key="general" href="#general">
+          General
+          <v-icon x-small class="ml-1">mdi-information</v-icon>
+        </v-tab>
+        <v-tab key="autorun" href="#autorun">
+          Autorun Modules
+          <v-icon x-small class="ml-1">mdi-play-circle</v-icon>
+        </v-tab>
+      </v-tabs>
+    </div>
+
     <edit-page-top
       :breads="breads"
       :show-submit="initialLoad"
@@ -52,48 +65,81 @@
         </div>
       </template>
     </edit-page-top>
-    <div class="headers">
-      <h3>{{ mode }} Listener</h3>
-    </div>
-    <tag-viewer
-      v-if="!isNew"
-      :tags="listener.tags"
-      @update-tag="updateTag"
-      @delete-tag="deleteTag"
-      @new-tag="addTag"
-    />
+
+    <!-- Error Alert -->
     <error-state-alert
       v-if="errorState"
       :resource-id="id"
       resource-type="listener"
     />
-    <v-card v-else style="padding: 10px">
-      <info-viewer class="info-viewer" :info="listenerInfo" />
-      <v-autocomplete
-        v-model="selectedTemplate"
-        :items="listenerTemplateIds"
-        :loading="!reset"
-        dense
-        outlined
-        label="Type"
-        :readonly="!canEdit"
-      />
-      <v-alert v-if="validationMessage" prominent type="warning">
-        <v-row align="center">
-          <v-col class="grow" style="word-wrap: word-break; width: 500px">
-            {{ validationMessage }}
-          </v-col>
-        </v-row>
-      </v-alert>
-      <general-form
-        v-if="reset"
-        ref="generalform"
-        v-model="form"
-        :options="listenerOptions"
-        :priority="formPriorities"
-        :readonly="!canEdit"
-      />
-    </v-card>
+
+    <!-- Tab Items -->
+    <v-tabs-items v-else v-model="tab">
+      <!-- General Tab Content -->
+      <v-tab-item
+        key="general"
+        :value="'general'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card flat>
+          <div class="headers" style="padding: 20px">
+            <h3>{{ mode }} Listener</h3>
+          </div>
+          <tag-viewer
+            v-if="!isNew"
+            :tags="listener.tags"
+            @update-tag="updateTag"
+            @delete-tag="deleteTag"
+            @new-tag="addTag"
+          />
+          <error-state-alert
+            v-if="errorState"
+            :resource-id="id"
+            resource-type="listener"
+          />
+          <v-card v-else style="padding: 10px">
+            <info-viewer class="info-viewer" :info="listenerInfo" />
+            <v-autocomplete
+              v-model="selectedTemplate"
+              :items="listenerTemplateIds"
+              :loading="!reset"
+              dense
+              outlined
+              label="Type"
+              :readonly="!canEdit"
+            />
+            <v-alert v-if="validationMessage" prominent type="warning">
+              <v-row align="center">
+                <v-col class="grow" style="word-wrap: word-break; width: 500px">
+                  {{ validationMessage }}
+                </v-col>
+              </v-row>
+            </v-alert>
+            <general-form
+              v-if="reset"
+              ref="generalform"
+              v-model="form"
+              :options="listenerOptions"
+              :priority="formPriorities"
+              :readonly="!canEdit"
+            />
+          </v-card>
+        </v-card>
+      </v-tab-item>
+
+      <!-- Autorun Modules Tab Content -->
+      <v-tab-item
+        key="autorun"
+        :value="'autorun'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card flat>
+          <AutoRunModules :selected-listener="listener" />
+        </v-card>
+      </v-tab-item>
+    </v-tabs-items>
   </div>
 </template>
 
@@ -104,6 +150,7 @@ import InfoViewer from "@/components/InfoViewer.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import TagViewer from "@/components/TagViewer.vue";
+import AutoRunModules from "@/components/AutoRunModules.vue";
 import { useListenerStore } from "@/stores/listener-module";
 
 export default {
@@ -114,6 +161,7 @@ export default {
     GeneralForm,
     ErrorStateAlert,
     EditPageTop,
+    AutoRunModules,
   },
   data() {
     return {
@@ -176,8 +224,6 @@ export default {
     },
     listenerOptions() {
       if (!this.isNew || this.isCopy) {
-        // if its not new, set the options
-        // iterate over the options in this.listener and set the values
         const options = {};
         Object.keys(this.listener.options).forEach((key) => {
           options[key] = { ...this.listenerTemplate.options[key] };
@@ -185,8 +231,6 @@ export default {
         });
         return options;
       }
-
-      // if its new, use the defaults from the template
       const { options } = this.listenerTemplate;
       if (!options) return {};
       return options;
@@ -211,6 +255,14 @@ export default {
       if (this.listener.name) return this.listener.name;
       if (this.id) return this.id;
       return "New";
+    },
+    tab: {
+      get() {
+        return this.$route.query.tab || "general";
+      },
+      set(tab) {
+        this.$router.replace({ query: { ...this.$route.query, tab } });
+      },
     },
   },
   watch: {
@@ -239,8 +291,7 @@ export default {
     this.listenerStore.getListenerTemplates();
 
     if (!this.isNew || this.isCopy) {
-      // using the route param id instad of this.id
-      // since this.id is 0 for copies.
+      // using the route param id instead of this.id
       this.getListener(this.$route.params.id);
     }
   },
@@ -287,16 +338,6 @@ export default {
             this.loading = false;
           })
           .catch((err) => {
-            // if (typeof err === 'object') {
-            // err.details.forEach((detail) => {
-            // Here we could set an error object on the form
-            // Hot going to do it atm since it would require doing
-            // some refactoring of the GeneralForm and DynamicFormInput
-            // and most (all?) of the validations that would be needed
-            // are already done client side.
-            // const field = detail.loc[1]
-            // this.errors[field] = detail.msg
-            // });
             if (err.startsWith("[*]")) {
               this.validationMessage = err;
             } else {
