@@ -159,19 +159,6 @@ export function updateSleep(sessionId, delay, jitter) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function scriptImport(sessionId, file) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  return axios({
-    method: "post",
-    url: `/agents/${sessionId}/tasks/script_import`,
-    data: formData,
-    headers: { "Content-Type": "multipart/form-data" },
-  })
-    .then((response) => response.data)
-    .catch((error) => Promise.reject(handleError(error)));
-}
 export function getJobs(sessionId) {
   return axios
     .post(`/agents/${sessionId}/tasks/jobs`)
