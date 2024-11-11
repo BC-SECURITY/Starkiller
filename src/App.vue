@@ -14,7 +14,8 @@
             $route.name === 'agents' ||
             $route.name === 'pluginEdit' ||
             $route.name === 'plugins' ||
-            $route.name === 'listeners'
+            $route.name === 'listeners' ||
+            $route.name === 'listenerEdit'
           "
           #extension
         >

@@ -51,7 +51,7 @@
             v-if="reset"
             ref="generalform"
             v-model="form"
-            :options="plugin.options"
+            :options="pluginOptions"
           />
           <v-btn :loading="loading" color="primary" @click="submit">
             Submit
@@ -99,7 +99,7 @@ export default {
       loading: false,
       isRefreshTasks: false,
       form: {},
-      plugin: { options: {} },
+      plugin: { execution_options: {} },
       errorState: false,
     };
   },
@@ -133,10 +133,10 @@ export default {
       };
     },
     pluginOptions() {
-      const { options } = this.plugin;
-      if (!options) return {};
+      const { execution_options } = this.plugin;
+      if (!execution_options) return {};
 
-      return options;
+      return execution_options;
     },
     id() {
       return this.$route.params.id;

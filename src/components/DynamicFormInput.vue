@@ -105,7 +105,7 @@ export default {
   props: {
     value: {
       type: [String, Array, Number],
-      default: "", // Set default to an empty string
+      required: true,
     },
     suggestedValues: {
       type: Array,
@@ -130,31 +130,15 @@ export default {
   },
   data() {
     return {
-      internalValue:
-        this.value !== undefined ? this.value : this.getDefaultValue(),
+      internalValue: this.value,
     };
   },
   watch: {
-    value(val) {
-      this.internalValue = val !== undefined ? val : this.getDefaultValue();
-    },
     internalValue(val) {
       this.$emit("input", val);
     },
   },
   methods: {
-    getDefaultValue() {
-      if (this.name === "Bypasses" || Array.isArray(this.suggestedValues)) {
-        return this.value && Array.isArray(this.value) ? this.value : [];
-      }
-      if (typeof this.value === "number") {
-        return 0;
-      }
-      if (typeof this.value === "string") {
-        return "";
-      }
-      return ""; // Default to an empty string if no value type matches
-    },
     truncate(msg) {
       if (msg) {
         return msg.length > 80 ? `${msg.substr(0, 80)}...` : msg;

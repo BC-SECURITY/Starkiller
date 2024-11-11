@@ -5,12 +5,10 @@
     :readonly="readonly"
     @submit.prevent.native="submit"
   >
-    <!-- Rendering required fields -->
-    <!-- eslint-disable -->
     <v-row
       v-for="field in requiredFields"
       :key="field.name"
-      v-if="isFieldVisible(field.name)"
+      :class="{ 'highlight-flash': recentlyVisibleFields.includes(field.name) }"
     >
       <v-col cols="6">
         <dynamic-form-input
@@ -27,13 +25,12 @@
       </v-col>
     </v-row>
 
-    <!-- Optional fields -->
     <v-subheader v-if="optionalFields.length > 0">Optional Fields</v-subheader>
     <v-divider v-if="optionalFields.length > 0" class="mb-8" />
     <v-row
       v-for="field in optionalFields"
       :key="field.name"
-      v-if="isFieldVisible(field.name)"
+      :class="{ 'highlight-flash': recentlyVisibleFields.includes(field.name) }"
     >
       <v-col cols="6">
         <dynamic-form-input
@@ -49,13 +46,10 @@
         <v-subheader>{{ field.description }}</v-subheader>
       </v-col>
     </v-row>
-    <!-- eslint-enable -->
   </v-form>
 </template>
-
 <script>
 import Vue from "vue";
-import debounce from "lodash/debounce";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
 import { useCredentialStore } from "@/stores/credential-module";
@@ -85,12 +79,11 @@ export default {
     return {
       form: {},
       valid: true,
-      visibleFields: {}, // Tracks visibility state of fields
-      debouncedHandler: debounce(this.filteredFieldsHandler, 300),
+      visibleFields: {},
+      recentlyVisibleFields: [],
     };
   },
   computed: {
-    // Store-related properties
     agentStore() {
       return useAgentStore();
     },
@@ -122,34 +115,21 @@ export default {
       return this.malleableProfileStore.profileNames;
     },
     optionalFields() {
-      return this.filteredFields.filter((el) => el.required === false);
+      return this.allFields.filter(
+        (el) => el.required === false && this.isFieldVisible(el),
+      );
     },
     requiredFields() {
-      return this.filteredFields.filter((el) => el.required === true);
+      return this.allFields.filter(
+        (el) => el.required === true && this.isFieldVisible(el),
+      );
     },
-    filteredFields() {
-      // Build field objects and apply filtering
+    allFields() {
       const fields = Object.keys(this.options).map((key) => ({
         name: key,
         ...this.options[key],
       }));
 
-      // Filter based on visibility conditions
-      fields.forEach((field) => {
-        const isVisible = this.shouldFieldBeVisible(field);
-        this.$set(this.visibleFields, field.name, isVisible);
-
-        // Set default value when revealing the field
-        if (
-          isVisible &&
-          !this.form[field.name] &&
-          this.options[field.name]?.value !== undefined
-        ) {
-          Vue.set(this.form, field.name, this.options[field.name].value);
-        }
-      });
-
-      // Prioritize fields based on input priority list
       this.priority
         .slice()
         .reverse()
@@ -167,30 +147,49 @@ export default {
       }));
     },
     rules() {
-      return this.filteredFields.reduce((map, field) => {
-        map[field.name] = [];
-        if (field.required === true) {
-          map[field.name].push((v) => !!v || `${field.name} is required`);
+      return this.allFields.reduce((map, field) => {
+        if (this.isFieldVisible(field)) {
+          map[field.name] = [];
+          if (field.required === true) {
+            map[field.name].push((v) => !!v || `${field.name} is required`);
+          }
         }
         return map;
       }, {});
     },
   },
   watch: {
+    options: {
+      immediate: true,
+      handler(newOptions) {
+        this.initializeForm(newOptions);
+      },
+    },
     form: {
       handler(val) {
-        const form2 = { ...val };
-        if (Array.isArray(form2.Bypasses)) {
-          form2.Bypasses = form2.Bypasses.join(" ");
+        this.updateFieldVisibility(val);
+        const updatedForm = { ...val };
+
+        if (updatedForm.Bypasses) {
+          updatedForm.Bypasses = updatedForm.Bypasses.join(" ");
         }
-        this.$emit("input", form2);
+
+        this.$emit("input", updatedForm);
       },
       deep: true,
     },
-    filteredFields: {
+    allFields: {
       immediate: true,
-      handler(arr, oldArr) {
-        this.debouncedHandler(arr, oldArr);
+      handler(arr) {
+        const map2 = arr.reduce((map, obj) => {
+          if (obj.name === "Bypasses" && !Array.isArray(obj.value)) {
+            map[obj.name] = obj.value.split(" ") || [];
+          } else {
+            map[obj.name] = obj.value == null ? "" : obj.value;
+          }
+          return map;
+        }, {});
+        Vue.set(this, "form", map2);
       },
     },
   },
@@ -200,24 +199,54 @@ export default {
     this.bypassStore.getBypasses();
     this.malleableProfileStore.getMalleableProfiles();
     this.credentialStore.getCredentials();
+    this.updateFieldVisibility(this.form, true);
   },
   methods: {
+    initializeForm(options) {
+      this.form = {};
+      Object.keys(options).forEach((key) => {
+        this.$set(this.form, key, options[key].value || null);
+      });
+    },
+    updateFieldVisibility(form, initial = false) {
+      const newlyVisibleFields = [];
+      const oldVisibleFields = { ...this.visibleFields };
+      this.visibleFields = {};
+      this.allFields.forEach((field) => {
+        if (field.depends_on && Array.isArray(field.depends_on)) {
+          const shouldBeVisible = field.depends_on.every((dependency) =>
+            dependency.values.includes(form[dependency.name]),
+          );
+          if (shouldBeVisible && !oldVisibleFields[field.name]) {
+            if (!initial) newlyVisibleFields.push(field.name);
+          }
+          this.$set(this.visibleFields, field.name, shouldBeVisible);
+        } else {
+          if (!this.visibleFields[field.name]) {
+            if (!initial) newlyVisibleFields.push(field.name);
+          }
+          this.$set(this.visibleFields, field.name, true);
+        }
+      });
+
+      this.highlightNewlyVisibleFields(newlyVisibleFields);
+    },
+    highlightNewlyVisibleFields(fields) {
+      this.recentlyVisibleFields = fields;
+      setTimeout(() => {
+        this.recentlyVisibleFields = [];
+      }, 7000);
+    },
+    isFieldVisible(field) {
+      return this.visibleFields[field.name] !== false;
+    },
     suggestedValuesForField(field) {
-      if (field.name === "Agent") {
-        return this.agents;
-      }
-      if (["Listener", "RedirectListener"].includes(field.name)) {
+      if (field.name === "Agent") return this.agents;
+      if (["Listener", "RedirectListener"].includes(field.name))
         return this.listeners;
-      }
-      if (field.name === "Bypasses") {
-        return this.bypasses;
-      }
-      if (field.name === "Profile") {
-        return this.malleableProfiles;
-      }
-      if (field.name === "CredID") {
-        return this.credentials;
-      }
+      if (field.name === "Bypasses") return this.bypasses;
+      if (field.name === "Profile") return this.malleableProfiles;
+      if (field.name === "CredID") return this.credentials;
       return field.suggested_values;
     },
     strictForField(field) {
@@ -236,63 +265,24 @@ export default {
         }[el.value_type] || "string"
       );
     },
-    filteredFieldsHandler(arr, oldArr = []) {
-      if (!Array.isArray(arr)) {
-        console.error(
-          "filteredFieldsHandler expected an array for arr, but received:",
-          arr,
-        );
-        return;
-      }
-
-      if (arr.length !== oldArr.length) {
-        const map2 = arr.reduce((map, obj) => {
-          if (obj.name === "Bypasses" && typeof obj.value === "string") {
-            map[obj.name] = obj.value.split(" ") || [];
-          } else {
-            map[obj.name] = obj.value == null ? "" : obj.value;
-          }
-          return map;
-        }, {});
-
-        Vue.set(this, "form", map2);
-
-        this.updateDependentFields();
-      }
-    },
-    updateDependentFields() {
-      this.filteredFields.forEach((field) => {
-        const isVisible = this.shouldFieldBeVisible(field);
-        this.$set(this.visibleFields, field.name, isVisible);
-
-        if (
-          isVisible &&
-          !this.form[field.name] &&
-          this.options[field.name]?.value !== undefined
-        ) {
-          // Set default value when revealing the field
-          Vue.set(this.form, field.name, this.options[field.name].value);
-        }
-      });
-    },
-    shouldFieldBeVisible(field) {
-      if (field.depends_on && Array.isArray(field.depends_on)) {
-        return field.depends_on.every((dependency) => {
-          const dependentValue = this.form[dependency.name];
-          return dependency.values.includes(dependentValue);
-        });
-      }
-      return true;
-    },
-    isFieldVisible(fieldName) {
-      return this.visibleFields[fieldName] !== false;
-    },
   },
 };
 </script>
 
 <style scoped>
-.mb-8 {
-  margin-bottom: 8px;
+.highlight-flash {
+  animation: flash 1s ease-in-out;
+}
+
+@keyframes flash {
+  0% {
+  }
+  50% {
+    opacity: 1;
+    background-color: #676767;
+    box-shadow: 0 0 5px 5px #676767;
+  }
+  100% {
+  }
 }
 </style>

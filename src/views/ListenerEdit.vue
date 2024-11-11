@@ -1,17 +1,19 @@
 <template>
   <div>
-    <div style="display: flex; flex-direction: row; width: 100%">
-      <v-tabs v-model="tab" align-with-title>
-        <v-tab key="general" href="#general">
-          General
-          <v-icon x-small class="ml-1">mdi-information</v-icon>
-        </v-tab>
-        <v-tab key="autorun" href="#autorun">
-          Autorun Modules
-          <v-icon x-small class="ml-1">mdi-play-circle</v-icon>
-        </v-tab>
-      </v-tabs>
-    </div>
+    <portal to="app-bar-extension">
+      <div style="display: flex; flex-direction: row; width: 100%">
+        <v-tabs v-model="tab" align-with-title>
+          <v-tab key="view" href="#view">
+            View
+            <v-icon x-small class="ml-1"> fa-eye </v-icon>
+          </v-tab>
+          <v-tab key="autorun" href="#autorun">
+            Autorun
+            <v-icon x-small class="ml-1"> fa-play </v-icon>
+          </v-tab>
+        </v-tabs>
+      </div>
+    </portal>
 
     <edit-page-top
       :breads="breads"
@@ -77,8 +79,8 @@
     <v-tabs-items v-else v-model="tab">
       <!-- General Tab Content -->
       <v-tab-item
-        key="general"
-        :value="'general'"
+        key="view"
+        :value="'view'"
         :transition="false"
         :reverse-transition="false"
       >
@@ -258,7 +260,7 @@ export default {
     },
     tab: {
       get() {
-        return this.$route.query.tab || "general";
+        return this.$route.query.tab || "view";
       },
       set(tab) {
         this.$router.replace({ query: { ...this.$route.query, tab } });
@@ -292,6 +294,7 @@ export default {
 
     if (!this.isNew || this.isCopy) {
       // using the route param id instead of this.id
+      // since this.id is 0 for copies.
       this.getListener(this.$route.params.id);
     }
   },
@@ -423,4 +426,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+// Overrides vuetify.css
+// Because we moved the tabs into a div, which made the color funky.
+.v-toolbar__content > div > .v-tabs > .v-slide-group.v-tabs-bar,
+.v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
+  background-color: inherit;
+}
+</style>
