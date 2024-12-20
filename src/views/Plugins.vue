@@ -4,12 +4,16 @@
       <div style="display: flex; flex-direction: row; width: 100%">
         <v-tabs v-model="tab" align-with-title>
           <v-tab key="list-view" href="#list-view">
-            List
+            Installed
             <v-icon x-small class="ml-1"> fa-list </v-icon>
           </v-tab>
           <v-tab key="tasks" href="#tasks">
             Tasks
             <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
+          </v-tab>
+          <v-tab key="marketplace" href="#marketplace">
+            Marketplace
+            <v-icon x-small class="ml-1"> fa-shopping-cart </v-icon>
           </v-tab>
         </v-tabs>
       </div>
@@ -35,6 +39,16 @@
           <plugin-tasks-list :active="tab === 'tasks'" :use-header="true" />
         </v-card>
       </v-tab-item>
+      <v-tab-item
+        key="marketplace"
+        :value="'marketplace'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card flat>
+          <plugin-marketplace :active="tab === 'marketplace'" />
+        </v-card>
+      </v-tab-item>
     </v-tabs-items>
   </div>
 </template>
@@ -42,12 +56,20 @@
 <script>
 import PluginsList from "@/components/plugins/PluginsList.vue";
 import PluginTasksList from "@/components/plugins/PluginTasksList.vue";
+import PluginMarketplace from "@/components/plugins/PluginMarketplace.vue";
 
 export default {
   name: "Plugins",
   components: {
     PluginsList,
     PluginTasksList,
+    PluginMarketplace,
+  },
+  props: {
+    active: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {};

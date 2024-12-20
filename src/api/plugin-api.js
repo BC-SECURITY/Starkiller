@@ -1,6 +1,13 @@
 import { axiosInstance as axios, handleError } from "@/api/axios-instance";
 import qs from "qs";
 
+export function getMarketplace() {
+  return axios
+    .get("/plugin-registries/marketplace")
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
 /**
  * Returns a full list of plugins.
  */
@@ -18,6 +25,13 @@ export function getPlugins() {
 export function getPlugin(name) {
   return axios
     .get(`/plugins/${name}`)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function updatePlugin(plugin) {
+  return axios
+    .put(`/plugins/${plugin.id}`, plugin)
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -93,9 +107,17 @@ export function getTasks(
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
 export function reloadPlugins() {
   return axios
     .post("/plugins/reload")
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function installPlugin({ name, version, registry }) {
+  return axios
+    .post(`/plugin-registries/marketplace/install`, { name, version, registry })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

@@ -29,42 +29,40 @@
       @delete="kill"
     >
       <template #extra-stuff>
-        <div style="display: flex; flex-direction: row" class="pt-2">
-          <v-switch
-            v-if="!isNew && initialLoad"
-            v-model="listener.enabled"
-            color="green"
-            label="Enabled"
-            class="mr-2"
-            @change="toggleEnabled"
-          />
-          <v-menu v-if="!isNew && initialLoad" offset-y open-on-hover>
-            <template #activator="{ on, attrs }">
-              <v-btn class="mr-5" text icon small v-bind="attrs" v-on="on">
-                <v-icon>fa-suitcase-rolling</v-icon>
-              </v-btn>
-            </template>
-            <v-list class="ml-2 mr-2">
-              <v-list-item
-                v-for="(item, index) in commonStagers"
-                :key="index"
-                link
-                :to="{
-                  name: 'stagerNew',
-                  query: { template: item, listener: listener.name },
-                }"
-              >
-                <v-list-item-title>
-                  {{ item }}
-                </v-list-item-title>
-              </v-list-item>
-              <v-divider />
-              <v-list-item link :to="{ name: 'stagerNew' }">
-                <v-list-item-title> Other </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </div>
+        <v-switch
+          v-if="!isNew && initialLoad"
+          v-model="listener.enabled"
+          color="green"
+          label="Enabled"
+          class="mr-2 mt-1"
+          @change="toggleEnabled"
+        />
+        <v-menu v-if="!isNew && initialLoad" offset-y open-on-hover>
+          <template #activator="{ on, attrs }">
+            <v-btn class="mr-5" text icon small v-bind="attrs" v-on="on">
+              <v-icon>fa-suitcase-rolling</v-icon>
+            </v-btn>
+          </template>
+          <v-list class="ml-2 mr-2">
+            <v-list-item
+              v-for="(item, index) in commonStagers"
+              :key="index"
+              link
+              :to="{
+                name: 'stagerNew',
+                query: { template: item, listener: listener.name },
+              }"
+            >
+              <v-list-item-title>
+                {{ item }}
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider />
+            <v-list-item link :to="{ name: 'stagerNew' }">
+              <v-list-item-title> Other </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
     </edit-page-top>
 

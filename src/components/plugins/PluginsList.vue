@@ -8,16 +8,22 @@
       :show-refresh="true"
       @refresh="getPlugins"
     />
-    <v-data-table :headers="headers" :items="plugins" dense>
-      <template #item.name="{ item }">
+    <v-list dense>
+      <v-list-item-group v-model="activeThing">
         <router-link
-          style="color: inherit"
-          :to="{ name: 'pluginEdit', params: { id: item.id } }"
+          v-for="plugin in plugins"
+          :key="plugin.id"
+          style="color: inherit; text-decoration: none"
+          :to="{ name: 'pluginEdit', params: { id: plugin.id } }"
         >
-          {{ item.name }}
+          <v-list-item class="list-item">
+            <v-list-item-content>
+              <v-list-item-title>{{ plugin.name }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </router-link>
-      </template>
-    </v-data-table>
+      </v-list-item-group>
+    </v-list>
   </div>
 </template>
 
@@ -38,6 +44,7 @@ export default {
   },
   data() {
     return {
+      activeThing: null,
       breads: [
         {
           text: "Plugins",
@@ -49,10 +56,6 @@ export default {
           disabled: true,
           href: "/plugins?tab=list-view",
         },
-      ],
-      headers: [
-        { text: "Name", value: "name" },
-        { text: "Description", value: "description" },
       ],
     };
   },
