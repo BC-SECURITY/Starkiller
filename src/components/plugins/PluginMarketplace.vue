@@ -107,7 +107,9 @@
                 style="color: inherit"
                 :to="{
                   name: 'pluginEdit',
-                  params: { id: selectedPluginObj.name },
+                  params: {
+                    id: nameToId(selectedPluginObj.name),
+                  },
                 }"
               >
                 <v-btn color="primary" class="pa-4 ma-4">Go To Plugin</v-btn>
@@ -245,6 +247,9 @@ export default {
           this.installing = false;
           this.refreshMarketplace();
         });
+    },
+    nameToId(name) {
+      return name.toLowerCase().replace(/[-/ ]/g, "_");
     },
   },
 };

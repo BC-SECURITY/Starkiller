@@ -8,7 +8,7 @@
       :show-refresh="true"
       @refresh="getPlugins"
     />
-    <v-list dense>
+    <v-list>
       <v-list-item-group v-model="activeThing">
         <router-link
           v-for="plugin in plugins"

@@ -3,20 +3,25 @@
     <portal to="app-bar-extension">
       <div style="display: flex; flex-direction: row; width: 100%">
         <v-tabs v-model="tab" align-with-title>
+          <v-tab
+            key="interact"
+            href="#interact"
+            :disabled="
+              !plugin.loaded || !plugin.enabled || !plugin.execution_enabled
+            "
+          >
+            Interact
+            <v-icon x-small class="ml-1"> fa-terminal </v-icon>
+          </v-tab>
+          <v-tab key="tasks" href="#tasks" :disabled="!plugin.loaded">
+            Tasks
+            <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
+          </v-tab>
           <v-tab key="details" href="#details">
             Details
             <v-icon x-small class="ml-1"> fa-info-circle </v-icon>
           </v-tab>
-          <!-- TODO: disable when execution is disabled and when plugin isn't loaded -->
-          <v-tab key="interact" href="#interact">
-            Interact
-            <v-icon x-small class="ml-1"> fa-terminal </v-icon>
-          </v-tab>
-          <v-tab key="tasks" href="#tasks">
-            Tasks
-            <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
-          </v-tab>
-          <v-tab key="settings" href="#settings">
+          <v-tab key="settings" href="#settings" :disabled="!plugin.loaded">
             Settings
             <v-icon x-small class="ml-1"> fa-cog </v-icon>
           </v-tab>
@@ -33,6 +38,7 @@
     >
       <template #extra-stuff>
         <tooltip-button-toggle
+          v-if="plugin.loaded"
           v-model="isRefreshTasks"
           icon="fa-redo"
           :button-text="isRefreshTasks ? 'On' : 'Off'"
@@ -55,6 +61,41 @@
     />
     <v-tabs-items v-else v-model="tab" class="scrollable-pane">
       <v-tab-item
+        key="interact"
+        :value="'interact'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <h4 class="pl-4 pb-4">Execute Plugin</h4>
+        <v-card style="padding: 10px">
+          <technique-chips :techniques="plugin.TechniqueChips" />
+          <general-form
+            v-if="reset"
+            ref="generalform"
+            v-model="form"
+            :options="pluginOptions"
+          />
+          <v-btn
+            :disabled="!plugin.enabled"
+            :loading="loading"
+            color="primary"
+            @click="submit"
+          >
+            Submit
+          </v-btn>
+        </v-card>
+      </v-tab-item>
+      <v-tab-item
+        key="tasks"
+        :value="'tasks'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card flat>
+          <plugin-tasks-list :plugin="plugin" :refresh-tasks="isRefreshTasks" />
+        </v-card>
+      </v-tab-item>
+      <v-tab-item
         v-if="initialLoad"
         key="details"
         :value="'details'"
@@ -67,14 +108,13 @@
             <v-row>
               <v-col cols="12">
                 <span v-if="!plugin.loaded">
-                  <v-alert prominent type="warning">
+                  <v-alert prominent type="warning" outlined>
                     <v-row align="center">
                       <v-col class="grow">
-                        Plugin wasn't loaded. Check the server logs.
-
-                        <span v-if="plugin.python_deps">
-                          <vue-markdown :source="pluginPythonDeps" />
-                        </span>
+                        <vue-markdown
+                          :source="pluginPythonDeps"
+                          :options="{ html: true }"
+                        />
                       </v-col>
                     </v-row>
                   </v-alert>
@@ -97,36 +137,6 @@
         </v-card>
       </v-tab-item>
       <v-tab-item
-        key="interact"
-        :value="'interact'"
-        :transition="false"
-        :reverse-transition="false"
-      >
-        <h4 class="pl-4 pb-4">Execute Plugin</h4>
-        <v-card style="padding: 10px">
-          <technique-chips :techniques="plugin.TechniqueChips" />
-          <general-form
-            v-if="reset"
-            ref="generalform"
-            v-model="form"
-            :options="pluginOptions"
-          />
-          <v-btn :loading="loading" color="primary" @click="submit">
-            Submit
-          </v-btn>
-        </v-card>
-      </v-tab-item>
-      <v-tab-item
-        key="tasks"
-        :value="'tasks'"
-        :transition="false"
-        :reverse-transition="false"
-      >
-        <v-card flat>
-          <plugin-tasks-list :plugin="plugin" :refresh-tasks="isRefreshTasks" />
-        </v-card>
-      </v-tab-item>
-      <v-tab-item
         key="settings"
         :value="'settings'"
         :transition="false"
@@ -143,11 +153,15 @@
                 <template v-else>
                   <general-form
                     v-if="reset"
-                    ref="generalform"
+                    ref="settingsform"
                     v-model="settingsForm"
                     :options="plugin.settings_options"
                   />
-                  <v-btn :loading="loading" color="primary" @click="submit">
+                  <v-btn
+                    :loading="loading"
+                    color="primary"
+                    @click="submitSettings"
+                  >
                     Submit
                   </v-btn>
                 </template>
@@ -238,15 +252,30 @@ export default {
         this.$router.replace({ query: { ...this.$route.query, tab } });
       },
       get() {
-        return this.$route.query.tab || "details";
+        if (this.$route.query.tab) {
+          return this.$route.query.tab;
+        }
+        if (!this.plugin?.execution_enabled) {
+          return "details";
+        }
+
+        return "interact";
       },
     },
     pluginPythonDeps() {
-      let md = `Python Dependencies:\n\n`;
-      this.plugin.python_deps.forEach((dep) => {
-        md += `\`${dep}\`\n`;
-      });
-      return md;
+      if (!this.plugin.python_deps.length > 0) {
+        return `
+Plugin wasn't loaded. Check the server logs.
+`;
+      }
+
+      return `
+This plugin requires additional Python dependencies.
+Please install and restart the server.
+\`\`\`sh
+poetry add ${this.plugin.python_deps.join(" ")}
+\`\`\`
+      `;
     },
   },
   mounted() {
@@ -262,10 +291,30 @@ export default {
 
       try {
         const response = await pluginApi.executePlugin(
-          this.plugin.name,
+          this.plugin.id,
           this.form,
         );
         this.$snack.success(`${response.detail}`);
+      } catch (err) {
+        this.$snack.error(`Error: ${err}`);
+      }
+
+      this.loading = false;
+    },
+    async submitSettings() {
+      if (this.loading || !this.$refs.settingsform.$refs.form.validate()) {
+        return;
+      }
+
+      this.loading = true;
+
+      try {
+        const response = await pluginApi.updatePlugin({
+          ...this.plugin,
+          options: this.settingsForm,
+        });
+        this.plugin = response;
+        this.$snack.success("Settings updated");
       } catch (err) {
         this.$snack.error(`Error: ${err}`);
       }
