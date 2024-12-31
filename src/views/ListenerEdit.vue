@@ -1,5 +1,20 @@
 <template>
   <div>
+    <portal to="app-bar-extension">
+      <div style="display: flex; flex-direction: row; width: 100%">
+        <v-tabs v-model="tab" align-with-title>
+          <v-tab key="view" href="#view">
+            View
+            <v-icon x-small class="ml-1"> fa-eye </v-icon>
+          </v-tab>
+          <v-tab key="autorun" href="#autorun">
+            Autorun
+            <v-icon x-small class="ml-1"> fa-play </v-icon>
+          </v-tab>
+        </v-tabs>
+      </div>
+    </portal>
+
     <edit-page-top
       :breads="breads"
       :show-submit="initialLoad"
@@ -14,86 +29,117 @@
       @delete="kill"
     >
       <template #extra-stuff>
-        <div style="display: flex; flex-direction: row" class="pt-2">
-          <v-switch
-            v-if="!isNew && initialLoad"
-            v-model="listener.enabled"
-            color="green"
-            label="Enabled"
-            class="mr-2"
-            @change="toggleEnabled"
-          />
-          <v-menu v-if="!isNew && initialLoad" offset-y open-on-hover>
-            <template #activator="{ on, attrs }">
-              <v-btn class="mr-5" text icon small v-bind="attrs" v-on="on">
-                <v-icon>fa-suitcase-rolling</v-icon>
-              </v-btn>
-            </template>
-            <v-list class="ml-2 mr-2">
-              <v-list-item
-                v-for="(item, index) in commonStagers"
-                :key="index"
-                link
-                :to="{
-                  name: 'stagerNew',
-                  query: { template: item, listener: listener.name },
-                }"
-              >
-                <v-list-item-title>
-                  {{ item }}
-                </v-list-item-title>
-              </v-list-item>
-              <v-divider />
-              <v-list-item link :to="{ name: 'stagerNew' }">
-                <v-list-item-title> Other </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </div>
+        <v-switch
+          v-if="!isNew && initialLoad"
+          v-model="listener.enabled"
+          color="green"
+          label="Enabled"
+          class="mr-2 mt-1"
+          @change="toggleEnabled"
+        />
+        <v-menu v-if="!isNew && initialLoad" offset-y open-on-hover>
+          <template #activator="{ on, attrs }">
+            <v-btn class="mr-5" text icon small v-bind="attrs" v-on="on">
+              <v-icon>fa-suitcase-rolling</v-icon>
+            </v-btn>
+          </template>
+          <v-list class="ml-2 mr-2">
+            <v-list-item
+              v-for="(item, index) in commonStagers"
+              :key="index"
+              link
+              :to="{
+                name: 'stagerNew',
+                query: { template: item, listener: listener.name },
+              }"
+            >
+              <v-list-item-title>
+                {{ item }}
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider />
+            <v-list-item link :to="{ name: 'stagerNew' }">
+              <v-list-item-title> Other </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
     </edit-page-top>
-    <div class="headers">
-      <h3>{{ mode }} Listener</h3>
-    </div>
-    <tag-viewer
-      v-if="!isNew"
-      :tags="listener.tags"
-      @update-tag="updateTag"
-      @delete-tag="deleteTag"
-      @new-tag="addTag"
-    />
+
+    <!-- Error Alert -->
     <error-state-alert
       v-if="errorState"
       :resource-id="id"
       resource-type="listener"
     />
-    <v-card v-else style="padding: 10px">
-      <info-viewer class="info-viewer" :info="listenerInfo" />
-      <v-autocomplete
-        v-model="selectedTemplate"
-        :items="listenerTemplateIds"
-        :loading="!reset"
-        dense
-        outlined
-        label="Type"
-        :readonly="!canEdit"
-      />
-      <v-alert v-if="validationMessage" prominent type="warning">
-        <v-row align="center">
-          <v-col class="grow" style="word-wrap: word-break; width: 500px">
-            {{ validationMessage }}
-          </v-col>
-        </v-row>
-      </v-alert>
-      <general-form
-        v-if="reset"
-        ref="generalform"
-        v-model="form"
-        :options="listenerOptions"
-        :priority="formPriorities"
-        :readonly="!canEdit"
-      />
-    </v-card>
+
+    <!-- Tab Items -->
+    <v-tabs-items v-else v-model="tab">
+      <!-- General Tab Content -->
+      <v-tab-item
+        key="view"
+        :value="'view'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card flat>
+          <div class="headers" style="padding: 20px">
+            <h3>{{ mode }} Listener</h3>
+          </div>
+          <tag-viewer
+            v-if="!isNew"
+            :tags="listener.tags"
+            @update-tag="updateTag"
+            @delete-tag="deleteTag"
+            @new-tag="addTag"
+          />
+          <error-state-alert
+            v-if="errorState"
+            :resource-id="id"
+            resource-type="listener"
+          />
+          <v-card v-else style="padding: 10px">
+            <info-viewer class="info-viewer" :info="listenerInfo" />
+            <v-autocomplete
+              v-model="selectedTemplate"
+              :items="listenerTemplateIds"
+              :loading="!reset"
+              dense
+              outlined
+              label="Type"
+              :readonly="!canEdit"
+            />
+            <v-alert v-if="validationMessage" prominent type="warning">
+              <v-row align="center">
+                <v-col class="grow" style="word-wrap: word-break; width: 500px">
+                  {{ validationMessage }}
+                </v-col>
+              </v-row>
+            </v-alert>
+            <general-form
+              v-if="reset"
+              ref="generalform"
+              v-model="form"
+              :options="listenerOptions"
+              :priority="formPriorities"
+              :readonly="!canEdit"
+            />
+          </v-card>
+        </v-card>
+      </v-tab-item>
+
+      <!-- Autorun Modules Tab Content -->
+      <v-tab-item
+        key="autorun"
+        :value="'autorun'"
+        :transition="false"
+        :reverse-transition="false"
+      >
+        <v-card flat>
+          <AutoRunModules :selected-listener="listener" />
+        </v-card>
+      </v-tab-item>
+    </v-tabs-items>
   </div>
 </template>
 
@@ -104,6 +150,7 @@ import InfoViewer from "@/components/InfoViewer.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import TagViewer from "@/components/TagViewer.vue";
+import AutoRunModules from "@/components/AutoRunModules.vue";
 import { useListenerStore } from "@/stores/listener-module";
 
 export default {
@@ -114,6 +161,7 @@ export default {
     GeneralForm,
     ErrorStateAlert,
     EditPageTop,
+    AutoRunModules,
   },
   data() {
     return {
@@ -176,8 +224,6 @@ export default {
     },
     listenerOptions() {
       if (!this.isNew || this.isCopy) {
-        // if its not new, set the options
-        // iterate over the options in this.listener and set the values
         const options = {};
         Object.keys(this.listener.options).forEach((key) => {
           options[key] = { ...this.listenerTemplate.options[key] };
@@ -185,8 +231,6 @@ export default {
         });
         return options;
       }
-
-      // if its new, use the defaults from the template
       const { options } = this.listenerTemplate;
       if (!options) return {};
       return options;
@@ -211,6 +255,14 @@ export default {
       if (this.listener.name) return this.listener.name;
       if (this.id) return this.id;
       return "New";
+    },
+    tab: {
+      get() {
+        return this.$route.query.tab || "view";
+      },
+      set(tab) {
+        this.$router.replace({ query: { ...this.$route.query, tab } });
+      },
     },
   },
   watch: {
@@ -239,7 +291,7 @@ export default {
     this.listenerStore.getListenerTemplates();
 
     if (!this.isNew || this.isCopy) {
-      // using the route param id instad of this.id
+      // using the route param id instead of this.id
       // since this.id is 0 for copies.
       this.getListener(this.$route.params.id);
     }
@@ -287,16 +339,6 @@ export default {
             this.loading = false;
           })
           .catch((err) => {
-            // if (typeof err === 'object') {
-            // err.details.forEach((detail) => {
-            // Here we could set an error object on the form
-            // Hot going to do it atm since it would require doing
-            // some refactoring of the GeneralForm and DynamicFormInput
-            // and most (all?) of the validations that would be needed
-            // are already done client side.
-            // const field = detail.loc[1]
-            // this.errors[field] = detail.msg
-            // });
             if (err.startsWith("[*]")) {
               this.validationMessage = err;
             } else {
@@ -382,4 +424,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+// Overrides vuetify.css
+// Because we moved the tabs into a div, which made the color funky.
+.v-toolbar__content > div > .v-tabs > .v-slide-group.v-tabs-bar,
+.v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
+  background-color: inherit;
+}
+</style>

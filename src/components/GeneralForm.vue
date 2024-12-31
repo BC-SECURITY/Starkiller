@@ -5,7 +5,11 @@
     :readonly="readonly"
     @submit.prevent.native="submit"
   >
-    <v-row v-for="field in requiredFields" :key="field.name">
+    <v-row
+      v-for="field in requiredFields"
+      :key="field.name"
+      :class="{ 'highlight-flash': recentlyVisibleFields.includes(field.name) }"
+    >
       <v-col cols="6">
         <dynamic-form-input
           v-model="form[field.name]"
@@ -17,15 +21,17 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader> {{ field.description }} </v-subheader>
+        <v-subheader>{{ field.description }}</v-subheader>
       </v-col>
     </v-row>
 
-    <v-subheader v-if="optionalFields.length > 0">
-      Optional Fields
-    </v-subheader>
+    <v-subheader v-if="optionalFields.length > 0">Optional Fields</v-subheader>
     <v-divider v-if="optionalFields.length > 0" class="mb-8" />
-    <v-row v-for="field in optionalFields" :key="field.name">
+    <v-row
+      v-for="field in optionalFields"
+      :key="field.name"
+      :class="{ 'highlight-flash': recentlyVisibleFields.includes(field.name) }"
+    >
       <v-col cols="6">
         <dynamic-form-input
           v-model="form[field.name]"
@@ -37,12 +43,11 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader> {{ field.description }} </v-subheader>
+        <v-subheader>{{ field.description }}</v-subheader>
       </v-col>
     </v-row>
   </v-form>
 </template>
-
 <script>
 import Vue from "vue";
 import { useListenerStore } from "@/stores/listener-module";
@@ -74,6 +79,8 @@ export default {
     return {
       form: {},
       valid: true,
+      visibleFields: {},
+      recentlyVisibleFields: [],
     };
   },
   computed: {
@@ -107,28 +114,17 @@ export default {
     malleableProfiles() {
       return this.malleableProfileStore.profileNames;
     },
-    /**
-     * Fields that go in the "Optional" section
-     */
     optionalFields() {
-      return this.fields
-        .filter((el) => el.required === false)
-        .map((el) => ({ ...el, type: this.fieldType(el) }));
+      return this.allFields.filter(
+        (el) => el.required === false && this.isFieldVisible(el),
+      );
     },
-    /**
-     * All the fields that are marked required by the API
-     */
     requiredFields() {
-      return this.fields
-        .filter((el) => el.required === true)
-        .map((el) => ({ ...el, type: this.fieldType(el) }));
+      return this.allFields.filter(
+        (el) => el.required === true && this.isFieldVisible(el),
+      );
     },
-    /**
-     * The fields from the API to dynamically generate the form.
-     * If items are in the `priority` list, they will be moved to the top of
-     * their respective sections.
-     */
-    fields() {
+    allFields() {
       const fields = Object.keys(this.options).map((key) => ({
         name: key,
         ...this.options[key],
@@ -145,39 +141,44 @@ export default {
           }
         });
 
-      return fields;
+      return fields.map((el) => ({
+        ...el,
+        type: this.fieldType(el),
+      }));
     },
-    /**
-     * The rules for the form, currently this is only to check for empty required fields.
-     */
     rules() {
-      return this.fields.reduce((map, field) => {
-        map[field.name] = [];
-        if (field.required === true) {
-          map[field.name].push(
-            (v) => !!v || v === 0 || `${field.name} is required`,
-          );
+      return this.allFields.reduce((map, field) => {
+        if (this.isFieldVisible(field)) {
+          map[field.name] = [];
+          if (field.required === true) {
+            map[field.name].push((v) => !!v || `${field.name} is required`);
+          }
         }
-
         return map;
       }, {});
     },
   },
   watch: {
+    options: {
+      immediate: true,
+      handler(newOptions) {
+        this.initializeForm(newOptions);
+      },
+    },
     form: {
       handler(val) {
-        const form2 = { ...val };
-        if (form2.Bypasses) {
-          form2.Bypasses = form2.Bypasses.join(" ");
+        this.updateFieldVisibility(val);
+        const updatedForm = { ...val };
+
+        if (updatedForm.Bypasses) {
+          updatedForm.Bypasses = updatedForm.Bypasses.join(" ");
         }
-        this.$emit("input", form2);
+
+        this.$emit("input", updatedForm);
       },
       deep: true,
     },
-    /**
-     * When the fields change, we update the form map and set it for reactivity to take place.
-     */
-    fields: {
+    allFields: {
       immediate: true,
       handler(arr) {
         const map2 = arr.reduce((map, obj) => {
@@ -198,54 +199,90 @@ export default {
     this.bypassStore.getBypasses();
     this.malleableProfileStore.getMalleableProfiles();
     this.credentialStore.getCredentials();
+    this.updateFieldVisibility(this.form, true);
   },
   methods: {
+    initializeForm(options) {
+      this.form = {};
+      Object.keys(options).forEach((key) => {
+        this.$set(this.form, key, options[key].value || null);
+      });
+    },
+    updateFieldVisibility(form, initial = false) {
+      const newlyVisibleFields = [];
+      const oldVisibleFields = { ...this.visibleFields };
+      this.visibleFields = {};
+      this.allFields.forEach((field) => {
+        if (field.depends_on && Array.isArray(field.depends_on)) {
+          const shouldBeVisible = field.depends_on.every((dependency) =>
+            dependency.values.includes(form[dependency.name]),
+          );
+          if (shouldBeVisible && !oldVisibleFields[field.name]) {
+            if (!initial) newlyVisibleFields.push(field.name);
+          }
+          this.$set(this.visibleFields, field.name, shouldBeVisible);
+        } else {
+          if (!this.visibleFields[field.name]) {
+            if (!initial) newlyVisibleFields.push(field.name);
+          }
+          this.$set(this.visibleFields, field.name, true);
+        }
+      });
+
+      this.highlightNewlyVisibleFields(newlyVisibleFields);
+    },
+    highlightNewlyVisibleFields(fields) {
+      this.recentlyVisibleFields = fields;
+      setTimeout(() => {
+        this.recentlyVisibleFields = [];
+      }, 7000);
+    },
+    isFieldVisible(field) {
+      return this.visibleFields[field.name] !== false;
+    },
     suggestedValuesForField(field) {
-      if (field.name === "Agent") {
-        return this.agents;
-      }
-      if (["Listener", "RedirectListener"].includes(field.name)) {
+      if (field.name === "Agent") return this.agents;
+      if (["Listener", "RedirectListener"].includes(field.name))
         return this.listeners;
-      }
-      if (field.name === "Bypasses") {
-        return this.bypasses;
-      }
-      if (field.name === "Profile") {
-        return this.malleableProfiles;
-      }
-      if (field.name === "CredID") {
-        return this.credentials;
-      }
+      if (field.name === "Bypasses") return this.bypasses;
+      if (field.name === "Profile") return this.malleableProfiles;
+      if (field.name === "CredID") return this.credentials;
       return field.suggested_values;
     },
     strictForField(field) {
-      if (field.name === "Listener") {
-        return true;
-      }
-      if (field.name === "Bypasses") {
-        return true;
-      }
-      if (field.name === "Profile") {
-        return true;
-      }
-      if (field.name === "CredID") {
-        return true;
-      }
-      return field.strict;
-    },
-    fieldExists(name) {
-      return this.fields.find((el) => el.name === name);
+      return ["Listener", "Bypasses", "Profile", "CredID"].includes(field.name)
+        ? true
+        : field.strict;
     },
     fieldType(el) {
-      if (el.value_type === "INTEGER") return "number";
-      if (el.value_type === "FLOAT") return "float";
-      if (el.value_type === "BOOLEAN") return "boolean";
-      if (el.value_type === "STRING") return "string";
-      if (el.value_type === "FILE") return "file";
-      return "string";
+      return (
+        {
+          INTEGER: "number",
+          FLOAT: "float",
+          BOOLEAN: "boolean",
+          STRING: "string",
+          FILE: "file",
+        }[el.value_type] || "string"
+      );
     },
   },
 };
 </script>
 
-<style></style>
+<style scoped>
+.highlight-flash {
+  animation: flash 1s ease-in-out;
+}
+
+@keyframes flash {
+  0% {
+  }
+  50% {
+    opacity: 1;
+    background-color: #676767;
+    box-shadow: 0 0 5px 5px #676767;
+  }
+  100% {
+  }
+}
+</style>

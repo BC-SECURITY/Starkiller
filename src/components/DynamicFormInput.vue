@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <div>
     <v-switch
@@ -53,16 +52,16 @@
     >
       <template #item="data">
         <v-list-item-content>
-          <v-list-item-title
-            v-text="
+          <v-list-item-title>
+            {{
               truncate(
                 `${data.item.username}, ${data.item.domain}, ${data.item.password}`,
               )
-            "
-          />
-          <v-list-item-subtitle
-            v-text="truncate(`id: ${data.item.id}, notes: ${data.item.notes}`)"
-          />
+            }}
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            {{ truncate(`id: ${data.item.id}, notes: ${data.item.notes}`) }}
+          </v-list-item-subtitle>
         </v-list-item-content>
       </template>
     </v-autocomplete>
@@ -84,6 +83,7 @@
       outlined
       dense
     />
+
     <v-text-field
       v-else
       v-model="internalValue"
@@ -148,5 +148,3 @@ export default {
   },
 };
 </script>
-
-<style></style>

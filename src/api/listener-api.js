@@ -96,3 +96,17 @@ export function addTag(listenerId, tag) {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function getAutorunTasks(listenerId) {
+  return axios
+    .get(`/listeners/${listenerId}/autorun`)
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function saveAutorunTasks(listenerId, modules) {
+  return axios
+    .put(`/listeners/${listenerId}/autorun`, { records: modules })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}

@@ -156,7 +156,7 @@ export default {
     plugin: {
       handler(val) {
         if (val) {
-          this.selectedPlugins = [val.session_id];
+          this.selectedPlugins = [val.id];
         }
       },
       immediate: true,
