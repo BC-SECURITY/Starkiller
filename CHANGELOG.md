@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Add plugin marketplace
 -  Add plugin detail page
 -  Add plugin settings page
+-  Add autocomplete to terminal for listeners, suggested values, and bypasses
+-  Fixed issue with agent task responses not showing up in terminal when sleep is set to 0
 
 ## [2.8.2] - 2024-09-22
 

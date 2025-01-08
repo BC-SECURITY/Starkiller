@@ -139,7 +139,7 @@
                       <v-icon x-small class="ml-1"> fa-list-check </v-icon>
                     </v-tab>
                     <v-tab key="terminal" href="#terminal">
-                      Terminal (Beta)
+                      Terminal
                       <v-icon x-small class="ml-1"> fa-terminal </v-icon>
                     </v-tab>
                   </v-tabs>
@@ -157,7 +157,7 @@
                     /></v-tab-item>
                     <v-tab-item
                       key="terminal"
-                      style="height: 75vh"
+                      style="height: auto"
                       :value="'terminal'"
                       :transition="false"
                       :reverse-transition="false"
@@ -276,9 +276,11 @@ export default {
       nameLoading: false,
       uploadLoading: false,
       downloadLoading: false,
+      scriptImportLoading: false,
       nameDialog: false,
       uploadDialog: false,
       downloadDialog: false,
+      scriptImportDialog: false,
       initialized: true,
       errorState: false,
       paneSize: 100,
