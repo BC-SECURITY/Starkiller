@@ -105,9 +105,7 @@
 </template>
 
 <script>
-import { mapState } from "pinia";
 import moment from "moment";
-import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   components: {},
@@ -158,7 +156,6 @@ export default {
     dirty() {
       return this.original !== this.internalValue;
     },
-    ...mapState(useApplicationStore, ["darkMode"]),
   },
   watch: {
     internalValue(val) {
@@ -208,10 +205,7 @@ export default {
     },
     getColClass() {
       if (this.editing === false && this.editable === true) {
-        if (this.darkMode) {
-          return "column-not-editing-dark";
-        }
-        return "column-not-editing";
+        return "column-not-editing-dark";
       }
       return "";
     },

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <v-app :dark="darkMode">
+    <v-app>
       <side-nav v-if="isLoggedIn && !hideSideBar" />
       <confirm ref="confirm" />
       <socket-notifications
@@ -92,7 +92,6 @@ export default {
   computed: {
     ...mapState(useApplicationStore, [
       "isLoggedIn",
-      "darkMode",
       "empireVersion",
       "connectionError",
     ]),
@@ -111,16 +110,6 @@ export default {
           this.$router.push({ name: "listeners" });
         } else if (val === false && this.isLoggedIn === false) {
           this.$router.push({ name: "home" });
-        }
-      },
-    },
-    darkMode: {
-      immediate: true,
-      handler(val) {
-        if (val === true) {
-          this.$vuetify.theme.dark = true;
-        } else {
-          this.$vuetify.theme.dark = false;
         }
       },
     },
