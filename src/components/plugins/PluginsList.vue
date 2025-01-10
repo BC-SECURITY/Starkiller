@@ -1,7 +1,6 @@
 <template>
   <div>
     <list-page-top
-      v-if="active"
       :breads="breads"
       :show-create="false"
       :show-delete="false"
@@ -36,12 +35,6 @@ export default {
   components: {
     ListPageTop,
   },
-  props: {
-    active: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       activeThing: null,
@@ -50,11 +43,6 @@ export default {
           text: "Plugins",
           disabled: true,
           href: "/plugins",
-        },
-        {
-          text: "List",
-          disabled: true,
-          href: "/plugins?tab=list-view",
         },
       ],
     };

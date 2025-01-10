@@ -200,6 +200,7 @@
               >
                 <v-card flat>
                   <agent-tasks-list
+                    :use-header="false"
                     :agent="agent"
                     :refresh-tasks="isRefreshTasks"
                   />

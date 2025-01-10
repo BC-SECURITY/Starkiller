@@ -1,7 +1,6 @@
 <template>
   <div>
     <list-page-top
-      v-if="active"
       :breads="breads"
       :show-create="false"
       :show-delete="false"
@@ -161,25 +160,14 @@ export default {
     VueMarkdown,
     AuthorChips,
   },
-  props: {
-    active: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       marketplacePlugins: [],
       breads: [
         {
-          text: "Plugins",
+          text: "Plugin Marketplace",
           disabled: true,
-          href: "/plugins",
-        },
-        {
-          text: "Marketplace",
-          disabled: true,
-          href: "/plugins?tab=marketplace",
+          href: "/plugin-marketplace",
         },
       ],
       headers: [

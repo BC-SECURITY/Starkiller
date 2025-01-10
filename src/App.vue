@@ -11,10 +11,7 @@
         <template
           v-if="
             $route.name === 'agentEdit' ||
-            $route.name === 'agents' ||
             $route.name === 'pluginEdit' ||
-            $route.name === 'plugins' ||
-            $route.name === 'listeners' ||
             $route.name === 'listenerEdit'
           "
           #extension

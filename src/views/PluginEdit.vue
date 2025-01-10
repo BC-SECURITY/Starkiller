@@ -92,7 +92,11 @@
         :reverse-transition="false"
       >
         <v-card flat>
-          <plugin-tasks-list :plugin="plugin" :refresh-tasks="isRefreshTasks" />
+          <plugin-tasks-list
+            :plugin="plugin"
+            :refresh-tasks="isRefreshTasks"
+            :use-header="false"
+          />
         </v-card>
       </v-tab-item>
       <v-tab-item
