@@ -14,17 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--  Removed import script button from agent page
--  Removed script command checkbox from agent page
--  Added dynamic options for form fields
--  Hide "File Path" on Download page
--  Add plugin marketplace
--  Add plugin detail page
--  Add plugin settings page
--  Add autocomplete to terminal for listeners, suggested values, and bypasses
--  Fixed issue with agent task responses not showing up in terminal when sleep is set to 0
--  Reorganize the navbar - Default to "mini" mode and add sub-menus
--  Remove light mode, so we only need to maintain one theme
+## [3.0.0-beta1] - 2025-01-11
+
+-   Removed import script button from agent page
+-   Removed script command checkbox from agent page
+-   Added dynamic options for form fields
+-   Hide "File Path" on Download page
+-   Add plugin marketplace
+-   Add plugin detail page
+-   Add plugin settings page
+-   Add autocomplete to terminal for listeners, suggested values, and bypasses
+-   Fixed issue with agent task responses not showing up in terminal when sleep is set to 0
+-   Reorganize the navbar - Default to "mini" mode and add sub-menus
+-   Remove light mode, so we only need to maintain one theme
 
 ## [2.8.2] - 2024-09-22
 
@@ -396,7 +398,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta1...HEAD
+
+[3.0.0-beta1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...v3.0.0-beta1
 
 [2.8.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.1...v2.8.2
 
