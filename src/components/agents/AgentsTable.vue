@@ -430,4 +430,11 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="scss">
+.warning-row {
+  background-color: #ffcccc;
+}
+.v-data-table.theme--dark .warning-row {
+  background-color: #bd4c4c;
+}
+</style>
