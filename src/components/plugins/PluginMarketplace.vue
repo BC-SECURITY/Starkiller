@@ -10,7 +10,11 @@
     <div style="display: flex; flex-direction: row">
       <div style="width: 350px; min-width: 350px; max-width: 350px">
         <v-card elevation="2" outlined flat class="pl-4 pr-4 pb-4">
-          <v-list class="overflow-y-auto" style="max-height: 600px">
+          <v-list
+            :disabled="installing"
+            class="overflow-y-auto"
+            style="max-height: 600px"
+          >
             <v-list-item-group
               v-model="selectedPluginIndex"
               mandatory

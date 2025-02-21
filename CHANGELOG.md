@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Enable file browser for ironpython
+
 ## [3.0.0-beta1] - 2025-01-11
 
 -   Removed import script button from agent page
