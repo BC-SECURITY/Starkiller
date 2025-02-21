@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-beta2] - 2025-02-21
+
 -   Enable file browser for ironpython
 
 ## [3.0.0-beta1] - 2025-01-11
@@ -400,7 +402,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta2...HEAD
+
+[3.0.0-beta2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta1...v3.0.0-beta2
 
 [3.0.0-beta1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...v3.0.0-beta1
 
