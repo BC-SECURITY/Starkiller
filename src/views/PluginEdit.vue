@@ -3,13 +3,7 @@
     <portal to="app-bar-extension">
       <div style="display: flex; flex-direction: row; width: 100%">
         <v-tabs v-model="tab" align-with-title>
-          <v-tab
-            key="interact"
-            href="#interact"
-            :disabled="
-              !plugin.loaded || !plugin.enabled || !plugin.execution_enabled
-            "
-          >
+          <v-tab key="interact" href="#interact" :disabled="interactDisabled">
             Interact
             <v-icon x-small class="ml-1"> fa-terminal </v-icon>
           </v-tab>
@@ -159,7 +153,7 @@
                     v-if="reset"
                     ref="settingsform"
                     v-model="settingsForm"
-                    :options="plugin.settings_options"
+                    :options="pluginSettingsOptions"
                   />
                   <v-btn
                     :loading="loading"
@@ -234,19 +228,19 @@ export default {
       if (this.id) return this.id;
       return "";
     },
-    pluginInfo() {
-      if (Object.keys(this.plugin).length < 1) return {};
-      return {
-        authors: this.plugin.authors,
-        description: this.plugin.description,
-        comments: this.plugin.comments,
-      };
-    },
     pluginOptions() {
       const { execution_options } = this.plugin;
       if (!execution_options) return {};
 
       return execution_options;
+    },
+    pluginSettingsOptions() {
+      const options = {};
+      Object.keys(this.plugin.settings_options).forEach((key) => {
+        options[key] = { ...this.plugin.settings_options[key] };
+        options[key].value = this.plugin.current_settings[key];
+      });
+      return options;
     },
     id() {
       return this.$route.params.id;
@@ -259,12 +253,20 @@ export default {
         if (this.$route.query.tab) {
           return this.$route.query.tab;
         }
-        if (!this.plugin?.execution_enabled) {
+        if (this.interactDisabled) {
           return "details";
         }
 
         return "interact";
       },
+    },
+    interactDisabled() {
+      return (
+        !this.plugin ||
+        !this.plugin.loaded ||
+        !this.plugin.enabled ||
+        !this.plugin.execution_enabled
+      );
     },
     pluginPythonDeps() {
       if (!this.plugin.python_deps.length > 0) {
@@ -313,11 +315,8 @@ poetry add ${this.plugin.python_deps.join(" ")}
       this.loading = true;
 
       try {
-        const response = await pluginApi.updatePlugin({
-          ...this.plugin,
-          options: this.settingsForm,
-        });
-        this.plugin = response;
+        await pluginApi.updatePluginSettings(this.plugin.id, this.settingsForm);
+        await this.getPlugin(this.id);
         this.$snack.success("Settings updated");
       } catch (err) {
         this.$snack.error(`Error: ${err}`);

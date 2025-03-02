@@ -36,6 +36,13 @@ export function updatePlugin(plugin) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
+export function updatePluginSettings(pluginId, settings) {
+  return axios
+    .put(`/plugins/${pluginId}/settings`, settings)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
 /**
  * Execute a plugin command.
  */

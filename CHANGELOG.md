@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Fixed plugin settings form
+-   Fixed the check for plugin interaction being disabled
+
 ## [3.0.0-beta2] - 2025-02-21
 
 -   Enable file browser for ironpython
