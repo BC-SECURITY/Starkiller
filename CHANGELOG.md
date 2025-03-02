@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-beta3] - 2025-03-02
+
 -   Fixed plugin settings form
 -   Fixed the check for plugin interaction being disabled
 
@@ -405,7 +407,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta3...HEAD
+
+[3.0.0-beta3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta2...v3.0.0-beta3
 
 [3.0.0-beta2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-beta1...v3.0.0-beta2
 
