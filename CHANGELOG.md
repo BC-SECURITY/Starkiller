@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-   Add sorting to plugin marketplace page
+
 ## [3.0.0-beta3] - 2025-03-02
 
 -   Fixed plugin settings form

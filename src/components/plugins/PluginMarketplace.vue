@@ -222,7 +222,10 @@ export default {
   },
   methods: {
     async refreshMarketplace() {
-      this.marketplacePlugins = (await pluginApi.getMarketplace()).records;
+      const { records } = await pluginApi.getMarketplace();
+      this.marketplacePlugins = records.sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
     },
     installSelectedPlugin() {
       this.installing = true;
