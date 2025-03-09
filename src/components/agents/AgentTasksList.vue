@@ -1,7 +1,7 @@
 <template>
   <div>
     <list-page-top
-      v-if="active && useHeader"
+      v-if="useHeader"
       :breads="breads"
       :show-create="false"
       :show-refresh="true"
@@ -96,14 +96,10 @@ export default {
     // Whether the list-page-top component should be used.
     useHeader: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // If useHeader is true, this will be ignored.
     refreshTasks: {
-      type: Boolean,
-      default: false,
-    },
-    active: {
       type: Boolean,
       default: false,
     },
@@ -112,14 +108,9 @@ export default {
     return {
       breads: [
         {
-          text: "Agents",
+          text: "Agent Tasks",
           disabled: true,
-          href: "/agents",
-        },
-        {
-          text: "Tasks",
-          disabled: true,
-          href: "/agents?tab=tasks",
+          href: "/agents-tasks",
         },
       ],
       tasks: [],

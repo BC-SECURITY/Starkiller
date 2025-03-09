@@ -11,6 +11,10 @@ on:
           - minor
           - major
         required: true
+      overrideVersion:
+        description: "Override the version number. If this is set, the bumpType will be ignored. example: v3.0.0-beta1"
+        type: string
+        required: false
 
 jobs:
   release_private:
@@ -35,9 +39,11 @@ jobs:
           node-version: 16
       - name: Change version number
         run: |
-          npm -no-git-tag-version version ${{ github.event.inputs.bumpType }}
-          # duplicate line?
-          APP_VERSION=$(npm pkg get version | sed 's/"//g')
+          if [ -n "${{ github.event.inputs.overrideVersion }}" ]; then
+            npm -no-git-tag-version version ${{ github.event.inputs.overrideVersion }}
+          else
+            npm -no-git-tag-version version ${{ github.event.inputs.bumpType }}
+          fi
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Get release branch name
         run: |

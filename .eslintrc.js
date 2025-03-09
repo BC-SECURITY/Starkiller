@@ -45,6 +45,8 @@ module.exports = {
       },
     ],
     "prefer-destructuring": ["error", { object: true, array: false }],
+    // Disable camelcase enforcement since the api is in snake_case
+    camelcase: "off",
   },
   settings: {
     ...createAliasSetting({

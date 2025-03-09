@@ -159,7 +159,6 @@ export default {
       headers: [
         { text: "Id", value: "id", sortable: false },
         { text: "Filename", value: "filename", sortable: true },
-        { text: "Location", value: "location", sortable: true },
         { text: "Size", value: "size", sortable: true },
         { text: "Created At", value: "created_at", sortable: true },
         { text: "Updated At", value: "updated_at", sortable: true },

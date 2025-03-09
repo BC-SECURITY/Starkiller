@@ -79,29 +79,15 @@ export default {
     me() {
       return this.applicationStore.user.username;
     },
-    darkMode() {
-      return this.applicationStore.darkMode;
-    },
     colors() {
-      if (this.darkMode) {
-        return {
-          header: { bg: "#F37C22", text: "#FFFFFF" },
-          launcher: { bg: "#F37C22" },
-          messageList: { bg: "#1E1E1E" },
-          userList: { bg: "#1E1E1E" },
-          sentMessage: { bg: "#1F89FB", text: "#FFFFFF" },
-          receivedMessage: { bg: "#3B3B3D", text: "#E1E1E1" },
-          userInput: { bg: "#1C1C1C", text: "#D7D7D7" },
-        };
-      }
       return {
         header: { bg: "#F37C22", text: "#FFFFFF" },
         launcher: { bg: "#F37C22" },
-        messageList: { bg: "#FFFFFF" },
-        userList: { bg: "#FFFFFF" },
-        sentMessage: { bg: "#1E87FB", text: "#FFFFFF" },
-        receivedMessage: { bg: "#E9E9EB", text: "#242424" },
-        userInput: { bg: "#FFFFFF", text: "#3A3A3A" },
+        messageList: { bg: "#1E1E1E" },
+        userList: { bg: "#1E1E1E" },
+        sentMessage: { bg: "#1F89FB", text: "#FFFFFF" },
+        receivedMessage: { bg: "#3B3B3D", text: "#E1E1E1" },
+        userInput: { bg: "#1C1C1C", text: "#D7D7D7" },
       };
     },
     participants() {

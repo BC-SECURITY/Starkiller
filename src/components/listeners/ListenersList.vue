@@ -1,7 +1,6 @@
 <template>
   <div class>
     <list-page-top
-      v-if="active"
       :breads="breads"
       :show-create="true"
       :show-refresh="true"
@@ -52,12 +51,6 @@ export default {
     ExpansionPanelFilter,
     ListPageTop,
   },
-  props: {
-    active: {
-      type: Boolean,
-      default: true,
-    },
-  },
   data() {
     return {
       moment,
@@ -66,11 +59,6 @@ export default {
           text: "Listeners",
           disabled: true,
           href: "/listeners",
-        },
-        {
-          text: "List",
-          disabled: true,
-          href: "/listeners?tab=list-view",
         },
       ],
       selected: [],

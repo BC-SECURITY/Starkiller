@@ -7,6 +7,7 @@ export const useListenerStore = defineStore("listener", {
     listeners: [],
     status: "success",
     templates: [],
+    autorunTasks: [],
   }),
   actions: {
     async getListeners() {
@@ -33,6 +34,27 @@ export const useListenerStore = defineStore("listener", {
       const index = this.listeners.findIndex((l) => l.id === id);
       if (index > -1) {
         this.listeners.splice(index, 1);
+      }
+    },
+
+    async fetchAutorunTasks(listenerId) {
+      try {
+        const { records: tasks } =
+          await listenerApi.getAutorunTasks(listenerId); // Extract records
+        this.autorunTasks = tasks;
+        return tasks;
+      } catch (error) {
+        console.error("Error fetching autorun tasks:", error);
+        return [];
+      }
+    },
+
+    async saveAutorunTasks({ listenerId, modules }) {
+      try {
+        await listenerApi.saveAutorunTasks(listenerId, { records: modules }); // Remove extra 'records'
+        console.log("Autorun tasks saved successfully.");
+      } catch (error) {
+        console.error("Error saving autorun tasks:", error);
       }
     },
   },

@@ -11,31 +11,8 @@
         <v-expansion-panel-content>
           <div style="text-align: left">
             <div style="margin-bottom: 10px">
-              <span>
-                <b class="mr-2">Authors:</b>
-                <template v-for="(author, index) in info.authors">
-                  <v-chip
-                    v-if="author.link"
-                    :key="index"
-                    medium
-                    :href="author.link"
-                    class="mr-1 mb-1"
-                  >
-                    {{ formatDisplayName(author) }}
-                  </v-chip>
-
-                  <v-chip
-                    v-else
-                    :key="index"
-                    medium
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="mr-1 mb-1"
-                  >
-                    {{ formatDisplayName(author) }}
-                  </v-chip>
-                </template>
-              </span>
+              <b class="mr-2">Authors:</b>
+              <author-chips :authors="info.authors" />
             </div>
             <div style="margin-bottom: 10px">
               <span>
@@ -65,25 +42,17 @@
 </template>
 
 <script>
+import AuthorChips from "@/components/AuthorChips.vue";
+
 export default {
+  name: "InfoViewer",
+  components: {
+    AuthorChips,
+  },
   props: {
     info: {
       type: Object,
       default: () => {},
-    },
-  },
-  methods: {
-    formatDisplayName(author) {
-      if (author.name && author.handle) {
-        return `${author.name} (${author.handle})`;
-      }
-      if (author.name) {
-        return author.name;
-      }
-      if (author.handle) {
-        return author.handle;
-      }
-      return "";
     },
   },
 };

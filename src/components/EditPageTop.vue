@@ -3,52 +3,55 @@
     <div class="v-toolbar__content pt-2" style="width: 100%">
       <v-breadcrumbs :items="breads" />
       <v-spacer />
-      <div class="pt-2">
+      <div
+        class="pt-3"
+        style="display: flex; flex-direction: row; align-items: flex-start"
+      >
         <slot name="extra-stuff" />
+        <v-btn
+          v-if="showDelete && !smallDelete"
+          color="error"
+          text
+          class="mr-2"
+          @click="$emit('delete')"
+        >
+          {{ deleteText }}
+          <v-icon right> fa-trash-alt </v-icon>
+        </v-btn>
+        <tooltip-button
+          v-else-if="showDelete && smallDelete"
+          icon="fa-trash-alt"
+          color="error"
+          :text="deleteText"
+          @click="$emit('delete')"
+        />
+        <v-btn
+          v-if="showCopy && Object.keys(copyLink).length > 0 && !smallCopy"
+          color="primary"
+          text
+          class="mr-2"
+          :to="copyLink"
+        >
+          {{ copyText }}
+          <v-icon right> fa-copy </v-icon>
+        </v-btn>
+        <tooltip-button
+          v-else-if="showCopy && Object.keys(copyLink).length > 0 && smallCopy"
+          icon="fa-copy"
+          :text="copyText"
+          :to="copyLink"
+        />
+        <v-btn
+          v-if="showSubmit"
+          :disabled="disableSubmit"
+          type="submit"
+          class="primary"
+          :loading="submitLoading"
+          @click="$emit('submit')"
+        >
+          {{ submitText }}
+        </v-btn>
       </div>
-      <v-btn
-        v-if="showDelete && !smallDelete"
-        color="error"
-        text
-        class="mr-2"
-        @click="$emit('delete')"
-      >
-        {{ deleteText }}
-        <v-icon right> fa-trash-alt </v-icon>
-      </v-btn>
-      <tooltip-button
-        v-else-if="showDelete && smallDelete"
-        icon="fa-trash-alt"
-        color="error"
-        :text="deleteText"
-        @click="$emit('delete')"
-      />
-      <v-btn
-        v-if="showCopy && Object.keys(copyLink).length > 0 && !smallCopy"
-        color="primary"
-        text
-        class="mr-2"
-        :to="copyLink"
-      >
-        {{ copyText }}
-        <v-icon right> fa-copy </v-icon>
-      </v-btn>
-      <tooltip-button
-        v-else-if="showCopy && Object.keys(copyLink).length > 0 && smallCopy"
-        icon="fa-copy"
-        :text="copyText"
-        :to="copyLink"
-      />
-      <v-btn
-        v-if="showSubmit"
-        :disabled="disableSubmit"
-        type="submit"
-        class="primary"
-        :loading="submitLoading"
-        @click="$emit('submit')"
-      >
-        {{ submitText }}
-      </v-btn>
     </div>
   </portal>
 </template>

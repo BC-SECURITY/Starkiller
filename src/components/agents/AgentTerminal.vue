@@ -1,25 +1,27 @@
 <template>
-  <div class="terminal-container">
-    <div ref="output" class="terminal-output">
-      <!-- eslint-disable vue/no-v-html -->
-      <div
-        v-for="(line, index) in outputLines"
-        :key="index"
-        :class="line.cssClasses"
-        style="white-space: pre-wrap"
-        v-html="ansiToHTML(line.content)"
-      />
+  <div>
+    <div class="terminal-container">
+      <div ref="output" class="terminal-output">
+        <div
+          v-for="(line, index) in outputLines"
+          :key="index"
+          :class="line.cssClasses"
+          style="white-space: pre-wrap"
+          v-html="ansiToHTML(line.content)"
+        />
+      </div>
+      <div class="terminal-input">
+        <span class="prompt" v-html="ansiToHTML(currentPrompt)" />
+        <input
+          ref="inputField"
+          v-model="currentInput"
+          @keyup.ctrl.c.prevent.stop="ctrlCHandler"
+          @keyup.enter="processCommand"
+          @keydown="handleKeyEvents"
+        />
+      </div>
     </div>
-    <div class="terminal-input">
-      <span class="prompt" v-html="ansiToHTML(currentPrompt)" />
-      <input
-        ref="inputField"
-        v-model="currentInput"
-        @keyup.ctrl.c.prevent.stop="ctrlCHandler"
-        @keyup.enter="processCommand"
-        @keydown="handleKeyEvents"
-      />
-    </div>
+
     <div
       v-show="suggestions.length"
       ref="suggestionList"
@@ -46,6 +48,8 @@ import * as agentTaskApi from "@/api/agent-task-api";
 import AnsiUp from "ansi_up";
 import { table } from "table";
 import { useModuleStore } from "@/stores/module-module";
+import { useListenerStore } from "@/stores/listener-module";
+import { useBypassStore } from "@/stores/bypass-module";
 
 function fuzzyMatch(query, string) {
   const q = Array.from(query);
@@ -104,49 +108,49 @@ export default {
         },
         {
           command: "clear",
-          description: "Clear the terminal output.",
+          description: "Clear the terminal output",
           usage: "clear",
         },
         {
           command: "back",
-          description: "Return to the main menu from a module.",
+          description: "Return to the main menu from a module",
           usage: "back",
         },
         {
           command: "usemodule",
-          description: "Use a specific module by name.",
+          description: "Use a specific module by name",
           usage: "usemodule <module_name>",
         },
         {
           command: "whoami",
-          description: "Display current user.",
+          description: "Display current user",
           usage: "whoami",
         },
         {
           command: "sysinfo",
-          description: "Tasks the specified agent to update sysinfo.",
+          description: "Tasks the specified agent to update sysinfo",
           usage: "sysinfo",
         },
         {
           command: "shell",
-          description: "Tasks the specified agent to execute a shell command.",
+          description: "Tasks the specified agent to execute a shell command",
           usage: "shell [--literal / -l] <shell_cmd>",
         },
         {
           command: "ps",
-          description: "Display the processes running on the agent's system.",
+          description: "Display the processes running on the agent's system",
           usage: "ps",
         },
         {
           command: "sc",
           description:
-            "Run the powershell_collection_screenshot module with Ratio set to 80.",
+            "Run the powershell_collection_screenshot module with Ratio set to 80",
           usage: "sc",
         },
         {
           command: "sherlock",
           description:
-            "PowerShell script to quickly find missing software patches for local privilege escalation vulnerabilities.",
+            "PowerShell script to quickly find missing software patches for local privilege escalation vulnerabilities",
           usage: "sherlock",
         },
         {
@@ -162,7 +166,7 @@ export default {
         {
           command: "sleep",
           description:
-            "Tasks specified agent to update delay (s) and jitter (0.0 - 1.0).",
+            "Tasks specified agent to update delay (s) and jitter (0.0 - 1.0)",
           usage: "sleep <delay> <jitter>",
         },
         {
@@ -190,7 +194,7 @@ export default {
         },
         {
           command: "info",
-          description: "Print default info on the current record.",
+          description: "Print default info on the current record",
           usage: "info",
         },
         {
@@ -200,7 +204,7 @@ export default {
         },
         {
           command: "set",
-          description: "Set a field for the current record.",
+          description: "Set a field for the current record",
           usage: "set <key> <value>",
         },
         {
@@ -210,12 +214,12 @@ export default {
         },
         {
           command: "clear",
-          description: "Clear the terminal output.",
+          description: "Clear the terminal output",
           usage: "clear",
         },
         {
           command: "back",
-          description: "Return to the main menu from a module.",
+          description: "Return to the main menu from a module",
           usage: "back",
         },
       ],
@@ -229,6 +233,15 @@ export default {
     },
     allModules() {
       return this.moduleStore.modules;
+    },
+    listenerStore() {
+      return useListenerStore();
+    },
+    bypassStore() {
+      return useBypassStore();
+    },
+    listeners() {
+      return this.listenerStore.listeners;
     },
     currentPrompt() {
       const prefix = this.colorizeText("(Empire: ", "white");
@@ -245,13 +258,15 @@ export default {
     },
   },
   watch: {
-    currentInput(val) {
-      if (val) {
-        this.generateSuggestions();
-      }
+    currentInput() {
+      this.generateSuggestions();
+      this.$nextTick(() => this.positionSuggestions());
     },
     outputLines(val) {
       localStorage.setItem(this.storageName(), JSON.stringify(val));
+    },
+    suggestions() {
+      this.$nextTick(() => this.positionSuggestions());
     },
   },
   async mounted() {
@@ -260,6 +275,8 @@ export default {
     if (this.allModules?.length === 0) {
       await this.moduleStore.getModules();
     }
+
+    await this.listenerStore.getListeners();
 
     // Load the command history from local storage
     const savedHistory = localStorage.getItem(this.storageName());
@@ -280,6 +297,22 @@ export default {
       this.addLine(`${this.currentPrompt} ${this.currentInput}`);
       this.currentInput = "";
     },
+    positionSuggestions() {
+      const { inputField } = this.$refs;
+      const { suggestionList } = this.$refs;
+      const promptSpan = this.$el.querySelector(".prompt"); // Select the prompt span
+
+      if (inputField && suggestionList && promptSpan) {
+        const inputRect = inputField.getBoundingClientRect();
+        const promptRect = promptSpan.getBoundingClientRect();
+
+        const promptWidth = promptSpan.offsetWidth;
+
+        suggestionList.style.top = `${inputRect.bottom}px`;
+        suggestionList.style.left = `${promptRect.left + promptWidth}px`;
+      }
+    },
+
     applySuggestion(suggestion) {
       this.currentInput = suggestion;
       this.suggestions = [];
@@ -287,7 +320,7 @@ export default {
     },
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
-        event.preventDefault(); // Prevent cursor from moving to beginning of input
+        event.preventDefault();
         if (this.historyIndex > 0) {
           this.historyIndex--;
           this.currentInput = this.commandHistory[this.historyIndex];
@@ -333,18 +366,34 @@ export default {
       } else if (event.code === "Space") {
         if (this.currentSuggestionIndex !== -1) {
           event.preventDefault();
-          this.currentInput = this.suggestions[this.currentSuggestionIndex];
+          const selectedSuggestion =
+            this.suggestions[this.currentSuggestionIndex];
+          const [command, option, ...currentValues] =
+            this.currentInput.split(" ");
+          if (option.toLowerCase() === "bypasses") {
+            this.currentInput = `${command} ${option} ${[
+              ...currentValues,
+              selectedSuggestion.split(" ").slice(-1)[0],
+            ].join(" ")}`;
+          } else {
+            this.currentInput = selectedSuggestion;
+          }
           this.suggestions = [];
           this.currentSuggestionIndex = -1;
         }
       }
     },
-    generateSuggestions() {
+    async generateSuggestions() {
       if (this.isShellMenu) {
-        if (this.suggestions.length > 0) this.suggestions = [];
+        this.suggestions = [];
         return;
       }
       const query = this.currentInput.toLowerCase().trim();
+
+      if (!query) {
+        this.suggestions = [];
+        return;
+      }
 
       const queryParts = query.split(" ");
       let moduleSuggestions = [];
@@ -360,7 +409,57 @@ export default {
         );
       }
       if (this.currentModule) {
-        if (queryParts[0] === "set" || queryParts[0] === "unset") {
+        if (queryParts[0] === "set") {
+          const optionName = queryParts[1]?.toLowerCase() || "";
+          const partialValue = queryParts.slice(2).join(" ") || "";
+
+          const normalizedOptions = Object.keys(this.moduleOptions).reduce(
+            (acc, key) => {
+              acc[key.toLowerCase()] = this.moduleOptions[key];
+              return acc;
+            },
+            {},
+          );
+
+          if (optionName.toLowerCase() === "listener") {
+            moduleSuggestions = this.listeners
+              .filter((listener) =>
+                fuzzyMatch(partialValue, listener.name.toLowerCase()),
+              )
+              .map((listener) => `set Listener ${listener.name}`);
+          } else if (optionName === "bypasses") {
+            const existingBypasses = partialValue
+              .split(" ")
+              .map((bypass) => bypass.trim().toLowerCase())
+              .filter((bypass) => bypass !== "");
+
+            moduleSuggestions = this.bypassStore.bypassNames
+              .filter(
+                (bypass) => !existingBypasses.includes(bypass.toLowerCase()),
+              )
+              .map((bypass) => {
+                const existingBypassesString = existingBypasses.join(" ");
+                return `set Bypasses ${existingBypassesString}${existingBypassesString ? " " : ""}${bypass}`;
+              });
+          } else {
+            const option = normalizedOptions[optionName];
+            if (option && option.suggested_values) {
+              moduleSuggestions = option.suggested_values
+                .filter((value) =>
+                  fuzzyMatch(partialValue, value.toLowerCase()),
+                )
+                .map((value) => `set ${optionName} ${value}`);
+            } else if (!queryParts[2]) {
+              moduleSuggestions = Object.keys(this.moduleOptions)
+                .filter(
+                  (opt) =>
+                    opt !== "Agent" &&
+                    fuzzyMatch(optionName.toLowerCase(), opt.toLowerCase()),
+                )
+                .map((opt) => `set ${opt}`);
+            }
+          }
+        } else if (queryParts[0] === "unset") {
           moduleSuggestions = Object.keys(this.moduleOptions)
             .filter(
               (option) =>
@@ -370,7 +469,7 @@ export default {
                   option.toLowerCase(),
                 ),
             )
-            .map((option) => `${queryParts[0]} ${option}`);
+            .map((option) => `unset ${option}`);
         }
         commandSuggestions = this.moduleHelpCommands
           .map((cmd) => cmd.command.toLowerCase())
@@ -404,10 +503,8 @@ export default {
         return;
       }
 
-      // Clear the suggestions
       this.suggestions = [];
 
-      // First, display the current input in the terminal with the prompt
       this.addLine(`${this.currentPrompt} ${this.currentInput}`);
       const commandParts = this.currentInput.split(" ");
       const command = commandParts[0];
@@ -421,9 +518,24 @@ export default {
         } else {
           this.addLine("Already at the main menu.");
         }
+      } else if (this.currentInput === "info") {
+        if (this.currentModule) {
+          this.addLine(
+            `${this.colorizeText("Module:", "green")} ${this.currentModule.name}`,
+            "indent-5-spaces",
+          );
+          this.addLine(
+            `${this.colorizeText("Description:", "green")} ${
+              this.currentModule.description
+            }`,
+            "indent-5-spaces",
+          );
+        } else {
+          this.addLine("No module is currently selected.");
+        }
       } else if (this.currentInput === "options") {
         if (this.currentModule) {
-          this.displayAllOptionValues();
+          this.displayModuleOptions();
         } else {
           this.addLine("No module is currently selected.");
         }
@@ -518,7 +630,6 @@ export default {
             }
         }
       } else {
-        // Module-specific commands
         switch (command) {
           case "set":
             this.setModuleOption(args[0], args.slice(1).join(" "));
@@ -546,7 +657,7 @@ export default {
             }
         }
       }
-      // Store command in history
+
       if (this.currentInput.trim()) {
         this.commandHistory.push(this.currentInput);
         this.historyIndex = this.commandHistory.length;
@@ -642,9 +753,11 @@ export default {
       config = { print: true, attempts: 30, delay: 5000 },
     ) {
       if (!config.attempts) config.attempts = 30;
-      if (!config.delay)
-        config.delay =
-          this.agent.delay != null ? this.agent.delay * 1000 : 5000;
+      config.delay = Math.max(
+        config.delay ||
+          (this.agent.delay != null ? this.agent.delay * 1000 : 5000),
+        1000,
+      );
 
       let res = null;
       let hasPrintedJobStarted = false;
@@ -795,7 +908,9 @@ export default {
       this.displayModuleOptions();
     },
     displayModuleOptions() {
-      this.moduleOptions.Agent.value = this.agent.session_id;
+      if (this.moduleOptions.Agent) {
+        this.moduleOptions.Agent.value = this.agent.session_id;
+      }
 
       const modifiedConfig = {
         ...this.tableConfig,
@@ -830,29 +945,38 @@ export default {
       const value = option && option.value ? option.value : "N/A";
       this.addLine(`${this.colorizeText(optionName, "green")}: ${value}`);
     },
-    displayAllOptionValues() {
-      Object.keys(this.currentOptions).forEach((optionName) => {
-        this.displayOptionValue(optionName);
-      });
-    },
     setModuleOption(optionName, value) {
       if (!this.currentModule) {
         this.addError("No module is currently selected.");
         return;
       }
-      if (!this.moduleOptions[optionName]) {
+
+      const normalizedOptions = Object.keys(this.moduleOptions).reduce(
+        (acc, key) => {
+          acc[key.toLowerCase()] = key;
+          return acc;
+        },
+        {},
+      );
+
+      const normalizedOptionName = normalizedOptions[optionName.toLowerCase()];
+
+      if (!normalizedOptionName) {
         this.addError(
           `Option "${optionName}" not found in module ${this.currentModule.name}.`,
         );
         return;
       }
-      if (optionName === "Agent") {
+
+      if (normalizedOptionName === "Agent") {
         this.addError("Error: Cannot set the Agent option.");
         return;
       }
-      this.moduleOptions[optionName].value = value;
-      this.addInfo(`Set ${optionName} to ${value}.`);
+
+      this.moduleOptions[normalizedOptionName].value = value;
+      this.addInfo(`Set ${normalizedOptionName} to ${value}.`);
     },
+
     async executeCurrentModule() {
       if (!this.currentModule) {
         this.addError("No module is currently selected.");
@@ -913,7 +1037,7 @@ export default {
 
       const modifiedConfig = {
         ...this.tableConfig,
-        columns: { 1: { width: 40 }, 2: { width: 30 } },
+        columns: { 1: { width: 40 }, 2: { width: 40 } },
       };
       const tableData = [
         [
@@ -979,21 +1103,25 @@ export default {
 .terminal-container {
   font-family: "Courier New", Courier, monospace;
   font-size: 14px;
-  max-height: 55vh;
+  max-height: 60vh;
   padding: 10px;
   background-color: #424242fc;
   color: white;
   border: 1px solid #57d9a3;
-  overflow: auto;
+  border-radius: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .terminal-output {
-  max-height: 50vh;
   overflow-y: auto;
 }
 
 .terminal-input {
   display: flex;
+  align-items: center;
 }
 
 .terminal-input input {
@@ -1002,6 +1130,7 @@ export default {
   border: none;
   outline: none;
   flex: 1;
+  padding-left: 5px;
 }
 
 .error-text {
@@ -1009,6 +1138,7 @@ export default {
   font-weight: bold;
   margin-right: 5px;
 }
+
 .error-text::before {
   content: "[!] ";
 }
@@ -1018,29 +1148,30 @@ export default {
   font-weight: bold;
   margin-right: 5px;
 }
+
 .info-text::before {
   content: "[*] ";
 }
 
 .prompt {
   color: #ff0000; /* ANSI red */
-  font-weight: bold; /* make text bold */
+  font-weight: bold;
   margin-right: 5px;
 }
 
 .autocomplete-suggestions {
-  position: absolute;
+  position: fixed;
   background-color: #3c3f43;
   border: 1px solid #57d9a3;
   border-radius: 5px;
-  z-index: 1;
+  z-index: 10;
   max-height: 150px;
   overflow-y: auto;
-  width: 100%;
   box-sizing: border-box;
-  padding: 5px;
   margin-top: 5px;
-  margin-bottom: 5px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+  color: white;
 }
 
 .suggestion {

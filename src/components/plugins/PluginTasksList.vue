@@ -1,7 +1,7 @@
 <template>
   <div>
     <list-page-top
-      v-if="active && useHeader"
+      v-if="useHeader"
       :breads="breads"
       :show-create="false"
       :show-refresh="true"
@@ -96,14 +96,10 @@ export default {
     // Whether the list-page-top component should be used.
     useHeader: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // If useHeader is true, this will be ignored.
     refreshTasks: {
-      type: Boolean,
-      default: false,
-    },
-    active: {
       type: Boolean,
       default: false,
     },
@@ -112,14 +108,9 @@ export default {
     return {
       breads: [
         {
-          text: "Plugins",
+          text: "Plugin Tasks",
           disabled: true,
-          href: "/plugins",
-        },
-        {
-          text: "Tasks",
-          disabled: true,
-          href: "/plugins?tab=tasks",
+          href: "/plugin-tasks",
         },
       ],
       tasks: [],
@@ -156,7 +147,7 @@ export default {
     plugin: {
       handler(val) {
         if (val) {
-          this.selectedPlugins = [val.session_id];
+          this.selectedPlugins = [val.id];
         }
       },
       immediate: true,

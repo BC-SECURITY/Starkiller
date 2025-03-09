@@ -1,7 +1,6 @@
 <template>
   <div>
     <list-page-top
-      v-if="active"
       :breads="breads"
       :show-create="false"
       :show-refresh="true"
@@ -69,12 +68,6 @@ export default {
     AgentsTable,
     ListPageTop,
   },
-  props: {
-    active: {
-      type: Boolean,
-      default: false,
-    },
-  },
   data() {
     return {
       breads: [
@@ -82,11 +75,6 @@ export default {
           text: "Agents",
           disabled: true,
           href: "/agents",
-        },
-        {
-          text: "List",
-          disabled: true,
-          href: "/agents?tab=list-view",
         },
       ],
       selected: [],

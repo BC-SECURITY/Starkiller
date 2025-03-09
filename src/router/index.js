@@ -24,7 +24,13 @@ const routes = [
   {
     path: "/listeners",
     name: "listeners",
-    component: () => import("../views/Listeners.vue"),
+    component: () => import("../components/listeners/ListenersList.vue"),
+  },
+  {
+    path: "/malleable-profiles",
+    name: "malleableProfiles",
+    component: () =>
+      import("../components/listeners/MalleableProfilesList.vue"),
   },
   {
     path: "/listeners/new",
@@ -54,7 +60,12 @@ const routes = [
   {
     path: "/agents",
     name: "agents",
-    component: () => import("../views/Agents.vue"),
+    component: () => import("../components/agents/AgentsList.vue"),
+  },
+  {
+    path: "/agent-tasks",
+    name: "agentTasks",
+    component: () => import("../components/agents/AgentTasksList.vue"),
   },
   {
     path: "/agents/:id",
@@ -108,12 +119,12 @@ const routes = [
     component: () => import("../views/CredentialEdit.vue"),
   },
   {
-    path: "/listeners/malleable-profiles/new",
+    path: "/malleable-profiles/new",
     name: "malleableProfileNew",
     component: () => import("../views/MalleableProfileEdit.vue"),
   },
   {
-    path: "/listeners/malleable-profiles/:id",
+    path: "/malleable-profiles/:id",
     name: "malleableProfileEdit",
     component: () => import("../views/MalleableProfileEdit.vue"),
   },
@@ -140,7 +151,17 @@ const routes = [
   {
     path: "/plugins",
     name: "plugins",
-    component: () => import("../views/Plugins.vue"),
+    component: () => import("../components/plugins/PluginsList.vue"),
+  },
+  {
+    path: "/plugin-tasks",
+    name: "pluginTasks",
+    component: () => import("../components/plugins/PluginTasksList.vue"),
+  },
+  {
+    path: "/plugin-marketplace",
+    name: "pluginMarketplace",
+    component: () => import("../components/plugins/PluginMarketplace.vue"),
   },
   {
     path: "/plugins/:id",

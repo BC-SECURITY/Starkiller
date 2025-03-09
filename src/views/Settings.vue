@@ -27,7 +27,6 @@
       </div>
       <v-divider />
       <div style="display: flex; flex-direction: row">
-        <v-switch v-model="applicationStore.darkMode" :label="`Dark Mode`" />
         <v-switch
           v-model="applicationStore.chatWidget"
           class="pl-8"

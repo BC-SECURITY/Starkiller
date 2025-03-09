@@ -1,6 +1,6 @@
 {
   "name": "starkiller",
-  "version": "2.8.2",
+  "version": "3.0.0-rc1",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -30,7 +30,9 @@
     "uuid": "^8.3.2",
     "vue": "2.7",
     "vue-beautiful-chat": "^2.5.0",
+    "vue-markdown-render": "1.1.2",
     "vue-router": "^3.5.1",
+    "vuedraggable": "^2.24.3",
     "vuetify": "^2.6.0"
   },
   "devDependencies": {

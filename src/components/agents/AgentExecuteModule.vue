@@ -8,10 +8,9 @@
     />
     <div v-else style="padding: 0 10px 10px 10px">
       <info-viewer class="info-viewer" :info="moduleInfo" />
-      <!-- todo could make this more friendly by looking up the "name" in the state in case it was changed -->
-      <span class="mr-2 mb-4"
-        >Executing on Agents: {{ agents.join(", ") }}</span
-      >
+      <span class="mr-2 mb-4">
+        Executing on Agents: {{ agents.join(", ") }}
+      </span>
       <technique-chips :techniques="selectedItem.techniques" />
       <v-autocomplete
         v-model="selectedModule"
@@ -25,7 +24,10 @@
       />
       <v-alert v-if="selectedItem.opsec_safe === false" type="warning">
         <v-row align="center">
-          <v-col class="grow" style="word-wrap: word-break; width: 500px">
+          <v-col
+            class="grow"
+            style="word-wrap: break-word; word-break: break-word; width: 500px"
+          >
             This module is not opsec safe.
           </v-col>
         </v-row>
@@ -137,7 +139,7 @@ export default {
     },
     moduleOptionDefaults: {
       type: Object,
-      default: () => {},
+      default: () => ({}),
     },
   },
   data() {
@@ -169,8 +171,8 @@ export default {
       return this.modules.map((el) => el.id);
     },
     moduleOptions() {
-      let { options } = this.selectedItem;
-      options = options || {};
+      const options = this.selectedItem.options || {};
+
       if (options && options.Agent) {
         delete options.Agent;
       }
@@ -180,7 +182,6 @@ export default {
           options[key].value = this.moduleOptionDefaults[key];
         }
       });
-
       return options;
     },
     moduleInfo() {
@@ -218,14 +219,18 @@ export default {
         this.handleSelect(this.moduleName);
       }
     },
-    selectedModule(newVal) {
-      this.emitModuleChange(newVal);
+    selectedModule(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.emitModuleChange(newVal);
+      }
     },
     moduleName: {
       immediate: true,
-      handler(newVal) {
-        this.selectedModule = newVal;
-        this.handleSelect(newVal);
+      handler(newVal, oldVal) {
+        if (newVal !== oldVal) {
+          this.selectedModule = newVal;
+          this.handleSelect(newVal);
+        }
       },
     },
   },
@@ -235,7 +240,7 @@ export default {
   methods: {
     async handleSelect(item) {
       this.errorState = false;
-      if (item === "" || item == null) {
+      if (!item) {
         this.reset = false;
         this.selectedItem = {};
         setTimeout(() => {
@@ -246,7 +251,7 @@ export default {
       const results = this.modules.find((el) => el.id === item);
       this.reset = false;
       this.selectedItem = results || {};
-      if (Object.keys(this.selectedItem).length === 0) {
+      if (!Object.keys(this.selectedItem).length) {
         this.errorState = true;
       }
       setTimeout(() => {
@@ -310,7 +315,6 @@ export default {
         this.$snack.info(`Module execution queued for ${displayName}`);
         this.selectedItem = {};
         this.selectedModule = "";
-        // emit a submitted event so ModuleExecute can clear agents list.
         this.$emit("submitted");
       }
 

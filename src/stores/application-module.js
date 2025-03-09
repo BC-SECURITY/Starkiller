@@ -16,7 +16,6 @@ export const useApplicationStore = defineStore("application", {
     user: {},
     loginError: "",
     empireVersion: "",
-    darkMode: true,
     chatWidget: true,
     hideStaleAgents: false,
     hideArchivedAgents: true,
@@ -99,7 +98,6 @@ export const useApplicationStore = defineStore("application", {
       this.user = {};
       this.loginError = "";
       this.empireVersion = "";
-      this.darkMode = true;
       this.chatWidget = true;
       this.hideStaleAgents = false;
       this.hideArchivedAgents = true;
