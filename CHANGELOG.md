@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added plugin settings page
 -   Added autocomplete to terminal for listeners, suggested values, and bypasses
 -   Added dynamic options for form fields
+-   Added autorun tab to listeners page
 
 ### Changed
 
