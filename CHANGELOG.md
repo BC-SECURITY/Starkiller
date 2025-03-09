@@ -28,8 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Enabled file browser for ironpython
 -   Reorganized the navbar - Default to "mini" mode and add sub-menus
 
-### Deprecated
-
 ### Removed
 
 -   Removed import script button from agent page
