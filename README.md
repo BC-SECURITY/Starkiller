@@ -59,9 +59,9 @@ At the moment, the extra Starkiller sponsorship features include:
 
   <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
 
-## Proxy Management
+## Ip Filtering
 
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/210124448-4f1107b0-3250-4faa-8ea9-4daec77e277e.gif"></div>
+  <div align="left"><img width="800" src="https://private-user-images.githubusercontent.com/9831420/424823702-95f90eb6-055d-4847-a1eb-87cb2ee4e9aa.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI0NDcyMzIsIm5iZiI6MTc0MjQ0NjkzMiwicGF0aCI6Ii85ODMxNDIwLzQyNDgyMzcwMi05NWY5MGViNi0wNTVkLTQ4NDctYTFlYi04N2NiMmVlNGU5YWEucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI1MDMyMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNTAzMjBUMDUwMjEyWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9YmNhYTcyOTQ0ODA2ZTg5YTZhYjJlNWZmYWMyNzI4MjJhMTlkYjFjY2M4MDdmNDc3MGZlYzg4NjExM2Y5MTEyOCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.cI0M--nasJDRIRSk1JY-iG370ccUfKmRwQRmJXxHKPA"></div>
 
 There is also a collection of Empire plugins available via sponsorship.
 
