@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2025-03-25
+
 ## [3.0.0-rc1] - 2025-03-09
 
 ### Added
@@ -411,7 +413,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-rc1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0...HEAD
+
+[3.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-rc1...v3.0.0
 
 [3.0.0-rc1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...v3.0.0-rc1
 
