@@ -16,8 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - 2025-03-25
 
-## [3.0.0-rc1] - 2025-03-09
-
 ### Added
 
 -   Added plugin marketplace
@@ -415,9 +413,7 @@ Including but not limited to:
 
 [Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0...HEAD
 
-[3.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0-rc1...v3.0.0
-
-[3.0.0-rc1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...v3.0.0-rc1
+[3.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.2...v3.0.0
 
 [2.8.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v2.8.1...v2.8.2
 
