@@ -153,8 +153,8 @@
                       <agent-interact :agent="agent" />
                       <v-divider />
                       <h4 class="pl-4 pt-2">Execute Module</h4>
-                      <agent-execute-module :agents="[agent.session_id]"
-                    /></v-tab-item>
+                      <agent-execute-module :agents="[agent]" />
+                    </v-tab-item>
                     <v-tab-item
                       key="terminal"
                       style="height: auto"
