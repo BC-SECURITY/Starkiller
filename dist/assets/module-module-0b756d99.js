@@ -1,1 +1,0 @@
-import{L as o}from"./index-864379eb.js";import{g as s}from"./module-api-66610cfb.js";const a=o("module",{state:()=>({modules:[]}),actions:{async getModules(){const e=await s();this.modules=e}},getters:{}});export{a as u};
