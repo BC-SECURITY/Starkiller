@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] - 2025-08-16
+
 ## [3.0.1] - 2025-07-11
 
 -   Added agent language as filter to avoid displaying incompatible modules
@@ -416,7 +418,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.2...HEAD
+
+[3.0.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.1...v3.0.2
 
 [3.0.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.0...v3.0.1
 
