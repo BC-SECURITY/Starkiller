@@ -36,12 +36,12 @@ export const useApplicationStore = defineStore("application", {
 
         const userResponse = await axios.get(`${url}/api/v2/users/me`, {
           headers: {
-            Authorization: `Bearer ${tokenResponse.data.access_token}`,
+            "X-Empire-Token": `Bearer ${tokenResponse.data.access_token}`,
           },
         });
         const versionResponse = await axios.get(`${url}/api/v2/meta/version`, {
           headers: {
-            Authorization: `Bearer ${tokenResponse.data.access_token}`,
+            "X-Empire-Token": `Bearer ${tokenResponse.data.access_token}`,
           },
         });
 
@@ -68,7 +68,7 @@ export const useApplicationStore = defineStore("application", {
     },
     async refreshMe() {
       const userResponse = await axios.get(`${this.url}/api/v2/users/me`, {
-        headers: { Authorization: `Bearer ${this.token}` },
+        headers: { "X-Empire-Token": `Bearer ${this.token}` },
       });
       this.user = userResponse.data;
     },
