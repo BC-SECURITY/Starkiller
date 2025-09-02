@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2025-09-02
+
 -   Use X-Empire-Token header for authorization
 
 ## [3.0.2] - 2025-08-16
@@ -420,7 +422,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.1.0...HEAD
+
+[3.1.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.2...v3.1.0
 
 [3.0.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.1...v3.0.2
 
