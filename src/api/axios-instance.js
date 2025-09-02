@@ -9,7 +9,7 @@ export function setInstance(url, token) {
     baseURL: `${url}/api/v2`,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      "X-Empire-Token": `Bearer ${token}`,
     },
   });
 

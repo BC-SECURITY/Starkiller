@@ -97,27 +97,6 @@ yarn dev
 yarn build
 ```
 
-## Compatability Table
-
-**Note**: As of Empire 5.0 and Starkiller 2.0, this compatability table is less relevant. Starkiller is now packaged in Empire as a git submodule and does not need to be installed separately.
-
-Starkiller’s new features occasionally depend on new functionality within Empire. Therefore, it is recommended that you follow this release table for syncing up your Starkiller and Empire versions. If you are using an older version of Empire, Starkiller will warn you when logging in, but will allow you to continue. If a there is a new minimum version of Empire required to get all the features out of Starkiller, we will do a minor version bump to Starkiller.
-| Starkiller Release | Minimum Empire Version | Notes |
-| ------------------ | ---------------------- | ------ |
-| 1.0.x | 3.1.1 | 3.1.1 is the first version of Empire to include all the user endpoints necessary for Starkiller to function |
-| 1.1.x | 3.1.5 | 3.1.5 updated the reporting endpoint to have the same result as running it in the CLI. Starkiller 1.1.x uses that reporting endpoint for the reporting tab |
-| 1.2.x | 3.2.0 | 3.2.0 added an endpoint for users that is needed for the UI updates introduced in Starkiller 1.2.0
-| 1.3.x | 3.3.0 | 3.3.0 categorized all of the modules in Empire with corresponding [MITRE techniques](https://attack.mitre.org/techniques/enterprise/)
-| 1.4.x, 1.5.x | 3.5.0 | 3.5.0 added real-time notifications for new listeners and agents
-| 1.6.x, 1.7.x | 3.7.0 | 1.6.0 was tested against Empire 3.7.0. There _shouldn't_ be any breaking changes, but there were a lot of code changes.
-| 1.8.x | 4.0.0 |
-| 1.9.x, 1.10.x, 1.11.x | 4.1.0 | The updated agent screen requires new endpoints in order to update fields on the 'view' tab
-| 2.0.x, 2.1.x | 5.0.0 | Uses the new v2 api
-| 2.2.x, 2.3.x | 5.2.0 | Requires the new plugin task endpoints
-| 2.4.x | 5.5.0 | For sponsors, requires the checkin endpoints
-| 2.5.x | 5.6.0 | Requires the tags endpoints
-| 2.6.x | 5.7.0 | Requires the user avatar endpoints and fixes for the agent task socketio events
-
 ## Changelog
 
 Detailed changes for each release are documented in the [changelog](./CHANGELOG.md).
