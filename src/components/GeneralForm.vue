@@ -81,6 +81,7 @@ export default {
       valid: true,
       visibleFields: {},
       recentlyVisibleFields: [],
+      initializedBypassesDefaults: false,
     };
   },
   computed: {
@@ -106,7 +107,11 @@ export default {
       return this.listenerStore.listenerNames;
     },
     bypasses() {
-      return this.bypassStore.bypassNames;
+      // Use defaults first, then remaining bypass names
+      return this.bypassStore.mergedBypassNames;
+    },
+    defaultBypasses() {
+      return this.bypassStore.defaultBypassNames;
     },
     credentials() {
       return this.credentialStore.credentials;
@@ -163,6 +168,7 @@ export default {
       immediate: true,
       handler(newOptions) {
         this.initializeForm(newOptions);
+        this.updateFieldVisibility(this.form, true);
       },
     },
     form: {
@@ -182,14 +188,29 @@ export default {
       immediate: true,
       handler(arr) {
         const map2 = arr.reduce((map, obj) => {
-          if (obj.name === "Bypasses" && !Array.isArray(obj.value)) {
-            map[obj.name] = obj.value.split(" ") || [];
+          if (obj.name === "Bypasses") {
+            if (Array.isArray(obj.value)) {
+              map[obj.name] = obj.value;
+            } else {
+              const raw = obj.value == null ? "" : String(obj.value);
+              map[obj.name] = raw
+                .split(" ")
+                .map((s) => s.trim())
+                .filter((s) => s.length > 0);
+            }
           } else {
             map[obj.name] = obj.value == null ? "" : obj.value;
           }
           return map;
         }, {});
         Vue.set(this, "form", map2);
+      },
+    },
+    defaultBypasses: {
+      immediate: true,
+      handler() {
+        // When defaults arrive, initialize if needed
+        this.tryInitializeBypassesDefaults();
       },
     },
   },
@@ -199,7 +220,6 @@ export default {
     this.bypassStore.getBypasses();
     this.malleableProfileStore.getMalleableProfiles();
     this.credentialStore.getCredentials();
-    this.updateFieldVisibility(this.form, true);
   },
   methods: {
     initializeForm(options) {
@@ -207,6 +227,23 @@ export default {
       Object.keys(options).forEach((key) => {
         this.$set(this.form, key, options[key].value || null);
       });
+    },
+    tryInitializeBypassesDefaults() {
+      if (this.initializedBypassesDefaults) return;
+      if (
+        !this.form ||
+        !Object.prototype.hasOwnProperty.call(this.form, "Bypasses")
+      )
+        return;
+      const current = this.form.Bypasses;
+      const isEmpty =
+        current == null ||
+        (Array.isArray(current) && current.length === 0) ||
+        (typeof current === "string" && current.trim() === "");
+      if (!isEmpty) return;
+      if (!this.defaultBypasses || this.defaultBypasses.length === 0) return;
+      this.$set(this.form, "Bypasses", [...this.defaultBypasses]);
+      this.initializedBypassesDefaults = true;
     },
     updateFieldVisibility(form, initial = false) {
       const newlyVisibleFields = [];

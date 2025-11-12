@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Preselect default bypasses from config in forms and prioritize them in suggestions
+
+
 ## [3.1.0] - 2025-09-02
 
 -   Use X-Empire-Token header for authorization
