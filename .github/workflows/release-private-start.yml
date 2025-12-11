@@ -24,7 +24,7 @@ jobs:
       - name: Set target branch
         run: echo "TARGET_BRANCH=private-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TARGET_BRANCH }}
           submodules: "recursive"
