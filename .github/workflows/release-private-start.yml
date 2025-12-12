@@ -24,7 +24,7 @@ jobs:
       - name: Set target branch
         run: echo "TARGET_BRANCH=private-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TARGET_BRANCH }}
           submodules: "recursive"
@@ -34,7 +34,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 16
       - name: Change version number

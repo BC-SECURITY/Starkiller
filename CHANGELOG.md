@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2025-12-11
+
+### Added
+
+-   Preselect default bypasses from config in forms and prioritize them in suggestions
+
 ## [3.1.0] - 2025-09-02
 
 -   Use X-Empire-Token header for authorization
@@ -422,7 +428,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.2.0...HEAD
+
+[3.2.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.1.0...v3.2.0
 
 [3.1.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.0.2...v3.1.0
 

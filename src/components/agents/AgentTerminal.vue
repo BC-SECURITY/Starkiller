@@ -11,6 +11,7 @@
         />
       </div>
       <div class="terminal-input">
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <span class="prompt" v-html="ansiToHTML(currentPrompt)" />
         <input
           ref="inputField"
@@ -277,6 +278,7 @@ export default {
     }
 
     await this.listenerStore.getListeners();
+    await this.bypassStore.getBypasses();
 
     // Load the command history from local storage
     const savedHistory = localStorage.getItem(this.storageName());
@@ -433,7 +435,7 @@ export default {
               .map((bypass) => bypass.trim().toLowerCase())
               .filter((bypass) => bypass !== "");
 
-            moduleSuggestions = this.bypassStore.bypassNames
+            moduleSuggestions = this.bypassStore.mergedBypassNames
               .filter(
                 (bypass) => !existingBypasses.includes(bypass.toLowerCase()),
               )

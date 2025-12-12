@@ -151,22 +151,32 @@ export default {
     },
     stagerOptions() {
       if (!this.isNew || this.isCopy) {
-        // if its not new, set the options
-        // iterate over the options in this.listener and set the values
+        // if it's not new, set the option values from the existing stager
         const options = {};
-        Object.keys(this.stager.options).forEach((key) => {
-          options[key] = { ...this.stagerTemplate.options[key] };
-          options[key].value = this.stager.options[key];
+        const templateOptions =
+          (this.stagerTemplate && this.stagerTemplate.options) || {};
+        const stagerOpts =
+          this.stager && this.stager.options ? this.stager.options : {};
+        Object.keys(stagerOpts).forEach((key) => {
+          const base = templateOptions[key] ? { ...templateOptions[key] } : {};
+          options[key] = base;
+          options[key].value = stagerOpts[key];
         });
         return options;
       }
 
-      // if its new, use the defaults from the template
-      const { options } = this.stagerTemplate;
-      if (!options) return {};
+      // if it's new, use the defaults from the template
+      const templateOptions =
+        (this.stagerTemplate && this.stagerTemplate.options) || {};
+      // Create a shallow clone so we don't mutate the template object directly
+      const options = Object.keys(templateOptions).reduce((acc, k) => {
+        acc[k] = { ...templateOptions[k] };
+        return acc;
+      }, {});
+      if (Object.keys(options).length === 0) return {};
 
-      // if the listener query param is set, set the listener to that
-      if (this.$route.query.listener) {
+      // if the listener query param is set, set the listener to that (when present)
+      if (this.$route.query.listener && options.Listener) {
         options.Listener.value = this.$route.query.listener;
       }
       return options;
