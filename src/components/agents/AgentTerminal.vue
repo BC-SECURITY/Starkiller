@@ -769,15 +769,21 @@ export default {
         // eslint-disable-next-line no-await-in-loop
         res = await this.checkTaskComplete(taskId);
         if (res) {
-          if (!res.toLowerCase().includes("job started")) {
+          const { output } = res;
+          if (!output.toLowerCase().includes("job started")) {
             if (config.print) {
-              this.addLine(res, "indent-5-spaces");
+              const taskName = res.module_name || res.task_name || "shell";
+              this.addLine(
+                `[*] Task ${res.id} (${taskName}) completed`,
+                "info-text",
+              );
+              this.addLine(output, "indent-5-spaces");
             }
             complete = true;
             break;
           } else if (!hasPrintedJobStarted) {
             // Print 'Job Started' only once
-            this.addLine(res, "indent-5-spaces");
+            this.addLine(output, "indent-5-spaces");
             hasPrintedJobStarted = true;
           }
         }
@@ -813,9 +819,9 @@ export default {
 
       if (complete) {
         // eslint-disable-next-line prefer-destructuring
-        this.currentDir = (await this.checkTaskComplete(response.id)).split(
-          "\r",
-        )[0];
+        this.currentDir = (
+          await this.checkTaskComplete(response.id)
+        ).output.split("\r")[0];
       }
     },
     // This is for when in the shell menu.
@@ -840,14 +846,14 @@ export default {
       }
 
       if (complete) {
-        this.addLine(complete, "indent-5-spaces");
+        this.addLine(complete.output, "indent-5-spaces");
       }
     },
     async checkTaskComplete(taskId) {
       try {
         const task = await agentTaskApi.getTask(this.agent.session_id, taskId);
         if (task.output) {
-          return task.output;
+          return task;
         }
 
         return false;

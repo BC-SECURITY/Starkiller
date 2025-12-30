@@ -51,7 +51,6 @@
           ref="pluginTaskTable"
           :plugin="plugin"
           :refresh-tasks="useHeader ? autoRefresh : refreshTasks"
-          :hide-columns="['id', 'task_name']"
           :selected-plugins="selectedPlugins"
           :selected-users="selectedUsers"
           :selected-tags="selectedTags"

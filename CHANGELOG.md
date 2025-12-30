@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+-   Added the ability to customize and persist table headers for Agent Tasks and Plugin Tasks tables.
+-   Added Task ID and Module Name/Task Name to the terminal output and task tab.
+-   Added display of task options (parameters) in the expanded task view as chips.
+-   Added a "Reset to Default" button to the header customization menu for all tables.
+
 ## [3.2.0] - 2025-12-11
 
 ### Added
