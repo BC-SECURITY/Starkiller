@@ -268,10 +268,43 @@
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
+            <v-subheader>Execution</v-subheader>
+            <v-list-item
+              v-show="supportsRerun(item)"
+              key="rerunTask"
+              link
+              @click="rerunTask(item)"
+            >
+              <v-list-item-title>
+                <v-icon small>fa-redo</v-icon>
+                Rerun Task
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider />
+            <v-subheader>Input</v-subheader>
+            <v-list-item key="clipboardInput" link @click="copyInput(item)">
+              <v-list-item-title>
+                <v-icon small>fa-paperclip</v-icon>
+                Copy to Clipboard
+              </v-list-item-title>
+            </v-list-item>
             <v-list-item key="downloadInput" link @click="downloadInput(item)">
               <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download Input
+                <v-icon small>fa-download</v-icon>
+                Download
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider v-if="hasOutput(item)" />
+            <v-subheader v-if="hasOutput(item)">Output</v-subheader>
+            <v-list-item
+              v-if="hasOutput(item)"
+              key="clipboardOutput"
+              link
+              @click="copyOutput(item)"
+            >
+              <v-list-item-title>
+                <v-icon small>fa-paperclip</v-icon>
+                Copy to Clipboard
               </v-list-item-title>
             </v-list-item>
             <v-list-item
@@ -281,37 +314,21 @@
               @click="downloadOutput(item)"
             >
               <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download Output
+                <v-icon small>fa-download</v-icon>
+                Download
               </v-list-item-title>
             </v-list-item>
-            <v-list-item key="clipboardInput" link @click="copyInput(item)">
-              <v-list-item-title>
-                <v-icon>fa-paperclip</v-icon>
-                Copy Input to Clipboard
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              v-if="hasOutput(item)"
-              key="clipboardOutput"
-              link
-              @click="copyOutput(item)"
-            >
-              <v-list-item-title>
-                <v-icon>fa-paperclip</v-icon>
-                Copy Output to Clipboard
-              </v-list-item-title>
-            </v-list-item>
-            <v-spacer />
+            <v-divider v-if="item.downloads.length > 0" />
+            <v-subheader v-if="item.downloads.length > 0">Files</v-subheader>
             <v-list-item
               v-for="download in item.downloads"
               :key="'download-' + download.id"
               link
               @click="downloadFile(download)"
             >
-              <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download {{ download.filename }}
+              <v-list-item-title title="Download file">
+                <v-icon small>fa-download</v-icon>
+                {{ download.filename }}
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -719,6 +736,19 @@ export default {
 
       // Need to call vue set to trigger reactivity on the table
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
+    },
+    async rerunTask(task) {
+      try {
+        const fullTask = await pluginApi.getTask(task.plugin_id, task.id);
+        const options = fullTask.options || {};
+        await pluginApi.executePlugin(fullTask.plugin_id, options);
+        this.$snack.info(`Plugin ${fullTask.plugin_id} rerun queued.`);
+      } catch (err) {
+        this.$snack.error(`Error rerunning task: ${err}`);
+      }
+    },
+    supportsRerun() {
+      return true;
     },
     async handleItemExpanded({ item, value }) {
       if (value && !this.expandedTasks[item.uniqueId].fullTaskLoaded) {

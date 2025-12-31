@@ -277,10 +277,43 @@
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
+            <v-subheader>Execution</v-subheader>
+            <v-list-item
+              v-show="supportsRerun(item)"
+              key="rerunTask"
+              link
+              @click="rerunTask(item)"
+            >
+              <v-list-item-title>
+                <v-icon small>fa-redo</v-icon>
+                Rerun Task
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider />
+            <v-subheader>Input</v-subheader>
+            <v-list-item key="clipboardInput" link @click="copyInput(item)">
+              <v-list-item-title>
+                <v-icon small>fa-paperclip</v-icon>
+                Copy to Clipboard
+              </v-list-item-title>
+            </v-list-item>
             <v-list-item key="downloadInput" link @click="downloadInput(item)">
               <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download Input
+                <v-icon small>fa-download</v-icon>
+                Download
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider v-if="hasOutput(item)" />
+            <v-subheader v-if="hasOutput(item)">Output</v-subheader>
+            <v-list-item
+              v-if="hasOutput(item)"
+              key="clipboardOutput"
+              link
+              @click="copyOutput(item)"
+            >
+              <v-list-item-title>
+                <v-icon small>fa-paperclip</v-icon>
+                Copy to Clipboard
               </v-list-item-title>
             </v-list-item>
             <v-list-item
@@ -290,37 +323,21 @@
               @click="downloadOutput(item)"
             >
               <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download Output
+                <v-icon small>fa-download</v-icon>
+                Download
               </v-list-item-title>
             </v-list-item>
-            <v-list-item key="clipboardInput" link @click="copyInput(item)">
-              <v-list-item-title>
-                <v-icon>fa-paperclip</v-icon>
-                Copy Input to Clipboard
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              v-if="hasOutput(item)"
-              key="clipboardOutput"
-              link
-              @click="copyOutput(item)"
-            >
-              <v-list-item-title>
-                <v-icon>fa-paperclip</v-icon>
-                Copy Output to Clipboard
-              </v-list-item-title>
-            </v-list-item>
-            <v-spacer />
+            <v-divider v-if="item.downloads.length > 0" />
+            <v-subheader v-if="item.downloads.length > 0">Files</v-subheader>
             <v-list-item
               v-for="download in item.downloads"
               :key="'download-' + download.id"
               link
               @click="downloadFile(download)"
             >
-              <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download {{ download.filename }}
+              <v-list-item-title title="Download file">
+                <v-icon small>fa-download</v-icon>
+                {{ download.filename }}
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -344,6 +361,7 @@ import DownloadMixin from "@/mixins/download-stager";
 import { useApplicationStore } from "@/stores/application-module";
 import * as downloadApi from "@/api/download-api";
 import * as agentTaskApi from "@/api/agent-task-api";
+import * as moduleApi from "@/api/module-api";
 
 export default {
   name: "AgentTasksTable",
@@ -745,6 +763,45 @@ export default {
         // Need to call vue set to trigger reactivity on the table
         Vue.set(this.tasks, this.tasks.indexOf(item), item);
       }
+    },
+    async rerunTask(task) {
+      try {
+        const fullTask = await agentTaskApi.getTask(task.agent_id, task.id);
+        if (fullTask.module_name) {
+          const options = {
+            ...(fullTask.options || {}),
+            Agent: fullTask.agent_id,
+          };
+          await moduleApi.executeModule(fullTask.module_name, options);
+          this.$snack.info(`Module ${fullTask.module_name} rerun queued.`);
+        } else if (fullTask.task_name === "TASK_SHELL") {
+          await agentTaskApi.shell(fullTask.agent_id, fullTask.full_input);
+          this.$snack.info("Shell command rerun queued.");
+        } else if (fullTask.task_name === "TASK_SYSINFO") {
+          await agentTaskApi.sysinfo(fullTask.agent_id);
+          this.$snack.info("Sysinfo task rerun queued.");
+        } else {
+          this.$snack.error(
+            `Rerunning ${fullTask.task_name} is not supported.`,
+          );
+        }
+      } catch (err) {
+        this.$snack.error(`Error rerunning task: ${err}`);
+      }
+    },
+    supportsRerun(item) {
+      if (item.module_name) {
+        return true;
+      }
+      if (
+        item.task_name === "shell" ||
+        item.task_name === "TASK_SHELL" ||
+        item.task_name === "sysinfo" ||
+        item.task_name === "TASK_SYSINFO"
+      ) {
+        return true;
+      }
+      return false;
     },
     handlePageChange() {
       this.debouncedGetTasks();

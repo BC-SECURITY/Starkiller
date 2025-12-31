@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added Task ID and Module Name/Task Name to the terminal output and task tab.
 -   Added display of task options (parameters) in the expanded task view as chips.
 -   Added a "Reset to Default" button to the header customization menu for all tables.
+-   Added "Rerun Task" functionality to Agent and Plugin task tables
+-   Reorganized task action menus into groups (Execution, Input, Output, Files)
 
 ## [3.2.0] - 2025-12-11
 
