@@ -192,3 +192,10 @@ export function addTag(agentId, taskId, tag) {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function stopTask(agentId, taskId) {
+  return axios
+    .post(`/agents/${agentId}/tasks/stop_job`, { id: taskId })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}

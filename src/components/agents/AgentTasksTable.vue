@@ -289,6 +289,12 @@
                 Rerun Task
               </v-list-item-title>
             </v-list-item>
+            <v-list-item key="stopTask" link @click="stopTask(item)">
+              <v-list-item-title>
+                <v-icon small>fa-stop</v-icon>
+                Stop Task
+              </v-list-item-title>
+            </v-list-item>
             <v-divider />
             <v-subheader>Input</v-subheader>
             <v-list-item key="clipboardInput" link @click="copyInput(item)">
@@ -802,6 +808,14 @@ export default {
         return true;
       }
       return false;
+    },
+    async stopTask(task) {
+      try {
+        await agentTaskApi.stopTask(task.agent_id, task.id);
+        this.$snack.success(`Task ${task.id} stop queued.`);
+      } catch (err) {
+        this.$snack.error(`Error stopping task: ${err}`);
+      }
     },
     handlePageChange() {
       this.debouncedGetTasks();

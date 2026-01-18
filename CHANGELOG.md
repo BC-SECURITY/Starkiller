@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added a "Reset to Default" button to the header customization menu for all tables.
 -   Added "Rerun Task" functionality to Agent and Plugin task tables
 -   Reorganized task action menus into groups (Execution, Input, Output, Files)
+-   Added Stop Task option for jobs
 
 ## [3.2.0] - 2025-12-11
 
