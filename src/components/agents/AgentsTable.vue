@@ -5,32 +5,12 @@
       style="display: flex; flex-direction: row-reverse"
     >
       <div style="height: 40px" />
-      <v-menu v-model="showHeaderMenu" offset-y :close-on-content-click="false">
-        <template #activator="{ on, attrs }">
-          <v-btn text icon x-small v-bind="attrs" v-on="on">
-            <v-icon>mdi-format-columns</v-icon>
-          </v-btn>
-        </template>
-        <v-list style="overflow-y: auto" max-height="400px">
-          <v-list-item>
-            <v-checkbox v-model="selectedAll" :label="'Select All'" />
-          </v-list-item>
-          <v-divider class="pb-4" />
-          <v-list-item v-for="(item, index) in selectableHeaders" :key="index">
-            <v-checkbox
-              v-model="selectedHeadersTemp"
-              :label="item.text"
-              :value="item"
-            />
-          </v-list-item>
-        </v-list>
-        <v-card class="pt-4">
-          <v-btn text class="mb-4" @click="showHeaderMenu = false">
-            Cancel
-          </v-btn>
-          <v-btn text class="ml-4 mb-4" @click="submitHeaderForm"> Save </v-btn>
-        </v-card>
-      </v-menu>
+      <header-menu
+        :headers-full="headersFull"
+        :initial-selected-headers="selectedHeadersTemp"
+        :default-headers="headersFull.filter((h) => h.defaultHeader === true)"
+        @submit="submitHeaderForm"
+      />
     </div>
     <v-data-table
       v-model="selected"
@@ -138,6 +118,7 @@
 import moment from "moment";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TagViewer from "@/components/TagViewer.vue";
+import HeaderMenu from "@/components/HeaderMenu.vue";
 import * as agentApi from "@/api/agent-api";
 import { useAgentStore } from "@/stores/agent-module";
 import { useApplicationStore } from "@/stores/application-module";
@@ -148,6 +129,7 @@ export default {
   components: {
     DateTimeDisplay,
     TagViewer,
+    HeaderMenu,
   },
   props: {
     input: {
@@ -257,7 +239,6 @@ export default {
       ],
       selectedHeadersTemp: [],
       selected: [],
-      showHeaderMenu: false,
       refreshInterval: null,
       moment,
     };
@@ -275,19 +256,6 @@ export default {
     agentsStatus() {
       return this.agentStore.status;
     },
-    selectedAll: {
-      set(val) {
-        this.selectedHeadersTemp = [...this.staticHeaders];
-        if (val) {
-          this.headersFull.forEach((h) => {
-            this.selectedHeadersTemp.push(h);
-          });
-        }
-      },
-      get() {
-        return this.selectedHeadersTemp.length === this.count;
-      },
-    },
     headers() {
       return this.headersFull
         .filter(
@@ -297,12 +265,6 @@ export default {
             ) > -1,
         )
         .sort((a, b) => a.order - b.order);
-    },
-    selectableHeaders() {
-      return this.headersFull.filter((h) => !h.alwaysShow);
-    },
-    staticHeaders() {
-      return this.headersFull.filter((h) => h.alwaysShow);
     },
     sortedAgents() {
       let sorted = this.agents.slice();
@@ -357,7 +319,9 @@ export default {
         (h) => h.defaultHeader === true,
       );
     }
-    this.selectedHeadersTemp = [...this.applicationStore.agentHeaders];
+    this.selectedHeadersTemp = this.headersFull.filter((h) =>
+      this.applicationStore.agentHeaders.some((h2) => h2.text === h.text),
+    );
   },
   methods: {
     deleteTag(agent, tag) {
@@ -389,9 +353,17 @@ export default {
         })
         .catch((err) => this.$snack.error(`Error: ${err}`));
     },
-    submitHeaderForm() {
+    submitHeaderForm(val) {
+      this.selectedHeadersTemp = val;
       this.applicationStore.agentHeaders = [...this.selectedHeadersTemp];
-      this.showHeaderMenu = false;
+    },
+    resetHeaders() {
+      this.applicationStore.agentHeaders = this.headersFull.filter(
+        (h) => h.defaultHeader === true,
+      );
+      this.selectedHeadersTemp = this.headersFull.filter((h) =>
+        this.applicationStore.agentHeaders.some((h2) => h2.text === h.text),
+      );
     },
     getAgents() {
       this.agentStore.getAgents();

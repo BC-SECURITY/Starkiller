@@ -51,7 +51,7 @@
           ref="agentTasksTable"
           :agent="agent"
           :refresh-tasks="useHeader ? autoRefresh : refreshTasks"
-          :hide-columns="['id', 'task_name']"
+          :hide-columns="['id']"
           :selected-agents="selectedAgents"
           :selected-users="selectedUsers"
           :selected-tags="selectedTags"

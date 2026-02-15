@@ -1,5 +1,17 @@
 <template>
   <div>
+    <div
+      class="ml-3 mr-3 align-center"
+      style="display: flex; flex-direction: row-reverse"
+    >
+      <div style="height: 40px" />
+      <header-menu
+        :headers-full="headersFull"
+        :initial-selected-headers="selectedHeadersTemp"
+        :default-headers="headersFull.filter((h) => h.defaultHeader === true)"
+        @submit="submitHeaderForm"
+      />
+    </div>
     <v-pagination
       v-model="currentPage"
       :length="totalPages"
@@ -18,104 +30,195 @@
       :loading="loading"
       :page="currentPage"
       show-expand
+      @item-expanded="handleItemExpanded"
       @update:options="handleOptionsChange"
     >
-      <template #expanded-item="{ headers: scopedHeader, item }">
-        <td :colspan="scopedHeader.length">
-          <div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <div>
-                <tooltip-button
-                  :icon="item.expandedInput ? 'fa-minus' : 'fa-plus'"
-                  text="See Full Input"
-                  x-small
-                  @click="toggleSeeFullInput(item)"
-                />
-                <span v-if="item.expandedInput">Showing full input</span>
-              </div>
-              <v-switch
-                v-model="expandedTasks[item.uniqueId].backgroundColor"
-                false-value="white"
-                true-value="black"
-                label="Dark Background"
-                @change="updateTaskBackgroundColor(item)"
-              />
-            </div>
-            <p><b>Task Input:</b></p>
-            <p
-              :class="
-                'mono ' +
-                (expandedTasks[item.uniqueId].backgroundColor === 'white'
-                  ? 'font-black'
-                  : 'font-white')
-              "
-              :style="
-                'background-color: ' +
-                expandedTasks[item.uniqueId].backgroundColor +
-                ';'
-              "
-            >
-              {{
-                addBlankLines(
-                  item.expandedInput
-                    ? expandedTasks[item.uniqueId].full_input
-                    : item.input,
-                )
-              }}
-            </p>
-            <p><b>Task Output:</b></p>
-            <div
-              v-if="
-                item.downloads.length > 0 &&
-                item.downloads.some((d) =>
-                  d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/),
-                )
-              "
-            >
-              <v-btn text x-small @click="getImagesForTask(item)">
-                View Images
-              </v-btn>
-              <div>
-                <v-img
-                  v-for="download in item.downloads"
-                  :key="download.id"
-                  :src="imageData(item, download)"
-                  :alt="download.filename"
-                  :max-width="700"
-                  contain
-                />
-              </div>
-            </div>
-            <div
-              :class="
-                'mono ' +
-                (expandedTasks[item.uniqueId].backgroundColor === 'white'
-                  ? 'font-black'
-                  : 'font-white')
-              "
-              :style="
-                'background-color: ' +
-                expandedTasks[item.uniqueId].backgroundColor +
-                ';'
-              "
-            >
-              <!-- TODO Option for original output -->
-              <!-- eslint-disable vue/no-v-html -->
-              <div
-                v-if="expandedTasks[item.uniqueId].htmlOutput"
-                v-html="expandedTasks[item.uniqueId].htmlOutput"
-              />
-              <div v-else>
-                {{ addBlankLines(item.output) }}
-              </div>
-            </div>
-          </div>
+      <template #expanded-item="{ headers: scopedHeaders, item }">
+        <td :colspan="scopedHeaders.length" class="pa-4">
+          <v-card flat>
+            <v-card-title class="subtitle-1 pb-4">
+              <v-row no-gutters align="center">
+                <v-col cols="4">
+                  <span class="font-weight-bold">Task #{{ item.id }}</span>
+                  <v-chip
+                    v-if="item.module_name || item.task_name"
+                    small
+                    class="ml-2"
+                    color="primary"
+                    outlined
+                  >
+                    {{ item.module_name || item.task_name }}
+                  </v-chip>
+                </v-col>
+                <v-col
+                  v-if="
+                    (expandedTasks[item.uniqueId].options &&
+                      Object.keys(expandedTasks[item.uniqueId].options).length >
+                        0) ||
+                    (expandedTasks[item.uniqueId].module_options &&
+                      Object.keys(expandedTasks[item.uniqueId].module_options)
+                        .length > 0)
+                  "
+                  cols="6"
+                >
+                  <div class="d-flex flex-wrap gap-2">
+                    <span class="font-weight-bold ml-2 mr-2 subtitle-1"
+                      >Options:</span
+                    >
+                    <v-chip
+                      v-for="(value, key) in expandedTasks[item.uniqueId]
+                        .options || expandedTasks[item.uniqueId].module_options"
+                      :key="key"
+                      small
+                      label
+                      class="mr-1 mb-1"
+                    >
+                      <span class="subtitle-2 font-weight-bold mr-1"
+                        >{{ key }}:</span
+                      >
+                      <span class="subtitle-2">{{ value }}</span>
+                    </v-chip>
+                  </div>
+                </v-col>
+                <v-col class="text-right">
+                  <v-switch
+                    v-model="expandedTasks[item.uniqueId].backgroundColor"
+                    false-value="white"
+                    true-value="black"
+                    label="Dark Mode Output"
+                    hide-details
+                    class="mt-0 pt-0 d-inline-block"
+                    @change="updateTaskBackgroundColor(item)"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-title>
+            <v-divider />
+
+            <v-card-text>
+              <v-row dense>
+                <v-col cols="12">
+                  <div class="mb-4">
+                    <div class="d-flex align-center mb-1">
+                      <span class="subtitle-2 font-weight-bold"
+                        >Task Input</span
+                      >
+                      <v-spacer />
+                      <tooltip-button
+                        :icon="item.expandedInput ? 'fa-minus' : 'fa-plus'"
+                        :text="
+                          item.expandedInput ? 'Show Less' : 'See Full Input'
+                        "
+                        x-small
+                        @click="toggleSeeFullInput(item)"
+                      />
+                    </div>
+                    <div
+                      :class="
+                        'mono rounded pa-2 ' +
+                        (expandedTasks[item.uniqueId].backgroundColor ===
+                        'white'
+                          ? 'font-black'
+                          : 'font-white')
+                      "
+                      :style="
+                        'background-color: ' +
+                        expandedTasks[item.uniqueId].backgroundColor +
+                        ';'
+                      "
+                    >
+                      {{
+                        addBlankLines(
+                          item.expandedInput
+                            ? expandedTasks[item.uniqueId].full_input
+                            : item.input,
+                        )
+                      }}
+                    </div>
+                  </div>
+
+                  <div v-if="hasOutput(item)">
+                    <div class="d-flex align-center mb-1">
+                      <span class="subtitle-2 font-weight-bold"
+                        >Task Output</span
+                      >
+                      <v-spacer />
+                      <v-btn
+                        v-if="
+                          item.downloads.length > 0 &&
+                          item.downloads.some((d) =>
+                            d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/),
+                          )
+                        "
+                        text
+                        x-small
+                        @click="getImagesForTask(item)"
+                      >
+                        View Images
+                      </v-btn>
+                    </div>
+
+                    <div
+                      v-if="
+                        item.downloads.length > 0 &&
+                        item.downloads.some((d) =>
+                          d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/),
+                        )
+                      "
+                    >
+                      <div class="d-flex flex-wrap gap-2 mb-2">
+                        <v-img
+                          v-for="download in item.downloads"
+                          :key="download.id"
+                          :src="imageData(item, download)"
+                          :alt="download.filename"
+                          :max-width="400"
+                          class="grey lighten-2 rounded mb-2"
+                          contain
+                        >
+                          <template #placeholder>
+                            <v-row
+                              class="fill-height ma-0"
+                              align="center"
+                              justify="center"
+                            >
+                              <v-progress-circular
+                                indeterminate
+                                color="grey lighten-5"
+                              />
+                            </v-row>
+                          </template>
+                        </v-img>
+                      </div>
+                    </div>
+
+                    <div
+                      :class="
+                        'mono rounded pa-2 ' +
+                        (expandedTasks[item.uniqueId].backgroundColor ===
+                        'white'
+                          ? 'font-black'
+                          : 'font-white')
+                      "
+                      :style="
+                        'background-color: ' +
+                        expandedTasks[item.uniqueId].backgroundColor +
+                        ';'
+                      "
+                    >
+                      <div
+                        v-if="expandedTasks[item.uniqueId].htmlOutput"
+                        v-html="expandedTasks[item.uniqueId].htmlOutput"
+                      />
+                      <div v-else>
+                        {{ addBlankLines(item.output) }}
+                      </div>
+                    </div>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
         </td>
       </template>
       <template #item.status="{ item }">
@@ -135,13 +238,16 @@
           fa-infinity
         </v-icon>
       </template>
+      <template v-if="!plugin" #item.plugin_id="{ item }">
+        <router-link
+          style="color: inherit"
+          :to="{ name: 'pluginEdit', params: { id: item.plugin_id } }"
+        >
+          {{ item.plugin_id }}
+        </router-link>
+      </template>
       <template #item.input="{ item }">
         <span>{{ truncateMessage(item.input) }}</span>
-      </template>
-      <template #item.task_name="{ item }">
-        <span>{{
-          item.module_name == null ? item.task_name : item.module_name
-        }}</span>
       </template>
       <template #item.updated_at="{ item }">
         <date-time-display :timestamp="item.updated_at" />
@@ -162,10 +268,43 @@
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
+            <v-subheader>Execution</v-subheader>
+            <v-list-item
+              v-show="supportsRerun(item)"
+              key="rerunTask"
+              link
+              @click="rerunTask(item)"
+            >
+              <v-list-item-title>
+                <v-icon small>fa-redo</v-icon>
+                Rerun Task
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider />
+            <v-subheader>Input</v-subheader>
+            <v-list-item key="clipboardInput" link @click="copyInput(item)">
+              <v-list-item-title>
+                <v-icon small>fa-paperclip</v-icon>
+                Copy to Clipboard
+              </v-list-item-title>
+            </v-list-item>
             <v-list-item key="downloadInput" link @click="downloadInput(item)">
               <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download Input
+                <v-icon small>fa-download</v-icon>
+                Download
+              </v-list-item-title>
+            </v-list-item>
+            <v-divider v-if="hasOutput(item)" />
+            <v-subheader v-if="hasOutput(item)">Output</v-subheader>
+            <v-list-item
+              v-if="hasOutput(item)"
+              key="clipboardOutput"
+              link
+              @click="copyOutput(item)"
+            >
+              <v-list-item-title>
+                <v-icon small>fa-paperclip</v-icon>
+                Copy to Clipboard
               </v-list-item-title>
             </v-list-item>
             <v-list-item
@@ -175,37 +314,21 @@
               @click="downloadOutput(item)"
             >
               <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download Output
+                <v-icon small>fa-download</v-icon>
+                Download
               </v-list-item-title>
             </v-list-item>
-            <v-list-item key="clipboardInput" link @click="copyInput(item)">
-              <v-list-item-title>
-                <v-icon>fa-paperclip</v-icon>
-                Copy Input to Clipboard
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              v-if="hasOutput(item)"
-              key="clipboardOutput"
-              link
-              @click="copyOutput(item)"
-            >
-              <v-list-item-title>
-                <v-icon>fa-paperclip</v-icon>
-                Copy Output to Clipboard
-              </v-list-item-title>
-            </v-list-item>
-            <v-spacer />
+            <v-divider v-if="item.downloads.length > 0" />
+            <v-subheader v-if="item.downloads.length > 0">Files</v-subheader>
             <v-list-item
               v-for="download in item.downloads"
               :key="'download-' + download.id"
               link
               @click="downloadFile(download)"
             >
-              <v-list-item-title>
-                <v-icon>fa-download</v-icon>
-                Download {{ download.filename }}
+              <v-list-item-title title="Download file">
+                <v-icon small>fa-download</v-icon>
+                {{ download.filename }}
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -224,7 +347,9 @@ import { default as AnsiUp } from "ansi_up";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TooltipButton from "@/components/TooltipButton.vue";
 import TagViewer from "@/components/TagViewer.vue";
+import HeaderMenu from "@/components/HeaderMenu.vue";
 import DownloadMixin from "@/mixins/download-stager";
+import { useApplicationStore } from "@/stores/application-module";
 import * as downloadApi from "@/api/download-api";
 import * as pluginApi from "@/api/plugin-api";
 
@@ -234,6 +359,7 @@ export default {
     DateTimeDisplay,
     TagViewer,
     TooltipButton,
+    HeaderMenu,
   },
   mixins: [DownloadMixin],
   props: {
@@ -285,26 +411,84 @@ export default {
       refreshInterval: null,
       expandedTasks: {},
       debouncedGetTasks: debounce(this.getTasks, 500),
-    };
-  },
-  computed: {
-    headers() {
-      return [
-        { text: "Task ID", value: "id", sortable: true },
-        { text: "Status", value: "status", sortable: true },
-        { text: "Plugin", value: "plugin_id", sortable: true },
-        { text: "Task Input", value: "input", sortable: false },
-        { text: "Task Name", value: "task_name", sortable: false },
-        { text: "User", value: "username", sortable: false },
-        { text: "Updated At", value: "updated_at", sortable: true },
+      selectedHeadersTemp: [],
+      headersFull: [
+        {
+          text: "Task ID",
+          value: "id",
+          sortable: true,
+          defaultHeader: false,
+          alwaysShow: false,
+          align: "center",
+          order: 1,
+        },
+        {
+          text: "Status",
+          value: "status",
+          sortable: true,
+          defaultHeader: true,
+          order: 2,
+        },
+        {
+          text: "Plugin",
+          value: "plugin_id",
+          sortable: true,
+          defaultHeader: true,
+          order: 3,
+        },
+        {
+          text: "Task Input",
+          value: "input",
+          sortable: false,
+          defaultHeader: false,
+          order: 5,
+        },
+        {
+          text: "User",
+          value: "username",
+          sortable: false,
+          defaultHeader: true,
+          order: 6,
+        },
+        {
+          text: "Updated At",
+          value: "updated_at",
+          sortable: true,
+          defaultHeader: true,
+          order: 7,
+        },
         {
           text: "Tags",
           value: "tags",
           sortable: false,
           width: 400,
+          defaultHeader: true,
+          order: 8,
         },
-        { text: "Actions", value: "actions", sortable: false },
-      ].filter((h) => !this.hideColumns.includes(h.value));
+        {
+          text: "Actions",
+          value: "actions",
+          sortable: false,
+          defaultHeader: true,
+          alwaysShow: true,
+          order: 9,
+        },
+      ],
+    };
+  },
+  computed: {
+    applicationStore() {
+      return useApplicationStore();
+    },
+    headers() {
+      return this.headersFull
+        .filter(
+          (h) =>
+            this.applicationStore.pluginTaskHeaders.findIndex(
+              (h2) => h2.text === h.text,
+            ) > -1,
+        )
+        .sort((a, b) => a.order - b.order);
     },
   },
   watch: {
@@ -344,13 +528,35 @@ export default {
       this.debouncedGetTasks();
     },
   },
-  async mounted() {
+  mounted() {
     this.debouncedGetTasks();
+    if (this.applicationStore.pluginTaskHeaders.length === 0) {
+      this.applicationStore.pluginTaskHeaders = this.headersFull.filter(
+        (h) => h.defaultHeader === true,
+      );
+    }
+    this.selectedHeadersTemp = this.headersFull.filter((h) =>
+      this.applicationStore.pluginTaskHeaders.some((h2) => h2.text === h.text),
+    );
   },
   beforeDestroy() {
     clearInterval(this.refreshInterval);
   },
   methods: {
+    submitHeaderForm(val) {
+      this.selectedHeadersTemp = val;
+      this.applicationStore.pluginTaskHeaders = [...this.selectedHeadersTemp];
+    },
+    resetHeaders() {
+      this.applicationStore.pluginTaskHeaders = this.headersFull.filter(
+        (h) => h.defaultHeader === true,
+      );
+      this.selectedHeadersTemp = this.headersFull.filter((h) =>
+        this.applicationStore.pluginTaskHeaders.some(
+          (h2) => h2.text === h.text,
+        ),
+      );
+    },
     // eslint-disable-next-line no-unused-vars
     // from https://github.com/xpl/ansicolor
     stripAnsi(text) {
@@ -430,9 +636,12 @@ export default {
     },
     async downloadInput(task) {
       if (task.input) {
-        if (!this.expandedTasks[task.uniqueId]) {
-          const data = await pluginApi.getTask(task.agent_id, task.id);
-          this.expandedTasks[task.uniqueId] = data;
+        if (!this.expandedTasks[task.uniqueId]?.full_input) {
+          const data = await pluginApi.getTask(task.plugin_id, task.id);
+          Vue.set(this.expandedTasks, task.uniqueId, {
+            ...this.expandedTasks[task.uniqueId],
+            ...data,
+          });
         }
 
         this.downloadText(
@@ -448,9 +657,12 @@ export default {
     },
     async copyInput(task) {
       if (task.input) {
-        if (!this.expandedTasks[task.uniqueId]) {
+        if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await pluginApi.getTask(task.plugin_id, task.id);
-          this.expandedTasks[task.uniqueId] = data;
+          Vue.set(this.expandedTasks, task.uniqueId, {
+            ...this.expandedTasks[task.uniqueId],
+            ...data,
+          });
         }
 
         try {
@@ -486,12 +698,13 @@ export default {
       return null;
     },
     async getImagesForTask(task) {
-      if (!this.expandedTasks[task.uniqueId]) {
+      if (!this.expandedTasks[task.uniqueId].imagesRetrieved) {
         const data = await pluginApi.getTask(task.plugin_id, task.id);
-        this.expandedTasks[task.uniqueId] = {
+        Vue.set(this.expandedTasks, task.uniqueId, {
           ...this.expandedTasks[task.uniqueId],
           ...data,
-        };
+          imagesRetrieved: true,
+        });
       }
 
       for (let i = 0; i < task.downloads.length; i++) {
@@ -510,11 +723,11 @@ export default {
     async toggleSeeFullInput(task) {
       if (!task.expandedInput) {
         const data = await pluginApi.getTask(task.plugin_id, task.id);
-        this.expandedTasks[task.uniqueId] = {
+        Vue.set(this.expandedTasks, task.uniqueId, {
           ...this.expandedTasks[task.uniqueId],
           ...data,
           expandedInput: true,
-        };
+        });
         task.expandedInput = true;
       } else {
         this.expandedTasks[task.uniqueId].expandedInput = false;
@@ -523,6 +736,31 @@ export default {
 
       // Need to call vue set to trigger reactivity on the table
       Vue.set(this.tasks, this.tasks.indexOf(task), task);
+    },
+    async rerunTask(task) {
+      try {
+        const fullTask = await pluginApi.getTask(task.plugin_id, task.id);
+        const options = fullTask.options || {};
+        await pluginApi.executePlugin(fullTask.plugin_id, options);
+        this.$snack.info(`Plugin ${fullTask.plugin_id} rerun queued.`);
+      } catch (err) {
+        this.$snack.error(`Error rerunning task: ${err}`);
+      }
+    },
+    supportsRerun() {
+      return true;
+    },
+    async handleItemExpanded({ item, value }) {
+      if (value && !this.expandedTasks[item.uniqueId].fullTaskLoaded) {
+        const data = await pluginApi.getTask(item.plugin_id, item.id);
+        Vue.set(this.expandedTasks, item.uniqueId, {
+          ...this.expandedTasks[item.uniqueId],
+          ...data,
+          fullTaskLoaded: true,
+        });
+        // Need to call vue set to trigger reactivity on the table
+        Vue.set(this.tasks, this.tasks.indexOf(item), item);
+      }
     },
     handlePageChange() {
       this.debouncedGetTasks();
@@ -578,7 +816,7 @@ export default {
         task.uniqueId = `${task.plugin_id}-${task.id}`;
 
         if (!this.expandedTasks[task.uniqueId]) {
-          this.expandedTasks[task.uniqueId] = {};
+          Vue.set(this.expandedTasks, task.uniqueId, {});
         }
 
         if (this.expandedTasks[task.uniqueId].expandedInput) {
@@ -599,7 +837,6 @@ export default {
         return task;
       });
 
-      this.tasks = response.records;
       this.loading = false;
     },
   },
