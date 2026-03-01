@@ -92,7 +92,11 @@
       </template>
 
       <template #expanded-item="{ headers: scopedHeaders, item }">
-        <td :colspan="scopedHeaders.length" class="pa-4">
+        <td
+          v-if="expandedJobs[item.id]"
+          :colspan="scopedHeaders.length"
+          class="pa-4"
+        >
           <div>
             <div class="d-flex align-center mb-2">
               <v-btn
@@ -240,12 +244,6 @@ export default {
       immediate: true,
     },
   },
-  mounted() {
-    this.refreshJobs();
-    if (this.autoRefresh) {
-      this.startAutoRefresh();
-    }
-  },
   beforeDestroy() {
     this.stopAutoRefresh();
   },
@@ -373,6 +371,8 @@ export default {
     },
     parseGetJobsOutput(output) {
       // Parse the table output from TASK_GETJOBS
+      // The agent labels the column "Task ID" but it represents the
+      // background job/thread ID, stored here as jobId.
       // Expected format:
       // Task ID | Status
       // --------------------
@@ -441,6 +441,7 @@ export default {
       return colors[status] || "grey";
     },
     formatDate(date) {
+      if (!date) return "N/A";
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
     truncateInput(input) {
@@ -483,6 +484,7 @@ export default {
 };
 </script>
 
+<!-- Unscoped so styles apply inside v-html rendered content -->
 <style>
 .text-truncate {
   overflow: hidden;
