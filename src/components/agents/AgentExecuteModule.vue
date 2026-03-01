@@ -453,7 +453,7 @@ export default {
         const displayName =
           this.agents.length > 1
             ? `${this.agents.length} agents.`
-            : `${this.agents[0]}.`;
+            : `${this.agents[0].name}`;
         this.$snack.info(`Module execution queued for ${displayName}`);
         this.selectedItem = {};
         this.selectedModule = "";
