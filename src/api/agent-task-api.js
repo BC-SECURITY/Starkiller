@@ -159,6 +159,10 @@ export function updateSleep(sessionId, delay, jitter) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
+/**
+ * Task the agent to report its background jobs.
+ * @param {string} sessionId agent sessionId
+ */
 export function getJobs(sessionId) {
   return axios
     .post(`/agents/${sessionId}/tasks/jobs`)
