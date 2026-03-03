@@ -159,9 +159,26 @@ export function updateSleep(sessionId, delay, jitter) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
+/**
+ * Task the agent to report its background jobs.
+ * Returns the created task object; poll with getTask() for actual results.
+ * @param {string} sessionId agent sessionId
+ */
 export function getJobs(sessionId) {
   return axios
     .post(`/agents/${sessionId}/tasks/jobs`)
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+/**
+ * Kill a background job on an agent.
+ * @param {string} sessionId agent sessionId
+ * @param {number} jobId job ID to kill
+ */
+export function killJob(sessionId, jobId) {
+  return axios
+    .post(`/agents/${sessionId}/tasks/kill_job`, { id: jobId })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

@@ -16,6 +16,10 @@
               Tasks
               <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
             </v-tab>
+            <v-tab key="jobs" href="#jobs">
+              Jobs
+              <v-icon x-small class="ml-1"> fa-cogs </v-icon>
+            </v-tab>
             <v-tab key="view" href="#view">
               View
               <v-icon x-small class="ml-1"> fa-eye </v-icon>
@@ -207,6 +211,16 @@
                 </v-card>
               </v-tab-item>
               <v-tab-item
+                key="jobs"
+                :value="'jobs'"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card flat>
+                  <agent-jobs :agent="agent" />
+                </v-card>
+              </v-tab-item>
+              <v-tab-item
                 key="view"
                 :value="'view'"
                 :transition="false"
@@ -239,6 +253,7 @@
 import AgentForm from "@/components/agents/AgentForm.vue";
 import AgentInteract from "@/components/agents/AgentInteract.vue";
 import AgentTasksList from "@/components/agents/AgentTasksList.vue";
+import AgentJobs from "@/components/agents/AgentJobs.vue";
 import AgentExecuteModule from "@/components/agents/AgentExecuteModule.vue";
 import AgentFileBrowser from "@/components/agents/AgentFileBrowser.vue";
 import AgentTerminal from "@/components/agents/AgentTerminal.vue";
@@ -262,6 +277,7 @@ export default {
     AgentExecuteModule,
     AgentFileBrowser,
     AgentTasksList,
+    AgentJobs,
     AgentTerminal,
     AgentUploadDialog,
     AgentDownloadDialog,
@@ -277,11 +293,9 @@ export default {
       nameLoading: false,
       uploadLoading: false,
       downloadLoading: false,
-      scriptImportLoading: false,
       nameDialog: false,
       uploadDialog: false,
       downloadDialog: false,
-      scriptImportDialog: false,
       initialized: true,
       errorState: false,
       paneSize: 100,
