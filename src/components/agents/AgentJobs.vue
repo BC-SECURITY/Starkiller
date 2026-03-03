@@ -3,12 +3,7 @@
     <div class="d-flex align-center mb-4">
       <h3>Background Jobs</h3>
       <v-spacer />
-      <v-btn
-        small
-        color="primary"
-        :loading="loading"
-        @click="refreshJobs"
-      >
+      <v-btn small color="primary" :loading="loading" @click="refreshJobs">
         <v-icon left small>fa-sync</v-icon>
         Refresh
       </v-btn>
@@ -52,11 +47,7 @@
       no-data-text="No background jobs found. Jobs will appear here when you run modules with Background=true."
     >
       <template #item.status="{ item }">
-        <v-chip
-          :color="getStatusColor(item.agentStatus)"
-          small
-          dark
-        >
+        <v-chip :color="getStatusColor(item.agentStatus)" small dark>
           {{ item.agentStatus }}
         </v-chip>
       </template>
@@ -67,11 +58,7 @@
 
       <template #item.actions="{ item }">
         <v-btn
-          v-if="
-            item.agentStatus === 'running' ||
-            item.agentStatus === 'started' ||
-            item.agentStatus === 'continuous'
-          "
+          v-if="isKillable(item.agentStatus)"
           small
           color="error"
           :loading="killingJob === item.id"
@@ -81,12 +68,15 @@
           Kill
         </v-btn>
         <span v-else class="grey--text">
-          {{ item.agentStatus === 'completed' ? 'Completed' : 'N/A' }}
+          {{ item.agentStatus === "completed" ? "Completed" : "N/A" }}
         </span>
       </template>
 
       <template #item.input="{ item }">
-        <span class="text-truncate" style="max-width: 300px; display: inline-block;">
+        <span
+          class="text-truncate"
+          style="max-width: 300px; display: inline-block"
+        >
           {{ truncateInput(item.input) }}
         </span>
       </template>
@@ -102,7 +92,9 @@
               <v-btn
                 x-small
                 text
-                @click="downloadTaskInput(item)"
+                @click="
+                  downloadText(item.input || '', `task-${item.id}-input.txt`)
+                "
               >
                 <v-icon left small>fa-download</v-icon>
                 Download Input
@@ -111,7 +103,9 @@
                 x-small
                 text
                 class="ml-2"
-                @click="downloadTaskOutput(item)"
+                @click="
+                  downloadText(item.output || '', `task-${item.id}-output.txt`)
+                "
               >
                 <v-icon left small>fa-download</v-icon>
                 Download Output
@@ -141,7 +135,7 @@
                 ';'
               "
             >
-              {{ item.input || 'No input' }}
+              {{ item.input || "No input" }}
             </p>
 
             <p><b>Output:</b></p>
@@ -163,7 +157,7 @@
                 v-if="expandedJobs[item.id].htmlOutput"
                 v-html="expandedJobs[item.id].htmlOutput"
               />
-              <div v-else>{{ item.output || 'No output yet' }}</div>
+              <div v-else>{{ item.output || "No output yet" }}</div>
             </div>
           </div>
         </td>
@@ -191,15 +185,17 @@ import moment from "moment";
 // eslint-disable-next-line import/no-named-default
 import { default as AnsiUp } from "ansi_up";
 import * as agentTaskApi from "@/api/agent-task-api";
+import pause from "@/utils/pause";
+import DownloadMixin from "@/mixins/download-stager";
 
-function pause(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
+const KILLABLE_STATUSES = ["running", "started", "continuous"];
+const ACTIVE_STATUSES = [...KILLABLE_STATUSES, "queued"];
+
+const ansiUp = new AnsiUp();
 
 export default {
   name: "AgentJobs",
+  mixins: [DownloadMixin],
   props: {
     agent: {
       type: Object,
@@ -214,6 +210,8 @@ export default {
       successMessage: null,
       autoRefresh: false,
       autoRefreshInterval: null,
+      killRefreshTimeout: null,
+      isDestroyed: false,
       killingJob: null,
       confirmDialog: false,
       jobToKill: null,
@@ -245,7 +243,11 @@ export default {
     },
   },
   beforeDestroy() {
+    this.isDestroyed = true;
     this.stopAutoRefresh();
+    if (this.killRefreshTimeout) {
+      clearTimeout(this.killRefreshTimeout);
+    }
   },
   methods: {
     async refreshJobs() {
@@ -259,29 +261,49 @@ export default {
         // Request the agent to report its jobs, returns the task object
         const task = await agentTaskApi.getJobs(this.agent.session_id);
 
-        // Poll for this specific task to complete, matching AgentTerminal pattern
+        // Poll for the task result using a delay based on agent check-in interval
         const pollDelay = Math.max(
           this.agent.delay != null ? this.agent.delay * 1000 : 5000,
           1000,
         );
         const maxAttempts = 30;
         let getJobsOutput = null;
+        let consecutiveErrors = 0;
 
         for (let i = 0; i < maxAttempts; i++) {
+          if (this.isDestroyed) return;
           // eslint-disable-next-line no-await-in-loop
           await pause(pollDelay);
-          // eslint-disable-next-line no-await-in-loop
-          const result = await agentTaskApi.getTask(
-            this.agent.session_id,
-            task.id,
-          );
-          if (result.output) {
-            getJobsOutput = result.output;
-            break;
+          if (this.isDestroyed) return;
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            const result = await agentTaskApi.getTask(
+              this.agent.session_id,
+              task.id,
+            );
+            consecutiveErrors = 0;
+            if (result.output) {
+              getJobsOutput = result.output;
+              break;
+            }
+          } catch (pollErr) {
+            consecutiveErrors += 1;
+            if (consecutiveErrors >= 3) {
+              const detail =
+                typeof pollErr === "string"
+                  ? pollErr
+                  : pollErr.message || "Unknown error";
+              throw new Error(
+                `Failed to poll for job results after ${consecutiveErrors} consecutive errors: ${detail}`,
+              );
+            }
           }
         }
 
         if (!getJobsOutput) {
+          this.error =
+            "Timed out waiting for agent to report jobs. " +
+            "The agent may be offline or have a high check-in delay. Try refreshing again later.";
           this.jobs = [];
           return;
         }
@@ -290,108 +312,100 @@ export default {
         const agentJobs = this.parseGetJobsOutput(getJobsOutput);
 
         // Fetch tasks to match jobs with their creator tasks
-        const response = await agentTaskApi.getTasks(
-          this.agent.session_id,
-          {
-            limit: 100,
-            page: 1,
-            sortBy: "id",
-            sortOrder: "desc",
-            status: null,
-          },
-        );
+        const response = await agentTaskApi.getTasks(this.agent.session_id, {
+          limit: 100,
+          page: 1,
+          sortBy: "id",
+          sortOrder: "desc",
+          status: null,
+        });
 
         // Build jobs array by matching agent jobs with their corresponding tasks
         this.jobs = agentJobs
           .map((agentJob) => {
             // Find the task that created this job
-            const creatorTask = response.records.find((t) => {
-              if (!t.output) return false;
-              return t.output.includes(`Job started: ${agentJob.jobId}`);
-            });
-
-            if (creatorTask) {
-              return {
-                id: agentJob.jobId,
-                jobId: agentJob.jobId,
-                agentStatus: agentJob.status,
-                task_name: creatorTask.task_name,
-                module_name: creatorTask.module_name,
-                input: creatorTask.input,
-                output: creatorTask.output,
-                created_at: creatorTask.created_at,
-                updated_at: creatorTask.updated_at,
-                taskId: creatorTask.id,
-              };
-            }
+            const creatorTask = response.records.find((t) =>
+              t.output?.includes(`Job started: ${agentJob.jobId}`),
+            );
 
             return {
               id: agentJob.jobId,
-              jobId: agentJob.jobId,
               agentStatus: agentJob.status,
-              task_name: "Unknown",
-              module_name: null,
-              input: "Unknown",
-              output: "",
-              created_at: null,
-              updated_at: null,
-              taskId: null,
+              task_name: creatorTask?.task_name ?? "Unknown",
+              module_name: creatorTask?.module_name ?? null,
+              input: creatorTask?.input ?? "Unknown",
+              output: creatorTask?.output ?? "",
+              created_at: creatorTask?.created_at ?? null,
+              updated_at: creatorTask?.updated_at ?? null,
+              taskId: creatorTask?.id ?? null,
             };
           })
-          .filter(
-            (job) =>
-              job.agentStatus === "running" ||
-              job.agentStatus === "started" ||
-              job.agentStatus === "continuous" ||
-              job.agentStatus === "queued",
-          );
+          .filter((job) => ACTIVE_STATUSES.includes(job.agentStatus));
+
+        // Clean up stale expandedJobs entries
+        const activeJobIds = new Set(this.jobs.map((j) => j.id));
+        Object.keys(this.expandedJobs).forEach((key) => {
+          if (!activeJobIds.has(Number(key))) {
+            this.$delete(this.expandedJobs, key);
+          }
+        });
 
         // Process each job for display
         this.jobs.forEach((job) => {
+          const output = job.output || "";
+          const htmlOutput = this.hasAnsi(output)
+            ? ansiUp.ansi_to_html(output)
+            : null;
+
           if (!this.expandedJobs[job.id]) {
             this.$set(this.expandedJobs, job.id, {
               backgroundColor: "black",
-              htmlOutput: this.isAnsi(job.output || "")
-                ? this.ansiToHtml(job.output)
-                : null,
+              htmlOutput,
             });
           } else {
-            this.expandedJobs[job.id].htmlOutput = this.isAnsi(
-              job.output || "",
-            )
-              ? this.ansiToHtml(job.output)
-              : null;
+            this.expandedJobs[job.id].htmlOutput = htmlOutput;
           }
         });
       } catch (err) {
-        this.error = err.message || "Failed to fetch jobs";
+        const detail =
+          typeof err === "string" ? err : err.message || "Unknown error";
+        this.error = `Failed to fetch jobs: ${detail}`;
       } finally {
         this.loading = false;
       }
     },
     parseGetJobsOutput(output) {
-      // Parse the table output from TASK_GETJOBS
-      // The agent labels the column "Task ID" but it represents the
+      // Parse the table output from TASK_GETJOBS.
+      // The agent labels the column "Task ID" but it actually represents the
       // background job/thread ID, stored here as jobId.
+      // Note: this format is specific to Empire's TASK_GETJOBS output and may vary by agent language.
       // Expected format:
       // Task ID | Status
       // --------------------
       // 27 | started
       // 1 | running
-      return output
+      const lines = output
         .split("\n")
         .filter(
           (line) =>
-            line.trim() &&
-            !line.includes("Task ID") &&
-            !line.includes("---"),
-        )
+            line.trim() && !line.includes("Task ID") && !line.includes("---"),
+        );
+
+      const parsed = lines
         .map((line) => line.match(/^\s*(\d+)\s*\|\s*(\w+)\s*$/))
         .filter((match) => match != null)
         .map((match) => ({
           jobId: parseInt(match[1], 10),
           status: match[2],
         }));
+
+      if (lines.length > 0 && parsed.length === 0) {
+        this.error =
+          "Received job data from agent but could not parse it. " +
+          "The agent may be running an incompatible version.";
+      }
+
+      return parsed;
     },
     killJob(job) {
       this.jobToKill = job;
@@ -407,10 +421,16 @@ export default {
 
       try {
         await agentTaskApi.killJob(this.agent.session_id, job.id);
-        this.successMessage = `Kill command sent for job #${job.id}`;
-        setTimeout(() => this.refreshJobs(), 3000);
+        this.successMessage = `Kill command sent for job #${job.id}. The job will be stopped on the agent's next check-in.`;
+        if (!this.autoRefresh) {
+          this.killRefreshTimeout = setTimeout(() => this.refreshJobs(), 3000);
+        }
       } catch (err) {
-        this.error = err.message || `Failed to kill job #${job.id}`;
+        const detail =
+          typeof err === "string"
+            ? err
+            : err.message || `Failed to kill job #${job.id}`;
+        this.error = detail;
       } finally {
         this.killingJob = null;
         this.jobToKill = null;
@@ -418,13 +438,19 @@ export default {
     },
     startAutoRefresh() {
       this.stopAutoRefresh();
-      this.autoRefreshInterval = setInterval(() => {
-        this.refreshJobs();
-      }, 10000);
+      const loop = async () => {
+        if (!this.autoRefresh || this.isDestroyed) return;
+        await this.refreshJobs();
+        if (this.autoRefresh && !this.isDestroyed) {
+          // Schedule next refresh after current one completes to avoid stacking
+          this.autoRefreshInterval = setTimeout(loop, 10000);
+        }
+      };
+      this.autoRefreshInterval = setTimeout(loop, 10000);
     },
     stopAutoRefresh() {
       if (this.autoRefreshInterval) {
-        clearInterval(this.autoRefreshInterval);
+        clearTimeout(this.autoRefreshInterval);
         this.autoRefreshInterval = null;
       }
     },
@@ -448,43 +474,17 @@ export default {
       if (!input) return "";
       return input.length > 50 ? `${input.substring(0, 50)}...` : input;
     },
-    // from https://github.com/xpl/ansicolor
-    stripAnsi(text) {
-      return text.replace(
-        // eslint-disable-next-line no-control-regex
-        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-PRZcf-nqry=><]/g,
-        "",
-      );
+    isKillable(status) {
+      return KILLABLE_STATUSES.includes(status);
     },
-    isAnsi(output) {
-      return this.stripAnsi(output) !== output;
-    },
-    ansiToHtml(output) {
-      return new AnsiUp().ansi_to_html(output);
-    },
-    downloadTaskInput(task) {
-      const blob = new Blob([task.input || ""], { type: "text/plain" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `task-${task.id}-input.txt`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    },
-    downloadTaskOutput(task) {
-      const blob = new Blob([task.output || ""], { type: "text/plain" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `task-${task.id}-output.txt`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+    hasAnsi(text) {
+      return text.includes("\u001b") || text.includes("\u009b");
     },
   },
 };
 </script>
 
-<!-- Unscoped so styles apply inside v-html rendered content -->
+<!-- Unscoped so styles apply inside v-html rendered ANSI output content -->
 <style>
 .text-truncate {
   overflow: hidden;

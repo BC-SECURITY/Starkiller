@@ -161,6 +161,7 @@ export function updateSleep(sessionId, delay, jitter) {
 
 /**
  * Task the agent to report its background jobs.
+ * Returns the created task object; poll with getTask() for actual results.
  * @param {string} sessionId agent sessionId
  */
 export function getJobs(sessionId) {
