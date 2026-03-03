@@ -22,6 +22,8 @@ export const useApplicationStore = defineStore("application", {
     filterOnlyMyStagers: true,
     autoSubscribeAgents: true,
     agentHeaders: [],
+    taskHeaders: [],
+    pluginTaskHeaders: [],
     connectionError: 0,
     notifications: [],
   }),
@@ -104,6 +106,8 @@ export const useApplicationStore = defineStore("application", {
       this.filterOnlyMyStagers = true;
       this.autoSubscribeAgents = true;
       this.agentHeaders = [];
+      this.taskHeaders = [];
+      this.pluginTaskHeaders = [];
       this.notifications = [];
     },
   },

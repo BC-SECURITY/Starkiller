@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added Jobs tab to agent page for viewing and managing background jobs
 -   Added ability to kill background jobs from the Jobs tab
 
+## [3.3.0] - 2026-01-18
+
+### Added
+
+-   Added the ability to customize and persist table headers for Agent Tasks and Plugin Tasks tables.
+-   Added Task ID and Module Name/Task Name to the terminal output and task tab.
+-   Added display of task options (parameters) in the expanded task view as chips.
+-   Added a "Reset to Default" button to the header customization menu for all tables.
+-   Added "Rerun Task" functionality to Agent and Plugin task tables
+-   Reorganized task action menus into groups (Execution, Input, Output, Files)
+-   Added Stop Task option for jobs
+
 ## [3.2.0] - 2025-12-11
 
 ### Added
@@ -433,7 +445,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...HEAD
+
+[3.3.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.2.0...v3.3.0
 
 [3.2.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.1.0...v3.2.0
 
