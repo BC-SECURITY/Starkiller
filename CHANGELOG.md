@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   Added Jobs tab to agent page for viewing and managing background jobs
+-   Added ability to kill background jobs from the Jobs tab
+
 ### Fixed
 
 -   Fixed module execution snackbar displaying "[object Object]" instead of agent name
