@@ -27,7 +27,8 @@
     />
     <v-card v-else style="padding: 10px">
       <general-form
-        v-if="reset"
+        v-if="initialLoad"
+        :key="credential.id"
         ref="generalform"
         v-model="form"
         :options="options"
@@ -53,9 +54,9 @@ export default {
     ErrorStateAlert,
     EditPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
-      reset: true,
       loading: false,
       initialLoad: false,
       credential: {},
@@ -67,13 +68,13 @@ export default {
     breads() {
       return [
         {
-          text: "Credentials",
+          title: "Credentials",
           disabled: false,
           to: "/credentials",
           exact: true,
         },
         {
-          text: this.id && !this.isCopy ? `${this.id}` : "New",
+          title: this.id && !this.isCopy ? `${this.id}` : "New",
           disabled: true,
           to: "/credential-edit",
         },
@@ -151,7 +152,7 @@ export default {
         .then(() => {
           this.credential.tags = this.credential.tags.filter((t) => t !== tag);
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(tag) {
       credentialApi
@@ -159,9 +160,9 @@ export default {
         .then((t) => {
           const index = this.credential.tags.findIndex((x) => x.id === t.id);
           this.credential.tags.splice(index, 1, t);
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(tag) {
       credentialApi
@@ -169,12 +170,12 @@ export default {
         .then((t) => {
           this.credential.tags.push(t);
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    submit() {
-      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
-        return;
-      }
+    async submit() {
+      if (this.loading) return;
+      const valid = await this.$refs.generalform.validate();
+      if (!valid) return;
 
       this.loading = true;
       if (this.id > 0) {
@@ -184,7 +185,7 @@ export default {
             this.loading = false;
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       } else {
@@ -195,7 +196,7 @@ export default {
             this.$router.push({ name: "credentialEdit", params: { id } });
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       }
@@ -203,7 +204,7 @@ export default {
     },
     async deleteCredential() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete credential ${this.id}?`,
           { color: "red" },
@@ -213,7 +214,7 @@ export default {
           this.credentialStore.deleteCredential(this.id);
           this.$router.push({ name: "credentials" });
         } catch (err) {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         }
       }
     },
@@ -221,15 +222,12 @@ export default {
       credentialApi
         .getCredential(id)
         .then((data) => {
-          this.reset = false;
-
           this.credential = data;
           this.initialLoad = true;
-          setTimeout(() => {
-            this.reset = true;
-          }, 500);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },

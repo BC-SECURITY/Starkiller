@@ -19,14 +19,14 @@
         ref="form"
         v-model="valid"
         style="max-width: 500px"
-        @submit.prevent.native="submit"
+        @submit.prevent="submit"
       >
         <v-text-field
           v-model="form.username"
           :rules="rules['name']"
           label="Username"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           :disabled="!isNew"
         />
@@ -34,30 +34,40 @@
           v-if="isNew"
           v-model="form.password"
           :type="showPassword ? 'text' : 'password'"
-          :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
+          :append-inner-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['password']"
           label="Password"
           autocomplete="off"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
-          @click:append="showPassword = !showPassword"
+          @click:append-inner="showPassword = !showPassword"
         />
         <v-text-field
           v-if="isNew"
           v-model="form.confirm_password"
           :type="showConfirm ? 'text' : 'password'"
-          :append-icon="showConfirm ? 'fa-eye' : 'fa-eye-slash'"
+          :append-inner-icon="showConfirm ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['confirmPassword']"
           label="Confirm Password"
           autocomplete="off"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
-          @click:append="showConfirm = !showConfirm"
+          @click:append-inner="showConfirm = !showConfirm"
         />
-        <v-switch v-if="isAdmin" v-model="form.is_admin" label="Admin" />
-        <v-switch v-if="!isNew" v-model="form.enabled" label="Enabled" />
+        <v-switch
+          v-if="isAdmin"
+          v-model="form.is_admin"
+          color="primary"
+          label="Admin"
+        />
+        <v-switch
+          v-if="!isNew"
+          v-model="form.enabled"
+          color="primary"
+          label="Enabled"
+        />
       </v-form>
     </v-card>
   </div>
@@ -76,6 +86,7 @@ export default {
     ErrorStateAlert,
     EditPageTop,
   },
+  inject: ["snack"],
   data() {
     return {
       form: {
@@ -114,13 +125,13 @@ export default {
     breads() {
       return [
         {
-          text: "Users",
+          title: "Users",
           disabled: false,
           to: "/users",
           exact: true,
         },
         {
-          text: this.breadcrumbName,
+          title: this.breadcrumbName,
           disabled: true,
           to: "/users-edit",
         },
@@ -144,33 +155,33 @@ export default {
     }
   },
   methods: {
-    submit() {
-      if (this.loading || !this.$refs.form.validate()) {
-        return;
-      }
+    async submit() {
+      if (this.loading) return;
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
 
       this.loading = true;
       if (this.id > 0) {
         userApi
           .updateUser(this.form)
           .then(() => {
-            this.$snack.success("User updated");
+            this.snack.success("User updated");
             this.loading = false;
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       } else {
         userApi
           .createUser(this.form)
           .then(({ id }) => {
-            this.$snack.success("User created");
+            this.snack.success("User created");
             this.loading = false;
             this.$router.push({ name: "userEdit", params: { id } });
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       }
@@ -182,7 +193,9 @@ export default {
           this.user = data;
           this.form = data;
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },

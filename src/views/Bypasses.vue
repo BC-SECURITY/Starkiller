@@ -11,17 +11,14 @@
     />
     <v-data-table
       v-model="selected"
+      v-model:sort-by="sortBy"
       :headers="headers"
       :items="bypasses"
-      :footer-props="{
-        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
-      }"
+      :items-per-page-options="[5, 10, 15, 20, 50, 100]"
       :items-per-page="15"
-      item-key="name"
-      dense
+      item-value="name"
+      density="compact"
       show-select
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
     >
       <template #item.name="{ item }">
         <router-link
@@ -35,9 +32,9 @@
         <date-time-display :timestamp="item.updated_at" />
       </template>
       <template #item.actions="{ item }">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn text icon x-small v-bind="attrs" v-on="on">
+        <v-menu>
+          <template #activator="{ props: activatorProps }">
+            <v-btn variant="text" icon size="x-small" v-bind="activatorProps">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
@@ -79,7 +76,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import { useBypassStore } from "@/stores/bypass-module";
@@ -91,23 +87,22 @@ export default {
     DateTimeDisplay,
     ListPageTop,
   },
+  inject: ["confirm"],
   data() {
     return {
       breads: [
         {
-          text: "Bypasses",
+          title: "Bypasses",
           disabled: true,
           href: "/bypasses",
         },
       ],
       headers: [
-        { text: "Name", value: "name" },
-        { text: "Updated At", value: "updated_at" },
-        { text: "Actions", value: "actions", sortable: false },
+        { title: "Name", key: "name" },
+        { title: "Updated At", key: "updated_at" },
+        { title: "Actions", key: "actions", sortable: false },
       ],
-      sortBy: "name",
-      sortDesc: false,
-      moment,
+      sortBy: [{ key: "name", order: "asc" }],
       selected: [],
     };
   },
@@ -135,7 +130,7 @@ export default {
     },
     async deleteBypass(item) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete bypass ${item.name}?`,
           { color: "red" },
@@ -146,7 +141,7 @@ export default {
     },
     async deleteBypasses() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete ${this.selected.length} bypasses?`,
           { color: "red" },

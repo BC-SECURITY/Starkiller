@@ -1,21 +1,26 @@
 <template>
   <v-expansion-panel>
-    <v-expansion-panel-header expand-icon="mdi-menu-down">
+    <v-expansion-panel-title expand-icon="mdi-menu-down">
       {{ title }}
-    </v-expansion-panel-header>
-    <v-expansion-panel-content>
-      <v-checkbox v-model="selectedAll" x-small dense label="Select All" />
+    </v-expansion-panel-title>
+    <v-expansion-panel-text>
+      <v-checkbox
+        v-model="selectedAll"
+        color="primary"
+        density="compact"
+        label="Select All"
+      />
       <v-divider class="pb-4" />
       <v-checkbox
         v-for="item in items"
         :key="item[itemKey]"
         v-model="selectedItems"
         :value="item[itemValue]"
-        x-small
-        dense
+        color="primary"
+        density="compact"
         :label="item[label]"
       />
-    </v-expansion-panel-content>
+    </v-expansion-panel-text>
   </v-expansion-panel>
 </template>
 
@@ -23,7 +28,7 @@
 export default {
   name: "ExpansionPanelFilter",
   props: {
-    value: {
+    modelValue: {
       type: Array,
       default: () => [],
     },
@@ -52,6 +57,7 @@ export default {
       default: false,
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
       selectedItems: [],
@@ -74,7 +80,7 @@ export default {
   watch: {
     selectedItems: {
       handler(val) {
-        this.$emit("input", val);
+        this.$emit("update:modelValue", val);
       },
     },
     items: {

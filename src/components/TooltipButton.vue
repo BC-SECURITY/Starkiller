@@ -1,15 +1,14 @@
 <template>
-  <v-tooltip bottom>
-    <template #activator="{ on }">
+  <v-tooltip location="bottom">
+    <template #activator="{ props: activatorProps }">
       <v-btn
         :color="flat ? '' : color"
         :to="to"
         :disabled="disabled"
         class="mr-5"
         icon
-        :small="!xSmall"
-        :x-small="xSmall"
-        v-on="on"
+        :size="xSmall ? 'x-small' : 'small'"
+        v-bind="activatorProps"
         @click="$emit('click')"
       >
         <v-icon :style="padLeft !== 0 ? `padding-left: ${padLeft}px` : ''">

@@ -3,12 +3,18 @@
     <div class="d-flex align-center mb-4">
       <h3>Background Jobs</h3>
       <v-spacer />
-      <v-btn small color="primary" :loading="loading" @click="refreshJobs">
-        <v-icon left small>fa-sync</v-icon>
+      <v-btn
+        size="small"
+        color="primary"
+        :loading="loading"
+        @click="refreshJobs"
+      >
+        <v-icon start size="small">fa-sync</v-icon>
         Refresh
       </v-btn>
       <v-switch
         v-model="autoRefresh"
+        color="primary"
         label="Auto-refresh"
         class="ml-4 mt-0"
         hide-details
@@ -18,9 +24,9 @@
     <v-alert
       v-if="error"
       type="error"
-      dismissible
+      closable
       class="mb-4"
-      @input="error = null"
+      @click:close="error = null"
     >
       {{ error }}
     </v-alert>
@@ -28,26 +34,26 @@
     <v-alert
       v-if="successMessage"
       type="success"
-      dismissible
+      closable
       class="mb-4"
-      @input="successMessage = null"
+      @click:close="successMessage = null"
     >
       {{ successMessage }}
     </v-alert>
 
     <v-data-table
+      v-model:expanded="expanded"
       :headers="headers"
       :items="jobs"
       :loading="loading"
       :items-per-page="10"
-      :expanded.sync="expanded"
-      item-key="id"
+      item-value="id"
       show-expand
       class="elevation-1"
       no-data-text="No background jobs found. Jobs will appear here when you run modules with Background=true."
     >
       <template #item.status="{ item }">
-        <v-chip :color="getStatusColor(item.agentStatus)" small dark>
+        <v-chip :color="getStatusColor(item.agentStatus)" size="small">
           {{ item.agentStatus }}
         </v-chip>
       </template>
@@ -59,15 +65,15 @@
       <template #item.actions="{ item }">
         <v-btn
           v-if="isKillable(item.agentStatus)"
-          small
+          size="small"
           color="error"
           :loading="killingJob === item.id"
           @click="killJob(item)"
         >
-          <v-icon left small>fa-stop</v-icon>
+          <v-icon start size="small">fa-stop</v-icon>
           Kill
         </v-btn>
-        <span v-else class="grey--text">
+        <span v-else class="text-grey">
           {{ item.agentStatus === "completed" ? "Completed" : "N/A" }}
         </span>
       </template>
@@ -81,38 +87,35 @@
         </span>
       </template>
 
-      <template #expanded-item="{ headers: scopedHeaders, item }">
-        <td
-          v-if="expandedJobs[item.id]"
-          :colspan="scopedHeaders.length"
-          class="pa-4"
-        >
+      <template #expanded-row="{ columns, item }">
+        <td v-if="expandedJobs[item.id]" :colspan="columns.length" class="pa-4">
           <div>
             <div class="d-flex align-center mb-2">
               <v-btn
-                x-small
-                text
+                size="x-small"
+                variant="text"
                 @click="
                   downloadText(item.input || '', `task-${item.id}-input.txt`)
                 "
               >
-                <v-icon left small>fa-download</v-icon>
+                <v-icon start size="small">fa-download</v-icon>
                 Download Input
               </v-btn>
               <v-btn
-                x-small
-                text
+                size="x-small"
+                variant="text"
                 class="ml-2"
                 @click="
                   downloadText(item.output || '', `task-${item.id}-output.txt`)
                 "
               >
-                <v-icon left small>fa-download</v-icon>
+                <v-icon start size="small">fa-download</v-icon>
                 Download Output
               </v-btn>
               <v-spacer />
               <v-switch
                 v-model="expandedJobs[item.id].backgroundColor"
+                color="primary"
                 false-value="white"
                 true-value="black"
                 label="Dark Background"
@@ -172,7 +175,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn text @click="confirmDialog = false">Cancel</v-btn>
+          <v-btn variant="text" @click="confirmDialog = false">Cancel</v-btn>
           <v-btn color="error" @click="confirmKillJob">Kill Job</v-btn>
         </v-card-actions>
       </v-card>
@@ -218,12 +221,12 @@ export default {
       expanded: [],
       expandedJobs: {},
       headers: [
-        { text: "ID", value: "id", width: "80px" },
-        { text: "Task Name", value: "task_name" },
-        { text: "Status", value: "status", width: "120px" },
-        { text: "Input", value: "input" },
-        { text: "Created", value: "created_at", width: "180px" },
-        { text: "Actions", value: "actions", sortable: false, width: "120px" },
+        { title: "ID", key: "id", width: "80px" },
+        { title: "Task Name", key: "task_name" },
+        { title: "Status", key: "status", width: "120px" },
+        { title: "Input", key: "input" },
+        { title: "Created", key: "created_at", width: "180px" },
+        { title: "Actions", key: "actions", sortable: false, width: "120px" },
       ],
     };
   },
@@ -242,7 +245,7 @@ export default {
       immediate: true,
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.isDestroyed = true;
     this.stopAutoRefresh();
     if (this.killRefreshTimeout) {
@@ -346,7 +349,7 @@ export default {
         const activeJobIds = new Set(this.jobs.map((j) => j.id));
         Object.keys(this.expandedJobs).forEach((key) => {
           if (!activeJobIds.has(Number(key))) {
-            this.$delete(this.expandedJobs, key);
+            delete this.expandedJobs[key];
           }
         });
 
@@ -358,10 +361,10 @@ export default {
             : null;
 
           if (!this.expandedJobs[job.id]) {
-            this.$set(this.expandedJobs, job.id, {
+            this.expandedJobs[job.id] = {
               backgroundColor: "black",
               htmlOutput,
-            });
+            };
           } else {
             this.expandedJobs[job.id].htmlOutput = htmlOutput;
           }

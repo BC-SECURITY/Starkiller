@@ -12,29 +12,22 @@
         @submit="submitHeaderForm"
       />
     </div>
-    <v-pagination
-      v-model="currentPage"
-      :length="totalPages"
-      :total-visible="10"
-      @input="handlePageChange"
-    />
-    <v-data-table
+    <v-data-table-server
+      v-model:sort-by="sortBy"
+      v-model:items-per-page="itemsPerPage"
+      v-model:page="currentPage"
       :headers="headers"
       :items="tasks"
-      item-key="uniqueId"
-      :sort-by="sortBy"
-      :sort-desc="sortDesc"
-      :server-items-length="totalItems"
-      :footer-props="{ 'items-per-page-options': [10, 25, 50, 100] }"
-      :items-per-page.sync="itemsPerPage"
+      item-value="uniqueId"
+      :items-length="totalItems"
+      :items-per-page-options="[10, 25, 50, 100]"
       :loading="loading"
-      :page="currentPage"
       show-expand
-      @item-expanded="handleItemExpanded"
+      @update:expanded="handleItemExpanded"
       @update:options="handleOptionsChange"
     >
-      <template #expanded-item="{ headers: scopedHeaders, item }">
-        <td :colspan="scopedHeaders.length" class="pa-4">
+      <template #expanded-row="{ columns, item }">
+        <td :colspan="columns.length" class="pa-4">
           <v-card flat>
             <v-card-title class="subtitle-1 pb-4">
               <v-row no-gutters align="center">
@@ -42,10 +35,10 @@
                   <span class="font-weight-bold">Task #{{ item.id }}</span>
                   <v-chip
                     v-if="item.module_name || item.task_name"
-                    small
+                    size="small"
                     class="ml-2"
                     color="primary"
-                    outlined
+                    variant="outlined"
                   >
                     {{ item.module_name || item.task_name }}
                   </v-chip>
@@ -69,7 +62,7 @@
                       v-for="(value, key) in expandedTasks[item.uniqueId]
                         .options || expandedTasks[item.uniqueId].module_options"
                       :key="key"
-                      small
+                      size="small"
                       label
                       class="mr-1 mb-1"
                     >
@@ -83,12 +76,13 @@
                 <v-col class="text-right">
                   <v-switch
                     v-model="expandedTasks[item.uniqueId].backgroundColor"
+                    color="primary"
                     false-value="white"
                     true-value="black"
                     label="Dark Mode Output"
                     hide-details
                     class="mt-0 pt-0 d-inline-block"
-                    @change="updateTaskBackgroundColor(item)"
+                    @update:model-value="updateTaskBackgroundColor(item)"
                   />
                 </v-col>
               </v-row>
@@ -150,8 +144,8 @@
                             d.filename.match(/[^/]+(jpg|jpeg|png|gif)$/),
                           )
                         "
-                        text
-                        x-small
+                        variant="text"
+                        size="x-small"
                         @click="getImagesForTask(item)"
                       >
                         View Images
@@ -173,7 +167,7 @@
                           :src="imageData(item, download)"
                           :alt="download.filename"
                           :max-width="400"
-                          class="grey lighten-2 rounded mb-2"
+                          class="bg-grey-lighten-2 rounded mb-2"
                           contain
                         >
                           <template #placeholder>
@@ -184,7 +178,7 @@
                             >
                               <v-progress-circular
                                 indeterminate
-                                color="grey lighten-5"
+                                color="grey-lighten-5"
                               />
                             </v-row>
                           </template>
@@ -222,19 +216,31 @@
         </td>
       </template>
       <template #item.status="{ item }">
-        <v-icon v-if="item.status === 'started'" color="blue" small>
+        <v-icon v-if="item.status === 'started'" color="blue" size="small">
           fa-check-square
         </v-icon>
-        <v-icon v-else-if="item.status === 'queued'" color="orange" small>
+        <v-icon
+          v-else-if="item.status === 'queued'"
+          color="orange"
+          size="small"
+        >
           fa-clock
         </v-icon>
-        <v-icon v-else-if="item.status === 'completed'" color="green" small>
+        <v-icon
+          v-else-if="item.status === 'completed'"
+          color="green"
+          size="small"
+        >
           fa-check-circle
         </v-icon>
-        <v-icon v-else-if="item.status === 'error'" color="red" small>
+        <v-icon v-else-if="item.status === 'error'" color="red" size="small">
           fa-times-circle
         </v-icon>
-        <v-icon v-else-if="item.status === 'continuous'" color="purple" small>
+        <v-icon
+          v-else-if="item.status === 'continuous'"
+          color="purple"
+          size="small"
+        >
           fa-infinity
         </v-icon>
       </template>
@@ -261,14 +267,14 @@
         />
       </template>
       <template #item.actions="{ item }">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn text icon x-small v-bind="attrs" v-on="on">
+        <v-menu>
+          <template #activator="{ props: activatorProps }">
+            <v-btn variant="text" icon size="x-small" v-bind="activatorProps">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
           <v-list class="ml-2 mr-2">
-            <v-subheader>Execution</v-subheader>
+            <v-list-subheader>Execution</v-list-subheader>
             <v-list-item
               v-show="supportsRerun(item)"
               key="rerunTask"
@@ -276,26 +282,26 @@
               @click="rerunTask(item)"
             >
               <v-list-item-title>
-                <v-icon small>fa-redo</v-icon>
+                <v-icon size="small">fa-redo</v-icon>
                 Rerun Task
               </v-list-item-title>
             </v-list-item>
             <v-divider />
-            <v-subheader>Input</v-subheader>
+            <v-list-subheader>Input</v-list-subheader>
             <v-list-item key="clipboardInput" link @click="copyInput(item)">
               <v-list-item-title>
-                <v-icon small>fa-paperclip</v-icon>
+                <v-icon size="small">fa-paperclip</v-icon>
                 Copy to Clipboard
               </v-list-item-title>
             </v-list-item>
             <v-list-item key="downloadInput" link @click="downloadInput(item)">
               <v-list-item-title>
-                <v-icon small>fa-download</v-icon>
+                <v-icon size="small">fa-download</v-icon>
                 Download
               </v-list-item-title>
             </v-list-item>
             <v-divider v-if="hasOutput(item)" />
-            <v-subheader v-if="hasOutput(item)">Output</v-subheader>
+            <v-list-subheader v-if="hasOutput(item)">Output</v-list-subheader>
             <v-list-item
               v-if="hasOutput(item)"
               key="clipboardOutput"
@@ -303,7 +309,7 @@
               @click="copyOutput(item)"
             >
               <v-list-item-title>
-                <v-icon small>fa-paperclip</v-icon>
+                <v-icon size="small">fa-paperclip</v-icon>
                 Copy to Clipboard
               </v-list-item-title>
             </v-list-item>
@@ -314,12 +320,14 @@
               @click="downloadOutput(item)"
             >
               <v-list-item-title>
-                <v-icon small>fa-download</v-icon>
+                <v-icon size="small">fa-download</v-icon>
                 Download
               </v-list-item-title>
             </v-list-item>
             <v-divider v-if="item.downloads.length > 0" />
-            <v-subheader v-if="item.downloads.length > 0">Files</v-subheader>
+            <v-list-subheader v-if="item.downloads.length > 0"
+              >Files</v-list-subheader
+            >
             <v-list-item
               v-for="download in item.downloads"
               :key="'download-' + download.id"
@@ -327,20 +335,18 @@
               @click="downloadFile(download)"
             >
               <v-list-item-title title="Download file">
-                <v-icon small>fa-download</v-icon>
+                <v-icon size="small">fa-download</v-icon>
                 {{ download.filename }}
               </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
       </template>
-    </v-data-table>
+    </v-data-table-server>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
-import moment from "moment";
 import debounce from "lodash.debounce";
 // eslint-disable-next-line import/no-named-default
 import { default as AnsiUp } from "ansi_up";
@@ -352,6 +358,7 @@ import DownloadMixin from "@/mixins/download-stager";
 import { useApplicationStore } from "@/stores/application-module";
 import * as downloadApi from "@/api/download-api";
 import * as pluginApi from "@/api/plugin-api";
+import { copyToClipboard } from "@/utils/clipboard";
 
 export default {
   name: "PluginTasksTable",
@@ -362,6 +369,7 @@ export default {
     HeaderMenu,
   },
   mixins: [DownloadMixin],
+  inject: ["snack"],
   props: {
     plugin: {
       type: Object,
@@ -401,21 +409,18 @@ export default {
     return {
       tasks: [],
       currentPage: 1,
-      totalPages: 1,
       totalItems: 0,
       itemsPerPage: 10,
       loading: false,
-      moment,
-      sortBy: "updated_at",
-      sortDesc: true,
+      sortBy: [{ key: "updated_at", order: "desc" }],
       refreshInterval: null,
       expandedTasks: {},
       debouncedGetTasks: debounce(this.getTasks, 500),
       selectedHeadersTemp: [],
       headersFull: [
         {
-          text: "Task ID",
-          value: "id",
+          title: "Task ID",
+          key: "id",
           sortable: true,
           defaultHeader: false,
           alwaysShow: false,
@@ -423,51 +428,51 @@ export default {
           order: 1,
         },
         {
-          text: "Status",
-          value: "status",
+          title: "Status",
+          key: "status",
           sortable: true,
           defaultHeader: true,
           order: 2,
         },
         {
-          text: "Plugin",
-          value: "plugin_id",
+          title: "Plugin",
+          key: "plugin_id",
           sortable: true,
           defaultHeader: true,
           order: 3,
         },
         {
-          text: "Task Input",
-          value: "input",
+          title: "Task Input",
+          key: "input",
           sortable: false,
           defaultHeader: false,
           order: 5,
         },
         {
-          text: "User",
-          value: "username",
+          title: "User",
+          key: "username",
           sortable: false,
           defaultHeader: true,
           order: 6,
         },
         {
-          text: "Updated At",
-          value: "updated_at",
+          title: "Updated At",
+          key: "updated_at",
           sortable: true,
           defaultHeader: true,
           order: 7,
         },
         {
-          text: "Tags",
-          value: "tags",
+          title: "Tags",
+          key: "tags",
           sortable: false,
           width: 400,
           defaultHeader: true,
           order: 8,
         },
         {
-          text: "Actions",
-          value: "actions",
+          title: "Actions",
+          key: "actions",
           sortable: false,
           defaultHeader: true,
           alwaysShow: true,
@@ -485,7 +490,7 @@ export default {
         .filter(
           (h) =>
             this.applicationStore.pluginTaskHeaders.findIndex(
-              (h2) => h2.text === h.text,
+              (h2) => h2.title === h.title,
             ) > -1,
         )
         .sort((a, b) => a.order - b.order);
@@ -530,16 +535,21 @@ export default {
   },
   mounted() {
     this.debouncedGetTasks();
-    if (this.applicationStore.pluginTaskHeaders.length === 0) {
+    if (
+      this.applicationStore.pluginTaskHeaders.length === 0 ||
+      !this.applicationStore.pluginTaskHeaders[0].title
+    ) {
       this.applicationStore.pluginTaskHeaders = this.headersFull.filter(
         (h) => h.defaultHeader === true,
       );
     }
     this.selectedHeadersTemp = this.headersFull.filter((h) =>
-      this.applicationStore.pluginTaskHeaders.some((h2) => h2.text === h.text),
+      this.applicationStore.pluginTaskHeaders.some(
+        (h2) => h2.title === h.title,
+      ),
     );
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.refreshInterval);
   },
   methods: {
@@ -553,7 +563,7 @@ export default {
       );
       this.selectedHeadersTemp = this.headersFull.filter((h) =>
         this.applicationStore.pluginTaskHeaders.some(
-          (h2) => h2.text === h.text,
+          (h2) => h2.title === h.title,
         ),
       );
     },
@@ -579,14 +589,10 @@ export default {
       pluginApi
         .deleteTag(task.plugin_id, task.id, tag.id)
         .then(() => {
-          this.$set(
-            task,
-            "tags",
-            task.tags.filter((t) => t.id !== tag.id),
-          );
+          task.tags = task.tags.filter((t) => t.id !== tag.id);
           this.$emit("refresh-tags");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(task, tag) {
       pluginApi
@@ -595,18 +601,18 @@ export default {
           const index = task.tags.findIndex((x) => x.id === t.id);
           task.tags.splice(index, 1, t);
           this.$emit("refresh-tags");
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(task, tag) {
       pluginApi
         .addTag(task.plugin_id, task.id, tag)
         .then((t) => {
-          this.$set(task, "tags", [...task.tags, t]);
+          task.tags = [...task.tags, t];
           this.$emit("refresh-tags");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     truncateMessage(task) {
       if (task) {
@@ -622,11 +628,8 @@ export default {
       }
       this.expandedTasks[task.uniqueId].backgroundColor = task.backgroundColor;
 
-      // Need to call vue set to trigger reactivity on the table
-      Vue.set(this.tasks, this.tasks.indexOf(task), task);
-    },
-    isDownload(task) {
-      return task.downloads && task.downloads.length > 0;
+      // Trigger reactivity on the table
+      this.tasks.splice(this.tasks.indexOf(task), 1, task);
     },
     downloadFile(download) {
       downloadApi.getDownload(download.id);
@@ -638,10 +641,10 @@ export default {
       if (task.input) {
         if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await pluginApi.getTask(task.plugin_id, task.id);
-          Vue.set(this.expandedTasks, task.uniqueId, {
+          this.expandedTasks[task.uniqueId] = {
             ...this.expandedTasks[task.uniqueId],
             ...data,
-          });
+          };
         }
 
         this.downloadText(
@@ -659,32 +662,21 @@ export default {
       if (task.input) {
         if (!this.expandedTasks[task.uniqueId]?.full_input) {
           const data = await pluginApi.getTask(task.plugin_id, task.id);
-          Vue.set(this.expandedTasks, task.uniqueId, {
+          this.expandedTasks[task.uniqueId] = {
             ...this.expandedTasks[task.uniqueId],
             ...data,
-          });
+          };
         }
 
-        try {
-          navigator.clipboard.writeText(
-            this.expandedTasks[task.uniqueId].full_input,
-          );
-        } catch (error) {
-          this.$snack.warn(
-            "Failed to copy to clipboard. You must be on HTTPS or localhost.",
-          );
-        }
+        await copyToClipboard(
+          this.expandedTasks[task.uniqueId].full_input,
+          this.snack,
+        );
       }
     },
-    copyOutput(task) {
+    async copyOutput(task) {
       if (task.output) {
-        try {
-          navigator.clipboard.writeText(task.output);
-        } catch (error) {
-          this.$snack.warn(
-            "Failed to copy to clipboard. You must be on HTTPS or localhost.",
-          );
-        }
+        await copyToClipboard(task.output, this.snack);
       }
     },
     imageData(task, download) {
@@ -700,11 +692,11 @@ export default {
     async getImagesForTask(task) {
       if (!this.expandedTasks[task.uniqueId].imagesRetrieved) {
         const data = await pluginApi.getTask(task.plugin_id, task.id);
-        Vue.set(this.expandedTasks, task.uniqueId, {
+        this.expandedTasks[task.uniqueId] = {
           ...this.expandedTasks[task.uniqueId],
           ...data,
           imagesRetrieved: true,
-        });
+        };
       }
 
       for (let i = 0; i < task.downloads.length; i++) {
@@ -718,64 +710,67 @@ export default {
           this.expandedTasks[task.uniqueId].downloads[i].image = url;
         }
       }
-      Vue.set(this.tasks, this.tasks.indexOf(task), task);
+      this.tasks.splice(this.tasks.indexOf(task), 1, task);
     },
     async toggleSeeFullInput(task) {
       if (!task.expandedInput) {
         const data = await pluginApi.getTask(task.plugin_id, task.id);
-        Vue.set(this.expandedTasks, task.uniqueId, {
+        this.expandedTasks[task.uniqueId] = {
           ...this.expandedTasks[task.uniqueId],
           ...data,
           expandedInput: true,
-        });
+        };
         task.expandedInput = true;
       } else {
         this.expandedTasks[task.uniqueId].expandedInput = false;
         task.expandedInput = false;
       }
 
-      // Need to call vue set to trigger reactivity on the table
-      Vue.set(this.tasks, this.tasks.indexOf(task), task);
+      // Trigger reactivity on the table
+      this.tasks.splice(this.tasks.indexOf(task), 1, task);
     },
     async rerunTask(task) {
       try {
         const fullTask = await pluginApi.getTask(task.plugin_id, task.id);
         const options = fullTask.options || {};
         await pluginApi.executePlugin(fullTask.plugin_id, options);
-        this.$snack.info(`Plugin ${fullTask.plugin_id} rerun queued.`);
+        this.snack.info(`Plugin ${fullTask.plugin_id} rerun queued.`);
       } catch (err) {
-        this.$snack.error(`Error rerunning task: ${err}`);
+        this.snack.error(`Error rerunning task: ${err}`);
       }
     },
     supportsRerun() {
       return true;
     },
-    async handleItemExpanded({ item, value }) {
-      if (value && !this.expandedTasks[item.uniqueId].fullTaskLoaded) {
-        const data = await pluginApi.getTask(item.plugin_id, item.id);
-        Vue.set(this.expandedTasks, item.uniqueId, {
-          ...this.expandedTasks[item.uniqueId],
-          ...data,
-          fullTaskLoaded: true,
-        });
-        // Need to call vue set to trigger reactivity on the table
-        Vue.set(this.tasks, this.tasks.indexOf(item), item);
-      }
-    },
-    handlePageChange() {
-      this.debouncedGetTasks();
+    async handleItemExpanded(expandedIds) {
+      const toLoad = expandedIds.filter(
+        (uniqueId) =>
+          this.expandedTasks[uniqueId] &&
+          !this.expandedTasks[uniqueId].fullTaskLoaded,
+      );
+
+      await Promise.all(
+        toLoad.map(async (uniqueId) => {
+          const item = this.tasks.find((t) => t.uniqueId === uniqueId);
+          if (!item) return;
+          try {
+            const data = await pluginApi.getTask(item.plugin_id, item.id);
+            this.expandedTasks[item.uniqueId] = {
+              ...this.expandedTasks[item.uniqueId],
+              ...data,
+              fullTaskLoaded: true,
+            };
+            this.tasks.splice(this.tasks.indexOf(item), 1, item);
+          } catch (err) {
+            this.snack.error(`Error loading task ${item.id}: ${err}`);
+          }
+        }),
+      );
     },
     handleOptionsChange(value) {
       this.currentPage = value.page;
       this.itemsPerPage = value.itemsPerPage;
-
-      if (value.sortBy.length > 0) {
-        this.sortBy = value.sortBy[0];
-        this.sortDesc = value.sortDesc[0];
-      } else {
-        this.sortBy = "id";
-        this.sortDesc = true;
-      }
+      this.sortBy = Array.isArray(value.sortBy) ? value.sortBy : [];
       this.debouncedGetTasks();
     },
     async getTasks() {
@@ -787,7 +782,6 @@ export default {
         // when no agents are selected. Even though the api sees no agents as all agents.
         this.tasks = [];
         this.currentPage = 1;
-        this.totalPages = 1;
         this.totalItems = 0;
         return;
       }
@@ -797,47 +791,52 @@ export default {
         plugins = this.selectedPlugins;
       }
 
-      const response = await pluginApi.getTasks(plugins, {
-        page: this.currentPage,
-        limit: this.itemsPerPage,
-        sortBy: this.sortBy,
-        sortOrder: this.sortDesc ? "desc" : "asc",
-        users: this.selectedUsers,
-        tags: this.selectedTags,
-        search: this.search,
-      });
-      this.currentPage = response.page;
-      this.totalPages = response.total_pages;
-      this.totalItems = response.total;
+      const sortEntry =
+        this.sortBy.length > 0 ? this.sortBy[0] : { key: "id", order: "desc" };
+      try {
+        const response = await pluginApi.getTasks(plugins, {
+          page: this.currentPage,
+          limit: this.itemsPerPage,
+          sortBy: sortEntry.key,
+          sortOrder: sortEntry.order,
+          users: this.selectedUsers,
+          tags: this.selectedTags,
+          search: this.search,
+        });
+        this.currentPage = response.page;
+        this.totalItems = response.total;
 
-      // iterate response.records and add expandedInput if it exists in expandedTasks
-      // this ensures that the expandedInput doesn't get wiped away after a refresh
-      this.tasks = response.records.map((task) => {
-        task.uniqueId = `${task.plugin_id}-${task.id}`;
+        // iterate response.records and add expandedInput if it exists in expandedTasks
+        // this ensures that the expandedInput doesn't get wiped away after a refresh
+        this.tasks = response.records.map((task) => {
+          task.uniqueId = `${task.plugin_id}-${task.id}`;
 
-        if (!this.expandedTasks[task.uniqueId]) {
-          Vue.set(this.expandedTasks, task.uniqueId, {});
-        }
+          if (!this.expandedTasks[task.uniqueId]) {
+            this.expandedTasks[task.uniqueId] = {};
+          }
 
-        if (this.expandedTasks[task.uniqueId].expandedInput) {
-          task.expandedInput = true;
-        }
+          if (this.expandedTasks[task.uniqueId].expandedInput) {
+            task.expandedInput = true;
+          }
 
-        this.expandedTasks[task.uniqueId].backgroundColor =
-          this.expandedTasks[task.uniqueId].backgroundColor || "black";
-        task.backgroundColor =
-          this.expandedTasks[task.uniqueId].backgroundColor;
+          this.expandedTasks[task.uniqueId].backgroundColor =
+            this.expandedTasks[task.uniqueId].backgroundColor || "black";
+          task.backgroundColor =
+            this.expandedTasks[task.uniqueId].backgroundColor;
 
-        if (this.isAnsi(task.output || "")) {
-          this.expandedTasks[task.uniqueId].htmlOutput = this.ansiToHtml(
-            task.output,
-          );
-        }
+          if (this.isAnsi(task.output || "")) {
+            this.expandedTasks[task.uniqueId].htmlOutput = this.ansiToHtml(
+              task.output,
+            );
+          }
 
-        return task;
-      });
-
-      this.loading = false;
+          return task;
+        });
+      } catch (err) {
+        this.snack.error(`Failed to load tasks: ${err}`);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };

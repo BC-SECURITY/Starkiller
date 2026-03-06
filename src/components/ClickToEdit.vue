@@ -2,9 +2,9 @@
   <v-row class="pb-5">
     <v-col cols="4" class="d-flex align-center justify-start">
       <span class="text--bold">{{ label }}</span>
-      <v-tooltip v-if="infoText" bottom>
-        <template #activator="{ on, attrs }">
-          <v-icon small class="ml-2" v-bind="attrs" v-on="on">
+      <v-tooltip v-if="infoText" location="bottom">
+        <template #activator="{ props: activatorProps }">
+          <v-icon size="small" class="ml-2" v-bind="activatorProps">
             mdi-information-outline
           </v-icon>
         </template>
@@ -19,8 +19,8 @@
           v-model="internalValue"
           :items="suggestedValues"
           :label="label"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           @blur="update"
           @keyup.enter="update"
         />
@@ -30,53 +30,51 @@
           v-model="menu"
           :close-on-content-click="false"
           transition="scale-transition"
-          offset-y
           min-width="auto"
         >
-          <template #activator="{ on, attrs }">
+          <template #activator="{ props: activatorProps }">
             <v-text-field
               ref="field"
               v-model="internalValue"
               label="Picker in menu"
               prepend-icon="mdi-calendar"
               readonly
-              v-bind="attrs"
+              v-bind="activatorProps"
               clearable
-              v-on="on"
               @click:clear="clear"
             />
           </template>
           <v-date-picker
-            v-model="internalValue"
-            outlined
-            dense
-            :range="dataType === 'date-range'"
-            :min="moment().format('YYYY-MM-DD')"
-            @blur="update"
-            @keyup.enter="update"
+            :model-value="
+              internalValue ? new Date(internalValue + 'T00:00:00') : undefined
+            "
+            :min="new Date()"
+            @update:model-value="onDatePicked"
           >
-            <v-spacer />
-            <v-btn
-              text
-              color="primary"
-              @click="
-                menu = false;
-                editing = false;
-                revert();
-              "
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              text
-              color="primary"
-              @click="
-                menu = false;
-                update();
-              "
-            >
-              OK
-            </v-btn>
+            <template #actions>
+              <v-spacer />
+              <v-btn
+                variant="text"
+                color="primary"
+                @click="
+                  menu = false;
+                  editing = false;
+                  revert();
+                "
+              >
+                Cancel
+              </v-btn>
+              <v-btn
+                variant="text"
+                color="primary"
+                @click="
+                  menu = false;
+                  update();
+                "
+              >
+                OK
+              </v-btn>
+            </template>
           </v-date-picker>
         </v-menu>
         <v-text-field
@@ -90,11 +88,11 @@
           :step="label === 'Jitter' ? '0.1' : '1'"
           :max="label === 'Jitter' ? '1' : ''"
           min="0"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           @blur="update"
-          @keyup.enter.native="update"
+          @keyup.enter="update"
         />
       </template>
       <span v-else class="ml-3">
@@ -108,7 +106,6 @@
 import moment from "moment";
 
 export default {
-  components: {},
   props: {
     editable: {
       type: Boolean,
@@ -118,7 +115,7 @@ export default {
       type: String,
       required: true,
     },
-    value: {
+    modelValue: {
       type: [String, Number],
       default: "",
     },
@@ -143,9 +140,10 @@ export default {
       default: () => [],
     },
   },
+  emits: ["update:modelValue", "update"],
   data() {
     return {
-      internalValue: this.value,
+      internalValue: this.modelValue,
       editing: false,
       menu: false,
       original: "",
@@ -158,12 +156,16 @@ export default {
     },
   },
   watch: {
+    modelValue(val) {
+      this.internalValue = val;
+      this.original = val;
+    },
     internalValue(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
   },
   mounted() {
-    this.original = this.value;
+    this.original = this.modelValue;
   },
   methods: {
     clicked() {
@@ -178,8 +180,12 @@ export default {
       });
     },
     async update() {
-      if (this.$refs.field.validate && this.$refs.field.validate() === false) {
-        return;
+      if (this.$refs.field && this.$refs.field.validate) {
+        const result = await this.$refs.field.validate();
+        const isValid = Array.isArray(result)
+          ? result.length === 0
+          : result?.valid !== false;
+        if (!isValid) return;
       }
 
       if (this.label === "Delay") {
@@ -202,6 +208,9 @@ export default {
       await this.$nextTick();
       this.editing = false;
       this.$emit("update");
+    },
+    onDatePicked(date) {
+      this.internalValue = date ? moment(date).format("YYYY-MM-DD") : "";
     },
     getColClass() {
       if (this.editing === false && this.editable === true) {

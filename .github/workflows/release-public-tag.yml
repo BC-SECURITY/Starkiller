@@ -27,7 +27,7 @@ jobs:
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
       - uses: actions/setup-node@v6
         with:
-          node-version: 16
+          node-version: 20
           cache: "yarn"
       - name: Set application version as variable
         run: |

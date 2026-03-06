@@ -5,6 +5,7 @@ import { setInstance } from "@/api/axios-instance";
 // eslint-disable-next-line import/prefer-default-export
 export const useApplicationStore = defineStore("application", {
   persist: {
+    omit: ["chatUnreadCount"],
     afterRestore: (ctx) => {
       setInstance(ctx.store.url, ctx.store.token);
     },
@@ -25,6 +26,7 @@ export const useApplicationStore = defineStore("application", {
     taskHeaders: [],
     pluginTaskHeaders: [],
     connectionError: 0,
+    chatUnreadCount: 0,
     notifications: [],
   }),
   actions: {

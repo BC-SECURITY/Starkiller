@@ -1,6 +1,5 @@
-import Vue from "vue";
-import Chat from "vue-beautiful-chat";
-import { createPinia, PiniaVuePlugin } from "pinia";
+import { createApp } from "vue";
+import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
 import App from "./App.vue";
@@ -9,17 +8,30 @@ import router from "./router";
 import "@fontsource/roboto";
 import vuetify from "./plugins/vuetify";
 
-Vue.use(Chat);
+const app = createApp(App);
 
-Vue.use(PiniaVuePlugin);
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
-Vue.use(pinia);
-Vue.config.productionTip = false;
 
-new Vue({
-  vuetify,
-  pinia,
-  router,
-  render: (h) => h(App),
-}).$mount("#app");
+app.config.errorHandler = (err, instance, info) => {
+  console.error(`[Starkiller] Unhandled error in ${info}:`, err);
+  try {
+    // eslint-disable-next-line no-underscore-dangle
+    const root = instance?.$?.appContext?.app?._instance;
+    const snack = root?.proxy?.$data?.snackProxy;
+    if (snack) {
+      snack.error(`Unexpected error: ${err.message || err}`);
+    }
+  } catch (secondaryErr) {
+    console.warn(
+      "[Starkiller] Could not display error notification:",
+      secondaryErr,
+    );
+  }
+};
+
+app.use(pinia);
+app.use(router);
+app.use(vuetify);
+
+app.mount("#app");

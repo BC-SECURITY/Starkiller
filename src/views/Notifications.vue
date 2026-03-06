@@ -3,45 +3,52 @@
     <list-page-top
       :breads="[
         {
-          text: 'Notifications',
+          title: 'Notifications',
           disabled: true,
           to: '/notifications',
         },
       ]"
     >
       <template #extra-stuff>
-        <v-btn color="primary" text @click="clearNotifications">
+        <v-btn color="primary" variant="text" @click="clearNotifications">
           Clear
-          <v-icon right> mdi-delete </v-icon>
+          <v-icon end> mdi-delete </v-icon>
         </v-btn>
       </template>
     </list-page-top>
-    <v-card class="mr-2 pa-2" elevation="2" outlined style="flex-basis: 250px">
+    <v-card
+      class="mr-2 pa-2"
+      elevation="2"
+      variant="outlined"
+      style="flex-basis: 250px"
+    >
       <v-list>
-        <template v-for="(item, i) in notifications">
+        <template v-for="(item, i) in notifications" :key="i">
           <v-list-item
-            :key="`list-'${i}`"
             :style="
               item.read ? '' : 'background-color: rgba(118, 127, 134, 0.5);'
             "
             :to="item.route"
             link
           >
-            <v-list-item-content>
-              <v-list-item-title>
-                {{ item.title }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                {{ item.text }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-btn v-if="item.route" color="primary" text :to="item.route">
+            <v-list-item-title>
+              {{ item.title }}
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ item.text }}
+            </v-list-item-subtitle>
+            <template #append>
+              <v-btn
+                v-if="item.route"
+                color="primary"
+                variant="text"
+                :to="item.route"
+              >
                 {{ item.buttonText }}
               </v-btn>
-            </v-list-item-action>
+            </template>
           </v-list-item>
-          <v-divider :key="`divider-${i}`" />
+          <v-divider />
         </template>
       </v-list>
     </v-card>
@@ -63,7 +70,7 @@ export default {
       return this.applicationStore.notifications;
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.applicationStore.markAllNotificationsAsRead();
   },
   methods: {

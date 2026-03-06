@@ -8,7 +8,7 @@
     />
     <advanced-table>
       <template #filters>
-        <v-switch v-model="showIds" label="Show IDs" />
+        <v-switch v-model="showIds" color="primary" label="Show IDs" />
         <expansion-panel-search
           v-model="search"
           title="Search"
@@ -64,7 +64,7 @@ export default {
       search: "",
       breads: [
         {
-          text: "Modules",
+          title: "Modules",
           disabled: true,
           href: "/modules",
         },

@@ -19,7 +19,7 @@ export default {
     ExpansionPanelFilter,
   },
   props: {
-    value: {
+    modelValue: {
       type: Array,
       default: () => [],
     },
@@ -32,6 +32,7 @@ export default {
       default: false,
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
       selectedItems: [],
@@ -44,7 +45,7 @@ export default {
   watch: {
     selectedItems: {
       handler(val) {
-        this.$emit("input", val);
+        this.$emit("update:modelValue", val);
       },
     },
   },

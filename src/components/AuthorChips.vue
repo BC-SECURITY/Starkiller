@@ -1,9 +1,8 @@
 <template>
   <div>
-    <template v-for="(author, index) in authors">
+    <template v-for="(author, index) in authors" :key="index">
       <a
         v-if="author.link"
-        :key="index"
         :href="author.link"
         target="_blank"
         rel="noopener noreferrer"
@@ -14,7 +13,7 @@
         </v-chip>
       </a>
 
-      <v-chip v-else :key="index" medium class="mr-1 mb-1">
+      <v-chip v-else medium class="mr-1 mb-1">
         {{ formatDisplayName(author) }}
       </v-chip>
     </template>

@@ -1,28 +1,28 @@
 <template>
   <div>
     <div>
-      <portal to="app-bar-extension">
+      <Teleport defer to="#app-bar-extension">
         <div style="display: flex; flex-direction: row; width: 100%">
-          <v-tabs v-model="tab" align-with-title>
-            <v-tab key="interact" href="#interact">
+          <v-tabs v-model="tab" color="primary" align-with-title>
+            <v-tab key="interact" value="interact">
               Interact
-              <v-icon x-small class="ml-1"> fa-arrow-pointer </v-icon>
+              <v-icon size="x-small" class="ml-1"> fa-arrow-pointer </v-icon>
             </v-tab>
-            <v-tab key="file-browser" href="#file-browser">
+            <v-tab key="file-browser" value="file-browser">
               File Browser
-              <v-icon x-small class="ml-1"> fa-folder-open </v-icon>
+              <v-icon size="x-small" class="ml-1"> fa-folder-open </v-icon>
             </v-tab>
-            <v-tab key="tasks" href="#tasks">
+            <v-tab key="tasks" value="tasks">
               Tasks
-              <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
+              <v-icon size="x-small" class="ml-1"> fa-sticky-note </v-icon>
             </v-tab>
-            <v-tab key="jobs" href="#jobs">
+            <v-tab key="jobs" value="jobs">
               Jobs
-              <v-icon x-small class="ml-1"> fa-cogs </v-icon>
+              <v-icon size="x-small" class="ml-1"> fa-cogs </v-icon>
             </v-tab>
-            <v-tab key="view" href="#view">
+            <v-tab key="view" value="view">
               View
-              <v-icon x-small class="ml-1"> fa-eye </v-icon>
+              <v-icon size="x-small" class="ml-1"> fa-eye </v-icon>
             </v-tab>
           </v-tabs>
           <div style="display: flex; flex-direction: row">
@@ -33,13 +33,15 @@
             </v-btn>
           </div>
         </div>
-      </portal>
-      <portal to="app-bar">
+      </Teleport>
+      <Teleport defer to="#app-bar">
         <div class="v-toolbar__content" style="width: 100%">
           <v-breadcrumbs :items="breads" />
-          <v-tooltip v-if="agent.high_integrity" bottom>
-            <template #activator="{ on }">
-              <v-icon small v-on="on"> fa-user-cog </v-icon>
+          <v-tooltip v-if="agent.high_integrity" location="bottom">
+            <template #activator="{ props: activatorProps }">
+              <v-icon size="small" v-bind="activatorProps">
+                fa-user-cog
+              </v-icon>
             </template>
             <span>Elevated Process</span>
           </v-tooltip>
@@ -68,59 +70,90 @@
               :button-text="isRefreshTasks ? 'On' : 'Off'"
               text="Auto-refresh Tasks"
             />
-            <tooltip-button
-              icon="fa-calendar-times"
-              text="Clear Queued Tasks"
-              @click="clearQueue"
-            />
-            <tooltip-button
-              icon="fa-upload"
-              text="Upload"
-              @click="uploadDialog = true"
-            />
-            <tooltip-button
-              icon="fa-download"
-              text="Download"
-              @click="downloadDialog = true"
-            />
-            <tooltip-button
-              v-if="!hideSideBar"
-              icon="fa-external-link-alt"
-              text="Popout"
-              @click="popout"
-            />
-            <tooltip-button
-              v-if="!subscribed"
-              icon="fa-bell"
-              text="Subscribe to Notifications"
-              @click="subscribe"
-            />
-            <tooltip-button
-              v-else
-              icon="fa-bell-slash"
-              text="Unsubscribe from Notifications"
-              @click="unsubscribe"
-            />
-            <tooltip-button
-              icon="fa-sync"
-              text="Reload SysInfo"
-              @click="reloadSysInfo"
-            />
-            <tooltip-button
-              icon="fa-tasks"
-              text="Get Agent Task Status List"
-              @click="getAgentTasks"
-            />
-            <tooltip-button
-              v-if="initialized && !archived"
-              icon="fa-trash-alt"
-              text="Kill Agent"
-              color="error"
-              @click="killAgent"
-            />
+            <v-menu>
+              <template #activator="{ props: activatorProps }">
+                <v-btn
+                  variant="text"
+                  icon
+                  size="small"
+                  class="mr-5"
+                  v-bind="activatorProps"
+                >
+                  <v-icon>fa-ellipsis-v</v-icon>
+                </v-btn>
+              </template>
+              <v-list density="compact">
+                <v-list-item @click="clearQueue">
+                  <template #prepend>
+                    <v-icon size="small">fa-calendar-times</v-icon>
+                  </template>
+                  <v-list-item-title>Clear Queued Tasks</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="uploadDialog = true">
+                  <template #prepend>
+                    <v-icon size="small">fa-upload</v-icon>
+                  </template>
+                  <v-list-item-title>Upload</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="downloadDialog = true">
+                  <template #prepend>
+                    <v-icon size="small">fa-download</v-icon>
+                  </template>
+                  <v-list-item-title>Download</v-list-item-title>
+                </v-list-item>
+                <v-list-item v-if="!hideSideBar" @click="popout">
+                  <template #prepend>
+                    <v-icon size="small">fa-external-link-alt</v-icon>
+                  </template>
+                  <v-list-item-title>Popout</v-list-item-title>
+                </v-list-item>
+                <v-divider />
+                <v-list-item v-if="!subscribed" @click="subscribe">
+                  <template #prepend>
+                    <v-icon size="small">fa-bell</v-icon>
+                  </template>
+                  <v-list-item-title
+                    >Subscribe to Notifications</v-list-item-title
+                  >
+                </v-list-item>
+                <v-list-item v-else @click="unsubscribe">
+                  <template #prepend>
+                    <v-icon size="small">fa-bell-slash</v-icon>
+                  </template>
+                  <v-list-item-title
+                    >Unsubscribe from Notifications</v-list-item-title
+                  >
+                </v-list-item>
+                <v-list-item @click="reloadSysInfo">
+                  <template #prepend>
+                    <v-icon size="small">fa-sync</v-icon>
+                  </template>
+                  <v-list-item-title>Reload SysInfo</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="getAgentTasks">
+                  <template #prepend>
+                    <v-icon size="small">fa-tasks</v-icon>
+                  </template>
+                  <v-list-item-title
+                    >Get Agent Task Status List</v-list-item-title
+                  >
+                </v-list-item>
+                <v-divider />
+                <v-list-item
+                  v-if="initialized && !archived"
+                  class="text-error"
+                  @click="killAgent"
+                >
+                  <template #prepend>
+                    <v-icon size="small" color="error">fa-trash-alt</v-icon>
+                  </template>
+                  <v-list-item-title>Kill Agent</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </div>
         </div>
-      </portal>
+      </Teleport>
       <error-state-alert
         v-if="errorState"
         :resource-id="id"
@@ -129,62 +162,74 @@
       <div v-if="!errorState" :style="splitPaneHeight()">
         <splitpanes :disabled="true" @resize="paneSize = $event[0].size">
           <pane min-size="30" :size="paneSize">
-            <v-tabs-items v-model="tab" class="scrollable-pane">
-              <v-tab-item
+            <v-window v-model="tab" class="scrollable-pane">
+              <v-window-item
                 key="interact"
-                :value="'interact'"
+                value="interact"
                 :transition="false"
                 :reverse-transition="false"
               >
                 <v-card v-if="initialized && !archived" flat>
-                  <v-tabs v-model="interactTab" :height="30" align-with-title>
-                    <v-tab key="form" href="#form">
-                      Form
-                      <v-icon x-small class="ml-1"> fa-list-check </v-icon>
+                  <v-tabs
+                    v-model="interactTab"
+                    :height="30"
+                    color="primary"
+                    align-with-title
+                  >
+                    <v-tab key="module" value="module">
+                      Module
+                      <v-icon size="x-small" class="ml-1">
+                        fa-grip-horizontal
+                      </v-icon>
                     </v-tab>
-                    <v-tab key="terminal" href="#terminal">
+                    <v-tab key="shell" value="shell">
+                      Shell
+                      <v-icon size="x-small" class="ml-1"> fa-terminal </v-icon>
+                    </v-tab>
+                    <v-tab key="terminal" value="terminal">
                       Terminal
-                      <v-icon x-small class="ml-1"> fa-terminal </v-icon>
+                      <v-icon size="x-small" class="ml-1"> fa-code </v-icon>
                     </v-tab>
                   </v-tabs>
-                  <v-tabs-items v-model="interactTab">
-                    <v-tab-item
-                      key="form"
-                      :value="'form'"
+                  <v-window v-model="interactTab">
+                    <v-window-item
+                      key="shell"
+                      value="shell"
                       :transition="false"
                       :reverse-transition="false"
                     >
                       <agent-interact :agent="agent" />
-                      <v-divider />
-                      <h4 class="pl-4 pt-2">Execute Module</h4>
+                    </v-window-item>
+                    <v-window-item
+                      key="module"
+                      value="module"
+                      :transition="false"
+                      :reverse-transition="false"
+                    >
                       <agent-execute-module :agents="[agent]" />
-                    </v-tab-item>
-                    <v-tab-item
+                    </v-window-item>
+                    <v-window-item
                       key="terminal"
                       style="height: auto"
-                      :value="'terminal'"
+                      value="terminal"
                       :transition="false"
                       :reverse-transition="false"
                     >
                       <agent-terminal class="mt-2" :agent="agent" />
-                    </v-tab-item>
-                  </v-tabs-items>
+                    </v-window-item>
+                  </v-window>
                 </v-card>
                 <v-card v-else-if="initialized && archived" flat>
                   <v-card-text>
-                    <v-alert
-                      type="error"
-                      icon="fa-exclamation-triangle"
-                      :value="true"
-                    >
+                    <v-alert type="error" icon="fa-exclamation-triangle">
                       This agent is archived.
                     </v-alert>
                   </v-card-text>
                 </v-card>
-              </v-tab-item>
-              <v-tab-item
+              </v-window-item>
+              <v-window-item
                 key="browser"
-                :value="'file-browser'"
+                value="file-browser"
                 :transition="false"
                 :reverse-transition="false"
               >
@@ -192,13 +237,13 @@
                   <agent-file-browser
                     :agent="agent"
                     :read-only="initialized && archived"
-                    @openUploadDialog="openUploadDialogPrefilled"
+                    @open-upload-dialog="openUploadDialogPrefilled"
                   />
                 </v-card>
-              </v-tab-item>
-              <v-tab-item
+              </v-window-item>
+              <v-window-item
                 key="tasks"
-                :value="'tasks'"
+                value="tasks"
                 :transition="false"
                 :reverse-transition="false"
               >
@@ -209,20 +254,20 @@
                     :refresh-tasks="isRefreshTasks"
                   />
                 </v-card>
-              </v-tab-item>
-              <v-tab-item
+              </v-window-item>
+              <v-window-item
                 key="jobs"
-                :value="'jobs'"
+                value="jobs"
                 :transition="false"
                 :reverse-transition="false"
               >
                 <v-card flat>
                   <agent-jobs :agent="agent" />
                 </v-card>
-              </v-tab-item>
-              <v-tab-item
+              </v-window-item>
+              <v-window-item
                 key="view"
-                :value="'view'"
+                value="view"
                 :transition="false"
                 :reverse-transition="false"
               >
@@ -233,8 +278,8 @@
                     @refresh-agent="getAgent(id)"
                   />
                 </v-card>
-              </v-tab-item>
-            </v-tabs-items>
+              </v-window-item>
+            </v-window>
           </pane>
           <!-- <pane :size="100 - paneSize">
             <div
@@ -259,7 +304,6 @@ import AgentFileBrowser from "@/components/agents/AgentFileBrowser.vue";
 import AgentTerminal from "@/components/agents/AgentTerminal.vue";
 import AgentUploadDialog from "@/components/agents/AgentUploadDialog.vue";
 import AgentDownloadDialog from "@/components/agents/AgentDownloadDialog.vue";
-import TooltipButton from "@/components/TooltipButton.vue";
 import TooltipButtonToggle from "@/components/TooltipButtonToggle.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import { Pane, Splitpanes } from "splitpanes";
@@ -281,12 +325,12 @@ export default {
     AgentTerminal,
     AgentUploadDialog,
     AgentDownloadDialog,
-    TooltipButton,
     TooltipButtonToggle,
     ErrorStateAlert,
     Splitpanes,
     Pane,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       agent: {},
@@ -302,7 +346,7 @@ export default {
       rightPaneInitialized: false,
       pathToFile: "",
       isRefreshTasks: true,
-      interactTab: "form",
+      interactTab: "module",
     };
   },
   computed: {
@@ -318,13 +362,13 @@ export default {
     breads() {
       return [
         {
-          text: "Agents",
+          title: "Agents",
           disabled: this.isChild,
           to: "/agents",
           exact: true,
         },
         {
-          text: this.breadcrumbName,
+          title: this.breadcrumbName,
           disabled: true,
           to: "/agent-edit",
         },
@@ -388,9 +432,9 @@ export default {
     async reloadSysInfo() {
       try {
         await agentTaskApi.sysinfo(this.agent.session_id);
-        this.$snack.success(`SysInfo reload queued for ${this.agent.name}`);
+        this.snack.success(`SysInfo reload queued for ${this.agent.name}`);
       } catch (error) {
-        this.$snack.error(
+        this.snack.error(
           `Error reloading SysInfo for ${this.agent.name}: ${error.message}`,
         );
       }
@@ -398,9 +442,9 @@ export default {
     async getAgentTasks() {
       try {
         await agentTaskApi.getJobs(this.agent.session_id);
-        this.$snack.success(`Task list queued for ${this.agent.name}`);
+        this.snack.success(`Task list queued for ${this.agent.name}`);
       } catch (error) {
-        this.$snack.error(
+        this.snack.error(
           `Error getting jobs for ${this.agent.name}: ${error.message}`,
         );
       }
@@ -431,13 +475,15 @@ export default {
         .then((data) => {
           this.agent = data;
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },
     async killAgent() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Kill Agent",
           `Do you want to kill agent ${this.agent.name}?`,
           {
@@ -446,9 +492,7 @@ export default {
         )
       ) {
         this.agentStore.killAgent({ sessionId: this.agent.session_id });
-        this.$snack.success(
-          `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
-        );
+        this.snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
         this.$router.push({ name: "agents" });
       }
     },
@@ -460,11 +504,11 @@ export default {
       });
       const queuedIds = queuedTasks.records.map((el) => el.id);
       if (queuedIds.length === 0) {
-        this.$snack.info("No queued tasks to clear.");
+        this.snack.info("No queued tasks to clear.");
         return;
       }
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "",
           `Do you want to clear ${queuedIds.length} queued tasks?`,
           {
@@ -476,7 +520,7 @@ export default {
           sessionId: this.agent.session_id,
           tasks: queuedIds,
         });
-        this.$snack.success(
+        this.snack.success(
           `Clearing queued tasks for Agent ${this.agent.session_id}.`,
         );
       }
@@ -497,11 +541,11 @@ export default {
       this.uploadLoading = true;
       try {
         await agentTaskApi.uploadFile(this.agent.session_id, file, pathToFile);
-        this.$snack.success(
+        this.snack.success(
           `Tasked agent ${this.agent.name} to upload file to ${pathToFile}`,
         );
       } catch (err) {
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
       }
 
       this.uploadLoading = false;
@@ -514,21 +558,15 @@ export default {
       this.downloadLoading = true;
       try {
         await agentTaskApi.downloadFile(this.agent.session_id, pathToFile);
-        this.$snack.success(
+        this.snack.success(
           `Tasked agent ${this.agent.name} to downloaded file ${pathToFile}`,
         );
       } catch (err) {
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
       }
 
       this.downloadLoading = false;
       this.downloadDialog = false;
-    },
-    /**
-     * When new results appear in the AgentCommandViewer, scroll it down to the bottom.
-     */
-    scrollResults() {
-      // this.$refs.bottomScrollable.scrollTop = this.$refs.bottomScrollable.scrollHeight;
     },
   },
 };
@@ -539,13 +577,6 @@ export default {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-// Overrides vuetify.css
-// Because we moved the tabs into a div, which made the color funky.
-.v-toolbar__content > div > .v-tabs > .v-slide-group.v-tabs-bar,
-.v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
-  background-color: inherit;
 }
 
 .splitpanes__splitter {

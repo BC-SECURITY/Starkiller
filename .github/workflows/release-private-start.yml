@@ -36,7 +36,7 @@ jobs:
           git config user.email noreply@github.com
       - uses: actions/setup-node@v6
         with:
-          node-version: 16
+          node-version: 20
       - name: Change version number
         run: |
           if [ -n "${{ github.event.inputs.overrideVersion }}" ]; then

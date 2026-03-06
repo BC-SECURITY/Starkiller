@@ -1,17 +1,17 @@
 <template>
   <v-expansion-panel>
-    <v-expansion-panel-header expand-icon="mdi-menu-down">
+    <v-expansion-panel-title expand-icon="mdi-menu-down">
       {{ title }}
-    </v-expansion-panel-header>
-    <v-expansion-panel-content>
+    </v-expansion-panel-title>
+    <v-expansion-panel-text>
       <v-text-field
         v-model="internalValue"
         :label="label"
-        outlined
-        dense
+        variant="outlined"
+        density="compact"
         required
       />
-    </v-expansion-panel-content>
+    </v-expansion-panel-text>
   </v-expansion-panel>
 </template>
 
@@ -19,7 +19,7 @@
 export default {
   name: "ExpansionPanelSearch",
   props: {
-    value: {
+    modelValue: {
       type: String,
       required: true,
     },
@@ -32,6 +32,7 @@ export default {
       required: true,
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
       internalValue: "",
@@ -40,12 +41,12 @@ export default {
   watch: {
     internalValue: {
       handler(val) {
-        this.$emit("input", val);
+        this.$emit("update:modelValue", val);
       },
     },
   },
   mounted() {
-    this.internalValue = this.value;
+    this.internalValue = this.modelValue;
   },
 };
 </script>

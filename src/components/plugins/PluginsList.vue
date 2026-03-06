@@ -8,20 +8,14 @@
       @refresh="getPlugins"
     />
     <v-list>
-      <v-list-item-group v-model="activeThing">
-        <router-link
-          v-for="plugin in plugins"
-          :key="plugin.id"
-          style="color: inherit; text-decoration: none"
-          :to="{ name: 'pluginEdit', params: { id: plugin.id } }"
-        >
-          <v-list-item class="list-item">
-            <v-list-item-content>
-              <v-list-item-title>{{ plugin.name }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </router-link>
-      </v-list-item-group>
+      <v-list-item
+        v-for="plugin in plugins"
+        :key="plugin.id"
+        :to="{ name: 'pluginEdit', params: { id: plugin.id } }"
+        link
+      >
+        <v-list-item-title>{{ plugin.name }}</v-list-item-title>
+      </v-list-item>
     </v-list>
   </div>
 </template>
@@ -37,10 +31,9 @@ export default {
   },
   data() {
     return {
-      activeThing: null,
       breads: [
         {
-          text: "Plugins",
+          title: "Plugins",
           disabled: true,
           href: "/plugins",
         },

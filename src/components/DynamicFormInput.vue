@@ -8,6 +8,7 @@
         suggestedValues.includes('False')
       "
       v-model="internalValue"
+      color="primary"
       false-value="False"
       true-value="True"
       :label="name"
@@ -18,7 +19,7 @@
       v-model="internalValue"
       :items="suggestedValues"
       :label="name"
-      outlined
+      variant="outlined"
       multiple
       chips
     />
@@ -34,10 +35,10 @@
       v-model="internalValue"
       :items="suggestedValues"
       :label="name"
-      outlined
-      dense
+      variant="outlined"
+      density="compact"
       item-value="session_id"
-      item-text="name"
+      item-title="name"
     />
 
     <v-autocomplete
@@ -45,24 +46,24 @@
       v-model="internalValue"
       :items="suggestedValues"
       :label="name"
-      outlined
-      dense
+      variant="outlined"
+      density="compact"
       item-value="id"
-      item-text="id"
+      item-title="id"
     >
-      <template #item="data">
-        <v-list-item-content>
+      <template #item="{ item, props: itemProps }">
+        <v-list-item v-bind="itemProps">
           <v-list-item-title>
             {{
               truncate(
-                `${data.item.username}, ${data.item.domain}, ${data.item.password}`,
+                `${item.raw.username}, ${item.raw.domain}, ${item.raw.password}`,
               )
             }}
           </v-list-item-title>
           <v-list-item-subtitle>
-            {{ truncate(`id: ${data.item.id}, notes: ${data.item.notes}`) }}
+            {{ truncate(`id: ${item.raw.id}, notes: ${item.raw.notes}`) }}
           </v-list-item-subtitle>
-        </v-list-item-content>
+        </v-list-item>
       </template>
     </v-autocomplete>
 
@@ -71,8 +72,8 @@
       v-model="internalValue"
       :items="suggestedValues"
       :label="name"
-      outlined
-      dense
+      variant="outlined"
+      density="compact"
     />
 
     <v-autocomplete
@@ -80,8 +81,8 @@
       v-model="internalValue"
       :items="suggestedValues"
       :label="name"
-      outlined
-      dense
+      variant="outlined"
+      density="compact"
     />
 
     <v-text-field
@@ -90,8 +91,8 @@
       :rules="rules"
       :label="name"
       :type="type === 'string' ? 'text' : 'number'"
-      outlined
-      dense
+      variant="outlined"
+      density="compact"
       required
     />
   </div>
@@ -103,7 +104,7 @@ import FileInput from "@/components/FileInput.vue";
 export default {
   components: { FileInput },
   props: {
-    value: {
+    modelValue: {
       type: [String, Array, Number],
       required: true,
     },
@@ -128,14 +129,18 @@ export default {
       default: "text",
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
-      internalValue: this.value,
+      internalValue: this.modelValue,
     };
   },
   watch: {
+    modelValue(val) {
+      this.internalValue = val;
+    },
     internalValue(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
   },
   methods: {

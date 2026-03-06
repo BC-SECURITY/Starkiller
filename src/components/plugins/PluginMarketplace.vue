@@ -9,46 +9,36 @@
     />
     <div style="display: flex; flex-direction: row">
       <div style="width: 350px; min-width: 350px; max-width: 350px">
-        <v-card elevation="2" outlined flat class="pl-4 pr-4 pb-4">
+        <v-card elevation="2" border class="pl-4 pr-4 pb-4">
           <v-list
             :disabled="installing"
             class="overflow-y-auto"
             style="max-height: 600px"
           >
-            <v-list-item-group
-              v-model="selectedPluginIndex"
-              mandatory
-              active-class="primary--text"
+            <v-list-item
+              v-for="(plugin, pluginIdx) in marketplacePlugins"
+              :key="plugin.name"
+              :active="selectedPluginIndex === pluginIdx"
+              selectable
+              @click="selectedPluginIndex = pluginIdx"
             >
-              <v-list-item
-                v-for="plugin in marketplacePlugins"
-                :key="plugin.name"
-                selectable
-              >
-                <v-list-item-avatar>
+              <template #prepend>
+                <v-avatar>
                   <img
                     v-if="plugin.icon"
                     :src="plugin.icon"
                     alt="Plugin Icon"
                   />
                   <v-icon v-else>fa-puzzle-piece</v-icon>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title>{{ plugin.name }}</v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-icon
-                    v-if="
-                      marketplacePlugins.find((p) => p.name === plugin.name)
-                        .installed
-                    "
-                    color="green"
-                  >
-                    fa-circle-check
-                  </v-icon>
-                </v-list-item-action>
-              </v-list-item>
-            </v-list-item-group>
+                </v-avatar>
+              </template>
+              <v-list-item-title>{{ plugin.name }}</v-list-item-title>
+              <template #append>
+                <v-icon v-if="plugin.installed" color="green">
+                  fa-circle-check
+                </v-icon>
+              </template>
+            </v-list-item>
           </v-list>
         </v-card>
       </div>
@@ -56,8 +46,7 @@
         <v-card
           v-if="selectedPluginObj"
           elevation="2"
-          outlined
-          flat
+          border
           style="max-height: 600px"
           class="pl-4 pr-4 pb-4 overflow-y-auto"
         >
@@ -96,7 +85,7 @@
             >
               <v-btn
                 v-if="!isSelectedInstalled"
-                class="pa-4 ma-4"
+                class="ma-4"
                 color="primary"
                 :loading="installing"
                 @click="installSelectedPlugin"
@@ -115,7 +104,7 @@
                   },
                 }"
               >
-                <v-btn color="primary" class="pa-4 ma-4">Go To Plugin</v-btn>
+                <v-btn color="primary" class="ma-4">Go To Plugin</v-btn>
               </router-link>
               <v-select
                 v-model="selectedPluginRegistry"
@@ -123,7 +112,7 @@
                 :disabled="registryOptions.length < 2"
                 label="Registry"
                 :items="registryOptions"
-                item-text="name"
+                item-title="name"
                 item-value="name"
               />
               <span v-if="isSelectedInstalled">
@@ -137,13 +126,13 @@
                 label="Version"
                 style="width: 200px; max-width: 200px"
                 :items="versionOptions"
-                item-text="name"
+                item-title="name"
                 item-value="name"
               />
             </div>
           </div>
           <v-divider class="mt-4 mb-4" />
-          <v-card class="pa-4" outlined elevation="2">
+          <v-card class="pa-4" elevation="2" border>
             <vue-markdown :source="selectedPluginObj.description" />
           </v-card>
           <v-divider class="mt-4 mb-4" />
@@ -164,19 +153,20 @@ export default {
     VueMarkdown,
     AuthorChips,
   },
+  inject: ["snack"],
   data() {
     return {
       marketplacePlugins: [],
       breads: [
         {
-          text: "Plugin Marketplace",
+          title: "Plugin Marketplace",
           disabled: true,
           href: "/plugin-marketplace",
         },
       ],
       headers: [
-        { text: "Name", value: "name" },
-        { text: "Description", value: "description" },
+        { title: "Name", key: "name" },
+        { title: "Description", key: "description" },
       ],
       selectedPluginIndex: -1,
       selectedPluginRegistry: "",
@@ -218,7 +208,11 @@ export default {
     },
   },
   async mounted() {
-    this.refreshMarketplace();
+    try {
+      await this.refreshMarketplace();
+    } catch (err) {
+      this.snack.error(`Failed to load plugin marketplace: ${err}`);
+    }
   },
   methods: {
     async refreshMarketplace() {
@@ -236,7 +230,7 @@ export default {
           registry: this.selectedPluginRegistry,
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.installing = false;

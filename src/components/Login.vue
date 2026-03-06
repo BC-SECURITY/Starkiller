@@ -1,16 +1,26 @@
 <template>
   <div class="hello">
-    <v-form class="inputs" @submit.prevent.native="submit">
-      <v-text-field v-model="form.url" label="Url" dense outlined />
-      <v-text-field v-model="form.username" label="Username" dense outlined />
+    <v-form class="inputs" @submit.prevent="submit">
+      <v-text-field
+        v-model="form.url"
+        label="Url"
+        density="compact"
+        variant="outlined"
+      />
+      <v-text-field
+        v-model="form.username"
+        label="Username"
+        density="compact"
+        variant="outlined"
+      />
       <v-text-field
         v-model="form.password"
         label="Password"
         :type="showPassword ? 'text' : 'password'"
-        :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
-        outlined
-        dense
-        @click:append="showPassword = !showPassword"
+        :append-inner-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
+        variant="outlined"
+        density="compact"
+        @click:append-inner="showPassword = !showPassword"
       />
       <v-checkbox v-model="rememberMe" label="Remember URL and Username" />
       <v-btn color="primary" type="submit" :loading="loading" rounded>
@@ -25,6 +35,7 @@ import { useApplicationStore } from "@/stores/application-module";
 
 export default {
   name: "Login",
+  inject: ["snack"],
   data() {
     return {
       loading: false,
@@ -52,7 +63,7 @@ export default {
     loginError(val) {
       if (val.length > 0) {
         this.loading = false;
-        this.$snack.error(`Error Logging In: ${val}`);
+        this.snack.error(`Error Logging In: ${val}`);
       }
     },
   },

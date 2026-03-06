@@ -3,22 +3,20 @@
     v-model="menu"
     :close-on-content-click="false"
     :close-on-click="false"
-    bottom
-    right
+    location="bottom end"
     transition="scale-transition"
     origin="top left"
   >
-    <template #activator="{ on }">
+    <template #activator="{ props: activatorProps }">
       <v-chip
         :color="internalTag.color"
-        text-color="white"
-        class="mt-4 mr-1 ml-1 mb-4"
-        :close="close"
+        class="mt-4 mr-1 ml-1 mb-4 text-white"
+        :closable="close"
+        v-bind="activatorProps"
         @click:close="deleteTag(internalTag)"
-        v-on="on"
       >
         {{ `${tag.name}:${tag.value}` }}
-        <v-icon v-if="customIcon" right>
+        <v-icon v-if="customIcon" end>
           {{ customIcon }}
         </v-icon>
       </v-chip>
@@ -32,16 +30,16 @@
           <v-text-field
             ref="nameField"
             v-model="internalTag.name"
-            outlined
-            dense
+            variant="outlined"
+            density="compact"
             label="Name"
             :rules="rules.noColon"
             required
           />
           <v-text-field
             v-model="internalTag.value"
-            outlined
-            dense
+            variant="outlined"
+            density="compact"
             label="Value"
             :rules="rules.noColon"
             required
@@ -56,7 +54,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="green" text @click="updateTag(internalTag)">
+          <v-btn color="green" variant="text" @click="updateTag(internalTag)">
             Update
           </v-btn>
         </v-card-actions>
@@ -121,10 +119,9 @@ export default {
     deleteTag(tag) {
       this.$emit("delete-tag", tag);
     },
-    updateTag(tag) {
-      if (!this.$refs.form.validate()) {
-        return;
-      }
+    async updateTag(tag) {
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
       this.$emit("update-tag", tag);
       this.menu = false;
       this.$refs.form.resetValidation();

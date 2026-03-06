@@ -1,7 +1,7 @@
 <template>
-  <v-tooltip top>
-    <template #activator="{ on }">
-      <span v-on="on">{{ moment(timestamp).fromNow() }}</span>
+  <v-tooltip location="top">
+    <template #activator="{ props: activatorProps }">
+      <span v-bind="activatorProps">{{ moment(timestamp).fromNow() }}</span>
     </template>
     <span>{{ moment(timestamp).format("MMM D YYYY, h:mm:ss a") }}</span>
   </v-tooltip>

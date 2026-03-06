@@ -828,14 +828,19 @@ export default {
     // The other function is for when not in the shell menu.
     async shellCommandOperator(stdin) {
       let response = null;
-      if (stdin.trim() === "sysinfo") {
-        response = await agentTaskApi.sysinfo(this.agent.session_id);
-      } else {
-        response = await agentTaskApi.shell(
-          this.agent.session_id,
-          stdin,
-          false,
-        );
+      try {
+        if (stdin.trim() === "sysinfo") {
+          response = await agentTaskApi.sysinfo(this.agent.session_id);
+        } else {
+          response = await agentTaskApi.shell(
+            this.agent.session_id,
+            stdin,
+            false,
+          );
+        }
+      } catch (error) {
+        this.addError(`Error executing command: ${error.message}`);
+        return;
       }
 
       const complete = await this.pollForResult(response.id, { print: false });
@@ -1035,8 +1040,12 @@ export default {
       }
     },
     async getSysInfo() {
-      const task = await agentTaskApi.sysinfo(this.agent.session_id);
-      this.pollForResult(task.id);
+      try {
+        const task = await agentTaskApi.sysinfo(this.agent.session_id);
+        this.pollForResult(task.id);
+      } catch (error) {
+        this.addError(`Error requesting sysinfo: ${error.message}`);
+      }
     },
     displayHelpMenu() {
       if (this.currentModule) {

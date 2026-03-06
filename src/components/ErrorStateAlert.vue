@@ -2,7 +2,7 @@
   <v-alert prominent type="error">
     <v-row align="center">
       <v-col class="grow">
-        {{ message }}
+        {{ displayMessage }}
       </v-col>
       <v-col class="shrink">
         <v-btn @click="$router.go(-1)"> Go back </v-btn>
@@ -25,9 +25,13 @@ export default {
     },
     message: {
       type: String,
-      default() {
-        return `The resource '${this.resourceType}/${this.resourceId}' Not Found.`;
-      },
+      default: "",
+    },
+  },
+  computed: {
+    displayMessage() {
+      if (this.message) return this.message;
+      return `The resource '${this.resourceType}/${this.resourceId}' Not Found.`;
     },
   },
 };

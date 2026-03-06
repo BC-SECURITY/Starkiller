@@ -17,7 +17,9 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="error" text @click.stop="show = false"> Close </v-btn>
+        <v-btn color="error" variant="text" @click.stop="show = false">
+          Close
+        </v-btn>
         <v-btn color="primary" :loading="loading" @click="submit">
           Submit
         </v-btn>
@@ -34,7 +36,7 @@ export default {
     AgentExecuteModule,
   },
   props: {
-    value: Boolean,
+    modelValue: Boolean,
     loading: {
       type: Boolean,
       default: false,
@@ -52,16 +54,17 @@ export default {
       default: () => {},
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {};
   },
   computed: {
     show: {
       get() {
-        return this.value;
+        return this.modelValue;
       },
       set(value) {
-        this.$emit("input", value);
+        this.$emit("update:modelValue", value);
       },
     },
   },

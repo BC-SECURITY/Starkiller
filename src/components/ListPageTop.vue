@@ -1,32 +1,30 @@
 <template>
-  <portal to="app-bar">
+  <Teleport defer to="#app-bar">
     <div class="v-toolbar__content pt-2" style="width: 100%">
       <v-breadcrumbs :items="breads" />
       <v-spacer />
-      <div class="pt-2">
+      <div style="display: flex; flex-direction: row; align-items: center">
         <slot name="extra-stuff" />
-      </div>
-      <div>
         <v-btn
           v-if="showDelete"
           color="error"
-          text
+          variant="text"
           class="mr-2"
           @click="$emit('delete')"
         >
           {{ deleteText }}
-          <v-icon right> fa-trash-alt </v-icon>
+          <v-icon end> fa-trash-alt </v-icon>
         </v-btn>
         <v-btn
           v-if="showRefresh && !isAutoRefresh"
           :disabled="refreshLoading"
           color="primary"
-          text
+          variant="text"
           class="mr-2"
           @click="$emit('refresh')"
         >
           {{ refreshText }}
-          <v-icon right> fa-redo {{ refreshLoading ? "fa-spin" : "" }} </v-icon>
+          <v-icon end> fa-redo {{ refreshLoading ? "fa-spin" : "" }} </v-icon>
         </v-btn>
         <tooltip-button-toggle
           v-if="showRefresh && isAutoRefresh"
@@ -43,11 +41,11 @@
           @click="$emit('create')"
         >
           {{ createText }}
-          <v-icon right> fa-plus-square </v-icon>
+          <v-icon end> fa-plus-square </v-icon>
         </v-btn>
       </div>
     </div>
-  </portal>
+  </Teleport>
 </template>
 
 <script>

@@ -1,22 +1,22 @@
 <template>
-  <portal to="app-bar">
+  <Teleport defer to="#app-bar">
     <div class="v-toolbar__content pt-2" style="width: 100%">
       <v-breadcrumbs :items="breads" />
       <v-spacer />
       <div
-        class="pt-3"
-        style="display: flex; flex-direction: row; align-items: flex-start"
+        style="display: flex; flex-direction: row; align-items: center"
+        class="mr-4"
       >
         <slot name="extra-stuff" />
         <v-btn
           v-if="showDelete && !smallDelete"
           color="error"
-          text
+          variant="text"
           class="mr-2"
           @click="$emit('delete')"
         >
           {{ deleteText }}
-          <v-icon right> fa-trash-alt </v-icon>
+          <v-icon end> fa-trash-alt </v-icon>
         </v-btn>
         <tooltip-button
           v-else-if="showDelete && smallDelete"
@@ -28,12 +28,12 @@
         <v-btn
           v-if="showCopy && Object.keys(copyLink).length > 0 && !smallCopy"
           color="primary"
-          text
+          variant="text"
           class="mr-2"
           :to="copyLink"
         >
           {{ copyText }}
-          <v-icon right> fa-copy </v-icon>
+          <v-icon end> fa-copy </v-icon>
         </v-btn>
         <tooltip-button
           v-else-if="showCopy && Object.keys(copyLink).length > 0 && smallCopy"
@@ -45,7 +45,7 @@
           v-if="showSubmit"
           :disabled="disableSubmit"
           type="submit"
-          class="primary"
+          color="primary"
           :loading="submitLoading"
           @click="$emit('submit')"
         >
@@ -53,7 +53,7 @@
         </v-btn>
       </div>
     </div>
-  </portal>
+  </Teleport>
 </template>
 
 <script>

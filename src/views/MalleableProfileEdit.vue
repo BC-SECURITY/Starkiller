@@ -26,14 +26,14 @@
         ref="form"
         v-model="valid"
         style="max-width: 500px"
-        @submit.prevent.native="submit"
+        @submit.prevent="submit"
       >
         <v-text-field
           v-model="form.name"
           :rules="rules['name']"
           label="name"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           :disabled="!isNew"
         />
@@ -41,8 +41,8 @@
           v-model="form.category"
           :rules="rules['category']"
           label="category"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           :disabled="!isNew"
         />
@@ -50,8 +50,8 @@
           v-model="form.data"
           :rules="rules['code']"
           label="code"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           auto-grow
         />
@@ -61,7 +61,6 @@
 </template>
 
 <script>
-import Vue from "vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as malleableApi from "@/api/malleable-api";
@@ -73,6 +72,7 @@ export default {
     ErrorStateAlert,
     EditPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       form: {},
@@ -124,13 +124,13 @@ export default {
     breads() {
       return [
         {
-          text: "Malleable Profiles",
+          title: "Malleable Profiles",
           disabled: false,
           to: "/malleable-profiles",
           exact: true,
         },
         {
-          text: this.breadcrumbName,
+          title: this.breadcrumbName,
           disabled: true,
           to: "/malleable-profiles-edit",
         },
@@ -161,20 +161,20 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.loading || !this.$refs.form.validate()) {
-        return;
-      }
+      if (this.loading) return;
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
 
       this.loading = true;
       if (this.id > 0) {
         malleableApi
           .updateMalleableProfile(this.id, this.form.data)
           .then(() => {
-            this.$snack.success("Malleable Profile updated");
+            this.snack.success("Malleable Profile updated");
             this.loading = false;
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       } else {
@@ -185,19 +185,19 @@ export default {
             this.form.data,
           )
           .then(({ id }) => {
-            this.$snack.success("Malleable Profile created");
+            this.snack.success("Malleable Profile created");
             this.loading = false;
             this.$router.push({ name: "malleableProfileEdit", params: { id } });
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       }
     },
     async deleteMalleableProfile() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete profile ${this.form.name}?`,
           { color: "red" },
@@ -210,7 +210,7 @@ export default {
             query: { tab: "malleable-profiles" },
           });
         } catch (err) {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         }
       }
     },
@@ -220,9 +220,11 @@ export default {
         .then((data) => {
           this.malleableProfile = data;
           this.initialLoad = true;
-          Vue.set(this, "form", { ...data });
+          this.form = { ...data };
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },

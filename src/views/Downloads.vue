@@ -7,7 +7,7 @@
       :show-delete="false"
       @refresh="refreshDownloads"
     >
-      <template slot="extra-stuff">
+      <template #extra-stuff>
         <tooltip-button
           icon="fa-upload"
           text="Upload"
@@ -23,12 +23,7 @@
       </template>
     </list-page-top>
     <div style="display: flex; flex-direction: row; flex-wrap: wrap">
-      <v-card
-        class="mr-2 pa-2"
-        elevation="2"
-        outlined
-        style="flex-basis: 250px"
-      >
+      <v-card class="mr-2 pa-2" elevation="2" border style="flex-basis: 250px">
         <v-expansion-panels class="mb-6" multiple>
           <expansion-panel-search
             v-model="search"
@@ -54,24 +49,17 @@
           />
         </v-expansion-panels>
       </v-card>
-      <v-card style="flex: 1; min-width: 0" elevation="2" outlined>
-        <v-pagination
-          v-model="currentPage"
-          :length="totalPages"
-          :total-visible="10"
-          @input="handlePageChange"
-        />
-        <v-data-table
+      <v-card style="flex: 1; min-width: 0" elevation="2" border>
+        <v-data-table-server
+          v-model:sort-by="sortBy"
+          v-model:items-per-page="itemsPerPage"
+          v-model:page="currentPage"
           :headers="headers"
           :items="items"
-          item-key="id"
-          :sort-by="sortBy"
-          :sort-desc="sortDesc"
-          :server-items-length="totalItems"
-          :footer-props="{ 'items-per-page-options': [10, 25, 50, 100] }"
-          :items-per-page.sync="itemsPerPage"
+          item-value="id"
+          :items-length="totalItems"
+          :items-per-page-options="[10, 25, 50, 100]"
           :loading="loading"
-          :page="currentPage"
           @update:options="handleOptionsChange"
         >
           <template #item.updated_at="{ item }">
@@ -92,9 +80,14 @@
             />
           </template>
           <template #item.actions="{ item }">
-            <v-menu offset-y>
-              <template #activator="{ on, attrs }">
-                <v-btn text icon x-small v-bind="attrs" v-on="on">
+            <v-menu>
+              <template #activator="{ props: activatorProps }">
+                <v-btn
+                  variant="text"
+                  icon
+                  size="x-small"
+                  v-bind="activatorProps"
+                >
                   <v-icon>fa-ellipsis-v</v-icon>
                 </v-btn>
               </template>
@@ -109,7 +102,7 @@
               </v-list>
             </v-menu>
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </v-card>
     </div>
   </div>
@@ -118,14 +111,13 @@
 <script>
 import * as downloadApi from "@/api/download-api";
 import debounce from "lodash.debounce";
-import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import TooltipButton from "@/components/TooltipButton.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
-import * as tagApi from "@/api/tag-api";
+import { fetchDedupedTags } from "@/utils/tags";
 
 export default {
   name: "Downloads",
@@ -137,33 +129,31 @@ export default {
     ListPageTop,
     TooltipButton,
   },
+  inject: ["snack"],
   data() {
     return {
-      moment,
       items: [],
       currentPage: 1,
-      totalPages: 1,
       totalItems: 0,
       itemsPerPage: 10,
-      sortBy: "updated_at",
-      sortDesc: true,
+      sortBy: [{ key: "updated_at", order: "desc" }],
       loading: false,
       search: "",
       breads: [
         {
-          text: "Downloads",
+          title: "Downloads",
           disabled: true,
           href: "/downloads",
         },
       ],
       headers: [
-        { text: "Id", value: "id", sortable: false },
-        { text: "Filename", value: "filename", sortable: true },
-        { text: "Size", value: "size", sortable: true },
-        { text: "Created At", value: "created_at", sortable: true },
-        { text: "Updated At", value: "updated_at", sortable: true },
-        { text: "Tags", value: "tags", sortable: false },
-        { text: "Actions", value: "actions", sortable: false },
+        { title: "Id", key: "id", sortable: false },
+        { title: "Filename", key: "filename", sortable: true },
+        { title: "Size", key: "size", sortable: true },
+        { title: "Created At", key: "created_at", sortable: true },
+        { title: "Updated At", key: "updated_at", sortable: true },
+        { title: "Tags", key: "tags", sortable: false },
+        { title: "Actions", key: "actions", sortable: false },
       ],
       isSelecting: false,
       selectedFile: null,
@@ -209,23 +199,7 @@ export default {
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({
-        page: 1,
-        limit: -1,
-        sources: "download",
-      });
-
-      const dedupedTags = [];
-      tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find(
-          (t) => t.name === tag.name && t.value === tag.value,
-        );
-        if (!existingTag) {
-          dedupedTags.push(tag);
-        }
-      });
-
-      this.tags = dedupedTags;
+      this.tags = await fetchDedupedTags("download");
     },
     deleteTag(download, tag) {
       downloadApi
@@ -234,7 +208,7 @@ export default {
           download.tags = download.tags.filter((t) => t.id !== tag.id);
           this.getTags();
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(download, tag) {
       downloadApi
@@ -243,9 +217,9 @@ export default {
           const index = download.tags.findIndex((x) => x.id === t.id);
           download.tags.splice(index, 1, t);
           this.getTags();
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(download, tag) {
       downloadApi
@@ -254,22 +228,25 @@ export default {
           download.tags.push(t);
           this.getTags();
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     async getDownloads() {
       this.loading = true;
+      const sortEntry =
+        this.sortBy.length > 0
+          ? this.sortBy[0]
+          : { key: "updated_at", order: "desc" };
       const response = await downloadApi.getDownloads({
         page: this.currentPage,
         limit: this.itemsPerPage,
         query: this.search,
         sources: this.selectedSources,
-        sortBy: this.sortBy,
-        sortOrder: this.sortDesc ? "desc" : "asc",
+        sortBy: sortEntry.key,
+        sortOrder: sortEntry.order,
         tags: this.selectedTags,
       });
       this.items = response.records;
       this.currentPage = response.page;
-      this.totalPages = response.total_pages;
       this.totalItems = response.total;
       this.loading = false;
     },
@@ -300,25 +277,18 @@ export default {
       const data = new FormData();
       data.append("file", this.selectedFile);
 
-      await downloadApi.createDownload(data);
-      this.$snack.success("Upload complete");
-      this.debouncedGetDownloads();
-    },
-    handlePageChange(page) {
-      this.currentPage = page;
-      this.debouncedGetDownloads();
+      try {
+        await downloadApi.createDownload(data);
+        this.snack.success("Upload complete");
+        this.debouncedGetDownloads();
+      } catch (err) {
+        this.snack.error(`Upload failed: ${err}`);
+      }
     },
     handleOptionsChange(value) {
       this.currentPage = value.page;
       this.itemsPerPage = value.itemsPerPage;
-
-      if (value.sortBy.length > 0) {
-        this.sortBy = value.sortBy[0];
-        this.sortDesc = value.sortDesc[0];
-      } else {
-        this.sortBy = "updated_at";
-        this.sortDesc = true;
-      }
+      this.sortBy = value.sortBy;
       this.debouncedGetDownloads();
     },
     // https://gist.github.com/zentala/1e6f72438796d74531803cc3833c039c

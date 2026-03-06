@@ -13,24 +13,24 @@
     />
     <v-treeview
       ref="treeview"
-      dense
+      v-model:opened="open"
+      density="compact"
       hoverable
       open-on-click
-      item-key="id"
+      item-value="id"
       :load-children="debouncedLoadChildren"
-      :open.sync="open"
       :items="tree"
     >
-      <template #label="{ item, open: isOpen }">
+      <template #title="{ item }">
         <v-btn
-          style="margin-left: -15px; width: 100%"
-          class="text-left"
-          text
+          :data-tree-id="item.id"
+          style="margin-left: -15px; width: 100%; justify-content: flex-start"
+          variant="text"
           @contextmenu="show(item, $event)"
         >
           <div style="display: flex; justify-content: flex-start">
             <v-icon v-if="!item.file">
-              {{ isOpen ? "mdi-folder-open" : "mdi-folder" }}
+              {{ open.includes(item.id) ? "mdi-folder-open" : "mdi-folder" }}
             </v-icon>
             <v-icon v-else>
               {{ files[item.file] || "mdi-file" }}
@@ -42,11 +42,8 @@
     </v-treeview>
     <v-menu
       v-model="showMenu"
-      :position-x="menuPosition.x"
-      :position-y="menuPosition.y"
+      :target="[menuPosition.x, menuPosition.y]"
       close-on-content-click
-      absolute
-      offset-y
     >
       <v-list>
         <v-list-item
@@ -54,7 +51,7 @@
           :key="menuItem.id"
           @click="clickAction(menuItem.id)"
         >
-          <v-list-item-content>{{ menuItem.name }}</v-list-item-content>
+          <v-list-item-title>{{ menuItem.name }}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -62,7 +59,7 @@
 </template>
 
 <script>
-import Vue from "vue";
+import { nextTick } from "vue";
 import * as agentApi from "@/api/agent-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 import debounce from "lodash.debounce";
@@ -73,6 +70,7 @@ export default {
   components: {
     ExecuteModuleDialog,
   },
+  inject: ["snack"],
   props: {
     agent: {
       type: Object,
@@ -263,7 +261,7 @@ export default {
         }
 
         if (!complete) {
-          this.$snack.error(
+          this.snack.error(
             "Agent didn't respond in time. Please try again later.",
           );
         }
@@ -275,34 +273,49 @@ export default {
     },
     async clickAction(action) {
       if (action === "open") {
+        // Click the actual treeview item to trigger Vuetify's internal
+        // expand pipeline (including the loading animation)
+        const treeEl = this.$refs.treeview?.$el;
+        if (treeEl) {
+          const btn = Array.from(
+            treeEl.querySelectorAll("[data-tree-id]"),
+          ).find((el) => el.dataset.treeId === String(this.selected.id));
+          const treeItem = btn?.closest(".v-treeview-item");
+          if (treeItem) {
+            treeItem.click();
+            return;
+          }
+        }
+        // Fallback: open without loading animation
+        console.warn(
+          "[Starkiller] Treeview DOM click failed, using fallback open",
+        );
         this.open.push(this.selected.id);
+        this.debouncedLoadChildren(this.selected);
       } else if (action === "close") {
         this.open.splice(
           this.open.findIndex((id) => id === this.selected.id),
           1,
         );
       } else if (action === "refresh") {
-        // Hackiness to get refreshes to work properly. Have to force the node to think it hasn't
-        // been loaded. https://github.com/vuetifyjs/vuetify/issues/10587
+        // Force refresh: clear children and re-open to trigger loadChildren
         this.selected.children = [];
 
-        const vueObj = this.$refs.treeview.nodes[this.selected.id];
         this.open.splice(
           this.open.findIndex((id) => id === this.selected.id),
           1,
         );
 
-        await Vue.nextTick();
+        await nextTick();
 
-        vueObj.vnode.hasLoaded = false;
         this.force[this.selected.id] = true;
 
-        await Vue.nextTick();
+        await nextTick();
 
         this.open.push(this.selected.id);
       } else if (action === "download") {
         agentTaskApi.downloadFile(this.agent.session_id, this.selected.path);
-        this.$snack.success(
+        this.snack.success(
           `Tasked ${this.agent.session_id} for download ${this.selected.path}`,
         );
       } else if (action === "zip") {
@@ -358,8 +371,7 @@ export default {
         return Promise.resolve();
       }
       if (!stopTrying && !this.readOnly) {
-        console.log(stopTrying, this.readOnly);
-        this.$snack.success(
+        this.snack.success(
           `Attempting to retrieve directory: ${a.path} with id ${a.id}`,
         );
         const task = await this.scrapeDirectory(a.path);
@@ -371,7 +383,6 @@ export default {
           await pause(6000);
           // eslint-disable-next-line no-await-in-loop
           if (await this.checkTaskComplete(task.id)) {
-            console.log("task complete", task.id);
             complete = true;
             break;
           }
@@ -379,7 +390,7 @@ export default {
         }
 
         if (!complete) {
-          this.$snack.error(
+          this.snack.error(
             "Agent didn't respond in time. Please try again later.",
           );
         }
@@ -426,6 +437,9 @@ export default {
 
 <style lang="scss">
 .v-treeview {
+  .v-list-item-title {
+    text-align: left;
+  }
   .v-btn__content {
     div {
       align-items: center;
