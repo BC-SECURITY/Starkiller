@@ -124,7 +124,7 @@ export default {
             this.internalPathToFile = `/tmp/${val}`;
           }
         } else if (
-          ["powershell", "csharp"].includes(this.language.toLowerCase())
+          ["powershell", "csharp", "c"].includes(this.language.toLowerCase())
         ) {
           if (this.pathToFile) {
             this.internalPathToFile =

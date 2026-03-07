@@ -244,6 +244,7 @@ export default {
           case "powershell":
           case "csharp":
           case "go":
+          case "c":
             return ["powershell", "csharp", "bof"];
           case "ironpython":
             return ["powershell", "csharp", "bof", "python"];
