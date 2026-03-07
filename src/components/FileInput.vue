@@ -34,8 +34,8 @@ export default {
   components: { FileUploadDialog },
   props: {
     modelValue: {
-      type: [String, Array, Number],
-      required: true,
+      type: [Number, Object],
+      default: null,
     },
     label: {
       type: String,

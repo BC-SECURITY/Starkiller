@@ -370,7 +370,7 @@ export default {
         {
           title: this.breadcrumbName,
           disabled: true,
-          to: "/agent-edit",
+          to: `/agents/${this.id}`,
         },
       ];
     },

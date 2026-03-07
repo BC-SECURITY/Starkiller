@@ -123,7 +123,7 @@ export default {
       return this.$route.name === "stagerNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -134,11 +134,11 @@ export default {
       return true;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
-        return { name: "stagerNew", params: { copy: true, id: this.id } };
+        return { name: "stagerNew", query: { copy: true, id: this.id } };
       return {};
     },
     stagerInfo() {
@@ -193,7 +193,7 @@ export default {
         {
           title: this.breadcrumbName,
           disabled: true,
-          to: "/stagers-edit",
+          to: `/stagers/${this.id}`,
         },
       ];
     },
@@ -231,7 +231,7 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
       // since this.id is 0 for copies.
-      this.getStager(this.$route.params.id);
+      this.getStager(this.$route.params.id || this.$route.query.id);
     }
 
     if (this.$route.query.template) {

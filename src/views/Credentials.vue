@@ -98,7 +98,7 @@
                     style="color: inherit"
                     :to="{
                       name: 'credentialNew',
-                      params: { copy: true, id: item.id },
+                      query: { copy: true, id: item.id },
                     }"
                   >
                     <v-list-item-title>

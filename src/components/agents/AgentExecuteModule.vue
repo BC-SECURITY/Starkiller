@@ -43,7 +43,7 @@
           <tooltip-button
             :icon="showTreeDialog ? 'mdi-folder-open' : 'mdi-folder'"
             color="grey-lighten-2"
-            tooltip="Browse modules by folder"
+            text="Browse modules by folder"
             @click="toggleTree"
           />
         </v-col>
@@ -182,6 +182,7 @@ import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import { useModuleStore } from "@/stores/module-module";
 import GeneralForm from "../GeneralForm.vue";
 import TechniqueChips from "../TechniqueChips.vue";
+import TooltipButton from "../TooltipButton.vue";
 
 export default {
   components: {
@@ -189,6 +190,7 @@ export default {
     GeneralForm,
     TechniqueChips,
     ErrorStateAlert,
+    TooltipButton,
   },
   inject: ["snack"],
   props: {

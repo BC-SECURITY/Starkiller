@@ -13,7 +13,9 @@
       show-select
     >
       <template #item.enabled="{ item }">
-        <v-badge dot :color="item.enabled === true ? 'green' : 'red'" />
+        <div class="d-flex align-center" style="height: 100%">
+          <v-badge dot :color="item.enabled === true ? 'green' : 'red'" />
+        </div>
       </template>
       <template #item.name="{ item }">
         <router-link
@@ -56,7 +58,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'listenerNew', params: { copy: true, id: item.id } }"
+              :to="{ name: 'listenerNew', query: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>

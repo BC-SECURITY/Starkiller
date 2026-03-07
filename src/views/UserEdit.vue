@@ -133,7 +133,7 @@ export default {
         {
           title: this.breadcrumbName,
           disabled: true,
-          to: "/users-edit",
+          to: `/users/${this.id}`,
         },
       ];
     },

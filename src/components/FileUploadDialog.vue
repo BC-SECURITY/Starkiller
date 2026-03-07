@@ -5,7 +5,7 @@
         <span class="headline">Upload To Empire Server</span>
       </v-card-title>
       <v-card-text>
-        <v-form ref="form" on-submit="return false;" @submit.prevent>
+        <v-form ref="form" @submit.prevent>
           <v-container>
             <v-row>
               <v-col cols="12">

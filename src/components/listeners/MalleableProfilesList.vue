@@ -93,7 +93,7 @@
                   key="copy"
                   :to="{
                     name: 'malleableProfileNew',
-                    params: { copy: true, id: item.id },
+                    query: { copy: true, id: item.id },
                   }"
                   link
                 >

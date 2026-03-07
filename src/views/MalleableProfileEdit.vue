@@ -100,7 +100,7 @@ export default {
       return this.$route.name === "malleableProfileNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -111,13 +111,13 @@ export default {
       return true;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
         return {
           name: "malleableProfileNew",
-          params: { copy: true, id: this.id },
+          query: { copy: true, id: this.id },
         };
       return {};
     },
@@ -132,7 +132,7 @@ export default {
         {
           title: this.breadcrumbName,
           disabled: true,
-          to: "/malleable-profiles-edit",
+          to: `/malleable-profiles/${this.id}`,
         },
       ];
     },
@@ -154,7 +154,7 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
       // since this.id is 0 for copies.
-      this.getMalleableProfile(this.$route.params.id);
+      this.getMalleableProfile(this.$route.params.id || this.$route.query.id);
     } else {
       this.initialLoad = true;
     }

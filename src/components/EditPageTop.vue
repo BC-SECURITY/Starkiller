@@ -60,7 +60,7 @@
 import TooltipButton from "@/components/TooltipButton.vue";
 
 export default {
-  name: "ListPageTop",
+  name: "EditPageTop",
   components: { TooltipButton },
   props: {
     deleteText: {
@@ -111,6 +111,7 @@ export default {
       default: () => [],
     },
   },
+  emits: ["submit", "delete"],
 };
 </script>
 

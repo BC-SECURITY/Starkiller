@@ -53,7 +53,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'bypassNew', params: { copy: true, id: item.id } }"
+              :to="{ name: 'bypassNew', query: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>

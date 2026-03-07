@@ -19,6 +19,7 @@
         <v-list-item
           v-for="(item, index) in notifications"
           :key="index"
+          :value="index"
           :style="
             item.read ? '' : 'background-color: rgba(118, 127, 134, 0.5);'
           "
@@ -30,7 +31,7 @@
               v-if="item.route"
               color="primary"
               variant="text"
-              :to="item.route"
+              @click="$router.push(item.route)"
             >
               {{ item.buttonText }}
             </v-btn>

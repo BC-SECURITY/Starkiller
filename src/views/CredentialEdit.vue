@@ -76,7 +76,7 @@ export default {
         {
           title: this.id && !this.isCopy ? `${this.id}` : "New",
           disabled: true,
-          to: "/credential-edit",
+          to: `/credentials/${this.id}`,
         },
       ];
     },
@@ -87,7 +87,7 @@ export default {
       return this.$route.name === "credentialNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -99,11 +99,11 @@ export default {
       return true;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
-        return { name: "credentialNew", params: { copy: true, id: this.id } };
+        return { name: "credentialNew", query: { copy: true, id: this.id } };
       return {};
     },
     options() {
@@ -140,7 +140,7 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
       // since this.id is 0 for copies.
-      this.getCredential(this.$route.params.id);
+      this.getCredential(this.$route.params.id || this.$route.query.id);
     } else {
       this.initialLoad = true;
     }

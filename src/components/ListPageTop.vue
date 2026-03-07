@@ -98,6 +98,7 @@ export default {
       default: () => [],
     },
   },
+  emits: ["create", "refresh", "delete", "update:auto-refresh"],
   data() {
     return {
       autoRefreshInternal: false,

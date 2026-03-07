@@ -5,7 +5,7 @@
       :show-create="false"
       :show-delete="false"
       :show-refresh="true"
-      @refresh="getPlugins"
+      @refresh="refreshMarketplace"
     />
     <div style="display: flex; flex-direction: row">
       <div style="width: 350px; min-width: 350px; max-width: 350px">
@@ -146,12 +146,14 @@
 import VueMarkdown from "vue-markdown-render";
 import * as pluginApi from "@/api/plugin-api";
 import AuthorChips from "@/components/AuthorChips.vue";
+import ListPageTop from "@/components/ListPageTop.vue";
 
 export default {
   name: "PluginMarketplace",
   components: {
     VueMarkdown,
     AuthorChips,
+    ListPageTop,
   },
   inject: ["snack"],
   data() {

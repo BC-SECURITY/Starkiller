@@ -57,7 +57,12 @@ export default {
   components: {
     DynamicFormInput,
   },
+  inheritAttrs: false,
   props: {
+    modelValue: {
+      type: Object,
+      default: () => ({}),
+    },
     options: {
       type: Object,
       required: true,

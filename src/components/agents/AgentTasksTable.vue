@@ -435,6 +435,14 @@ export default {
       selectedHeadersTemp: [],
       headersFull: [
         {
+          title: "",
+          key: "data-table-expand",
+          sortable: false,
+          defaultHeader: true,
+          alwaysShow: true,
+          order: 0,
+        },
+        {
           title: "Task ID",
           key: "id",
           sortable: true,
@@ -448,6 +456,7 @@ export default {
           key: "status",
           sortable: true,
           defaultHeader: true,
+          align: "center",
           order: 2,
         },
         {
@@ -512,6 +521,7 @@ export default {
       return this.headersFull
         .filter(
           (h) =>
+            h.key === "data-table-expand" ||
             this.applicationStore.taskHeaders.findIndex(
               (h2) => h2.title === h.title,
             ) > -1,

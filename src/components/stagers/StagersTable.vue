@@ -62,7 +62,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'stagerNew', params: { copy: true, id: item.id } }"
+              :to="{ name: 'stagerNew', query: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>

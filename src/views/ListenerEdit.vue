@@ -204,7 +204,7 @@ export default {
       return this.$route.name === "listenerNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -215,11 +215,11 @@ export default {
       return this.isNew || !this.listener.enabled;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
-        return { name: "listenerNew", params: { copy: true, id: this.id } };
+        return { name: "listenerNew", query: { copy: true, id: this.id } };
       return {};
     },
     listenerInfo() {
@@ -260,7 +260,7 @@ export default {
         {
           title: this.breadcrumbName,
           disabled: true,
-          to: "/listeners-edit",
+          to: `/listeners/${this.id}`,
         },
       ];
     },
@@ -309,7 +309,7 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instead of this.id
       // since this.id is 0 for copies.
-      this.getListener(this.$route.params.id);
+      this.getListener(this.$route.params.id || this.$route.query.id);
     }
   },
   methods: {

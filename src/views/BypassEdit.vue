@@ -69,6 +69,7 @@ export default {
   inject: ["snack", "confirm"],
   data() {
     return {
+      initialLoad: false,
       form: {},
       rules: {
         name: [
@@ -98,7 +99,7 @@ export default {
       return this.$route.name === "bypassNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -109,11 +110,11 @@ export default {
       return true;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
-        return { name: "bypassNew", params: { copy: true, id: this.id } };
+        return { name: "bypassNew", query: { copy: true, id: this.id } };
       return {};
     },
     breads() {
@@ -127,7 +128,7 @@ export default {
         {
           title: this.breadcrumbName,
           disabled: true,
-          to: "/bypasses-edit",
+          to: `/bypasses/${this.id}`,
         },
       ];
     },
@@ -149,7 +150,7 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
       // since this.id is 0 for copies.
-      this.getBypass(this.$route.params.id);
+      this.getBypass(this.$route.params.id || this.$route.query.id);
     } else {
       this.initialLoad = true;
     }
