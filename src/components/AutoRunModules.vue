@@ -49,23 +49,31 @@
                   cursor: grab;
                   display: flex;
                   align-items: center;
+                  justify-content: space-between;
                   margin-bottom: 5px;
                 "
               >
-                <v-icon left>mdi-drag-horizontal</v-icon>
-                {{ index + 1 }}. {{ module.id || module.module_id }}
+                <div style="display: flex; align-items: center;">
+                  <v-icon left>mdi-drag-horizontal</v-icon>
+                  {{ index + 1 }}. {{ module.id || module.module_id }}
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <v-btn
+                    small
+                    color="primary"
+                    @click="openOptionsDialog(module, index)"
+                  >
+                    Edit Options
+                  </v-btn>
+                  <v-btn
+                    small
+                    color="red"
+                    @click="removeModuleFromList(index)"
+                  >
+                    Delete
+                  </v-btn>
+                </div>
               </div>
-              <v-btn small color="primary" @click="openOptionsDialog(module)">
-                Edit Options
-              </v-btn>
-              <v-btn
-                small
-                color="red"
-                style="margin-left: 20px"
-                @click="removeModuleFromList(index)"
-              >
-                Delete
-              </v-btn>
             </v-card>
           </div>
         </draggable>
@@ -86,38 +94,33 @@
     </v-row>
 
     <!-- Options Dialog -->
-    <v-dialog v-model="showDialog" max-width="600px">
-      <v-card>
+    <v-dialog v-model="showDialog" max-width="900px">
+      <v-card class="autorun-options-card">
         <v-card-title>
           <span class="headline">Options</span>
         </v-card-title>
 
         <v-card-text>
-          <v-form ref="optionsForm">
-            <v-row>
-              <v-col
-                v-for="field in filteredOptions"
-                :key="field.name"
-                cols="12"
-              >
-                <dynamic-form-input
-                  v-model="selectedModuleForEdit.options[field.name].value"
-                  :suggested-values="field.suggested_values"
-                  :strict="strictForField(field)"
-                  :name="field.name"
-                  :type="fieldType(field)"
-                />
-                <v-subheader>{{ field.description }}</v-subheader>
-              </v-col>
-            </v-row>
+          <v-form ref="optionsForm" @submit.prevent>
+            <general-form
+              v-if="dialogOptions"
+              :key="dialogFormKey"
+              ref="generalform"
+              v-model="selectedModuleForm"
+              :options="dialogOptions"
+              :readonly="false"
+            />
           </v-form>
         </v-card-text>
 
         <v-card-actions>
-          <v-btn color="blue darken-1" text @click="showDialog = false"
-            >Cancel</v-btn
-          >
-          <v-btn color="blue darken-1" text @click="saveOptions">Save</v-btn>
+          <v-spacer />
+          <v-btn color="blue darken-1" text @click="showDialog = false">
+            Cancel
+          </v-btn>
+          <v-btn color="orange darken-1" dark @click="saveOptions">
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -127,12 +130,12 @@
 <script>
 import draggable from "vuedraggable";
 import { useModuleStore } from "@/stores/module-module";
-import DynamicFormInput from "@/components/DynamicFormInput.vue";
+import GeneralForm from "@/components/GeneralForm.vue";
 import { getAutorunTasks, saveAutorunTasks } from "@/api/listener-api"; // Import the correct API methods
 
 export default {
   name: "AutoRunModules",
-  components: { draggable, DynamicFormInput },
+  components: { draggable, GeneralForm },
   props: {
     selectedListener: {
       type: Object,
@@ -147,6 +150,10 @@ export default {
       showDialog: false, // Show/Hide options dialog
       selectedModuleForEdit: null, // Module selected for editing options
       searchText: "", // Track search input for autocomplete
+      selectedModuleForm: {},
+      dialogOptions: null,
+      dialogFormKey: 0,
+      editingModuleIndex: -1,
     };
   },
   computed: {
@@ -167,15 +174,6 @@ export default {
           id: module.id,
           name: `${module.id}`,
         }));
-    },
-    filteredOptions() {
-      if (!this.selectedModuleForEdit) return [];
-      return Object.keys(this.selectedModuleForEdit.options)
-        .map((key) => ({
-          name: key,
-          ...this.selectedModuleForEdit.options[key],
-        }))
-        .filter((field) => field.name.toLowerCase() !== "agent");
     },
   },
   watch: {
@@ -253,6 +251,26 @@ export default {
       }
     },
     async saveAutorunTasks() {
+      const modulesWithMissing = this.moduleList
+        .map((module) => ({
+          module,
+          missing: this.getMissingRequiredOptions(module),
+        }))
+        .filter((item) => item.missing.length > 0);
+
+      if (modulesWithMissing.length > 0) {
+        const details = modulesWithMissing
+          .map(
+            ({ module, missing }) =>
+              `${module.id || module.module_id}: ${missing.join(", ")}`,
+          )
+          .join(" | ");
+        this.$snack.error(
+          `Missing required options for autorun modules → ${details}`,
+        );
+        return;
+      }
+
       // Always send the cleaned modules to the API, even if the list is empty
       const cleanedModules = this.moduleList.map((module) => {
         // Extract only the key-value pairs from the options object
@@ -281,39 +299,78 @@ export default {
         console.error("Failed to save autorun modules", error);
       }
     },
-    openOptionsDialog(module) {
-      this.selectedModuleForEdit = {
-        ...module,
-        options: { ...module.options },
-      };
+    openOptionsDialog(module, index) {
+      this.selectedModuleForEdit = { ...module };
+      this.editingModuleIndex = index;
+      this.dialogOptions = this.cloneModuleOptions(module.options || {});
+      this.dialogFormKey += 1;
+      this.selectedModuleForm = {};
       this.showDialog = true;
     },
     saveOptions() {
-      const index = this.moduleList.findIndex(
-        (mod) => mod.id === this.selectedModuleForEdit.id,
-      );
-      if (index !== -1) {
-        this.$set(this.moduleList, index, this.selectedModuleForEdit);
+      if (this.editingModuleIndex === -1) {
+        this.showDialog = false;
+        return;
       }
+
+      const isValid = this.$refs.generalform?.$refs.form.validate?.();
+      if (isValid === false) {
+        return;
+      }
+
+      const updatedModule = {
+        ...this.moduleList[this.editingModuleIndex],
+        options: this.applyFormValuesToOptions(
+          this.moduleList[this.editingModuleIndex].options || {},
+          this.selectedModuleForm,
+        ),
+      };
+
+      this.$set(this.moduleList, this.editingModuleIndex, updatedModule);
       this.showDialog = false;
+      this.editingModuleIndex = -1;
+      this.dialogOptions = null;
+    },
+    cloneModuleOptions(options) {
+      const cloned = JSON.parse(JSON.stringify(options || {}));
+      if (cloned.Agent) {
+        delete cloned.Agent;
+      }
+      return cloned;
+    },
+    applyFormValuesToOptions(options, formValues) {
+      const updatedOptions = JSON.parse(JSON.stringify(options));
+      Object.keys(updatedOptions).forEach((key) => {
+        if (key === "Agent") return;
+        if (formValues[key] !== undefined) {
+          updatedOptions[key].value = formValues[key];
+        }
+      });
+      return updatedOptions;
     },
     removeModuleFromList(index) {
       // Remove the module at the given index
       this.moduleList.splice(index, 1);
     },
-    fieldType(field) {
-      return (
-        {
-          INTEGER: "number",
-          FLOAT: "float",
-          BOOLEAN: "boolean",
-          STRING: "string",
-          FILE: "file",
-        }[field.value_type] || "string"
-      );
-    },
-    strictForField(field) {
-      return field.strict || false;
+    getMissingRequiredOptions(module) {
+      if (!module || !module.options) return [];
+
+      return Object.entries(module.options)
+        .filter(
+          ([key, option]) => option.required === true && key.toLowerCase() !== "agent",
+        )
+        .reduce((missing, [key, option]) => {
+          const value = option.value;
+          const isEmptyString = typeof value === "string" && value.trim() === "";
+          const isEmptyArray = Array.isArray(value) && value.length === 0;
+          const isUnset = value === null || value === undefined;
+
+          if (isUnset || isEmptyString || isEmptyArray) {
+            missing.push(key);
+          }
+
+          return missing;
+        }, []);
     },
   },
 };
@@ -335,5 +392,9 @@ export default {
 
 .v-icon {
   margin-right: 10px; /* Add some spacing to the icon */
+}
+
+.autorun-options-card {
+  padding: 20px;
 }
 </style>
