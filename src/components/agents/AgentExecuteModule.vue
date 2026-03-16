@@ -106,6 +106,12 @@
           label="Ignore Language Version Check"
           color="primary"
         />
+        <v-checkbox
+          v-model="backgroundOverride"
+          class="pa-1"
+          label="Run as Background Job"
+          color="primary"
+        />
       </div>
 
       <general-form
@@ -227,6 +233,7 @@ export default {
       errorState: false,
       ignoreAdminCheck: false,
       ignoreLanguageCheck: false,
+      backgroundOverride: false,
       treeSelected: [],
       treeOpen: [],
       showTreeDialog: false,
@@ -401,6 +408,8 @@ export default {
       this.selectedItem = results || {};
       if (!Object.keys(this.selectedItem).length) {
         this.errorState = true;
+      } else {
+        this.backgroundOverride = !!this.selectedItem.background;
       }
     },
     handleTreeSelect(selected) {
@@ -438,6 +447,7 @@ export default {
             },
             this.ignoreAdminCheck,
             this.ignoreLanguageCheck,
+            this.backgroundOverride,
           ),
         ),
       );
