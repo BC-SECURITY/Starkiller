@@ -16,7 +16,6 @@
         <input
           ref="inputField"
           v-model="currentInput"
-          @keyup.ctrl.c.prevent.stop="ctrlCHandler"
           @keyup.enter="processCommand"
           @keydown="handleKeyEvents"
         />
@@ -65,6 +64,10 @@ export default {
     agent: {
       type: Object,
       required: true,
+    },
+    tabId: {
+      type: Number,
+      default: null,
     },
   },
   data() {
@@ -136,6 +139,7 @@ export default {
           command: "shell",
           description: "Tasks the specified agent to execute a shell command",
           usage: "shell [--literal / -l] <shell_cmd>",
+          // For interactive shell sessions, use the Shell tab
         },
         {
           command: "ps",
@@ -224,8 +228,6 @@ export default {
           usage: "back",
         },
       ],
-      isShellMenu: false,
-      currentDir: "loading...",
     };
   },
   computed: {
@@ -250,8 +252,6 @@ export default {
       let body = "";
       if (this.currentModule) {
         body = this.colorizeText(`usemodule/${this.currentModule.id}`, "red");
-      } else if (this.isShellMenu) {
-        body = this.colorizeText(this.currentDir, "green");
       } else {
         body = this.colorizeText(this.agent.session_id, "red");
       }
@@ -290,14 +290,8 @@ export default {
   },
   methods: {
     storageName() {
-      return `terminal-history-${this.agent.session_id}`;
-    },
-    ctrlCHandler(_event) {
-      if (this.isShellMenu) {
-        this.isShellMenu = false;
-      }
-      this.addLine(`${this.currentPrompt} ${this.currentInput}`);
-      this.currentInput = "";
+      const suffix = this.tabId != null ? `-${this.tabId}` : "";
+      return `terminal-history-${this.agent.session_id}${suffix}`;
     },
     positionSuggestions() {
       const { inputField } = this.$refs;
@@ -386,10 +380,6 @@ export default {
       }
     },
     async generateSuggestions() {
-      if (this.isShellMenu) {
-        this.suggestions = [];
-        return;
-      }
       const query = this.currentInput.toLowerCase().trim();
 
       if (!query) {
@@ -512,9 +502,7 @@ export default {
       const command = commandParts[0];
       const args = commandParts.slice(1);
 
-      if (this.isShellMenu) {
-        this.shellCommandOperator(this.currentInput);
-      } else if (command === "back") {
+      if (command === "back") {
         if (this.currentModule) {
           this.currentModule = null;
         } else {
@@ -562,10 +550,9 @@ export default {
             break;
           case "shell":
             if (args.length < 1) {
-              this.isShellMenu = true;
-              this.updateCurrentDirectory();
-              this.addInfo(`Shell session started on ${this.agent.session_id}`);
-              this.addInfo("Exit shell menu with Ctrl+C.");
+              this.addError(
+                "Usage: shell [--literal / -l] <shell_cmd>. Use the Shell tab for an interactive session.",
+              );
             } else {
               this.runShellCommand(commandParts.slice(1).join(" "));
             }
@@ -798,61 +785,6 @@ export default {
       }
 
       return res;
-    },
-    getDirectoryCommand() {
-      if (this.agent.language === "python") {
-        return "echo $PWD";
-      }
-      if (this.agent.language === "ironpython") {
-        return "cd .";
-      }
-      return "(Resolve-Path .\\).Path";
-    },
-    async updateCurrentDirectory() {
-      this.currentDir = "loading...";
-      const response = await agentTaskApi.shell(
-        this.agent.session_id,
-        this.getDirectoryCommand(),
-      );
-
-      const complete = await this.pollForResult(response.id, { print: false });
-
-      if (complete) {
-        // eslint-disable-next-line prefer-destructuring
-        this.currentDir = (
-          await this.checkTaskComplete(response.id)
-        ).output.split("\r")[0];
-      }
-    },
-    // This is for when in the shell menu.
-    // The other function is for when not in the shell menu.
-    async shellCommandOperator(stdin) {
-      let response = null;
-      try {
-        if (stdin.trim() === "sysinfo") {
-          response = await agentTaskApi.sysinfo(this.agent.session_id);
-        } else {
-          response = await agentTaskApi.shell(
-            this.agent.session_id,
-            stdin,
-            false,
-          );
-        }
-      } catch (error) {
-        this.addError(`Error executing command: ${error.message}`);
-        return;
-      }
-
-      const complete = await this.pollForResult(response.id, { print: false });
-
-      if (["cd", "set-location"].includes(stdin.toLowerCase().split(" ")[0])) {
-        this.updateCurrentDirectory();
-        return;
-      }
-
-      if (complete) {
-        this.addLine(complete.output, "indent-5-spaces");
-      }
     },
     async checkTaskComplete(taskId) {
       try {
