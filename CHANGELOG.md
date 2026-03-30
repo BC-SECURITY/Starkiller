@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
+
 ## [3.4.0] - 2026-03-08
 
 ### Changed

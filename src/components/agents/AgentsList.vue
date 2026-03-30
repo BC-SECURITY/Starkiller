@@ -150,8 +150,8 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.forEach((agent) => {
-          this.agentStore.killAgent({ sessionId: agent.session_id });
+        this.selected.forEach((sessionId) => {
+          this.agentStore.killAgent({ sessionId });
         });
         this.snack.success(
           `${this.selected.length} agents tasked to run TASK_EXIT.`,
