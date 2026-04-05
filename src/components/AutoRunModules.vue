@@ -8,15 +8,15 @@
           <v-col cols="8">
             <v-autocomplete
               v-model="selectedModule"
+              v-model:search="searchText"
               :items="availableModuleOptions"
               label="Select Module to Add"
               item-value="id"
-              item-text="name"
+              item-title="name"
               :menu-props="{ maxHeight: '300px', offsetY: true, nudgeTop: 5 }"
-              outlined
-              dense
+              variant="outlined"
+              density="compact"
               clearable
-              :search-input.sync="searchText"
             />
           </v-col>
           <v-col cols="4">
@@ -36,38 +36,45 @@
     <v-row>
       <v-col>
         <h3>Selected Modules</h3>
-        <draggable v-model="moduleList" group="modules" handle=".handle">
-          <div
-            v-for="(module, index) in moduleList"
-            :key="module.id || module.module_id"
-            class="module-block"
-          >
-            <v-card style="padding: 10px">
-              <div
-                class="handle"
-                style="
-                  cursor: grab;
-                  display: flex;
-                  align-items: center;
-                  margin-bottom: 5px;
-                "
-              >
-                <v-icon left>mdi-drag-horizontal</v-icon>
-                {{ index + 1 }}. {{ module.id || module.module_id }}
-              </div>
-              <v-btn small color="primary" @click="openOptionsDialog(module)">
-                Edit Options
-              </v-btn>
-              <v-btn
-                small
-                color="red"
-                style="margin-left: 20px"
-                @click="removeModuleFromList(index)"
-              >
-                Delete
-              </v-btn>
-            </v-card>
-          </div>
+        <draggable
+          v-model="moduleList"
+          group="modules"
+          handle=".handle"
+          item-key="id"
+        >
+          <template #item="{ element: module, index }">
+            <div class="module-block">
+              <v-card style="padding: 10px">
+                <div
+                  class="handle"
+                  style="
+                    cursor: grab;
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 5px;
+                  "
+                >
+                  <v-icon start>mdi-drag-horizontal</v-icon>
+                  {{ index + 1 }}. {{ module.id || module.module_id }}
+                </div>
+                <v-btn
+                  size="small"
+                  color="primary"
+                  @click="openOptionsDialog(module)"
+                >
+                  Edit Options
+                </v-btn>
+                <v-btn
+                  size="small"
+                  color="red"
+                  style="margin-left: 20px"
+                  @click="removeModuleFromList(index)"
+                >
+                  Delete
+                </v-btn>
+              </v-card>
+            </div>
+          </template>
         </draggable>
       </v-col>
     </v-row>
@@ -107,17 +114,22 @@
                   :name="field.name"
                   :type="fieldType(field)"
                 />
-                <v-subheader>{{ field.description }}</v-subheader>
+                <v-list-subheader>{{ field.description }}</v-list-subheader>
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
 
         <v-card-actions>
-          <v-btn color="blue darken-1" text @click="showDialog = false"
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="showDialog = false"
             >Cancel</v-btn
           >
-          <v-btn color="blue darken-1" text @click="saveOptions">Save</v-btn>
+          <v-btn color="blue-darken-1" variant="text" @click="saveOptions"
+            >Save</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -133,6 +145,7 @@ import { getAutorunTasks, saveAutorunTasks } from "@/api/listener-api"; // Impor
 export default {
   name: "AutoRunModules",
   components: { draggable, DynamicFormInput },
+  inject: ["snack"],
   props: {
     selectedListener: {
       type: Object,
@@ -220,6 +233,9 @@ export default {
           });
         } catch (error) {
           console.error("Failed to fetch autorun tasks", error);
+          this.snack.error(
+            `Failed to load autorun modules: ${error.message || error}`,
+          );
         }
       }
     },
@@ -275,9 +291,9 @@ export default {
       try {
         // Send the cleanedModules (even if it's an empty array) directly to the server
         await saveAutorunTasks(this.selectedListener.id, cleanedModules);
-        this.$snack.success("Autorun modules saved.");
+        this.snack.success("Autorun modules saved.");
       } catch (error) {
-        this.$snack.error("Failed to save autorun modules.");
+        this.snack.error("Failed to save autorun modules.");
         console.error("Failed to save autorun modules", error);
       }
     },
@@ -293,7 +309,7 @@ export default {
         (mod) => mod.id === this.selectedModuleForEdit.id,
       );
       if (index !== -1) {
-        this.$set(this.moduleList, index, this.selectedModuleForEdit);
+        this.moduleList[index] = this.selectedModuleForEdit;
       }
       this.showDialog = false;
     },

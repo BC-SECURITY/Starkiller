@@ -1,9 +1,9 @@
 <template>
-  <v-tooltip bottom>
-    <template #activator="{ on }">
+  <v-tooltip location="bottom">
+    <template #activator="{ props: activatorProps }">
       <v-btn-toggle v-model="internalValue" class="mr-5">
-        <v-btn :value="true" v-on="on">
-          <v-icon left>
+        <v-btn :value="true" v-bind="activatorProps">
+          <v-icon start>
             {{ icon }}
           </v-icon>
           <span>{{ buttonText }}</span>
@@ -18,7 +18,7 @@
 export default {
   name: "TooltipButtonToggle",
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
       default: false,
     },
@@ -35,13 +35,14 @@ export default {
       required: true,
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
       internalValue: false,
     };
   },
   watch: {
-    value: {
+    modelValue: {
       immediate: true,
       handler(newValue) {
         this.internalValue = newValue;
@@ -49,7 +50,7 @@ export default {
     },
     internalValue: {
       handler(newValue) {
-        this.$emit("input", newValue);
+        this.$emit("update:modelValue", !!newValue);
       },
     },
   },

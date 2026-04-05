@@ -14,10 +14,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-03-08
+
+### Changed
+
+-   Migrated from Vue 2 to Vue 3
+-   Migrated from Vuetify 2 to Vuetify 3
+-   Replaced vue-beautiful-chat with native Vuetify 3 chat drawer
+-   Updated CI workflows to Node 20
+
 ### Added
 
 -   Added Jobs tab to agent page for viewing and managing background jobs
 -   Added ability to kill background jobs from the Jobs tab
+
+### Fixed
+
+-   Fixed module execution snackbar displaying "[object Object]" instead of agent name
+-   Fixed bulk delete on malleable profiles page using wrong identifier
 
 ## [3.3.0] - 2026-01-18
 
@@ -445,7 +459,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...HEAD
+
+[3.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...v3.4.0
 
 [3.3.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.2.0...v3.3.0
 

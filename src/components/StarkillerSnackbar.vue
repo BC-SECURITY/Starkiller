@@ -3,13 +3,11 @@
     v-model="notification.enabled"
     :color="notification.color"
     transition="scroll-y-transition"
-    left
-    bottom
-    app
+    location="bottom start"
   >
     {{ notification.text }}
 
-    <template #action="{ attrs }">
+    <template #actions>
       <v-btn
         v-if="notification.showButton"
         :color="
@@ -19,8 +17,7 @@
             ? 'white'
             : 'orange darken-2'
         "
-        text
-        v-bind="attrs"
+        variant="text"
         @click="notification.buttonAction"
       >
         {{ notification.buttonText }}
@@ -29,7 +26,7 @@
         v-if="notification.dismissable"
         class="ml-2"
         icon
-        x-small
+        size="x-small"
         @click="notification.enabled = false"
       >
         <v-icon>fa-times</v-icon>

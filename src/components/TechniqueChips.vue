@@ -4,7 +4,7 @@
     <v-chip
       v-for="tech in techniques.filter((t) => t !== '')"
       :key="tech"
-      small
+      size="small"
       :href="getTechniqueUrl(tech)"
       target="_blank"
       rel="noopener noreferrer"

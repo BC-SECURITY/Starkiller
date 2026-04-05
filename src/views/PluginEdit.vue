@@ -1,27 +1,27 @@
 <template>
   <div class="p4">
-    <portal to="app-bar-extension">
+    <Teleport defer to="#app-bar-extension">
       <div style="display: flex; flex-direction: row; width: 100%">
-        <v-tabs v-model="tab" align-with-title>
-          <v-tab key="interact" href="#interact" :disabled="interactDisabled">
+        <v-tabs v-model="tab" color="primary" align-with-title>
+          <v-tab key="interact" value="interact" :disabled="interactDisabled">
             Interact
-            <v-icon x-small class="ml-1"> fa-terminal </v-icon>
+            <v-icon size="x-small" class="ml-1"> fa-terminal </v-icon>
           </v-tab>
-          <v-tab key="tasks" href="#tasks" :disabled="!plugin.loaded">
+          <v-tab key="tasks" value="tasks" :disabled="!plugin.loaded">
             Tasks
-            <v-icon x-small class="ml-1"> fa-sticky-note </v-icon>
+            <v-icon size="x-small" class="ml-1"> fa-sticky-note </v-icon>
           </v-tab>
-          <v-tab key="details" href="#details">
+          <v-tab key="details" value="details">
             Details
-            <v-icon x-small class="ml-1"> fa-info-circle </v-icon>
+            <v-icon size="x-small" class="ml-1"> fa-info-circle </v-icon>
           </v-tab>
-          <v-tab key="settings" href="#settings" :disabled="!plugin.loaded">
+          <v-tab key="settings" value="settings" :disabled="!plugin.loaded">
             Settings
-            <v-icon x-small class="ml-1"> fa-cog </v-icon>
+            <v-icon size="x-small" class="ml-1"> fa-cog </v-icon>
           </v-tab>
         </v-tabs>
       </div>
-    </portal>
+    </Teleport>
     <edit-page-top
       :breads="breads"
       :show-submit="false"
@@ -43,8 +43,9 @@
           :disabled="!plugin.loaded"
           color="green"
           label="Enabled"
-          class="mr-2 mt-3"
-          @change="toggleEnabled"
+          hide-details
+          class="mr-2"
+          @update:model-value="toggleEnabled"
         ></v-switch>
       </template>
     </edit-page-top>
@@ -53,10 +54,10 @@
       :resource-id="id"
       resource-type="plugin"
     />
-    <v-tabs-items v-else v-model="tab" class="scrollable-pane">
-      <v-tab-item
+    <v-window v-else v-model="tab" class="scrollable-pane">
+      <v-window-item
         key="interact"
-        :value="'interact'"
+        value="interact"
         :transition="false"
         :reverse-transition="false"
       >
@@ -64,7 +65,8 @@
         <v-card style="padding: 10px">
           <technique-chips :techniques="plugin.TechniqueChips" />
           <general-form
-            v-if="reset"
+            v-if="initialLoad"
+            :key="plugin.id"
             ref="generalform"
             v-model="form"
             :options="pluginOptions"
@@ -78,10 +80,10 @@
             Submit
           </v-btn>
         </v-card>
-      </v-tab-item>
-      <v-tab-item
+      </v-window-item>
+      <v-window-item
         key="tasks"
-        :value="'tasks'"
+        value="tasks"
         :transition="false"
         :reverse-transition="false"
       >
@@ -92,11 +94,11 @@
             :use-header="false"
           />
         </v-card>
-      </v-tab-item>
-      <v-tab-item
+      </v-window-item>
+      <v-window-item
         v-if="initialLoad"
         key="details"
-        :value="'details'"
+        value="details"
         :transition="false"
         :reverse-transition="false"
       >
@@ -106,7 +108,7 @@
             <v-row>
               <v-col cols="12">
                 <span v-if="!plugin.loaded">
-                  <v-alert prominent type="warning" outlined>
+                  <v-alert prominent type="warning" variant="outlined">
                     <v-row align="center">
                       <v-col class="grow">
                         <vue-markdown
@@ -124,7 +126,7 @@
                 <v-card
                   v-if="plugin.readme"
                   class="pa-4"
-                  outlined
+                  variant="outlined"
                   elevation="2"
                 >
                   <vue-markdown :source="plugin.readme" />
@@ -133,10 +135,10 @@
             </v-row>
           </v-card-text>
         </v-card>
-      </v-tab-item>
-      <v-tab-item
+      </v-window-item>
+      <v-window-item
         key="settings"
-        :value="'settings'"
+        value="settings"
         :transition="false"
         :reverse-transition="false"
       >
@@ -150,7 +152,8 @@
                 >
                 <template v-else>
                   <general-form
-                    v-if="reset"
+                    v-if="initialLoad"
+                    :key="`settings-${plugin.id}`"
                     ref="settingsform"
                     v-model="settingsForm"
                     :options="pluginSettingsOptions"
@@ -167,8 +170,8 @@
             </v-row>
           </v-card-text>
         </v-card>
-      </v-tab-item>
-    </v-tabs-items>
+      </v-window-item>
+    </v-window>
   </div>
 </template>
 
@@ -195,9 +198,9 @@ export default {
     ErrorStateAlert,
     VueMarkdown,
   },
+  inject: ["snack"],
   data() {
     return {
-      reset: true,
       loading: false,
       isRefreshTasks: false,
       initialLoad: false,
@@ -211,13 +214,13 @@ export default {
     breads() {
       return [
         {
-          text: "Plugins",
+          title: "Plugins",
           disabled: false,
           to: "/plugins",
           exact: true,
         },
         {
-          text: this.breadcrumbName,
+          title: this.breadcrumbName,
           disabled: true,
           to: "/plugins/edit",
         },
@@ -289,9 +292,9 @@ poetry add ${this.plugin.python_deps.join(" ")}
   },
   methods: {
     async submit() {
-      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
-        return;
-      }
+      if (this.loading) return;
+      const valid = await this.$refs.generalform.validate();
+      if (!valid) return;
 
       this.loading = true;
 
@@ -300,26 +303,26 @@ poetry add ${this.plugin.python_deps.join(" ")}
           this.plugin.id,
           this.form,
         );
-        this.$snack.success(`${response.detail}`);
+        this.snack.success(`${response.detail}`);
       } catch (err) {
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
       }
 
       this.loading = false;
     },
     async submitSettings() {
-      if (this.loading || !this.$refs.settingsform.$refs.form.validate()) {
-        return;
-      }
+      if (this.loading) return;
+      const valid = await this.$refs.settingsform.validate();
+      if (!valid) return;
 
       this.loading = true;
 
       try {
         await pluginApi.updatePluginSettings(this.plugin.id, this.settingsForm);
         await this.getPlugin(this.id);
-        this.$snack.success("Settings updated");
+        this.snack.success("Settings updated");
       } catch (err) {
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
       }
 
       this.loading = false;
@@ -335,36 +338,22 @@ poetry add ${this.plugin.python_deps.join(" ")}
         this.plugin = response;
       } catch (err) {
         this.plugin.enabled = !val;
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
       }
     },
     getPlugin(id) {
       pluginApi
         .getPlugin(id)
         .then((data) => {
-          this.reset = false;
-
           this.plugin = data;
-          setTimeout(() => {
-            this.reset = true;
-          }, 500);
-        })
-        .catch(() => {
-          this.errorState = true;
-        })
-        .finally(() => {
           this.initialLoad = true;
+        })
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
+          this.errorState = true;
         });
     },
   },
 };
 </script>
-
-<style lang="scss">
-// Overrides vuetify.css
-// Because we moved the tabs into a div, which made the color funky.
-.v-toolbar__content > div > .v-tabs > .v-slide-group.v-tabs-bar,
-.v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
-  background-color: inherit;
-}
-</style>

@@ -5,9 +5,10 @@
       <confirm ref="confirm" />
       <socket-notifications
         v-if="isLoggedIn && versionSatisfies('>=4.0') && !hideSideBar"
+        ref="socketNotifications"
       />
       <starkiller-snackbar ref="snack" />
-      <v-app-bar v-if="isLoggedIn" elevate-on-scroll app>
+      <v-app-bar v-if="isLoggedIn" scroll-behavior="elevate">
         <template
           v-if="
             $route.name === 'agentEdit' ||
@@ -16,19 +17,33 @@
           "
           #extension
         >
-          <portal-target name="app-bar-extension" slim />
+          <div
+            id="app-bar-extension"
+            style="display: flex; flex: 1 1 auto; align-items: center"
+          ></div>
         </template>
-        <portal-target name="app-bar" multiple slim />
+        <div
+          id="app-bar"
+          style="display: flex; flex: 1 1 auto; align-items: center"
+        ></div>
+        <div v-if="isLoggedIn && chatWidget" class="pt-2">
+          <v-btn icon variant="text" size="small" @click="openChat">
+            <v-badge
+              :content="chatUnreadCount"
+              :model-value="chatUnreadCount > 0"
+              color="#F37C22"
+            >
+              <v-icon>mdi-chat</v-icon>
+            </v-badge>
+          </v-btn>
+        </div>
         <notification-bell
           v-show="$route.name !== 'notifications'"
           ref="bell"
         />
       </v-app-bar>
-      <!-- Sizes your content based upon application components -->
       <v-main>
-        <!-- Provides the application the proper gutter -->
         <v-container fluid>
-          <!-- If using vue-router -->
           <router-view />
         </v-container>
       </v-main>
@@ -66,7 +81,6 @@
   </div>
 </template>
 <script>
-import Vue from "vue";
 import semver from "semver";
 import { mapState } from "pinia";
 
@@ -86,11 +100,49 @@ export default {
     SocketNotifications,
     StarkillerSnackbar,
   },
+  provide() {
+    return {
+      snack: this.snackProxy,
+      bell: this.bellProxy,
+      confirm: (...args) => {
+        if (!this.$refs.confirm) {
+          console.warn("[Starkiller] confirm ref unavailable:", ...args);
+          return false;
+        }
+        return this.$refs.confirm.open(...args);
+      },
+    };
+  },
+  data() {
+    const createRefProxy = (refName, methods) =>
+      Object.fromEntries(
+        methods.map((method) => [
+          method,
+          (...args) => {
+            if (!this.$refs[refName]) {
+              console.error(
+                `[Starkiller] ${refName} ref unavailable, ${method}:`,
+                ...args,
+              );
+              return;
+            }
+            this.$refs[refName][method](...args);
+          },
+        ]),
+      );
+
+    return {
+      snackProxy: createRefProxy("snack", ["error", "warn", "success", "info"]),
+      bellProxy: createRefProxy("bell", ["push"]),
+    };
+  },
   computed: {
     ...mapState(useApplicationStore, [
       "isLoggedIn",
       "empireVersion",
       "connectionError",
+      "chatWidget",
+      "chatUnreadCount",
     ]),
     isLoginPage() {
       return this.$route.name === "home";
@@ -122,7 +174,7 @@ export default {
         if (val.length > 0) {
           if (semver.satisfies(val.split(" ")[0].split("-")[0], "<5.2")) {
             await this.$nextTick();
-            this.$snack.warn(
+            this.snackProxy.warn(
               "This version of Starkiller is recommended to be used with Empire 5.2 or greater." +
                 " Some features may not work properly.",
             );
@@ -133,20 +185,14 @@ export default {
     },
     connectionError(val) {
       if (val > 0) {
-        this.$snack.error("Could not reach Empire server");
+        this.snackProxy.error("Could not reach Empire server");
       }
     },
   },
-  mounted() {
-    this.$root.$confirm = this.$refs.confirm.open;
-
-    // register global snackbar
-    Vue.prototype.$snack = this.$refs.snack;
-
-    // register global notification bell
-    Vue.prototype.$bell = this.$refs.bell;
-  },
   methods: {
+    openChat() {
+      this.$refs.socketNotifications?.$refs.chat?.open();
+    },
     versionSatisfies(version) {
       return semver.satisfies(
         this.empireVersion.split(" ")[0].split("-")[0],

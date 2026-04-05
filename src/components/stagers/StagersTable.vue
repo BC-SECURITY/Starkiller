@@ -4,13 +4,11 @@
       v-model="selected"
       :headers="headers"
       :items="filteredStagers"
-      :footer-props="{
-        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
-      }"
+      :items-per-page-options="[5, 10, 15, 20, 50, 100]"
       :items-per-page="15"
       :loading="stagersStatus === 'loading'"
-      item-key="id"
-      dense
+      item-value="id"
+      density="compact"
       show-select
     >
       <template #item.name="{ item }">
@@ -33,9 +31,9 @@
         <date-time-display :timestamp="item.created_at" />
       </template>
       <template #item.actions="{ item }">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn text icon x-small v-bind="attrs" v-on="on">
+        <v-menu>
+          <template #activator="{ props: activatorProps }">
+            <v-btn variant="text" icon size="x-small" v-bind="activatorProps">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
@@ -64,7 +62,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'stagerNew', params: { copy: true, id: item.id } }"
+              :to="{ name: 'stagerNew', query: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>
@@ -87,7 +85,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import DownloadMixin from "@/mixins/download-stager";
 import CopyMixin from "@/mixins/copy-stager";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
@@ -101,6 +98,7 @@ export default {
     DateTimeDisplay,
   },
   mixins: [DownloadMixin, CopyMixin],
+  inject: ["snack"],
   props: {
     onlyMyStagers: {
       type: Boolean,
@@ -111,16 +109,16 @@ export default {
       default: () => [],
     },
   },
+  emits: ["update:modelValue", "delete-stager"],
   data() {
     return {
-      moment,
       headers: [
-        { text: "Name", value: "name" },
-        { text: "Listener", value: "options.Listener" },
-        { text: "Type", value: "template" },
-        { text: "Language", value: "options.Language" },
-        { text: "Created At", value: "created_at" },
-        { text: "Actions", value: "actions", sortable: false },
+        { title: "Name", key: "name" },
+        { title: "Listener", key: "options.Listener" },
+        { title: "Type", key: "template" },
+        { title: "Language", key: "options.Language" },
+        { title: "Created At", key: "created_at" },
+        { title: "Actions", key: "actions", sortable: false },
       ],
       selected: [],
     };
@@ -151,7 +149,7 @@ export default {
   },
   watch: {
     selected(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
   },
   mounted() {

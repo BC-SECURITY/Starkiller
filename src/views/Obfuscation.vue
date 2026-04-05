@@ -14,24 +14,20 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-            <v-form
-              ref="form"
-              v-model="valid"
-              @submit.prevent.native="saveKeyword"
-            >
+            <v-form ref="form" v-model="valid" @submit.prevent="saveKeyword">
               <v-text-field
                 v-model="editedKeyword.keyword"
                 :rules="rules['keyword']"
-                dense
-                outlined
+                density="compact"
+                variant="outlined"
                 required
                 label="Keyword"
               />
               <v-text-field
                 v-model="editedKeyword.replacement"
                 :rules="rules['replacement']"
-                dense
-                outlined
+                density="compact"
+                variant="outlined"
                 required
                 label="Replacement"
               />
@@ -42,10 +38,16 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn color="blue darken-1" text @click="keywordDialog = false">
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="keywordDialog = false"
+          >
             Cancel
           </v-btn>
-          <v-btn color="blue darken-1" text @click="saveKeyword"> Save </v-btn>
+          <v-btn color="blue-darken-1" variant="text" @click="saveKeyword">
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -67,10 +69,18 @@
 
         <v-card-actions>
           <v-spacer />
-          <v-btn color="blue darken-1" text @click="preobfuscateDialog = false">
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="preobfuscateDialog = false"
+          >
             Cancel
           </v-btn>
-          <v-btn color="blue darken-1" text @click="preobfuscateModules">
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="preobfuscateModules"
+          >
             Save
           </v-btn>
         </v-card-actions>
@@ -85,15 +95,20 @@
             <span class="headline">Keyword Obfuscation</span>
             <v-btn color="primary" @click="createKeyword">
               Create
-              <v-icon right> fa-plus-square </v-icon>
+              <v-icon end> fa-plus-square </v-icon>
             </v-btn>
           </span>
         </v-card-title>
         <v-data-table :headers="headers" :items="keywords">
           <template #item.actions="{ item }">
-            <v-menu offset-y>
-              <template #activator="{ on, attrs }">
-                <v-btn text icon x-small v-bind="attrs" v-on="on">
+            <v-menu>
+              <template #activator="{ props: activatorProps }">
+                <v-btn
+                  variant="text"
+                  icon
+                  size="x-small"
+                  v-bind="activatorProps"
+                >
                   <v-icon>fa-ellipsis-v</v-icon>
                 </v-btn>
               </template>
@@ -123,63 +138,64 @@
           </span>
         </v-card-title>
         <v-card-text>
-          <v-card
-            v-for="(config, index) in configs"
-            :key="index"
-            outlined
-            class="ma-2 pa-2"
-          >
-            <v-card-subtitle>{{ config.language }}</v-card-subtitle>
-            <v-card-text>
-              <v-form>
-                <v-switch
-                  v-model="config.enabled"
-                  label="Enabled"
-                  :readonly="readonly"
-                />
-                <v-text-field
-                  v-model="config.command"
-                  label="Command"
-                  :rules="
-                    config.language !== 'csharp'
-                      ? [(v) => !!v || 'Command is required']
-                      : []
-                  "
-                  dense
-                  outlined
-                  :readonly="readonly"
-                />
-                <!-- This isn't currently used. Showing it would probably just confuse people. -->
-                <!-- <v-text-field
+          <template v-for="(config, index) in configs" :key="index">
+            <v-divider v-if="index > 0" class="my-2" />
+            <v-card border class="ma-2 pa-2">
+              <v-card-subtitle>{{ config.language }}</v-card-subtitle>
+              <v-card-text>
+                <v-form>
+                  <v-switch
+                    v-model="config.enabled"
+                    color="primary"
+                    label="Enabled"
+                    :readonly="readonly"
+                  />
+                  <v-text-field
+                    v-model="config.command"
+                    label="Command"
+                    :rules="
+                      config.language !== 'csharp'
+                        ? [(v) => !!v || 'Command is required']
+                        : []
+                    "
+                    density="compact"
+                    variant="outlined"
+                    :readonly="readonly"
+                  />
+                  <!-- This isn't currently used. Showing it would probably just confuse people. -->
+                  <!-- <v-text-field
                   v-model="configs[0].module"
                   label="ModuleName"
                   :rules="[v => !!v || 'ModuleName is required']"
-                  dense
-                  outlined
+                  density="compact"
+                  variant="outlined"
                   :readonly="true"
                 /> -->
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="primary" @click="editConfig(config)"> Save </v-btn>
-              <v-btn
-                :disabled="!config.preobfuscatable"
-                text
-                color="primary"
-                @click="openPreobfuscateDialog(config)"
-              >
-                Preobfuscate
-              </v-btn>
-              <v-btn
-                :disabled="!config.preobfuscatable"
-                text
-                color="error"
-                @click="deletePreobfuscatedModules(config)"
-              >
-                Remove preobfuscated modules
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+                </v-form>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn color="primary" @click="editConfig(config)">
+                  Save
+                </v-btn>
+                <v-btn
+                  :disabled="!config.preobfuscatable"
+                  variant="text"
+                  color="primary"
+                  @click="openPreobfuscateDialog(config)"
+                >
+                  Preobfuscate
+                </v-btn>
+                <v-btn
+                  :disabled="!config.preobfuscatable"
+                  variant="text"
+                  color="error"
+                  @click="deletePreobfuscatedModules(config)"
+                >
+                  Remove preobfuscated modules
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </template>
         </v-card-text>
       </v-card>
     </div>
@@ -196,6 +212,7 @@ export default {
   components: {
     ListPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       valid: true,
@@ -207,7 +224,7 @@ export default {
       reobfuscate: false,
       breads: [
         {
-          text: "Obfuscation",
+          title: "Obfuscation",
           disabled: true,
           href: "/obfuscation",
         },
@@ -216,16 +233,16 @@ export default {
       readonly: false,
       headers: [
         {
-          text: "Keyword",
-          value: "keyword",
+          title: "Keyword",
+          key: "keyword",
         },
         {
-          text: "Replacement",
-          value: "replacement",
+          title: "Replacement",
+          key: "replacement",
         },
         {
-          text: "Actions",
-          value: "actions",
+          title: "Actions",
+          key: "actions",
           sortable: false,
           width: 15,
         },
@@ -262,10 +279,6 @@ export default {
     refreshConfigs() {
       this.obfuscationStore.getConfigs();
     },
-    toggleEditing(item) {
-      console.log("editing");
-      this.$set(item, "editing", !item.editing);
-    },
     editKeyword(item) {
       this.editedKeyword = { ...item };
       this.keywordDialogTitle = "Edit Keyword";
@@ -285,9 +298,8 @@ export default {
         .substring(2, 8);
     },
     async saveKeyword() {
-      if (!this.$refs.form.validate()) {
-        return;
-      }
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
       try {
         if (!this.editedKeyword.id) {
           await obfuscationApi.createKeyword(this.editedKeyword);
@@ -297,12 +309,12 @@ export default {
         this.refreshKeywords();
         this.keywordDialog = false;
       } catch (e) {
-        this.$snack.error(`${e}`);
+        this.snack.error(`${e}`);
       }
     },
     async deleteKeyword(item) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete keyword ${item.keyword}?`,
           { color: "red" },
@@ -315,14 +327,14 @@ export default {
       try {
         await obfuscationApi.updateObfuscationConfig(config);
         if (config.preobfuscatable) {
-          this.$snack.success(
+          this.snack.success(
             'Updated config. Use "preobfuscate" to re-apply obfuscation.',
           );
         } else {
-          this.$snack.success("Updated config.");
+          this.snack.success("Updated config.");
         }
       } catch (e) {
-        this.$snack.error(`${e}`);
+        this.snack.error(`${e}`);
       }
     },
     openPreobfuscateDialog(config) {
@@ -340,17 +352,17 @@ export default {
           this.editedPreobfuscate.language,
           this.reobfuscate,
         );
-        this.$snack.info(
+        this.snack.info(
           "Preobfuscation started in the background. This will take a few minutes.",
         );
       } catch (e) {
-        this.$snack.error(`${e}`);
+        this.snack.error(`${e}`);
       }
       this.preobfuscateDialog = false;
     },
     async deletePreobfuscatedModules(config) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "",
           "Are you sure? This will delete all preobfuscated modules.",
           { color: "red", width: 500 },
@@ -358,9 +370,9 @@ export default {
       ) {
         try {
           await obfuscationApi.deletePreobfuscatedModules(config.language);
-          this.$snack.success("Preobfuscated modules deleted.");
+          this.snack.success("Preobfuscated modules deleted.");
         } catch (e) {
-          this.$snack.error(`${e}`);
+          this.snack.error(`${e}`);
         }
       }
     },

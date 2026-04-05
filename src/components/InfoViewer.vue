@@ -5,10 +5,10 @@
       class="collapse"
     >
       <v-expansion-panel>
-        <v-expansion-panel-header v-if="Object.keys(info).length > 0">
+        <v-expansion-panel-title v-if="Object.keys(info).length > 0">
           {{ info.description }}
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
           <div style="text-align: left">
             <div style="margin-bottom: 10px">
               <b class="mr-2">Authors:</b>
@@ -35,7 +35,7 @@
               {{ detail.value }}
             </span>
           </div>
-        </v-expansion-panel-content>
+        </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
   </div>

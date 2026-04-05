@@ -1,6 +1,6 @@
 <template>
   <div>
-    <chat v-if="socket && chatWidget" :socket="socket" />
+    <chat v-if="socket && chatWidget" ref="chat" :socket="socket" />
   </div>
 </template>
 
@@ -15,9 +15,8 @@ import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   name: "SocketNotifications",
-  components: {
-    Chat,
-  },
+  components: { Chat },
+  inject: ["snack", "bell"],
   data() {
     return {
       socket: null,
@@ -82,7 +81,7 @@ export default {
       this.setAgentHandlers();
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.disconnect();
   },
   methods: {
@@ -99,6 +98,7 @@ export default {
       });
     },
     disconnect() {
+      if (!this.socket) return;
       console.log("Closing Socket");
       this.socket.close();
       this.socket = null;
@@ -112,7 +112,7 @@ export default {
           }
 
           this.socket.on(`agents/${sessionId}/task`, (data) => {
-            this.$bell.push({
+            this.bell.push({
               title: `Task Results for Agent ${data.agent_id}`,
               text: `${data.output?.substring(0, 50)}...`,
               route: {
@@ -128,7 +128,7 @@ export default {
     setPluginHandlers() {
       this.plugins.forEach((plugin) => {
         this.socket.on(`plugins/${plugin.name}/notifications`, (data) => {
-          this.$bell.push({
+          this.bell.push({
             title: `${plugin.name}`,
             text: `${data.message}`,
             // todo instead of color we could add an icon to bells
@@ -139,7 +139,7 @@ export default {
     },
     setHandlers() {
       this.socket.on("listeners/new", (data) => {
-        this.$bell.push({
+        this.bell.push({
           title: "New Listener",
           text: `New Listener '${data.name}' started!`,
           route: {
@@ -151,7 +151,7 @@ export default {
       });
 
       this.socket.on("agents/new", (data) => {
-        this.$bell.push({
+        this.bell.push({
           title: "New Agent",
           text: `New Agent '${data.session_id}' callback!`,
           buttonText: "View",
@@ -165,12 +165,12 @@ export default {
 
       this.socket.on("reconnect_failed", () => {
         console.log("Failed to connect to SocketIO");
-        this.$snack.error("Failed to connect to SocketIO");
+        this.snack.error("Failed to connect to SocketIO");
       });
       this.socket.on("connect_error", () => {
         console.log("SocketIO Connection Error, retrying.");
         // a bit too noisy to popup on every reconnect attempt.
-        // this.$snack.warn('SocketIO Connection Error, retrying.');
+        // this.snack.warn('SocketIO Connection Error, retrying.');
       });
     },
     getColorForPluginMessage(message) {

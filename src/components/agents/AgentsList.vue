@@ -17,10 +17,12 @@
       <template #filters>
         <v-switch
           v-model="applicationStore.hideStaleAgents"
+          color="primary"
           label="Hide Stale Agents"
         />
         <v-switch
           v-model="applicationStore.hideArchivedAgents"
+          color="primary"
           class="pl-4"
           label="Hide Archived Agents"
         />
@@ -51,7 +53,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AgentsTable from "@/components/agents/AgentsTable.vue";
@@ -68,11 +69,12 @@ export default {
     AgentsTable,
     ListPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       breads: [
         {
-          text: "Agents",
+          title: "Agents",
           disabled: true,
           href: "/agents",
         },
@@ -80,7 +82,6 @@ export default {
       selected: [],
       selectedTags: [],
       tags: [],
-      moment,
       autoRefresh: true,
     };
   },
@@ -143,7 +144,7 @@ export default {
     },
     async killAgents() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Kill Agent",
           `Do you want to kill ${this.selected.length} agents?`,
           { color: "red" },
@@ -152,7 +153,7 @@ export default {
         this.selected.forEach((agent) => {
           this.agentStore.killAgent({ sessionId: agent.session_id });
         });
-        this.$snack.success(
+        this.snack.success(
           `${this.selected.length} agents tasked to run TASK_EXIT.`,
         );
         this.selected = [];
@@ -163,14 +164,14 @@ export default {
     },
     async killAgent(item) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Kill Agent",
           `Do you want to kill agent ${item.name}?`,
           { color: "red" },
         )
       ) {
         this.agentStore.killAgent({ sessionId: item.session_id });
-        this.$snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
+        this.snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
       }
     },
   },

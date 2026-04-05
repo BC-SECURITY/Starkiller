@@ -13,6 +13,7 @@
       <template #filters>
         <v-switch
           v-model="applicationStore.filterOnlyMyStagers"
+          color="primary"
           label="Only My Stagers"
         />
       </template>
@@ -29,7 +30,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import DownloadMixin from "@/mixins/download-stager";
 import CopyMixin from "@/mixins/copy-stager";
 import ListPageTop from "@/components/ListPageTop.vue";
@@ -47,12 +47,12 @@ export default {
     StagersTable,
   },
   mixins: [DownloadMixin, CopyMixin],
+  inject: ["snack", "confirm"],
   data() {
     return {
-      moment,
       breads: [
         {
-          text: "Stagers",
+          title: "Stagers",
           disabled: true,
           href: "/stagers",
         },
@@ -80,7 +80,7 @@ export default {
     },
     async deleteStager(item) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           "Are you sure you want to delete this stager?",
           { color: "red" },
@@ -91,7 +91,7 @@ export default {
     },
     async deleteStagers() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete ${this.selected.length} stagers?`,
           { color: "red" },

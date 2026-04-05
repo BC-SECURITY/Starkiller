@@ -23,12 +23,13 @@
         <span class="ma-2">{{ user.username }}</span>
 
         <v-spacer />
-        <v-btn color="primary" text @click="logout"> Logout </v-btn>
+        <v-btn color="primary" variant="text" @click="logout"> Logout </v-btn>
       </div>
       <v-divider />
       <div style="display: flex; flex-direction: row">
         <v-switch
           v-model="applicationStore.chatWidget"
+          color="primary"
           class="pl-8"
           :label="`Chat Widget`"
         />
@@ -41,7 +42,7 @@
         ref="form"
         v-model="valid"
         style="max-width: 500px"
-        @submit.prevent.native="submit"
+        @submit.prevent="submit"
       >
         <v-text-field
           v-model="password.form.password"
@@ -50,8 +51,8 @@
           :rules="rules['password']"
           label="Password"
           autocomplete="off"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           @click:append="showPassword = !showPassword"
         />
@@ -62,8 +63,8 @@
           :rules="rules['confirmPassword']"
           label="Confirm Password"
           autocomplete="off"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           @click:append="showConfirm = !showConfirm"
         />
@@ -215,6 +216,7 @@ export default {
   components: {
     ListPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       password: {
@@ -250,7 +252,7 @@ export default {
       valid: false,
       breads: [
         {
-          text: "Settings",
+          title: "Settings",
           disabled: true,
           href: "/settings",
         },
@@ -307,13 +309,17 @@ export default {
       const data = new FormData();
       data.append("file", selectedFile);
 
-      await userApi.uploadAvatar(this.userId, data);
-      this.applicationStore.refreshMe();
-      this.$snack.success("Upload complete");
+      try {
+        await userApi.uploadAvatar(this.userId, data);
+        this.applicationStore.refreshMe();
+        this.snack.success("Upload complete");
+      } catch (err) {
+        this.snack.error(`Error uploading avatar: ${err}`);
+      }
     },
     async logout() {
       if (
-        await this.$root.$confirm("", "Are you sure you want to logout?", {
+        await this.confirm("", "Are you sure you want to logout?", {
           color: "green",
         })
       ) {
@@ -324,21 +330,21 @@ export default {
       this.applicationStore.clear();
       this.agentStore.clear();
     },
-    submit() {
-      if (this.password.loading || !this.$refs.form.validate()) {
-        return;
-      }
+    async submit() {
+      if (this.password.loading) return;
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
 
       this.password.loading = true;
       userApi
         .updatePassword(this.user.id, this.password.form.password)
         .then(() => {
-          this.$snack.success("Password updated");
+          this.snack.success("Password updated");
           this.password.form = {};
           this.$refs.form.resetValidation();
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.password.loading = false;
@@ -349,10 +355,10 @@ export default {
       malleableApi
         .resetProfiles()
         .then(() => {
-          this.$snack.success("Profiles reset successful");
+          this.snack.success("Profiles reset successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.profiles.loading = false;
@@ -363,10 +369,10 @@ export default {
       malleableApi
         .reloadProfiles()
         .then(() => {
-          this.$snack.success("Profiles reload successful");
+          this.snack.success("Profiles reload successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.profiles.loading = false;
@@ -377,10 +383,10 @@ export default {
       moduleApi
         .reloadModules()
         .then(() => {
-          this.$snack.success("Module reload successful");
+          this.snack.success("Module reload successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.modules.loading = false;
@@ -391,10 +397,10 @@ export default {
       moduleApi
         .resetModules()
         .then(() => {
-          this.$snack.success("Module reset successful");
+          this.snack.success("Module reset successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.modules.loading = false;
@@ -405,10 +411,10 @@ export default {
       bypassApi
         .reloadBypasses()
         .then(() => {
-          this.$snack.success("Bypass reload successful");
+          this.snack.success("Bypass reload successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.bypasses.loading = false;
@@ -419,10 +425,10 @@ export default {
       bypassApi
         .resetBypasses()
         .then(() => {
-          this.$snack.success("Bypass reset successful");
+          this.snack.success("Bypass reset successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.bypasses.loading = false;
@@ -433,10 +439,10 @@ export default {
       pluginApi
         .reloadPlugins()
         .then(() => {
-          this.$snack.success("Plugin reload successful");
+          this.snack.success("Plugin reload successful");
         })
         .catch((err) => {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         })
         .finally(() => {
           this.plugins.loading = false;

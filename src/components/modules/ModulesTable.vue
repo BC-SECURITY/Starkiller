@@ -3,13 +3,11 @@
     <v-data-table
       :headers="headers"
       :items="filteredModules"
-      :footer-props="{
-        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
-      }"
+      :items-per-page-options="[5, 10, 15, 20, 50, 100]"
       :items-per-page="15"
-      item-key="id"
+      item-value="id"
       show-expand
-      dense
+      density="compact"
     >
       <template #item.id="{ item }">
         <router-link
@@ -31,16 +29,31 @@
         <technique-chips :techniques="item.techniques" :show-title="false" />
       </template>
       <template #item.needs_admin="{ item }">
-        <v-simple-checkbox v-model="item.needs_admin" disabled />
+        <v-checkbox
+          v-model="item.needs_admin"
+          disabled
+          hide-details
+          density="compact"
+        />
       </template>
       <template #item.opsec_safe="{ item }">
-        <v-simple-checkbox v-model="item.opsec_safe" disabled />
+        <v-checkbox
+          v-model="item.opsec_safe"
+          disabled
+          hide-details
+          density="compact"
+        />
       </template>
       <template #item.background="{ item }">
-        <v-simple-checkbox v-model="item.background" disabled />
+        <v-checkbox
+          v-model="item.background"
+          disabled
+          hide-details
+          density="compact"
+        />
       </template>
-      <template #expanded-item="{ headers: scopedHeader, item }">
-        <td :colspan="scopedHeader.length">
+      <template #expanded-row="{ columns, item }">
+        <td :colspan="columns.length">
           <div class="d-flex flex-column">
             <b>Description:</b>
             {{ item.description }}
@@ -104,25 +117,25 @@ export default {
     headers() {
       const headers = [
         {
-          text: "Name",
-          value: "name",
+          title: "Name",
+          key: "name",
         },
-        { text: "Language", value: "language", sort: this.sortLanguage },
-        { text: "Needs Admin", value: "needs_admin", width: "75px" },
-        { text: "Opsec Safe", value: "opsec_safe", width: "75px" },
-        { text: "Background", value: "background", width: "75px" },
+        { title: "Language", key: "language", sort: this.sortLanguage },
+        { title: "Needs Admin", key: "needs_admin", width: "75px" },
+        { title: "Opsec Safe", key: "opsec_safe", width: "75px" },
+        { title: "Background", key: "background", width: "75px" },
         {
-          text: "Techniques",
-          value: "techniques",
+          title: "Techniques",
+          key: "techniques",
           width: "300px",
           sortable: false,
         },
       ];
       if (this.showIds) {
         headers.unshift({
-          text: "id",
+          title: "id",
           align: "start",
-          value: "id",
+          key: "id",
         });
       }
 

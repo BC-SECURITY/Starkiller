@@ -6,8 +6,8 @@
     @keydown.esc="cancel"
   >
     <v-card>
-      <v-toolbar dark :color="options.color" dense flat>
-        <v-toolbar-title class="white--text">
+      <v-toolbar :color="options.color" density="compact" flat>
+        <v-toolbar-title class="text-white">
           {{ title }}
         </v-toolbar-title>
       </v-toolbar>
@@ -16,8 +16,8 @@
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer />
-        <v-btn color="grey" text @click.native="cancel"> Cancel </v-btn>
-        <v-btn color="primary" @click.native="agree"> Yes </v-btn>
+        <v-btn color="grey" variant="text" @click="cancel"> Cancel </v-btn>
+        <v-btn color="primary" @click="agree"> Yes </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

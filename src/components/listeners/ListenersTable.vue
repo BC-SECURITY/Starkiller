@@ -6,16 +6,16 @@
       :loading="listenersStatus === 'loading'"
       :headers="headers"
       :items="sortedListeners"
-      :footer-props="{
-        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
-      }"
+      :items-per-page-options="[5, 10, 15, 20, 50, 100]"
       :items-per-page="15"
-      item-key="id"
-      dense
+      item-value="id"
+      density="compact"
       show-select
     >
       <template #item.enabled="{ item }">
-        <v-badge dot :color="item.enabled === true ? 'green' : 'red'" />
+        <div class="d-flex align-center" style="height: 100%">
+          <v-badge dot :color="item.enabled === true ? 'green' : 'red'" />
+        </div>
       </template>
       <template #item.name="{ item }">
         <router-link
@@ -37,9 +37,9 @@
         />
       </template>
       <template #item.actions="{ item }">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn text icon x-small v-bind="attrs" v-on="on">
+        <v-menu>
+          <template #activator="{ props: activatorProps }">
+            <v-btn variant="text" icon size="x-small" v-bind="activatorProps">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
@@ -58,7 +58,7 @@
             </v-list-item>
             <v-list-item
               key="copy"
-              :to="{ name: 'listenerNew', params: { copy: true, id: item.id } }"
+              :to="{ name: 'listenerNew', query: { copy: true, id: item.id } }"
               link
             >
               <v-list-item-title>
@@ -81,7 +81,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import TagViewer from "@/components/TagViewer.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import * as listenerApi from "@/api/listener-api";
@@ -93,6 +92,7 @@ export default {
     DateTimeDisplay,
     TagViewer,
   },
+  inject: ["snack"],
   props: {
     input: {
       type: Array,
@@ -103,24 +103,24 @@ export default {
       default: () => [],
     },
   },
+  emits: ["update:modelValue", "refresh-tags", "kill-listener"],
   data() {
     return {
-      moment,
       headers: [
         {
-          text: "",
+          title: "",
           align: "start",
           sortable: false,
           width: "5px",
-          value: "enabled",
+          key: "enabled",
         },
-        { text: "Name", value: "name" },
-        { text: "Template", value: "template" },
-        { text: "Host", value: "options.Host" },
-        { text: "Port", value: "options.Port" },
-        { text: "Created At", value: "created_at" },
-        { text: "Tags", value: "tags", sortable: false },
-        { text: "Actions", value: "actions", sortable: false },
+        { title: "Name", key: "name" },
+        { title: "Template", key: "template" },
+        { title: "Host", key: "options.Host" },
+        { title: "Port", key: "options.Port" },
+        { title: "Created At", key: "created_at" },
+        { title: "Tags", key: "tags", sortable: false },
+        { title: "Actions", key: "actions", sortable: false },
       ],
       selected: [],
     };
@@ -152,7 +152,7 @@ export default {
       this.getListeners();
     },
     selected(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
   },
   mounted() {
@@ -166,7 +166,7 @@ export default {
           listener.tags = listener.tags.filter((t) => t.id !== tag.id);
           this.$emit("refresh-tags");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(listener, tag) {
       listenerApi
@@ -175,9 +175,9 @@ export default {
           const index = listener.tags.findIndex((x) => x.id === t.id);
           listener.tags.splice(index, 1, t);
           this.$emit("refresh-tags");
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(listener, tag) {
       listenerApi
@@ -186,7 +186,7 @@ export default {
           listener.tags.push(t);
           this.$emit("refresh-tags");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     async killListener(item) {
       this.$emit("kill-listener", item);

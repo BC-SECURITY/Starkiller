@@ -35,7 +35,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
@@ -51,12 +50,12 @@ export default {
     ExpansionPanelFilter,
     ListPageTop,
   },
+  inject: ["confirm"],
   data() {
     return {
-      moment,
       breads: [
         {
-          text: "Listeners",
+          title: "Listeners",
           disabled: true,
           href: "/listeners",
         },
@@ -107,7 +106,7 @@ export default {
     },
     async killListener(item) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to kill listener ${item.name}?`,
           { color: "red" },
@@ -118,7 +117,7 @@ export default {
     },
     async killListeners() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to kill ${this.selected.length} listeners?`,
           { color: "red" },

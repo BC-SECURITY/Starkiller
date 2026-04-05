@@ -1,8 +1,14 @@
 <template>
   <div class="pt-2">
-    <v-menu v-model="menu" offset-y>
-      <template #activator="{ on, attrs }">
-        <v-btn class="text-none mr-5" stacked icon v-bind="attrs" v-on="on">
+    <v-menu v-model="menu">
+      <template #activator="{ props: activatorProps }">
+        <v-btn
+          class="text-none mr-5"
+          variant="text"
+          icon
+          size="small"
+          v-bind="activatorProps"
+        >
           <v-badge v-if="unreadCount > 0" :content="unreadCount" color="error">
             <v-icon>mdi-bell-outline</v-icon>
           </v-badge>
@@ -13,32 +19,36 @@
         <v-list-item
           v-for="(item, index) in notifications"
           :key="index"
+          :value="index"
           :style="
             item.read ? '' : 'background-color: rgba(118, 127, 134, 0.5);'
           "
         >
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-            <v-list-item-subtitle>{{ item.text }}</v-list-item-subtitle>
-          </v-list-item-content>
-          <v-list-item-action>
-            <v-btn v-if="item.route" color="primary" text :to="item.route">
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+          <v-list-item-subtitle>{{ item.text }}</v-list-item-subtitle>
+          <template #append>
+            <v-btn
+              v-if="item.route"
+              color="primary"
+              variant="text"
+              @click="$router.push(item.route)"
+            >
               {{ item.buttonText }}
             </v-btn>
-          </v-list-item-action>
+          </template>
         </v-list-item>
         <v-list-item v-if="notifications.length === 0">
-          <v-list-item-content>
-            <v-list-item-title>No notifications</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-title>No notifications</v-list-item-title>
         </v-list-item>
       </v-list>
       <v-divider />
       <v-list>
-        <v-list-item v-if="notifications.length > 0">
-          <v-list-item-content style="cursor: pointer" @click="toNotifications">
-            <v-list-item-title>View All</v-list-item-title>
-          </v-list-item-content>
+        <v-list-item
+          v-if="notifications.length > 0"
+          style="cursor: pointer"
+          @click="toNotifications"
+        >
+          <v-list-item-title>View All</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -73,7 +83,6 @@ export default {
       }
     },
   },
-  mounted() {},
   methods: {
     toNotifications() {
       this.$router.push({ name: "notifications" });

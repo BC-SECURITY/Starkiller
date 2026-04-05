@@ -1,19 +1,19 @@
 <template>
   <div>
-    <portal to="app-bar-extension">
+    <Teleport v-if="!isNew" defer to="#app-bar-extension">
       <div style="display: flex; flex-direction: row; width: 100%">
-        <v-tabs v-model="tab" align-with-title>
-          <v-tab key="view" href="#view">
+        <v-tabs v-model="tab" color="primary" align-with-title>
+          <v-tab key="view" value="view">
             View
-            <v-icon x-small class="ml-1"> fa-eye </v-icon>
+            <v-icon size="x-small" class="ml-1"> fa-eye </v-icon>
           </v-tab>
-          <v-tab key="autorun" href="#autorun">
+          <v-tab key="autorun" value="autorun">
             Autorun
-            <v-icon x-small class="ml-1"> fa-play </v-icon>
+            <v-icon size="x-small" class="ml-1"> fa-play </v-icon>
           </v-tab>
         </v-tabs>
       </div>
-    </portal>
+    </Teleport>
 
     <edit-page-top
       :breads="breads"
@@ -34,12 +34,19 @@
           v-model="listener.enabled"
           color="green"
           label="Enabled"
-          class="mr-2 mt-1"
-          @change="toggleEnabled"
+          hide-details
+          class="mr-2"
+          @update:model-value="toggleEnabled"
         />
-        <v-menu v-if="!isNew && initialLoad" offset-y open-on-hover>
-          <template #activator="{ on, attrs }">
-            <v-btn class="mr-5" text icon small v-bind="attrs" v-on="on">
+        <v-menu v-if="!isNew && initialLoad" open-on-hover>
+          <template #activator="{ props: activatorProps }">
+            <v-btn
+              class="mr-5"
+              variant="text"
+              icon
+              size="small"
+              v-bind="activatorProps"
+            >
               <v-icon>fa-suitcase-rolling</v-icon>
             </v-btn>
           </template>
@@ -74,11 +81,11 @@
     />
 
     <!-- Tab Items -->
-    <v-tabs-items v-else v-model="tab">
+    <v-window v-else v-model="tab">
       <!-- General Tab Content -->
-      <v-tab-item
+      <v-window-item
         key="view"
-        :value="'view'"
+        value="view"
         :transition="false"
         :reverse-transition="false"
       >
@@ -103,9 +110,9 @@
             <v-autocomplete
               v-model="selectedTemplate"
               :items="listenerTemplateIds"
-              :loading="!reset"
-              dense
-              outlined
+              :loading="loadingTemplate"
+              density="compact"
+              variant="outlined"
               label="Type"
               :readonly="!canEdit"
             />
@@ -117,7 +124,8 @@
               </v-row>
             </v-alert>
             <general-form
-              v-if="reset"
+              v-if="initialLoad"
+              :key="selectedTemplate"
               ref="generalform"
               v-model="form"
               :options="listenerOptions"
@@ -126,20 +134,20 @@
             />
           </v-card>
         </v-card>
-      </v-tab-item>
+      </v-window-item>
 
       <!-- Autorun Modules Tab Content -->
-      <v-tab-item
+      <v-window-item
         key="autorun"
-        :value="'autorun'"
+        value="autorun"
         :transition="false"
         :reverse-transition="false"
       >
         <v-card flat>
           <AutoRunModules :selected-listener="listener" />
         </v-card>
-      </v-tab-item>
-    </v-tabs-items>
+      </v-window-item>
+    </v-window>
   </div>
 </template>
 
@@ -163,14 +171,15 @@ export default {
     EditPageTop,
     AutoRunModules,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       listener: { options: {} },
       listenerTemplate: { options: {} },
       selectedTemplate: "",
       form: {},
-      reset: true,
       loading: false,
+      loadingTemplate: false,
       formPriorities: ["Name", "Host", "Port"],
       errorState: false,
       validationMessage: null,
@@ -195,7 +204,7 @@ export default {
       return this.$route.name === "listenerNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -206,11 +215,11 @@ export default {
       return this.isNew || !this.listener.enabled;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
-        return { name: "listenerNew", params: { copy: true, id: this.id } };
+        return { name: "listenerNew", query: { copy: true, id: this.id } };
       return {};
     },
     listenerInfo() {
@@ -231,22 +240,27 @@ export default {
         });
         return options;
       }
-      const { options } = this.listenerTemplate;
-      if (!options) return {};
+      const templateOptions =
+        (this.listenerTemplate && this.listenerTemplate.options) || {};
+      const options = Object.keys(templateOptions).reduce((acc, k) => {
+        acc[k] = { ...templateOptions[k] };
+        return acc;
+      }, {});
+      if (Object.keys(options).length === 0) return {};
       return options;
     },
     breads() {
       return [
         {
-          text: "Listeners",
+          title: "Listeners",
           disabled: false,
           to: "/listeners",
           exact: true,
         },
         {
-          text: this.breadcrumbName,
+          title: this.breadcrumbName,
           disabled: true,
-          to: "/listeners-edit",
+          to: `/listeners/${this.id}`,
         },
       ];
     },
@@ -268,15 +282,17 @@ export default {
   watch: {
     selectedTemplate: {
       async handler(val) {
+        this.loadingTemplate = true;
         const a = await listenerApi
           .getListenerTemplate(val)
-          .catch((err) => this.$snack.error(`Error: ${err}`));
+          .catch((err) =>
+            this.snack.error(
+              `Error: ${err?.response?.data?.detail || err?.message || err}`,
+            ),
+          );
+        this.loadingTemplate = false;
         if (a) {
-          this.reset = false;
-
           this.listenerTemplate = a;
-          await this.$nextTick();
-          this.reset = true;
           this.initialLoad = true;
         }
       },
@@ -293,7 +309,7 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instead of this.id
       // since this.id is 0 for copies.
-      this.getListener(this.$route.params.id);
+      this.getListener(this.$route.params.id || this.$route.query.id);
     }
   },
   methods: {
@@ -305,7 +321,7 @@ export default {
             (t) => t.id !== tag.id,
           );
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(tag) {
       listenerApi
@@ -313,9 +329,9 @@ export default {
         .then((t) => {
           const index = this.listener.tags.findIndex((x) => x.id === t.id);
           this.listener.tags.splice(index, 1, t);
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(tag) {
       listenerApi
@@ -323,26 +339,26 @@ export default {
         .then((t) => {
           this.listener.tags.push(t);
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     async submit() {
-      if (this.loading || !this.$refs.generalform.$refs.form.validate()) {
-        return;
-      }
+      if (this.loading) return;
+      const valid = await this.$refs.generalform.validate();
+      if (!valid) return;
 
       this.loading = true;
       if (this.id > 0) {
         listenerApi
           .updateListener({ ...this.listener, options: this.form })
           .then(() => {
-            this.$snack.success("Listener updated");
+            this.snack.success("Listener updated");
             this.loading = false;
           })
           .catch((err) => {
             if (err.startsWith("[*]")) {
               this.validationMessage = err;
             } else {
-              this.$snack.error(`Error: ${err}`);
+              this.snack.error(`Error: ${err}`);
             }
             this.loading = false;
           });
@@ -350,7 +366,7 @@ export default {
         listenerApi
           .createListener(this.selectedTemplate, this.form)
           .then(({ id }) => {
-            this.$snack.success("Listener created");
+            this.snack.success("Listener created");
             this.loading = false;
             this.$router.push({ name: "listenerEdit", params: { id } });
           })
@@ -358,7 +374,7 @@ export default {
             if (err.startsWith("[*]")) {
               this.validationMessage = err;
             } else {
-              this.$snack.error(`Error: ${err}`);
+              this.snack.error(`Error: ${err}`);
             }
             this.loading = false;
           });
@@ -366,7 +382,7 @@ export default {
     },
     async kill() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to kill listener ${this.form.Name}?`,
           { color: "red" },
@@ -376,7 +392,7 @@ export default {
           await this.listenerStore.killListener(this.id);
           this.$router.push({ name: "listeners" });
         } catch (err) {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         }
       }
     },
@@ -390,7 +406,9 @@ export default {
           });
           this.selectedTemplate = data.template;
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },
@@ -399,7 +417,7 @@ export default {
 
       if (
         val === true &&
-        !(await this.$root.$confirm(
+        !(await this.confirm(
           "",
           "Re-enabling the listener will also save any unsaved option changes.",
           { color: "yellow" },
@@ -417,18 +435,9 @@ export default {
         this.listener = response;
       } catch (err) {
         this.listener.enabled = !val;
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
       }
     },
   },
 };
 </script>
-
-<style lang="scss">
-// Overrides vuetify.css
-// Because we moved the tabs into a div, which made the color funky.
-.v-toolbar__content > div > .v-tabs > .v-slide-group.v-tabs-bar,
-.v-toolbar__extension > div > .v-tabs > .v-slide-group.v-tabs-bar {
-  background-color: inherit;
-}
-</style>

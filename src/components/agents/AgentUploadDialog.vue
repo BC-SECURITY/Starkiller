@@ -16,20 +16,20 @@
           v-model="internalPathToFile"
           label="path/to/file (On the agent's machine)"
           :rules="rules['pathToFile']"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           :disabled="!file"
         />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" text @click.stop="show = false">
+        <v-btn color="blue-darken-1" variant="text" @click.stop="show = false">
           Close
         </v-btn>
         <v-btn
-          color="blue darken-1"
-          text
+          color="blue-darken-1"
+          variant="text"
           :loading="loading"
           :disabled="submitDisabled"
           @click="submit"
@@ -50,7 +50,7 @@ const MAX_BYTES = 1048576;
 export default {
   components: { FileInput },
   props: {
-    value: Boolean,
+    modelValue: Boolean,
     language: {
       type: String,
       default: "",
@@ -64,6 +64,7 @@ export default {
       default: "",
     },
   },
+  emits: ["update:modelValue", "submit"],
   data() {
     return {
       formatBytes,
@@ -86,10 +87,10 @@ export default {
   computed: {
     show: {
       get() {
-        return this.value;
+        return this.modelValue;
       },
       set(value) {
-        this.$emit("input", value);
+        this.$emit("update:modelValue", value);
       },
     },
     fileName() {
@@ -106,7 +107,7 @@ export default {
     pathToFile(val) {
       this.internalPathToFile = val;
     },
-    value(val) {
+    modelValue(val) {
       if (val === false) {
         this.file = null;
         this.internalPathToFile = null;
@@ -123,7 +124,7 @@ export default {
             this.internalPathToFile = `/tmp/${val}`;
           }
         } else if (
-          ["powershell", "csharp"].includes(this.language.toLowerCase())
+          ["powershell", "csharp", "c"].includes(this.language.toLowerCase())
         ) {
           if (this.pathToFile) {
             this.internalPathToFile =

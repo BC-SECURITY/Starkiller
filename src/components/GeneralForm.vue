@@ -1,10 +1,5 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-    :readonly="readonly"
-    @submit.prevent.native="submit"
-  >
+  <v-form ref="form" v-model="valid" :readonly="readonly" @submit.prevent>
     <v-row
       v-for="field in requiredFields"
       :key="field.name"
@@ -21,11 +16,13 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader>{{ field.description }}</v-subheader>
+        <v-list-subheader>{{ field.description }}</v-list-subheader>
       </v-col>
     </v-row>
 
-    <v-subheader v-if="optionalFields.length > 0">Optional Fields</v-subheader>
+    <v-list-subheader v-if="optionalFields.length > 0"
+      >Optional Fields</v-list-subheader
+    >
     <v-divider v-if="optionalFields.length > 0" class="mb-8" />
     <v-row
       v-for="field in optionalFields"
@@ -43,13 +40,12 @@
         />
       </v-col>
       <v-col cols="6">
-        <v-subheader>{{ field.description }}</v-subheader>
+        <v-list-subheader>{{ field.description }}</v-list-subheader>
       </v-col>
     </v-row>
   </v-form>
 </template>
 <script>
-import Vue from "vue";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
 import { useCredentialStore } from "@/stores/credential-module";
@@ -61,7 +57,12 @@ export default {
   components: {
     DynamicFormInput,
   },
+  inheritAttrs: false,
   props: {
+    modelValue: {
+      type: Object,
+      default: () => ({}),
+    },
     options: {
       type: Object,
       required: true,
@@ -75,6 +76,7 @@ export default {
       default: () => [],
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
       form: {},
@@ -180,7 +182,7 @@ export default {
           updatedForm.Bypasses = updatedForm.Bypasses.join(" ");
         }
 
-        this.$emit("input", updatedForm);
+        this.$emit("update:modelValue", updatedForm);
       },
       deep: true,
     },
@@ -203,7 +205,7 @@ export default {
           }
           return map;
         }, {});
-        Vue.set(this, "form", map2);
+        this.form = map2;
       },
     },
     defaultBypasses: {
@@ -222,10 +224,14 @@ export default {
     this.credentialStore.getCredentials();
   },
   methods: {
+    async validate() {
+      const { valid } = await this.$refs.form.validate();
+      return valid;
+    },
     initializeForm(options) {
       this.form = {};
       Object.keys(options).forEach((key) => {
-        this.$set(this.form, key, options[key].value || null);
+        this.form[key] = options[key].value || null;
       });
     },
     tryInitializeBypassesDefaults() {
@@ -242,7 +248,7 @@ export default {
         (typeof current === "string" && current.trim() === "");
       if (!isEmpty) return;
       if (!this.defaultBypasses || this.defaultBypasses.length === 0) return;
-      this.$set(this.form, "Bypasses", [...this.defaultBypasses]);
+      this.form.Bypasses = [...this.defaultBypasses];
       this.initializedBypassesDefaults = true;
     },
     updateFieldVisibility(form, initial = false) {
@@ -257,12 +263,12 @@ export default {
           if (shouldBeVisible && !oldVisibleFields[field.name]) {
             if (!initial) newlyVisibleFields.push(field.name);
           }
-          this.$set(this.visibleFields, field.name, shouldBeVisible);
+          this.visibleFields[field.name] = shouldBeVisible;
         } else {
           if (!this.visibleFields[field.name]) {
             if (!initial) newlyVisibleFields.push(field.name);
           }
-          this.$set(this.visibleFields, field.name, true);
+          this.visibleFields[field.name] = true;
         }
       });
 

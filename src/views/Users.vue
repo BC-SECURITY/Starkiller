@@ -8,7 +8,7 @@
       @create="create"
       @refresh="getUsers"
     />
-    <v-data-table :headers="headers" :items="users" dense>
+    <v-data-table :headers="headers" :items="users" density="compact">
       <template #item.username="{ item }">
         <router-link
           v-if="isAdmin"
@@ -20,18 +20,26 @@
         <span v-else>{{ item.username }}</span>
       </template>
       <template #item.is_admin="{ item }">
-        <v-simple-checkbox v-model="item.is_admin" disabled />
+        <v-checkbox
+          v-model="item.is_admin"
+          color="primary"
+          density="compact"
+          hide-details
+          disabled
+        />
       </template>
       <template #item.actions="{ item }">
-        <v-tooltip v-if="isAdmin" :disabled="!item.admin" top>
-          <template #activator="{ on }">
-            <div style="max-width: 120px" v-on="on">
+        <v-tooltip v-if="isAdmin" :disabled="!item.admin" location="top">
+          <template #activator="{ props: activatorProps }">
+            <div style="max-width: 120px" v-bind="activatorProps">
               <v-switch
                 v-model="item.enabled"
+                color="primary"
+                density="compact"
+                hide-details
                 :disabled="item.admin"
                 label="Enabled"
-                v-on="on"
-                @change="disableUser(item)"
+                @update:model-value="disableUser(item)"
               />
             </div>
           </template>
@@ -45,7 +53,6 @@
 <script>
 import { mapState } from "pinia";
 import * as userApi from "@/api/user-api";
-import moment from "moment";
 import ListPageTop from "@/components/ListPageTop.vue";
 import { useUserStore } from "@/stores/user-module";
 import { useApplicationStore } from "@/stores/application-module";
@@ -55,20 +62,20 @@ export default {
   components: {
     ListPageTop,
   },
+  inject: ["snack"],
   data() {
     return {
-      moment,
       breads: [
         {
-          text: "Users",
+          title: "Users",
           disabled: true,
           href: "/users",
         },
       ],
       headers: [
-        { text: "Name", value: "username" },
-        { text: "Is Admin", value: "is_admin" },
-        { text: "Actions", value: "actions", sortable: false },
+        { title: "Name", key: "username" },
+        { title: "Is Admin", key: "is_admin" },
+        { title: "Actions", key: "actions", sortable: false },
       ],
     };
   },
@@ -90,7 +97,7 @@ export default {
     },
     async disableUser(item) {
       userApi.updateUser(item).catch((err) => {
-        this.$snack.error(`Error: ${err}`);
+        this.snack.error(`Error: ${err}`);
         item.enabled = !item.enabled;
       });
     },

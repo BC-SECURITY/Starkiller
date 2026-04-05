@@ -10,7 +10,7 @@
       <click-to-edit
         label="Session ID"
         :editable="false"
-        :value="form.session_id"
+        :model-value="form.session_id"
       />
       <click-to-edit
         v-model="form.name"
@@ -21,22 +21,22 @@
       />
       <click-to-edit
         label="External IP"
-        :value="form.external_ip"
+        :model-value="form.external_ip"
         :editable="false"
       />
       <click-to-edit
         label="Internal IP"
-        :value="form.internal_ip"
+        :model-value="form.internal_ip"
         :editable="false"
       />
       <click-to-edit
         label="Host Name"
-        :value="form.hostname"
+        :model-value="form.hostname"
         :editable="false"
       />
       <click-to-edit
         label="Username"
-        :value="form.username"
+        :model-value="form.username"
         :editable="false"
       />
       <click-to-edit
@@ -67,12 +67,12 @@
       />
       <click-to-edit
         label="Check In Time"
-        :value="moment(form.checkin_time).fromNow()"
+        :model-value="moment(form.checkin_time).fromNow()"
         :editable="false"
       />
       <click-to-edit
         label="Last Seen Time"
-        :value="moment(form.lastseen_time).fromNow()"
+        :model-value="moment(form.lastseen_time).fromNow()"
         :editable="false"
       />
       <click-to-edit
@@ -101,41 +101,44 @@
       />
       <click-to-edit
         label="OS Details"
-        :value="form.os_details"
+        :model-value="form.os_details"
         :editable="false"
       />
       <click-to-edit
         label="Architecture"
-        :value="form.architecture"
+        :model-value="form.architecture"
         :editable="false"
       />
       <click-to-edit
         label="Process ID"
-        :value="form.process_id"
+        :model-value="form.process_id"
         :editable="false"
       />
       <click-to-edit
         label="Process Name"
-        :value="form.process_name"
+        :model-value="form.process_name"
         :editable="false"
       />
       <click-to-edit
         label="Language"
-        :value="form.language"
+        :model-value="form.language"
         :editable="false"
       />
       <click-to-edit
         label="Language Version"
-        :value="form.language_version"
+        :model-value="form.language_version"
         :editable="false"
       />
-      <click-to-edit label="Profile" :value="form.profile" :editable="false" />
+      <click-to-edit
+        label="Profile"
+        :model-value="form.profile"
+        :editable="false"
+      />
     </v-form>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
 import moment from "moment";
 import TagViewer from "@/components/TagViewer.vue";
 import ClickToEdit from "@/components/ClickToEdit.vue";
@@ -146,6 +149,7 @@ import { useAgentStore } from "@/stores/agent-module";
 
 export default {
   components: { TagViewer, ClickToEdit },
+  inject: ["snack"],
   props: {
     /**
      * The agent object to populate the form fields.
@@ -236,7 +240,7 @@ export default {
           return map;
         }, {});
 
-        Vue.set(this, "form", map2);
+        this.form = map2;
       },
     },
   },
@@ -250,16 +254,16 @@ export default {
         .then(() => {
           this.$emit("refresh-agent");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(tag) {
       agentApi
         .updateTag(this.agent.session_id, tag)
         .then(() => {
           this.$emit("refresh-agent");
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(tag) {
       agentApi
@@ -267,7 +271,7 @@ export default {
         .then(() => {
           this.$emit("refresh-agent");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     async updateName() {
       if (this.agent.name === this.form.name) return;
@@ -278,10 +282,10 @@ export default {
           newName: this.form.name,
         });
       } catch (err) {
-        this.$snack.error(`Update agent listener failed: ${err}`);
+        this.snack.error(`Update agent listener failed: ${err}`);
         return;
       }
-      this.$snack.info(`Agent ${this.agent.name} name updated`);
+      this.snack.info(`Agent ${this.agent.name} name updated`);
       this.$emit("refresh-agent");
     },
     async updateListener() {
@@ -293,10 +297,10 @@ export default {
         )[0].id;
         await agentTaskApi.updateComms(this.agent.session_id, listenerId);
       } catch (err) {
-        this.$snack.error(`Update agent listener failed: ${err}`);
+        this.snack.error(`Update agent listener failed: ${err}`);
         return;
       }
-      this.$snack.info(
+      this.snack.info(
         `Tasked agent to change listener to: ${this.form.listener}`,
       );
       this.$emit("refresh-agent");
@@ -311,10 +315,10 @@ export default {
       try {
         await agentTaskApi.updateKillDate(this.agent.session_id, date);
       } catch (err) {
-        this.$snack.error(`Update agent kill date failed: ${err}`);
+        this.snack.error(`Update agent kill date failed: ${err}`);
         return;
       }
-      this.$snack.info(`Tasked agent to change kill date to: ${date}`);
+      this.snack.info(`Tasked agent to change kill date to: ${date}`);
       this.$emit("refresh-agent");
     },
     async updateWorkingHours() {
@@ -326,10 +330,10 @@ export default {
           this.form.working_hours,
         );
       } catch (err) {
-        this.$snack.error(`Update agent working hours failed: ${err}`);
+        this.snack.error(`Update agent working hours failed: ${err}`);
         return;
       }
-      this.$snack.info(
+      this.snack.info(
         `Tasked agent to change working hours to: ${this.form.working_hours}`,
       );
       this.$emit("refresh-agent");
@@ -344,10 +348,10 @@ export default {
           this.form.jitter,
         );
       } catch (err) {
-        this.$snack.error(`Update agent delay failed: ${err}`);
+        this.snack.error(`Update agent delay failed: ${err}`);
         return;
       }
-      this.$snack.info(`Tasked agent to change delay to: ${this.form.delay}`);
+      this.snack.info(`Tasked agent to change delay to: ${this.form.delay}`);
       this.$emit("refresh-agent");
     },
     async updateJitter() {
@@ -360,10 +364,10 @@ export default {
           this.form.jitter,
         );
       } catch (err) {
-        this.$snack.error(`Update agent delay failed: ${err}`);
+        this.snack.error(`Update agent delay failed: ${err}`);
         return;
       }
-      this.$snack.info(`Tasked agent to change jitter to: ${this.form.jitter}`);
+      this.snack.info(`Tasked agent to change jitter to: ${this.form.jitter}`);
       this.$emit("refresh-agent");
     },
     fieldExists(name) {

@@ -15,7 +15,9 @@
       <technique-chips :techniques="selectedItem.techniques" />
 
       <v-alert
-        v-if="reset && modules.length > 0 && autocompleteOptions.length === 0"
+        v-if="
+          initialLoad && modules.length > 0 && autocompleteOptions.length === 0
+        "
         type="error"
       >
         No modules are compatible with all selected agents.
@@ -26,22 +28,22 @@
           <v-autocomplete
             v-model="selectedModule"
             :items="autocompleteOptions"
-            item-text="text"
+            item-title="text"
             item-value="value"
-            :loading="!reset"
+            :loading="!initialLoad"
             placeholder="Search module..."
-            outlined
-            dense
+            variant="outlined"
+            density="compact"
             clearable
-            @change="handleSelect"
+            @update:model-value="handleSelect"
           />
         </v-col>
 
         <v-col cols="1" class="d-flex align-center" style="margin-top: -25px">
           <tooltip-button
             :icon="showTreeDialog ? 'mdi-folder-open' : 'mdi-folder'"
-            color="grey lighten-2"
-            tooltip="Browse modules by folder"
+            color="grey-lighten-2"
+            text="Browse modules by folder"
             @click="toggleTree"
           />
         </v-col>
@@ -54,20 +56,23 @@
           </v-card-title>
           <v-card-text>
             <v-treeview
+              v-model:activated="treeSelected"
+              v-model:opened="treeOpen"
               :items="treeOptions"
               open-on-click
               activatable
-              :active.sync="treeSelected"
-              :open.sync="treeOpen"
-              item-key="id"
-              item-text="name"
+              item-value="id"
+              item-title="name"
               item-children="children"
-              @update:active="handleTreeSelect"
+              @update:activated="handleTreeSelect"
             />
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn text color="primary" @click="showTreeDialog = false"
+            <v-btn
+              variant="text"
+              color="primary"
+              @click="showTreeDialog = false"
               >Close</v-btn
             >
           </v-card-actions>
@@ -104,7 +109,8 @@
       </div>
 
       <general-form
-        v-if="reset"
+        v-if="initialLoad"
+        :key="selectedModule"
         ref="generalform"
         v-model="form"
         :options="moduleOptions"
@@ -126,10 +132,10 @@
           </v-card-title>
           <v-card-text>
             <v-data-table
-              dense
+              density="compact"
               :items="results"
               :headers="headers"
-              :item-class="rowClass"
+              :row-props="getRowProps"
             >
               <template #item.agent="{ item }">
                 <div>
@@ -155,7 +161,11 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn color="blue darken-1" text @click="showDialog = false">
+            <v-btn
+              color="blue-darken-1"
+              variant="text"
+              @click="showDialog = false"
+            >
               Okay
             </v-btn>
           </v-card-actions>
@@ -172,6 +182,7 @@ import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import { useModuleStore } from "@/stores/module-module";
 import GeneralForm from "../GeneralForm.vue";
 import TechniqueChips from "../TechniqueChips.vue";
+import TooltipButton from "../TooltipButton.vue";
 
 export default {
   components: {
@@ -179,7 +190,9 @@ export default {
     GeneralForm,
     TechniqueChips,
     ErrorStateAlert,
+    TooltipButton,
   },
+  inject: ["snack"],
   props: {
     agents: {
       type: Array,
@@ -201,13 +214,13 @@ export default {
   data() {
     return {
       loading: false,
+      initialLoad: false,
       selectedModule: "",
       selectedItem: {},
       results: [],
-      reset: true,
       headers: [
-        { text: "Agent", value: "agent" },
-        { text: "Result", value: "result" },
+        { title: "Agent", key: "agent" },
+        { title: "Result", key: "result" },
       ],
       showDialog: false,
       form: {},
@@ -233,6 +246,7 @@ export default {
           case "powershell":
           case "csharp":
           case "go":
+          case "c":
             return ["powershell", "csharp", "bof"];
           case "ironpython":
             return ["powershell", "csharp", "bof", "python"];
@@ -371,6 +385,7 @@ export default {
   },
   async mounted() {
     await this.moduleStore.getModules();
+    this.initialLoad = true;
   },
   methods: {
     toggleTree() {
@@ -379,22 +394,14 @@ export default {
     async handleSelect(item) {
       this.errorState = false;
       if (!item) {
-        this.reset = false;
         this.selectedItem = {};
-        setTimeout(() => {
-          this.reset = true;
-        }, 500);
         return;
       }
       const results = this.modules.find((el) => el.id === item);
-      this.reset = false;
       this.selectedItem = results || {};
       if (!Object.keys(this.selectedItem).length) {
         this.errorState = true;
       }
-      setTimeout(() => {
-        this.reset = true;
-      }, 500);
     },
     handleTreeSelect(selected) {
       if (selected.length > 0) {
@@ -407,17 +414,19 @@ export default {
         }
       }
     },
-    rowClass(item) {
-      return item.status === "rejected" ? "red" : "";
+    getRowProps({ item }) {
+      return { class: item.status === "rejected" ? "red" : "" };
     },
     emitModuleChange(newVal) {
       this.$emit("moduleChange", newVal);
     },
-    validate() {
-      return this.$refs.generalform.$refs.form.validate();
+    async validate() {
+      return this.$refs.generalform.validate();
     },
     async create() {
-      if (this.agents.length < 1 || this.loading || !this.validate()) return;
+      if (this.agents.length < 1 || this.loading) return;
+      const valid = await this.validate();
+      if (!valid) return;
       this.loading = true;
       const result = await Promise.allSettled(
         this.agents.map((agent) =>
@@ -441,20 +450,20 @@ export default {
           { rejected: [], fulfilled: [] },
         );
         if (this.agents.length > 1) {
-          this.$snack.warn(
+          this.snack.warn(
             `Module failed to execute for ${split.rejected.length} out of ${this.agents.length} agents.`,
           );
           this.results = result;
           this.showDialog = true;
         } else {
-          this.$snack.error(`Error: ${result[0].reason.error}`);
+          this.snack.error(`Error: ${result[0].reason.error}`);
         }
       } else {
         const displayName =
           this.agents.length > 1
             ? `${this.agents.length} agents.`
-            : `${this.agents[0]}.`;
-        this.$snack.info(`Module execution queued for ${displayName}`);
+            : `${this.agents[0].name}`;
+        this.snack.info(`Module execution queued for ${displayName}`);
         this.selectedItem = {};
         this.selectedModule = "";
         this.$emit("submitted");

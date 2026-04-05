@@ -8,7 +8,11 @@ module.exports = {
   env: {
     es2021: true,
   },
-  extends: ["plugin:vue/recommended", "@vue/eslint-config-airbnb", "prettier"],
+  extends: [
+    "plugin:vue/vue3-recommended",
+    "@vue/eslint-config-airbnb",
+    "prettier",
+  ],
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
@@ -59,6 +63,12 @@ module.exports = {
       files: ["**/__tests__/*.{j,t}s?(x)"],
       env: {
         mocha: true,
+      },
+    },
+    {
+      files: ["src/plugins/vuetify.js"],
+      rules: {
+        "import/no-unresolved": "off",
       },
     },
   ],

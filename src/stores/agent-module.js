@@ -14,17 +14,22 @@ export const useAgentStore = defineStore("agent", {
   actions: {
     async getAgents() {
       this.status = "loading";
-      const agents = await agentApi.getAgents(true);
-      this.agents = agents;
-      this.status = "success";
+      try {
+        const agents = await agentApi.getAgents(true);
+        this.agents = agents;
+        this.status = "success";
 
-      const { autoSubscribeAgents } = useApplicationStore();
-      if (autoSubscribeAgents) {
-        agents.forEach((agent) => {
-          if (!this.subscribed[agent.session_id]) {
-            this.subscribe({ sessionId: agent.session_id });
-          }
-        });
+        const { autoSubscribeAgents } = useApplicationStore();
+        if (autoSubscribeAgents) {
+          agents.forEach((agent) => {
+            if (!this.subscribed[agent.session_id]) {
+              this.subscribe({ sessionId: agent.session_id });
+            }
+          });
+        }
+      } catch (err) {
+        console.error("[Starkiller] Failed to fetch agents:", err);
+        this.status = "error";
       }
     },
     async getAgent({ sessionId }) {

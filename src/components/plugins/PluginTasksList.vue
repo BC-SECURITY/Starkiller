@@ -63,7 +63,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import { mapState } from "pinia";
 
 import PluginTasksTable from "@/components/plugins/PluginTasksTable.vue";
@@ -107,7 +106,7 @@ export default {
     return {
       breads: [
         {
-          text: "Plugin Tasks",
+          title: "Plugin Tasks",
           disabled: true,
           href: "/plugin-tasks",
         },
@@ -115,7 +114,6 @@ export default {
       tasks: [],
       search: "",
       loading: false,
-      moment,
       selectedPlugins: [],
       selectedUsers: [],
       selectedTags: [],

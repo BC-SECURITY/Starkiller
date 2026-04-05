@@ -7,8 +7,9 @@
   margin-bottom: 15px;
 }
 
-.sc-launcher,
-.sc-open-icon,
-.sc-closed-icon {
-  bottom: 0 !important;
+// Overrides vuetify.css
+// Because Teleport wraps tabs in a div, which changes the background color.
+.v-toolbar__content > div > .v-tabs,
+.v-toolbar__extension > div > .v-tabs {
+  background-color: inherit;
 }

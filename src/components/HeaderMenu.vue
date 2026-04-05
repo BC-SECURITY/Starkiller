@@ -1,30 +1,37 @@
 <template>
-  <v-menu v-model="show" offset-y :close-on-content-click="false">
-    <template #activator="{ on, attrs }">
-      <v-btn text icon x-small v-bind="attrs" v-on="on">
+  <v-menu v-model="show" :close-on-content-click="false">
+    <template #activator="{ props: activatorProps }">
+      <v-btn variant="text" icon size="x-small" v-bind="activatorProps">
         <v-icon>mdi-format-columns</v-icon>
       </v-btn>
     </template>
     <v-card>
       <v-list style="overflow-y: auto" max-height="400px">
         <v-list-item>
-          <v-checkbox v-model="selectedAll" :label="'Select All'" />
+          <v-checkbox
+            v-model="selectedAll"
+            color="primary"
+            :label="'Select All'"
+          />
         </v-list-item>
         <v-divider class="pb-4" />
         <v-list-item v-for="(item, index) in selectableHeaders" :key="index">
           <v-checkbox
             v-model="selectedHeadersTemp"
-            :label="item.text"
+            color="primary"
+            :label="item.title"
             :value="item"
           />
         </v-list-item>
       </v-list>
       <v-divider />
       <v-card-actions>
-        <v-btn text color="error" @click="resetHeaders"> Reset </v-btn>
+        <v-btn variant="text" color="error" @click="resetHeaders">
+          Reset
+        </v-btn>
         <v-spacer />
-        <v-btn text @click="show = false"> Cancel </v-btn>
-        <v-btn text @click="submitHeaderForm"> Save </v-btn>
+        <v-btn variant="text" @click="show = false"> Cancel </v-btn>
+        <v-btn variant="text" @click="submitHeaderForm"> Save </v-btn>
       </v-card-actions>
     </v-card>
   </v-menu>

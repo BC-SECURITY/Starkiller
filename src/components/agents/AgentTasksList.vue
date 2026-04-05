@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import { mapState } from "pinia";
 
 import AgentTasksTable from "@/components/agents/AgentTasksTable.vue";
@@ -87,6 +86,7 @@ export default {
     ListPageTop,
   },
   mixins: [DownloadMixin],
+  inject: ["snack"],
   props: {
     agent: {
       type: Object,
@@ -108,7 +108,7 @@ export default {
     return {
       breads: [
         {
-          text: "Agent Tasks",
+          title: "Agent Tasks",
           disabled: true,
           href: "/agents-tasks",
         },
@@ -116,7 +116,6 @@ export default {
       tasks: [],
       search: "",
       loading: false,
-      moment,
       selectedAgents: [],
       selectedUsers: [],
       selectedTags: [],
@@ -154,11 +153,15 @@ export default {
     },
   },
   async mounted() {
-    await Promise.all([
-      this.agentStore.getAgents(),
-      this.userStore.getUsers(),
-      this.getTags(),
-    ]);
+    try {
+      await Promise.all([
+        this.agentStore.getAgents(),
+        this.userStore.getUsers(),
+        this.getTags(),
+      ]);
+    } catch (err) {
+      this.snack.error(`Failed to load filter data: ${err}`);
+    }
   },
   methods: {
     async getTags() {

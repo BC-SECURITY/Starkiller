@@ -4,13 +4,13 @@
     <h4 class="pl-4 pb-4">Execute Module</h4>
     <v-autocomplete
       v-model="selectedAgents"
-      dense
-      outlined
+      density="compact"
+      variant="outlined"
       chips
       multiple
       placeholder="Agents"
       :items="agents"
-      item-text="name"
+      item-title="name"
       item-value="session_id"
     />
     <v-card>
@@ -19,7 +19,7 @@
         :module-name="moduleName"
         :agents="selectedAgents"
         :show-submit="false"
-        @moduleChange="moduleChange"
+        @module-change="moduleChange"
         @submitted="clearAgents"
       />
     </v-card>
@@ -55,13 +55,13 @@ export default {
     breads() {
       return [
         {
-          text: "Modules",
+          title: "Modules",
           disabled: false,
           to: "/modules",
           exact: true,
         },
         {
-          text: `${this.moduleName}`,
+          title: `${this.moduleName}`,
           disabled: true,
           to: "/modules/execute",
         },

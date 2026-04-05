@@ -15,21 +15,23 @@
     <v-data-table
       v-model="selected"
       :loading="agentsStatus === 'loading'"
-      :item-class="rowClass"
+      :row-props="getRowProps"
       :headers="headers"
       :items="sortedAgents"
-      :footer-props="{
-        itemsPerPageOptions: [5, 10, 15, 20, 50, 100],
-      }"
+      :items-per-page-options="[5, 10, 15, 20, 50, 100]"
       :items-per-page="15"
-      item-key="session_id"
-      dense
+      item-value="session_id"
+      density="compact"
       show-select
     >
       <template #item.name="{ item }">
-        <v-tooltip top>
-          <template #activator="{ on }">
-            <v-icon v-if="item.high_integrity" small v-on="on">
+        <v-tooltip location="top">
+          <template #activator="{ props: activatorProps }">
+            <v-icon
+              v-if="item.high_integrity"
+              size="small"
+              v-bind="activatorProps"
+            >
               fa-user-cog
             </v-icon>
           </template>
@@ -68,9 +70,9 @@
         />
       </template>
       <template #item.actions="{ item }">
-        <v-menu offset-y>
-          <template #activator="{ on, attrs }">
-            <v-btn text icon x-small v-bind="attrs" v-on="on">
+        <v-menu>
+          <template #activator="{ props: activatorProps }">
+            <v-btn variant="text" icon size="x-small" v-bind="activatorProps">
               <v-icon>fa-ellipsis-v</v-icon>
             </v-btn>
           </template>
@@ -115,7 +117,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import HeaderMenu from "@/components/HeaderMenu.vue";
@@ -131,6 +132,7 @@ export default {
     TagViewer,
     HeaderMenu,
   },
+  inject: ["snack"],
   props: {
     input: {
       type: Array,
@@ -153,85 +155,86 @@ export default {
       default: false,
     },
   },
+  emits: ["update:modelValue", "refresh-tags", "kill-agent"],
   data() {
     return {
       loading: false,
       headersFull: [
         {
-          text: "Name",
-          value: "name",
+          title: "Name",
+          key: "name",
           defaultHeader: true,
           alwaysShow: true,
           order: 1,
         },
         {
-          text: "Last Seen",
-          value: "lastseen_time",
+          title: "Last Seen",
+          key: "lastseen_time",
           defaultHeader: true,
           alwaysShow: true,
           order: 2,
         },
         {
-          text: "First Seen",
-          value: "checkin_time",
+          title: "First Seen",
+          key: "checkin_time",
           defaultHeader: true,
           alwaysShow: true,
           order: 3,
         },
         {
-          text: "Listener",
-          value: "listener",
+          title: "Listener",
+          key: "listener",
           order: 4,
         },
         {
-          text: "Hostname",
-          value: "hostname",
+          title: "Hostname",
+          key: "hostname",
           defaultHeader: true,
           order: 5,
         },
         {
-          text: "Process",
-          value: "process_name",
+          title: "Process",
+          key: "process_name",
           defaultHeader: true,
           order: 6,
         },
-        { text: "Process ID", value: "process_id", order: 7 },
+        { title: "Process ID", key: "process_id", order: 7 },
         {
-          text: "Architecture",
-          value: "architecture",
+          title: "Architecture",
+          key: "architecture",
           order: 8,
         },
         {
-          text: "Language",
-          value: "language",
+          title: "Language",
+          key: "language",
           defaultHeader: true,
           order: 9,
         },
-        { text: "Language Version", value: "language_version", order: 10 },
+        { title: "Language Version", key: "language_version", order: 10 },
         {
-          text: "Username",
-          value: "username",
+          title: "Username",
+          key: "username",
           defaultHeader: true,
           order: 11,
         },
-        { text: "Working Hours", value: "working_hours", order: 12 },
-        { text: "External IP", value: "external_ip", order: 13 },
+        { title: "Working Hours", key: "working_hours", order: 12 },
+        { title: "External IP", key: "external_ip", order: 13 },
         {
-          text: "Internal IP",
-          value: "internal_ip",
+          title: "Internal IP",
+          key: "internal_ip",
           defaultHeader: true,
           order: 14,
         },
-        { text: "Delay", value: "delay", order: 15 },
-        { text: "Jitter", value: "jitter", order: 16 },
+        { title: "Delay", key: "delay", order: 15 },
+        { title: "Jitter", key: "jitter", order: 16 },
         {
-          text: "Tags",
-          value: "tags",
+          title: "Tags",
+          key: "tags",
           order: 17,
         },
         {
-          text: "Actions",
-          value: "actions",
+          title: "Actions",
+          key: "actions",
           defaultHeader: true,
           alwaysShow: true,
           order: 18,
@@ -240,7 +243,6 @@ export default {
       selectedHeadersTemp: [],
       selected: [],
       refreshInterval: null,
-      moment,
     };
   },
   computed: {
@@ -261,7 +263,7 @@ export default {
         .filter(
           (h) =>
             this.applicationStore.agentHeaders.findIndex(
-              (h2) => h2.text === h.text,
+              (h2) => h2.title === h.title,
             ) > -1,
         )
         .sort((a, b) => a.order - b.order);
@@ -292,7 +294,7 @@ export default {
       this.getAgents();
     },
     selected(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
     refreshAgents: {
       handler(newVal) {
@@ -302,25 +304,27 @@ export default {
             this.getAgents();
           }, 8000);
         } else {
-          console.log("Clearing interval");
           clearInterval(this.refreshInterval);
         }
       },
       immediate: true,
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.refreshInterval);
   },
   async mounted() {
     this.getAgents();
-    if (this.applicationStore.agentHeaders.length === 0) {
+    if (
+      this.applicationStore.agentHeaders.length === 0 ||
+      !this.applicationStore.agentHeaders[0].title
+    ) {
       this.applicationStore.agentHeaders = this.headersFull.filter(
         (h) => h.defaultHeader === true,
       );
     }
     this.selectedHeadersTemp = this.headersFull.filter((h) =>
-      this.applicationStore.agentHeaders.some((h2) => h2.text === h.text),
+      this.applicationStore.agentHeaders.some((h2) => h2.title === h.title),
     );
   },
   methods: {
@@ -331,7 +335,7 @@ export default {
           agent.tags = agent.tags.filter((t) => t.id !== tag.id);
           this.$emit("refresh-tags");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(agent, tag) {
       agentApi
@@ -340,9 +344,9 @@ export default {
           const index = agent.tags.findIndex((x) => x.id === t.id);
           agent.tags.splice(index, 1, t);
           this.$emit("refresh-tags");
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(agent, tag) {
       agentApi
@@ -351,7 +355,7 @@ export default {
           agent.tags.push(t);
           this.$emit("refresh-tags");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     submitHeaderForm(val) {
       this.selectedHeadersTemp = val;
@@ -362,7 +366,7 @@ export default {
         (h) => h.defaultHeader === true,
       );
       this.selectedHeadersTemp = this.headersFull.filter((h) =>
-        this.applicationStore.agentHeaders.some((h2) => h2.text === h.text),
+        this.applicationStore.agentHeaders.some((h2) => h2.title === h.title),
       );
     },
     getAgents() {
@@ -371,9 +375,9 @@ export default {
     async reloadSysInfo(agent) {
       try {
         await agentTaskApi.sysinfo(agent.session_id);
-        this.$snack.success(`SysInfo reload queued for ${agent.name}`);
+        this.snack.success(`SysInfo reload queued for ${agent.name}`);
       } catch (error) {
-        this.$snack.error(
+        this.snack.error(
           `Error reloading SysInfo for ${agent.name}: ${error.message}`,
         );
       }
@@ -394,9 +398,8 @@ export default {
       }
       return "";
     },
-    rowClass(item) {
-      if (item.stale) return "warning-row";
-      return "";
+    getRowProps({ item }) {
+      return { class: item.stale ? "warning-row" : "" };
     },
   },
 };
@@ -406,7 +409,7 @@ export default {
 .warning-row {
   background-color: #ffcccc;
 }
-.v-data-table.theme--dark .warning-row {
+.v-theme--dark .warning-row {
   background-color: #bd4c4c;
 }
 </style>

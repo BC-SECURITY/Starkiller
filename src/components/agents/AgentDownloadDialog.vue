@@ -13,8 +13,8 @@
                   v-model="pathToFile"
                   label="path/to/file"
                   :rules="rules['pathToFile']"
-                  outlined
-                  dense
+                  variant="outlined"
+                  density="compact"
                   required
                 />
               </v-col>
@@ -24,10 +24,15 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1" text @click.stop="show = false">
+        <v-btn color="blue-darken-1" variant="text" @click.stop="show = false">
           Close
         </v-btn>
-        <v-btn color="blue darken-1" text :loading="loading" @click="submit">
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          :loading="loading"
+          @click="submit"
+        >
           Save
         </v-btn>
       </v-card-actions>
@@ -38,12 +43,13 @@
 <script>
 export default {
   props: {
-    value: Boolean,
+    modelValue: Boolean,
     loading: {
       type: Boolean,
       default: false,
     },
   },
+  emits: ["update:modelValue", "submit"],
   data() {
     return {
       pathToFile: "",
@@ -55,15 +61,15 @@ export default {
   computed: {
     show: {
       get() {
-        return this.value;
+        return this.modelValue;
       },
       set(value) {
-        this.$emit("input", value);
+        this.$emit("update:modelValue", value);
       },
     },
   },
   watch: {
-    value(val) {
+    modelValue(val) {
       if (val === false) {
         this.$refs.form.reset();
       }
@@ -71,9 +77,8 @@ export default {
   },
   methods: {
     async submit() {
-      if (!this.$refs.form.validate()) {
-        return;
-      }
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
 
       this.$emit("submit", { pathToFile: this.pathToFile });
     },

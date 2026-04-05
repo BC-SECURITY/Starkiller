@@ -22,13 +22,13 @@
       resource-type="bypass"
     />
     <v-card v-else style="padding: 10px">
-      <v-form ref="form" v-model="valid" @submit.prevent.native="submit">
+      <v-form ref="form" v-model="valid" @submit.prevent="submit">
         <v-text-field
           v-model="form.name"
           :rules="rules['name']"
           label="name"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           :disabled="!isNew"
         />
@@ -36,16 +36,16 @@
           v-model="form.language"
           :rules="rules['language']"
           label="language"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
         />
         <v-textarea
           v-model="form.code"
           :rules="rules['code']"
           label="code"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           required
           auto-grow
         />
@@ -55,7 +55,6 @@
 </template>
 
 <script>
-import Vue from "vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as bypassApi from "@/api/bypass-api";
@@ -67,8 +66,10 @@ export default {
     ErrorStateAlert,
     EditPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
+      initialLoad: false,
       form: {},
       rules: {
         name: [
@@ -98,7 +99,7 @@ export default {
       return this.$route.name === "bypassNew";
     },
     isCopy() {
-      return this.$route.params.copy === true;
+      return this.$route.query.copy === "true";
     },
     mode() {
       if (this.isCopy) return "Copy";
@@ -109,25 +110,25 @@ export default {
       return true;
     },
     id() {
-      return this.isCopy ? 0 : this.$route.params.id;
+      return this.isCopy ? 0 : this.$route.params.id || this.$route.query.id;
     },
     copyLink() {
       if (this.id > 0)
-        return { name: "bypassNew", params: { copy: true, id: this.id } };
+        return { name: "bypassNew", query: { copy: true, id: this.id } };
       return {};
     },
     breads() {
       return [
         {
-          text: "Bypasses",
+          title: "Bypasses",
           disabled: false,
           to: "/bypasses",
           exact: true,
         },
         {
-          text: this.breadcrumbName,
+          title: this.breadcrumbName,
           disabled: true,
-          to: "/bypasses-edit",
+          to: `/bypasses/${this.id}`,
         },
       ];
     },
@@ -149,16 +150,16 @@ export default {
     if (!this.isNew || this.isCopy) {
       // using the route param id instad of this.id
       // since this.id is 0 for copies.
-      this.getBypass(this.$route.params.id);
+      this.getBypass(this.$route.params.id || this.$route.query.id);
     } else {
       this.initialLoad = true;
     }
   },
   methods: {
     async submit() {
-      if (this.loading || !this.$refs.form.validate()) {
-        return;
-      }
+      if (this.loading) return;
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
 
       this.loading = true;
       if (this.id > 0) {
@@ -170,30 +171,30 @@ export default {
             this.form.language,
           )
           .then(() => {
-            this.$snack.success("Bypass updated");
+            this.snack.success("Bypass updated");
             this.loading = false;
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       } else {
         bypassApi
           .createBypass(this.form.name, this.form.code, this.form.language)
           .then(({ id }) => {
-            this.$snack.success("Bypass created");
+            this.snack.success("Bypass created");
             this.loading = false;
             this.$router.push({ name: "bypassEdit", params: { id } });
           })
           .catch((err) => {
-            this.$snack.error(`Error: ${err}`);
+            this.snack.error(`Error: ${err}`);
             this.loading = false;
           });
       }
     },
     async deleteBypass() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete bypass ${this.form.name}?`,
           { color: "red" },
@@ -203,7 +204,7 @@ export default {
           this.bypassStore.deleteBypass(this.form.id);
           this.$router.push({ name: "bypasses" });
         } catch (err) {
-          this.$snack.error(`Error: ${err}`);
+          this.snack.error(`Error: ${err}`);
         }
       }
     },
@@ -213,9 +214,11 @@ export default {
         .then((data) => {
           this.bypass = { ...data };
           this.initialLoad = true;
-          Vue.set(this, "form", { ...data });
+          this.form = { ...data };
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err);
+          this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },

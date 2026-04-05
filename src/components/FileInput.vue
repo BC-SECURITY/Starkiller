@@ -7,20 +7,18 @@
     />
     <v-autocomplete
       v-model="internalValue"
+      v-model:search="search"
       :items="fileItems"
       :loading="isLoading"
-      :search-input.sync="search"
       hide-no-data
-      hide-selected
       clearable
-      cache-items
-      item-text="description"
+      item-title="description"
       item-value="id"
       :label="label"
       placeholder="Start typing to Search"
       prepend-icon="fa-upload"
-      outlined
-      dense
+      variant="outlined"
+      density="compact"
       :return-object="returnObject"
       @click:prepend="showDialog = true"
     />
@@ -35,9 +33,9 @@ import formatBytes from "@/utils/format-bytes";
 export default {
   components: { FileUploadDialog },
   props: {
-    value: {
-      type: [String, Array, Number],
-      required: true,
+    modelValue: {
+      type: [Number, Object],
+      default: null,
     },
     label: {
       type: String,
@@ -58,9 +56,10 @@ export default {
       default: false,
     },
   },
+  emits: ["update:modelValue"],
   data() {
     return {
-      internalValue: this.value,
+      internalValue: this.modelValue,
       isLoading: false,
       count: 0,
       entries: [],
@@ -85,9 +84,9 @@ export default {
   },
   watch: {
     internalValue(val) {
-      this.$emit("input", val);
+      this.$emit("update:modelValue", val);
     },
-    value(val) {
+    modelValue(val) {
       this.internalValue = val;
     },
     search() {

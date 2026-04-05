@@ -11,12 +11,7 @@
       @refresh="getCredentials"
     />
     <div style="display: flex; flex-direction: row; flex-wrap: wrap">
-      <v-card
-        class="mr-2 pa-2"
-        elevation="2"
-        outlined
-        style="flex-basis: 250px"
-      >
+      <v-card class="mr-2 pa-2" elevation="2" border style="flex-basis: 250px">
         <v-expansion-panels class="mb-6" multiple>
           <expansion-panel-search
             v-model="search"
@@ -34,14 +29,14 @@
           />
         </v-expansion-panels>
       </v-card>
-      <v-card style="flex: 1; min-width: 0" elevation="2" outlined>
+      <v-card style="flex: 1; min-width: 0" elevation="2" border>
         <v-data-table
           v-model="selected"
           :loading="loading"
           :headers="headers"
           :items="credentials"
-          item-key="id"
-          dense
+          item-value="id"
+          density="compact"
           show-select
         >
           <template #item.id="{ item }">
@@ -73,9 +68,14 @@
             />
           </template>
           <template #item.actions="{ item }">
-            <v-menu offset-y>
-              <template #activator="{ on, attrs }">
-                <v-btn text icon x-small v-bind="attrs" v-on="on">
+            <v-menu>
+              <template #activator="{ props: activatorProps }">
+                <v-btn
+                  variant="text"
+                  icon
+                  size="x-small"
+                  v-bind="activatorProps"
+                >
                   <v-icon>fa-ellipsis-v</v-icon>
                 </v-btn>
               </template>
@@ -98,7 +98,7 @@
                     style="color: inherit"
                     :to="{
                       name: 'credentialNew',
-                      params: { copy: true, id: item.id },
+                      query: { copy: true, id: item.id },
                     }"
                   >
                     <v-list-item-title>
@@ -129,8 +129,9 @@ import ListPageTop from "@/components/ListPageTop.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
-import * as tagApi from "@/api/tag-api";
 import * as credentialApi from "@/api/credential-api";
+import { copyToClipboard } from "@/utils/clipboard";
+import { fetchDedupedTags } from "@/utils/tags";
 import { useCredentialStore } from "@/stores/credential-module";
 
 export default {
@@ -141,24 +142,25 @@ export default {
     TagViewer,
     ListPageTop,
   },
+  inject: ["snack", "confirm"],
   data() {
     return {
       breads: [
         {
-          text: "Credentials",
+          title: "Credentials",
           disabled: true,
           href: "/credentials",
         },
       ],
       headers: [
-        { text: "id", value: "id" },
-        { text: "CredType", value: "credtype" },
-        { text: "Username", value: "username" },
-        { text: "Password", value: "password" },
-        { text: "Domain", value: "domain" },
-        { text: "Host", value: "host" },
-        { text: "Tags", value: "tags", width: 300 },
-        { text: "Actions", value: "actions", sortable: false },
+        { title: "id", key: "id" },
+        { title: "CredType", key: "credtype" },
+        { title: "Username", key: "username" },
+        { title: "Password", key: "password" },
+        { title: "Domain", key: "domain" },
+        { title: "Host", key: "host" },
+        { title: "Tags", key: "tags", width: 300 },
+        { title: "Actions", key: "actions", sortable: false },
       ],
       selected: [],
       selectedTags: [],
@@ -191,23 +193,7 @@ export default {
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({
-        page: 1,
-        limit: -1,
-        sources: "credential",
-      });
-
-      const dedupedTags = [];
-      tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find(
-          (t) => t.name === tag.name && t.value === tag.value,
-        );
-        if (!existingTag) {
-          dedupedTags.push(tag);
-        }
-      });
-
-      this.tags = dedupedTags;
+      this.tags = await fetchDedupedTags("credential");
     },
     deleteTag(credential, tag) {
       credentialApi
@@ -216,7 +202,7 @@ export default {
           credential.tags = credential.tags.filter((t) => t.id !== tag.id);
           this.getTags();
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     updateTag(credential, tag) {
       credentialApi
@@ -225,9 +211,9 @@ export default {
           const index = credential.tags.findIndex((x) => x.id === t.id);
           credential.tags.splice(index, 1, t);
           this.getTags();
-          this.$snack.success("Tag updated");
+          this.snack.success("Tag updated");
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     addTag(credential, tag) {
       credentialApi
@@ -236,7 +222,7 @@ export default {
           credential.tags.push(t);
           this.getTags();
         })
-        .catch((err) => this.$snack.error(`Error: ${err}`));
+        .catch((err) => this.snack.error(`Error: ${err}`));
     },
     async getCredentials() {
       this.loading = true;
@@ -255,7 +241,7 @@ export default {
     },
     async deleteCredential(item) {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete credential ${item.id}?`,
           { color: "red" },
@@ -267,7 +253,7 @@ export default {
     },
     async deleteCredentials() {
       if (
-        await this.$root.$confirm(
+        await this.confirm(
           "Delete",
           `Are you sure you want to delete ${this.selected.length} credentials?`,
           { color: "red" },
@@ -280,14 +266,7 @@ export default {
       }
     },
     async copyToClipboard(val) {
-      try {
-        await navigator.clipboard.writeText(val);
-        this.$snack.success("Output copied to clipboard");
-      } catch (error) {
-        this.$snack.warn(
-          "Failed to copy to clipboard. You must be on HTTPS or localhost.",
-        );
-      }
+      await copyToClipboard(val, this.snack);
     },
   },
 };

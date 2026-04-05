@@ -39,7 +39,7 @@ export default {
     return {
       breads: [
         {
-          text: "About",
+          title: "About",
           disabled: true,
           href: "/about",
         },
