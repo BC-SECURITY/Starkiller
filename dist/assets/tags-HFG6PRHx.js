@@ -1,0 +1,1 @@
+import{g as t}from"./tag-api-KgP96g3O.js";async function g(n){const i=await t({page:1,limit:-1,sources:n}),e=[];return i.records.forEach(s=>{e.find(a=>a.name===s.name&&a.value===s.value)||e.push(s)}),e}export{g as f};
