@@ -52,7 +52,7 @@
       <v-dialog v-model="showTreeDialog" max-width="500px">
         <v-card>
           <v-card-title>
-            <span class="headline">Browse Modules</span>
+            <span class="text-headline-small">Browse Modules</span>
           </v-card-title>
           <v-card-text>
             <v-treeview
@@ -80,7 +80,7 @@
       </v-dialog>
 
       <v-alert v-if="selectedItem.opsec_safe === false" type="warning">
-        <v-row align="center">
+        <v-row class="align-center">
           <v-col
             class="grow"
             style="word-wrap: break-word; word-break: break-word; width: 500px"
@@ -134,7 +134,7 @@
       <v-dialog ref="nameDialog" v-model="showDialog" max-width="900px">
         <v-card>
           <v-card-title>
-            <span class="headline">Execution Result</span>
+            <span class="text-headline-small">Execution Result</span>
           </v-card-title>
           <v-card-text>
             <v-data-table

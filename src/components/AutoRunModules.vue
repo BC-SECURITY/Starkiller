@@ -96,7 +96,7 @@
     <v-dialog v-model="showDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline">Options</span>
+          <span class="text-headline-small">Options</span>
         </v-card-title>
 
         <v-card-text>

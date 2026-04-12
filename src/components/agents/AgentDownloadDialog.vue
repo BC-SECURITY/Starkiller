@@ -2,7 +2,7 @@
   <v-dialog ref="downloadDialog" v-model="show" max-width="500px">
     <v-card>
       <v-card-title>
-        <span class="headline">Download</span>
+        <span class="text-headline-small">Download</span>
       </v-card-title>
       <v-card-text>
         <v-form ref="form" @submit.prevent>

@@ -9,6 +9,22 @@
       >
         <slot name="extra-stuff" />
         <v-btn
+          v-if="showCopy && Object.keys(copyLink).length > 0 && !smallCopy"
+          color="primary"
+          variant="text"
+          class="mr-2"
+          :to="copyLink"
+        >
+          {{ copyText }}
+          <v-icon end> fa-copy </v-icon>
+        </v-btn>
+        <tooltip-button
+          v-else-if="showCopy && Object.keys(copyLink).length > 0 && smallCopy"
+          icon="fa-copy"
+          :text="copyText"
+          :to="copyLink"
+        />
+        <v-btn
           v-if="showDelete && !smallDelete"
           color="error"
           variant="text"
@@ -26,26 +42,10 @@
           @click="$emit('delete')"
         />
         <v-btn
-          v-if="showCopy && Object.keys(copyLink).length > 0 && !smallCopy"
-          color="primary"
-          variant="text"
-          class="mr-2"
-          :to="copyLink"
-        >
-          {{ copyText }}
-          <v-icon end> fa-copy </v-icon>
-        </v-btn>
-        <tooltip-button
-          v-else-if="showCopy && Object.keys(copyLink).length > 0 && smallCopy"
-          icon="fa-copy"
-          :text="copyText"
-          :to="copyLink"
-        />
-        <v-btn
           v-if="showSubmit"
           :disabled="disableSubmit"
           type="submit"
-          color="primary"
+          :color="disableSubmit ? undefined : 'primary'"
           :loading="submitLoading"
           @click="$emit('submit')"
         >

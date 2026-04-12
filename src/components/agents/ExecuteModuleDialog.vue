@@ -2,7 +2,7 @@
   <v-dialog ref="downloadDialog" v-model="show" max-width="800px">
     <v-card>
       <v-card-title>
-        <span class="headline" />
+        <span class="text-headline-small" />
       </v-card-title>
       <v-card-text>
         <agent-execute-module

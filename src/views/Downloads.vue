@@ -23,7 +23,7 @@
       </template>
     </list-page-top>
     <div style="display: flex; flex-direction: row; flex-wrap: wrap">
-      <v-card class="mr-2 pa-2" elevation="2" border style="flex-basis: 250px">
+      <v-card class="mr-2 pa-2" border style="flex-basis: 250px">
         <v-expansion-panels class="mb-6" multiple>
           <expansion-panel-search
             v-model="search"
@@ -49,7 +49,7 @@
           />
         </v-expansion-panels>
       </v-card>
-      <v-card style="flex: 1; min-width: 0" elevation="2" border>
+      <v-card style="flex: 1; min-width: 0" border>
         <v-data-table-server
           v-model:sort-by="sortBy"
           v-model:items-per-page="itemsPerPage"

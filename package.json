@@ -31,7 +31,7 @@
     "vue-markdown-render": "^2.3.0",
     "vue-router": "^4.3",
     "vuedraggable": "^4.1",
-    "vuetify": "^3.12"
+    "vuetify": "^4.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
@@ -43,6 +43,6 @@
     "prettier": "^3.0.2",
     "sass": "^1.70",
     "vite": "^5.0",
-    "vite-plugin-vuetify": "^2.0"
+    "vite-plugin-vuetify": "^2.1"
   }
 }
