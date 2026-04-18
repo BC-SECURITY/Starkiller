@@ -5,13 +5,7 @@
         <span class="headline">Upload To Agent</span>
       </v-card-title>
       <v-card-text>
-        <p>Only showing files smaller than {{ formatBytes(maxBytes) }}</p>
-        <file-input
-          v-model="file"
-          :rules="rules['fileInput']"
-          :maximum-file-size="maxBytes"
-          return-object
-        />
+        <file-input v-model="file" :rules="rules['fileInput']" return-object />
         <v-text-field
           v-model="internalPathToFile"
           label="path/to/file (On the agent's machine)"
@@ -43,9 +37,6 @@
 
 <script>
 import FileInput from "@/components/FileInput.vue";
-import formatBytes from "@/utils/format-bytes";
-
-const MAX_BYTES = 1048576;
 
 export default {
   components: { FileInput },
@@ -67,20 +58,13 @@ export default {
   emits: ["update:modelValue", "submit"],
   data() {
     return {
-      formatBytes,
-      maxBytes: MAX_BYTES,
       descriptionLimit: 80,
       entries: [],
       internalPathToFile: this.pathToFile,
       file: null,
       rules: {
         pathToFile: [(v) => !!v || "PathToFile is required"],
-        fileInput: [
-          (v) => !!v || "File required",
-          (v) =>
-            (!!v && v.size < MAX_BYTES) ||
-            `Maximum size of ${Math.floor(MAX_BYTES / 1e6)} MiB.`,
-        ],
+        fileInput: [(v) => !!v || "File required"],
       },
     };
   },
@@ -115,7 +99,7 @@ export default {
     },
     fileName(val) {
       if (val) {
-        if (["python", "ironpython"].includes(this.language.toLowerCase())) {
+        if (["python"].includes(this.language.toLowerCase())) {
           // always use the passed in pathToFile if it exists
           if (this.pathToFile) {
             this.internalPathToFile =
@@ -124,7 +108,9 @@ export default {
             this.internalPathToFile = `/tmp/${val}`;
           }
         } else if (
-          ["powershell", "csharp", "c"].includes(this.language.toLowerCase())
+          ["powershell", "csharp", "c", "ironpython", "go"].includes(
+            this.language.toLowerCase(),
+          )
         ) {
           if (this.pathToFile) {
             this.internalPathToFile =
@@ -141,7 +127,7 @@ export default {
       if (val.endsWith("/") || val.endsWith("\\")) {
         return val;
       }
-      if (["python", "ironpython"].includes(this.language.toLowerCase())) {
+      if (["python"].includes(this.language.toLowerCase())) {
         return `${val}/`;
       }
 
