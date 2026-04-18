@@ -14,9 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0-a.1] - 2026-04-18
+
+### Added
+
+-   Auto-select best DotNetVersion based on agent's installed .NET
+-   Dashboard and Graph View available for all users
+-   Dedicated Shell session tab and multi-tab Terminal support
+-   Background override toggle to module execution
+
 ### Fixed
 
 -   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
+-   Fixed agent upload path for Go/IronPython and removed file size limit
 
 ## [3.4.0] - 2026-03-08
 
@@ -463,7 +473,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0-a.1...HEAD
+
+[4.0.0-a.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v4.0.0-a.1
 
 [3.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...v3.4.0
 
