@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+.claude/settings.local.json
 
 # As of 2.0, we will commit /dist on tagged releases.
 # /dist

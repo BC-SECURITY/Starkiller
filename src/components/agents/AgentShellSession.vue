@@ -61,15 +61,24 @@ export default {
   },
   watch: {
     outputLines(val) {
-      localStorage.setItem(this.storageName(), JSON.stringify(val));
+      try {
+        const toStore = val.length > 500 ? val.slice(-500) : val;
+        localStorage.setItem(this.storageName(), JSON.stringify(toStore));
+      } catch {
+        // localStorage quota exceeded — ignore
+      }
     },
   },
   async mounted() {
     this.$refs.inputField.focus();
 
-    const savedHistory = localStorage.getItem(this.storageName());
-    if (savedHistory) {
-      this.outputLines = JSON.parse(savedHistory);
+    try {
+      const savedHistory = localStorage.getItem(this.storageName());
+      if (savedHistory) {
+        this.outputLines = JSON.parse(savedHistory);
+      }
+    } catch {
+      localStorage.removeItem(this.storageName());
     }
 
     this.scrollToBottom();
@@ -137,11 +146,14 @@ export default {
       const complete = await this.pollForResult(response.id, { print: false });
 
       if (["cd", "set-location"].includes(stdin.toLowerCase().split(" ")[0])) {
+        if (complete?.output) {
+          this.addLine(complete.output, "indent-5-spaces");
+        }
         this.updateCurrentDirectory();
         return;
       }
 
-      if (complete) {
+      if (complete?.output) {
         this.addLine(complete.output, "indent-5-spaces");
       }
     },
@@ -156,18 +168,23 @@ export default {
     },
     async updateCurrentDirectory() {
       this.currentDir = "loading...";
-      const response = await agentTaskApi.shell(
-        this.agent.session_id,
-        this.getDirectoryCommand(),
-      );
+      try {
+        const response = await agentTaskApi.shell(
+          this.agent.session_id,
+          this.getDirectoryCommand(),
+        );
 
-      const complete = await this.pollForResult(response.id, { print: false });
+        const complete = await this.pollForResult(response.id, {
+          print: false,
+        });
 
-      if (complete) {
-        // eslint-disable-next-line prefer-destructuring
-        this.currentDir = (
-          await this.checkTaskComplete(response.id)
-        ).output.split("\r")[0];
+        if (complete?.output) {
+          this.currentDir = complete.output.split("\r")[0];
+        } else {
+          this.currentDir = this.agent.session_id;
+        }
+      } catch {
+        this.currentDir = this.agent.session_id;
       }
     },
     async pollForResult(
@@ -246,32 +263,20 @@ export default {
       });
     },
     ansiToHTML(input) {
-      const ansiUp = new AnsiUp();
-      return ansiUp.ansi_to_html(input);
+      const converter = new AnsiUp();
+      return converter.ansi_to_html(input);
     },
     colorizeText(text, color = "") {
-      let colorCode = "";
-      const boldCode = "\u001b[1m";
-      switch (color.toLowerCase()) {
-        case "red":
-          colorCode = "\u001b[91m";
-          break;
-        case "green":
-          colorCode = "\u001b[92m";
-          break;
-        case "blue":
-          colorCode = "\u001b[94m";
-          break;
-        case "yellow":
-          colorCode = "\u001b[93m";
-          break;
-        case "white":
-          colorCode = "\u001b[97m";
-          break;
-        default:
-          return text;
-      }
-      return `${boldCode}${colorCode}${text}\u001b[0m`;
+      const ansiColors = {
+        red: "\u001b[91m",
+        green: "\u001b[92m",
+        blue: "\u001b[94m",
+        yellow: "\u001b[93m",
+        white: "\u001b[97m",
+      };
+      const colorCode = ansiColors[color.toLowerCase()];
+      if (!colorCode) return text;
+      return `\u001b[1m${colorCode}${text}\u001b[0m`;
     },
   },
 };

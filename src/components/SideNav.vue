@@ -122,6 +122,7 @@ export default {
       mini: true,
       openedGroups: [],
       items: [
+        { title: "Dashboard", pathName: "dashboard", icon: "fa-chart-line" },
         {
           title: "Listeners",
           icon: "fa-server",
@@ -162,6 +163,11 @@ export default {
               title: "Agents",
               pathName: "agents",
               icon: "fa-link",
+            },
+            {
+              title: "Agents Graph",
+              pathName: "agentsGraph",
+              icon: "fa-diagram-project",
             },
             {
               title: "Agent Tasks",

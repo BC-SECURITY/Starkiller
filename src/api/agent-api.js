@@ -88,3 +88,39 @@ export function addTag(agentId, tag) {
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
+
+export function getProcesses(hostId) {
+  return axios
+    .get(`/hosts/${hostId}/processes`)
+    .then(({ data }) => data.records)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function getCheckinsLast() {
+  return axios
+    .get("/agents/checkins/", {
+      params: {
+        limit: 1,
+        order_direction: "desc",
+      },
+    })
+    .then(({ data }) => data.records[0])
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function getCheckinsAgg(
+  bucketSize = "day",
+  startDate = null,
+  endDate = null,
+) {
+  return axios
+    .get("/agents/checkins/aggregate", {
+      params: {
+        bucket_size: bucketSize.toLowerCase(),
+        start_date: startDate,
+        end_date: endDate,
+      },
+    })
+    .then(({ data }) => data)
+    .catch((error) => Promise.reject(handleError(error)));
+}
