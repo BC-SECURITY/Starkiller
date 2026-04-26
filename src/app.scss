@@ -13,3 +13,11 @@
 .v-toolbar__extension > div > .v-tabs {
   background-color: inherit;
 }
+
+// Style empty data table state
+.v-data-table-rows-no-data td {
+  text-align: center;
+  padding: 48px 16px !important;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}

@@ -16,12 +16,7 @@
         </v-btn>
       </template>
     </list-page-top>
-    <v-card
-      class="mr-2 pa-2"
-      elevation="2"
-      variant="outlined"
-      style="flex-basis: 250px"
-    >
+    <v-card class="mr-2 pa-2" variant="outlined" style="flex-basis: 250px">
       <v-list>
         <template v-for="(item, i) in notifications" :key="i">
           <v-list-item

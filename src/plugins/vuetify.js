@@ -1,5 +1,4 @@
 import { createVuetify } from "vuetify";
-import * as labsComponents from "vuetify/labs/components";
 import { aliases } from "vuetify/iconsets/fa";
 import "vuetify/styles";
 import "@mdi/font/css/materialdesignicons.css";
@@ -31,8 +30,9 @@ const autoIconComponent = {
 };
 
 export default createVuetify({
-  components: {
-    ...labsComponents,
+  defaults: {
+    VDataTable: { density: "comfortable", hover: true },
+    VDataTableServer: { density: "comfortable", hover: true },
   },
   theme: {
     defaultTheme: "dark",

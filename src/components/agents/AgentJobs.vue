@@ -49,7 +49,6 @@
       :items-per-page="10"
       item-value="id"
       show-expand
-      class="elevation-1"
       no-data-text="No background jobs found. Jobs will appear here when you run modules with Background=true."
     >
       <template #item.status="{ item }">

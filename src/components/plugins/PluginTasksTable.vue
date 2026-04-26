@@ -29,8 +29,8 @@
       <template #expanded-row="{ columns, item }">
         <td :colspan="columns.length" class="pa-4">
           <v-card flat>
-            <v-card-title class="subtitle-1 pb-4">
-              <v-row no-gutters align="center">
+            <v-card-title class="text-subtitle-1 pb-4">
+              <v-row no-gutters class="align-center">
                 <v-col cols="4">
                   <span class="font-weight-bold">Task #{{ item.id }}</span>
                   <v-chip
@@ -55,7 +55,7 @@
                   cols="6"
                 >
                   <div class="d-flex flex-wrap gap-2">
-                    <span class="font-weight-bold ml-2 mr-2 subtitle-1"
+                    <span class="font-weight-bold ml-2 mr-2 text-subtitle-1"
                       >Options:</span
                     >
                     <v-chip
@@ -66,10 +66,10 @@
                       label
                       class="mr-1 mb-1"
                     >
-                      <span class="subtitle-2 font-weight-bold mr-1"
+                      <span class="text-subtitle-2 font-weight-bold mr-1"
                         >{{ key }}:</span
                       >
-                      <span class="subtitle-2">{{ value }}</span>
+                      <span class="text-subtitle-2">{{ value }}</span>
                     </v-chip>
                   </div>
                 </v-col>
@@ -90,11 +90,11 @@
             <v-divider />
 
             <v-card-text>
-              <v-row dense>
+              <v-row density="compact">
                 <v-col cols="12">
                   <div class="mb-4">
                     <div class="d-flex align-center mb-1">
-                      <span class="subtitle-2 font-weight-bold"
+                      <span class="text-subtitle-2 font-weight-bold"
                         >Task Input</span
                       >
                       <v-spacer />
@@ -133,7 +133,7 @@
 
                   <div v-if="hasOutput(item)">
                     <div class="d-flex align-center mb-1">
-                      <span class="subtitle-2 font-weight-bold"
+                      <span class="text-subtitle-2 font-weight-bold"
                         >Task Output</span
                       >
                       <v-spacer />
@@ -172,9 +172,7 @@
                         >
                           <template #placeholder>
                             <v-row
-                              class="fill-height ma-0"
-                              align="center"
-                              justify="center"
+                              class="fill-height ma-0 align-center justify-center"
                             >
                               <v-progress-circular
                                 indeterminate

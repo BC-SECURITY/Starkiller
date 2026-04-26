@@ -5,8 +5,9 @@
         :color="flat ? '' : color"
         :to="to"
         :disabled="disabled"
-        class="mr-5"
+        class="mr-2"
         icon
+        variant="text"
         :size="xSmall ? 'x-small' : 'small'"
         v-bind="activatorProps"
         @click="$emit('click')"

@@ -9,7 +9,7 @@
     />
     <div style="display: flex; flex-direction: row">
       <div style="width: 350px; min-width: 350px; max-width: 350px">
-        <v-card elevation="2" border class="pl-4 pr-4 pb-4">
+        <v-card border class="pl-4 pr-4 pb-4">
           <v-list
             :disabled="installing"
             class="overflow-y-auto"
@@ -45,7 +45,6 @@
       <div style="flex-grow: 1">
         <v-card
           v-if="selectedPluginObj"
-          elevation="2"
           border
           style="max-height: 600px"
           class="pl-4 pr-4 pb-4 overflow-y-auto"
@@ -132,7 +131,7 @@
             </div>
           </div>
           <v-divider class="mt-4 mb-4" />
-          <v-card class="pa-4" elevation="2" border>
+          <v-card class="pa-4" border>
             <vue-markdown :source="selectedPluginObj.description" />
           </v-card>
           <v-divider class="mt-4 mb-4" />

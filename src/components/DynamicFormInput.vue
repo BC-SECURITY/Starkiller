@@ -51,7 +51,7 @@
       item-value="id"
       item-title="id"
     >
-      <template #item="{ item, props: itemProps }">
+      <template #item="{ internalItem: item, props: itemProps }">
         <v-list-item v-bind="itemProps">
           <v-list-item-title>
             {{

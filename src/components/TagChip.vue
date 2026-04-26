@@ -10,13 +10,16 @@
     <template #activator="{ props: activatorProps }">
       <v-chip
         :color="internalTag.color"
-        class="mt-4 mr-1 ml-1 mb-4 text-white"
+        class="mt-4 mr-1 ml-1 mb-4"
+        :class="{ 'text-white': !isNew }"
+        :variant="isNew ? 'outlined' : 'flat'"
+        size="small"
         :closable="close"
         v-bind="activatorProps"
         @click:close="deleteTag(internalTag)"
       >
         {{ `${tag.name}:${tag.value}` }}
-        <v-icon v-if="customIcon" end>
+        <v-icon v-if="customIcon" end size="x-small">
           {{ customIcon }}
         </v-icon>
       </v-chip>

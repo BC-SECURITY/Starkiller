@@ -1,7 +1,7 @@
 <template>
-  <v-row class="pb-5">
+  <v-row class="pb-2">
     <v-col cols="4" class="d-flex align-center justify-start">
-      <span class="text--bold">{{ label }}</span>
+      <span class="font-weight-bold">{{ label }}</span>
       <v-tooltip v-if="infoText" location="bottom">
         <template #activator="{ props: activatorProps }">
           <v-icon size="small" class="ml-2" v-bind="activatorProps">

@@ -1,6 +1,6 @@
 <template>
   <v-alert prominent type="error">
-    <v-row align="center">
+    <v-row class="align-center">
       <v-col class="grow">
         {{ displayMessage }}
       </v-col>

@@ -10,7 +10,7 @@
     <v-dialog v-model="keywordDialog" max-width="500px">
       <v-card>
         <v-card-title>
-          <span class="text-h5">{{ keywordDialogTitle }}</span>
+          <span class="text-headline-small">{{ keywordDialogTitle }}</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -54,7 +54,7 @@
     <v-dialog v-model="preobfuscateDialog" max-width="500px">
       <v-card>
         <v-card-title>
-          <span class="text-h5" />
+          <span class="text-headline-small" />
         </v-card-title>
         <v-card-text>
           <p>
@@ -87,18 +87,14 @@
       </v-card>
     </v-dialog>
     <div style="display: flex; flex-direction: row; align-items: flex-start">
-      <v-card style="flex: 1 0 50%" class="ma-2 pa-2">
-        <v-card-title>
-          <span
-            style="display: flex; justify-content: space-between; width: 100%"
-          >
-            <span class="headline">Keyword Obfuscation</span>
-            <v-btn color="primary" @click="createKeyword">
-              Create
-              <v-icon end> fa-plus-square </v-icon>
-            </v-btn>
-          </span>
-        </v-card-title>
+      <v-card style="flex: 1 0 50%" class="ma-2 pa-2" border>
+        <div class="d-flex align-center justify-space-between pa-4">
+          <span class="text-headline-small">Keyword Obfuscation</span>
+          <v-btn color="primary" @click="createKeyword">
+            Create
+            <v-icon end> fa-plus-square </v-icon>
+          </v-btn>
+        </div>
         <v-data-table :headers="headers" :items="keywords">
           <template #item.actions="{ item }">
             <v-menu>
@@ -131,10 +127,10 @@
           </template>
         </v-data-table>
       </v-card>
-      <v-card style="flex: 1 0 50%" class="ma-2 pa-2">
+      <v-card style="flex: 1 0 50%" class="ma-2 pa-2" border>
         <v-card-title>
           <span>
-            <span class="headline">Global Obfuscation</span>
+            <span class="text-headline-small">Global Obfuscation</span>
           </span>
         </v-card-title>
         <v-card-text>
