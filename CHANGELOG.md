@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-04-26
+
 ### Changed
 
 -   Upgraded Vuetify from v3 to v4
@@ -475,7 +477,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...HEAD
+
+[3.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v3.5.0
 
 [3.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...v3.4.0
 
