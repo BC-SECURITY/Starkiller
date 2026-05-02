@@ -8,6 +8,7 @@
       variant="outlined"
       chips
       multiple
+      return-object
       placeholder="Agents"
       :items="agents"
       item-title="name"
@@ -77,6 +78,7 @@ export default {
       this.$refs.executeform.create();
     },
     moduleChange(val) {
+      if (!val) return;
       this.moduleName = val;
       this.$router.push({ name: "moduleExecute", params: { id: val } });
     },

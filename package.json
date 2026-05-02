@@ -8,7 +8,9 @@
     "serve": "vite preview",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
     "format": "prettier .  --write",
-    "format:check": "prettier .  --check"
+    "format:check": "prettier .  --check",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "main": "background.js",
   "dependencies": {
@@ -34,6 +36,7 @@
     "vuetify": "^4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@rushstack/eslint-patch": "^1.2.0",
     "@vitejs/plugin-vue": "^5.0",
     "@vue/eslint-config-airbnb": "^7.0.0",

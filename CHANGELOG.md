@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
+
+### Fixed
+
+-   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete
+-   Fixed a Vue Router "Missing required param" error logged after every successful module execution
+
 ## [3.5.0] - 2026-04-26
 
 ### Changed
