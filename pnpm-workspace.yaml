@@ -1,0 +1,20 @@
+# pnpm project configuration.
+
+# Only these dependencies may run install/build scripts. pnpm 11 blocks
+# every other dependency's build scripts by default and errors with
+# ERR_PNPM_IGNORED_BUILDS unless the package is listed here.
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true
+  vue-demi: true
+
+# Supply-chain-security settings — see https://pnpm.io/supply-chain-security
+
+# Do not resolve package versions published less than 1 week ago.
+minimumReleaseAge: 10080
+
+# Transitive dependencies may not resolve from git repos or tarball URLs.
+blockExoticSubdeps: true
+
+# Block installs where a package's trust level dropped vs. a previous release.
+trustPolicy: no-downgrade

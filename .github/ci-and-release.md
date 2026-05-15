@@ -153,7 +153,7 @@ the `sponsors-main` branch or `kali-main` branch.
 ### 9. Tag and Release
 
 Once the pull requests are merged, the `Sponsors - Tag Release` and `Kali - Tag Release` workflows will automatically run.
-The workflow will run `yarn build` and commit the `dist/` to `sponsors-main` and `kali-main` (independently). It will then create a tag and release on the `HEAD` of of `sponsors-main` and `kali-main` using the release notes from `CHANGELOG.md` for the body of the release.
+The workflow will run `pnpm build` and commit the `dist/` to `sponsors-main` and `kali-main` (independently). It will then create a tag and release on the `HEAD` of of `sponsors-main` and `kali-main` using the release notes from `CHANGELOG.md` for the body of the release.
 
 ### Setup
 
@@ -185,7 +185,7 @@ the `main` branch. This will ensure the change ends up in the release properly.
 Once the pull request is merged, the `Public - Tag Release` workflow will automatically run.
 The workflow will create a tag and release on the `HEAD` of `main`, using the release notes from `CHANGELOG.md` for the body of the release.
 
-The workflow will detect the last released tag, and use the release notes from the `CHANGELOG.md` between the last release and the current release. The workflow will run `yarn build` and commit the `dist/` to `main-main`.
+The workflow will detect the last released tag, and use the release notes from the `CHANGELOG.md` between the last release and the current release. The workflow will run `pnpm build` and commit the `dist/` to `main-main`.
 
 ### Setup
 

@@ -10,11 +10,11 @@ repos:
       - id: trailing-whitespace
   - repo: local
     hooks:
-      - id: yarn-lint
-        name: yarn-lint
-        entry: bash -c 'yarn lint'
+      - id: pnpm-lint
+        name: pnpm-lint
+        entry: bash -c 'pnpm lint'
         language: system
-      - id: yarn-format
-        name: yarn-format
-        entry: bash -c 'yarn format'
+      - id: pnpm-format
+        name: pnpm-format
+        entry: bash -c 'pnpm format'
         language: system

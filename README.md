@@ -77,24 +77,27 @@ Thanks to our sponsors the following features which started as sponsor features 
 
 Prerequisites:
 
-- [Node.js](http://nodejs.org/) 16+.
-- [Yarn](https://classic.yarnpkg.com/en/docs/install)
-  Currently it has been tested using Yarn 1.22.
+- [Node.js](http://nodejs.org/) 22+.
+- [pnpm](https://pnpm.io/installation) 11+.
+
+The exact pnpm version is pinned via the `packageManager` field in `package.json`.
+Run `corepack enable` once and Corepack will automatically use the pinned version;
+otherwise install pnpm 11+ manually.
 
 ```
-yarn
+pnpm install
 ```
 
 ### Compile and hot-reload for development
 
 ```
-yarn dev
+pnpm dev
 ```
 
 ### Compile and minify for production
 
 ```
-yarn build
+pnpm build
 ```
 
 ## Changelog
