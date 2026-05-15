@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="terminal-container">
+    <div class="terminal-container" data-testid="agent-terminal">
       <div ref="output" class="terminal-output">
         <div
           v-for="(line, index) in outputLines"

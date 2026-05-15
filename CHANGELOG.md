@@ -12,19 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Fixed** for any bug fixes.
 **Security** in case of vulnerabilities.
 
-## [Unreleased]
+## [Unreleased - 4.x]
 
 ### Changed
 
--   Upgraded Vuetify from v3 to v4
-    -   Migrated deprecated VRow/VCol props (align, justify, dense) to utility classes
-    -   Migrated MD2 typography classes (headline, text-h5, subtitle-1/2) to MD3 equivalents
-    -   Adopted MD3 visual defaults (elevation, density, button styling)
-    -   Improved table UX with row hover highlighting
-    -   Improved Settings page layout with max-width constraint and inner password icons
-    -   Improved empty table state styling
-    -   Improved edit page toolbar button ordering and spacing
-    -   Refined footer, tag chips, and app bar density
+-   **BREAKING**: Switched package manager from yarn to pnpm 11. Contributors now need Node 22+ and pnpm 11+ (`corepack enable` picks up the pinned version).
 
 ## [4.0.0-a.1] - 2026-04-18
 
@@ -39,6 +31,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
 -   Fixed agent upload path for Go/IronPython and removed file size limit
+
+## [Unreleased]
+
+### Added
+
+-   Added Playwright end-to-end test suite, run as a CI job on every PR
+
+### Fixed
+
+-   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete
+-   Fixed a Vue Router "Missing required param" error logged after every successful module execution
+
+## [3.5.0] - 2026-04-26
+
+### Changed
+
+-   Upgraded Vuetify from v3 to v4
+    -   Migrated deprecated VRow/VCol props (align, justify, dense) to utility classes
+    -   Migrated MD2 typography classes (headline, text-h5, subtitle-1/2) to MD3 equivalents
+    -   Adopted MD3 visual defaults (elevation, density, button styling)
+    -   Improved table UX with row hover highlighting
+    -   Improved Settings page layout with max-width constraint and inner password icons
+    -   Improved empty table state styling
+    -   Improved edit page toolbar button ordering and spacing
+    -   Refined footer, tag chips, and app bar density
+
+### Fixed
+
+-   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
 
 ## [3.4.0] - 2026-03-08
 
@@ -485,9 +506,13 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0-a.1...HEAD
+[Unreleased - 4.x]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0-a.1...HEAD
 
 [4.0.0-a.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v4.0.0-a.1
+
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...HEAD
+
+[3.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v3.5.0
 
 [3.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...v3.4.0
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="terminal-container">
+    <div class="terminal-container" data-testid="agent-shell">
       <div ref="output" class="terminal-output">
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div
