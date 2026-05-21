@@ -28,7 +28,7 @@
 <script>
 import pause from "@/utils/pause";
 import * as agentTaskApi from "@/api/agent-task-api";
-import AnsiUp from "ansi_up";
+import { ansiToHtml } from "@/utils/ansi";
 
 export default {
   name: "AgentShellSession",
@@ -262,10 +262,7 @@ export default {
         outputDiv.scrollTop = outputDiv.scrollHeight;
       });
     },
-    ansiToHTML(input) {
-      const converter = new AnsiUp();
-      return converter.ansi_to_html(input);
-    },
+    ansiToHTML: ansiToHtml,
     colorizeText(text, color = "") {
       const ansiColors = {
         red: "\u001b[91m",

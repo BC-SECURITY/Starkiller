@@ -94,8 +94,8 @@ import {
   ArcElement,
   TimeSeriesScale,
 } from "chart.js";
-import "chartjs-adapter-moment";
-import moment from "moment";
+import "chartjs-adapter-dayjs-4";
+import dayjs from "@/plugins/dayjs";
 
 import * as agentApi from "@/api/agent-api";
 import AgentTasksTable from "@/components/agents/AgentTasksTable.vue";
@@ -292,7 +292,7 @@ export default {
       if (config) {
         this.lookbackMessage = config.message;
         if (config.amount && this.latestRecord) {
-          startDate = moment(this.latestRecord)
+          startDate = dayjs(this.latestRecord)
             .subtract(config.amount, config.unit)
             .toISOString();
         }

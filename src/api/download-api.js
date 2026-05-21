@@ -69,9 +69,6 @@ export function getDownload(id) {
       const link = document.createElement("a");
       link.href = url;
       const filename = getFilename(response.headers["content-disposition"]);
-      console.warn(filename);
-      console.warn(response.headers["content-disposition"]);
-
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();

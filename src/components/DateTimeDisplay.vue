@@ -1,14 +1,14 @@
 <template>
   <v-tooltip location="top">
     <template #activator="{ props: activatorProps }">
-      <span v-bind="activatorProps">{{ moment(timestamp).fromNow() }}</span>
+      <span v-bind="activatorProps">{{ relativeTime }}</span>
     </template>
-    <span>{{ moment(timestamp).format("MMM D YYYY, h:mm:ss a") }}</span>
+    <span>{{ absoluteTime }}</span>
   </v-tooltip>
 </template>
 
 <script>
-import moment from "moment";
+import dayjs from "@/plugins/dayjs";
 
 export default {
   name: "DateTimeDisplay",
@@ -18,10 +18,18 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      moment,
-    };
+  computed: {
+    // dayjs(null|"") is "valid" and yields a bogus relative time (moment
+    // rendered "Invalid date"); guard so an unparseable timestamp shows a
+    // placeholder. dayjs(undefined) stays valid (= now), matching moment.
+    relativeTime() {
+      const parsed = dayjs(this.timestamp);
+      return parsed.isValid() ? parsed.fromNow() : "N/A";
+    },
+    absoluteTime() {
+      const parsed = dayjs(this.timestamp);
+      return parsed.isValid() ? parsed.format("MMM D YYYY, h:mm:ss a") : "N/A";
+    },
   },
 };
 </script>

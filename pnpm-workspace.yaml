@@ -18,3 +18,10 @@ blockExoticSubdeps: true
 
 # Block installs where a package's trust level dropped vs. a previous release.
 trustPolicy: no-downgrade
+
+# chokidar dropped npm provenance attestation in its 3.x -> 4.x rewrite, which
+# trustPolicy flags as a downgrade. It is a widely-used, year-old build-tool
+# dependency (pulled in transitively via sass/vite) and was already present in
+# the committed lockfile, so this is a vetted exception rather than a new risk.
+trustPolicyExclude:
+  - chokidar

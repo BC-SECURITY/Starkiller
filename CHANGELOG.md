@@ -36,12 +36,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Added Playwright end-to-end test suite, run as a CI job on every PR
+-   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
+-   Added a Vitest unit-test harness (running in the `node` environment) with @pinia/testing, and initial unit tests for Pinia stores (bypass-module, listener-module) and utilities (tags)
+-   Added `jsconfig.json` for editor path-alias resolution and a Node `engines` field to `package.json`
+
+### Changed
+
+-   Extracted duplicated ANSI-to-HTML helpers into a shared utility (`src/utils/ansi.js`) and auto-refresh polling into a reusable composable (`useAutoRefresh`)
+-   Declared explicit `emits` options on components that were emitting undeclared events
+-   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
+-   Replaced the deprecated `moment` dependency with `dayjs`
+-   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
+-   Upgraded the build and state-management stack to the latest majors:
+    -   Vite 5 → 8 (now powered by Rolldown/Oxc) and @vitejs/plugin-vue 5 → 6
+    -   Pinia 2 → 3 and pinia-plugin-persistedstate 3 → 4
+    -   Vitest 3 → 4 and @pinia/testing 0.1 → 1
+    -   Renamed the persistedstate `afterRestore` hook to `afterHydrate` in `application-module` (v4 hook rename); the hook still re-applies the axios instance URL/token after rehydration
+    -   `chatUnreadCount` is now correctly excluded from persisted state: persistedstate v4 honors the `omit` option, which v3 silently ignored (it had previously been persisted)
+-   Bumped CI workflows to Node 22 and tightened the `engines` field to meet Vite 8's Node baseline (`^20.19.0 || >=22.12.0`)
+
+### Removed
+
+-   Removed the unused `vue.config.js` (dead Vue CLI config carried over from Vue CLI / Webpack era, superseded by Vite)
+-   Removed the unused `uuid` dependency
 
 ### Fixed
 
 -   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete
 -   Fixed a Vue Router "Missing required param" error logged after every successful module execution
+-   Fixed socket event-handler and timer leaks in the chat widget that caused duplicate messages and inflated unread counts after the chat widget was toggled
+-   Fixed unstable index-based `v-for` keys on chat messages and notifications that could corrupt list rendering on reorder
+-   Removed leftover debug `console.log` and `console.warn` calls from API modules
 
 ## [3.5.0] - 2026-04-26
 

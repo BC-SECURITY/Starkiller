@@ -18,7 +18,7 @@
       <v-list style="max-height: 400px; overflow-y: auto">
         <v-list-item
           v-for="(item, index) in notifications"
-          :key="index"
+          :key="item.id"
           :value="index"
           :style="
             item.read ? '' : 'background-color: rgba(118, 127, 134, 0.5);'

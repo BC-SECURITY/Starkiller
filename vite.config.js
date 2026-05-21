@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
 import path from "path";
@@ -12,5 +12,12 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  test: {
+    globals: true,
+    environment: "node",
+    // Unit/component tests live in src/. The e2e/ directory is owned by
+    // Playwright (test:e2e); keep Vitest out of it.
+    include: ["src/**/*.{test,spec}.{js,jsx}"],
   },
 });

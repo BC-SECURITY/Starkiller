@@ -62,6 +62,7 @@ export default {
       default: false,
     },
   },
+  emits: ["click"],
   methods: {
     style() {
       return this.padLeft !== 0 ? `padding-left: ${this.padLeft}px` : "";

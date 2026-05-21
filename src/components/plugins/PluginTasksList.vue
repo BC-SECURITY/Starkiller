@@ -67,7 +67,7 @@ import { mapState } from "pinia";
 
 import PluginTasksTable from "@/components/plugins/PluginTasksTable.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
-import DownloadMixin from "@/mixins/download-stager";
+import { useDownload } from "@/composables/useDownload";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
@@ -84,7 +84,6 @@ export default {
     PluginTasksTable,
     ListPageTop,
   },
-  mixins: [DownloadMixin],
   props: {
     plugin: {
       type: Object,
@@ -101,6 +100,10 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup() {
+    const { downloadStager, downloadText } = useDownload();
+    return { downloadStager, downloadText };
   },
   data() {
     return {

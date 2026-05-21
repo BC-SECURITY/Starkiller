@@ -62,9 +62,7 @@
 </template>
 
 <script>
-// eslint-disable-next-line import/no-unresolved
 import "@livereader/graphly-d3/style.css";
-// eslint-disable-next-line import/no-unresolved
 import { ForceSimulation, Event } from "@livereader/graphly-d3";
 import { useAgentStore } from "@/stores/agent-module";
 import { useListenerStore } from "@/stores/listener-module";

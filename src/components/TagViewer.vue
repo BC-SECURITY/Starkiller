@@ -34,6 +34,7 @@ export default {
       default: () => [],
     },
   },
+  emits: ["delete-tag", "update-tag", "new-tag"],
   data() {
     return {
       menu: {},

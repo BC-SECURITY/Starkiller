@@ -183,12 +183,11 @@
 </template>
 
 <script>
-import moment from "moment";
-// eslint-disable-next-line import/no-named-default
-import { default as AnsiUp } from "ansi_up";
+import dayjs from "@/plugins/dayjs";
+import { AnsiUp } from "@/utils/ansi";
 import * as agentTaskApi from "@/api/agent-task-api";
 import pause from "@/utils/pause";
-import DownloadMixin from "@/mixins/download-stager";
+import { useDownload } from "@/composables/useDownload";
 
 const KILLABLE_STATUSES = ["running", "started", "continuous"];
 const ACTIVE_STATUSES = [...KILLABLE_STATUSES, "queued"];
@@ -197,12 +196,15 @@ const ansiUp = new AnsiUp();
 
 export default {
   name: "AgentJobs",
-  mixins: [DownloadMixin],
   props: {
     agent: {
       type: Object,
       required: true,
     },
+  },
+  setup() {
+    const { downloadStager, downloadText } = useDownload();
+    return { downloadStager, downloadText };
   },
   data() {
     return {
@@ -470,7 +472,7 @@ export default {
     },
     formatDate(date) {
       if (!date) return "N/A";
-      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
     },
     truncateInput(input) {
       if (!input) return "";
