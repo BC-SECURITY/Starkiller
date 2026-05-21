@@ -140,4 +140,31 @@ export default [
       globals: globals.node,
     },
   },
+
+  // Vitest unit/component tests. `globals: true` in vite.config.js exposes
+  // describe/it/expect/vi etc. globally, so the specs don't import them — declare
+  // them here to keep no-undef happy. Prefer the `globals` package's vitest set
+  // when present (newer versions), with an explicit fallback list otherwise.
+  // (e2e/ is the Playwright suite and is handled by the Node block above.)
+  {
+    files: ["**/*.{test,spec}.{js,jsx}", "**/__tests__/**/*.{js,jsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...(globals.vitest ?? {
+          describe: "readonly",
+          it: "readonly",
+          test: "readonly",
+          suite: "readonly",
+          expect: "readonly",
+          vi: "readonly",
+          vitest: "readonly",
+          beforeAll: "readonly",
+          afterAll: "readonly",
+          beforeEach: "readonly",
+          afterEach: "readonly",
+        }),
+      },
+    },
+  },
 ];

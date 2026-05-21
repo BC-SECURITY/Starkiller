@@ -10,7 +10,9 @@
     "format": "prettier .  --write",
     "format:check": "prettier .  --check",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "vitest",
+    "test:unit:run": "vitest run"
   },
   "main": "background.js",
   "engines": {
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@eslint/compat": "^2.1.0",
     "@eslint/js": "^9.39.4",
+    "@pinia/testing": "0.1.7",
     "@playwright/test": "^1.58.2",
     "@vitejs/plugin-vue": "^5.0",
     "@vue/eslint-config-prettier": "^10.2.0",
@@ -49,6 +52,7 @@
     "prettier": "^3.0.2",
     "sass": "^1.70",
     "vite": "^5.0",
-    "vite-plugin-vuetify": "^2.1"
+    "vite-plugin-vuetify": "^2.1",
+    "vitest": "3.2.4"
   }
 }

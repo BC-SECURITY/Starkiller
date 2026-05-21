@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
+-   Added a Vitest unit-test harness with @vue/test-utils, @pinia/testing, and happy-dom, and initial unit tests for Pinia stores (bypass-module, listener-module) and utilities (tags)
 -   Added `jsconfig.json` for editor path-alias resolution and a Node `engines` field to `package.json`
 
 ### Changed

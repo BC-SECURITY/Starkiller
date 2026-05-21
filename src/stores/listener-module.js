@@ -12,9 +12,14 @@ export const useListenerStore = defineStore("listener", {
   actions: {
     async getListeners() {
       this.status = "loading";
-      const listeners = await listenerApi.getListeners();
-      this.listeners = listeners;
-      this.status = "success";
+      try {
+        const listeners = await listenerApi.getListeners();
+        this.listeners = listeners;
+        this.status = "success";
+      } catch (err) {
+        console.error("[Starkiller] Failed to fetch listeners:", err);
+        this.status = "error";
+      }
     },
     async getListenerTemplates() {
       const templates = await listenerApi.getListenerTemplates();
