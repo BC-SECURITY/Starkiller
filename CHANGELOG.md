@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
 -   Replaced the deprecated `moment` dependency with `dayjs`
 -   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
 
