@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
--   Added a Vitest unit-test harness with @vue/test-utils, @pinia/testing, and happy-dom, and initial unit tests for Pinia stores (bypass-module, listener-module) and utilities (tags)
+-   Added a Vitest unit-test harness (running in the `node` environment) with @pinia/testing, and initial unit tests for Pinia stores (bypass-module, listener-module) and utilities (tags)
 -   Added `jsconfig.json` for editor path-alias resolution and a Node `engines` field to `package.json`
 
 ### Changed
@@ -27,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
 -   Replaced the deprecated `moment` dependency with `dayjs`
 -   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
+-   Upgraded the build and state-management stack to the latest majors:
+    -   Vite 5 → 8 (now powered by Rolldown/Oxc) and @vitejs/plugin-vue 5 → 6
+    -   Pinia 2 → 3 and pinia-plugin-persistedstate 3 → 4
+    -   Vitest 3 → 4 and @pinia/testing 0.1 → 1
+    -   Renamed the persistedstate `afterRestore` hook to `afterHydrate` in `application-module` (v4 hook rename); the hook still re-applies the axios instance URL/token after rehydration
+    -   `chatUnreadCount` is now correctly excluded from persisted state: persistedstate v4 honors the `omit` option, which v3 silently ignored (it had previously been persisted)
+-   Bumped CI workflows to Node 22 and tightened the `engines` field to meet Vite 8's Node baseline (`^20.19.0 || >=22.12.0`)
 
 ### Removed
 

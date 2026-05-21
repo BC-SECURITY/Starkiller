@@ -10,8 +10,19 @@ let notificationCounter = 0;
 export const useApplicationStore = defineStore("application", {
   persist: {
     omit: ["chatUnreadCount"],
-    afterRestore: (ctx) => {
-      setInstance(ctx.store.url, ctx.store.token);
+    afterHydrate: (ctx) => {
+      try {
+        setInstance(ctx.store.url, ctx.store.token);
+      } catch (err) {
+        // persistedstate swallows hook errors unless debug is enabled, and
+        // this hook is the only path that re-initializes the axios instance
+        // after a reload. Log explicitly so a failure here is visible instead
+        // of later surfacing as an opaque null-instance API crash.
+        console.error(
+          "[Starkiller] Failed to re-initialize API client after hydrate:",
+          err,
+        );
+      }
       // Backfill ids on notifications persisted before ids existed, so
       // they don't all key on `undefined` after a reload.
       ctx.store.notifications.forEach((n) => {
