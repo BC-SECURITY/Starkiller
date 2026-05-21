@@ -71,5 +71,13 @@ module.exports = {
         "import/no-unresolved": "off",
       },
     },
+    {
+      // Composables use named exports (useFoo) even when a file exposes
+      // only one.
+      files: ["src/composables/**/*.js"],
+      rules: {
+        "import/prefer-default-export": "off",
+      },
+    },
   ],
 };

@@ -352,7 +352,7 @@ import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TooltipButton from "@/components/TooltipButton.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import HeaderMenu from "@/components/HeaderMenu.vue";
-import DownloadMixin from "@/mixins/download-stager";
+import { useDownload } from "@/composables/useDownload";
 import { useApplicationStore } from "@/stores/application-module";
 import * as downloadApi from "@/api/download-api";
 import * as pluginApi from "@/api/plugin-api";
@@ -366,7 +366,6 @@ export default {
     TooltipButton,
     HeaderMenu,
   },
-  mixins: [DownloadMixin],
   inject: ["snack"],
   props: {
     plugin: {
@@ -402,6 +401,10 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  setup() {
+    const { downloadStager, downloadText } = useDownload();
+    return { downloadStager, downloadText };
   },
   data() {
     return {

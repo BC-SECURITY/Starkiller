@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
 
+### Changed
+
+-   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
+
 ### Fixed
 
 -   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete

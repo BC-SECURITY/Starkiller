@@ -85,8 +85,8 @@
 </template>
 
 <script>
-import DownloadMixin from "@/mixins/download-stager";
-import CopyMixin from "@/mixins/copy-stager";
+import { useDownload } from "@/composables/useDownload";
+import { useCopyStager } from "@/composables/useCopyStager";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import * as downloadApi from "@/api/download-api";
 import { useStagerStore } from "@/stores/stager-module";
@@ -97,7 +97,6 @@ export default {
   components: {
     DateTimeDisplay,
   },
-  mixins: [DownloadMixin, CopyMixin],
   inject: ["snack"],
   props: {
     onlyMyStagers: {
@@ -110,6 +109,11 @@ export default {
     },
   },
   emits: ["update:modelValue", "delete-stager"],
+  setup() {
+    const { downloadStager, downloadText } = useDownload();
+    const { copyStager } = useCopyStager();
+    return { downloadStager, downloadText, copyStager };
+  },
   data() {
     return {
       headers: [

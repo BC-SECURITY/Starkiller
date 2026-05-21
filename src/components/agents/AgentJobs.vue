@@ -188,7 +188,7 @@ import moment from "moment";
 import { default as AnsiUp } from "ansi_up";
 import * as agentTaskApi from "@/api/agent-task-api";
 import pause from "@/utils/pause";
-import DownloadMixin from "@/mixins/download-stager";
+import { useDownload } from "@/composables/useDownload";
 
 const KILLABLE_STATUSES = ["running", "started", "continuous"];
 const ACTIVE_STATUSES = [...KILLABLE_STATUSES, "queued"];
@@ -197,12 +197,15 @@ const ansiUp = new AnsiUp();
 
 export default {
   name: "AgentJobs",
-  mixins: [DownloadMixin],
   props: {
     agent: {
       type: Object,
       required: true,
     },
+  },
+  setup() {
+    const { downloadStager, downloadText } = useDownload();
+    return { downloadStager, downloadText };
   },
   data() {
     return {

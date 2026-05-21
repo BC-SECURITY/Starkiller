@@ -84,7 +84,7 @@ import GeneralForm from "@/components/GeneralForm.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
 import * as downloadApi from "@/api/download-api";
-import CopyMixin from "@/mixins/copy-stager";
+import { useCopyStager } from "@/composables/useCopyStager";
 import TooltipButton from "@/components/TooltipButton.vue";
 import { useStagerStore } from "@/stores/stager-module";
 import * as stagerApi from "@/api/stager-api";
@@ -98,8 +98,11 @@ export default {
     EditPageTop,
     TooltipButton,
   },
-  mixins: [CopyMixin],
   inject: ["snack", "confirm"],
+  setup() {
+    const { copyStager } = useCopyStager();
+    return { copyStager };
+  },
   data() {
     return {
       stager: { options: {} },

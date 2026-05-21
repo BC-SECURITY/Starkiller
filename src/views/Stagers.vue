@@ -30,8 +30,8 @@
 </template>
 
 <script>
-import DownloadMixin from "@/mixins/download-stager";
-import CopyMixin from "@/mixins/copy-stager";
+import { useDownload } from "@/composables/useDownload";
+import { useCopyStager } from "@/composables/useCopyStager";
 import ListPageTop from "@/components/ListPageTop.vue";
 import StagersTable from "@/components/stagers/StagersTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
@@ -46,8 +46,12 @@ export default {
     ListPageTop,
     StagersTable,
   },
-  mixins: [DownloadMixin, CopyMixin],
   inject: ["snack", "confirm"],
+  setup() {
+    const { downloadStager, downloadText } = useDownload();
+    const { copyStager } = useCopyStager();
+    return { downloadStager, downloadText, copyStager };
+  },
   data() {
     return {
       breads: [
