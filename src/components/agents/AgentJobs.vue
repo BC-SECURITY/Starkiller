@@ -183,7 +183,7 @@
 </template>
 
 <script>
-import moment from "moment";
+import dayjs from "@/plugins/dayjs";
 // eslint-disable-next-line import/no-named-default
 import { default as AnsiUp } from "ansi_up";
 import * as agentTaskApi from "@/api/agent-task-api";
@@ -473,7 +473,7 @@ export default {
     },
     formatDate(date) {
       if (!date) return "N/A";
-      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
     },
     truncateInput(input) {
       if (!input) return "";

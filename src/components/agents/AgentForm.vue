@@ -67,12 +67,12 @@
       />
       <click-to-edit
         label="Check In Time"
-        :model-value="moment(form.checkin_time).fromNow()"
+        :model-value="relativeTime(form.checkin_time)"
         :editable="false"
       />
       <click-to-edit
         label="Last Seen Time"
-        :model-value="moment(form.lastseen_time).fromNow()"
+        :model-value="relativeTime(form.lastseen_time)"
         :editable="false"
       />
       <click-to-edit
@@ -139,7 +139,7 @@
 </template>
 
 <script>
-import moment from "moment";
+import dayjs from "@/plugins/dayjs";
 import TagViewer from "@/components/TagViewer.vue";
 import ClickToEdit from "@/components/ClickToEdit.vue";
 import * as agentTaskApi from "@/api/agent-task-api";
@@ -171,7 +171,6 @@ export default {
       labelPosition: "left",
       rules: {},
       form: {},
-      moment,
       workingHoursRules: [
         (v) =>
           /^[0-9]{1,2}:[0-5][0-9]-[0-9]{1,2}:[0-5][0-9]$/.test(v) ||
@@ -248,6 +247,13 @@ export default {
     this.listenerStore.getListeners();
   },
   methods: {
+    // dayjs(null|"") is "valid" and yields a bogus relative time (moment
+    // rendered "Invalid date"); guard so an unparseable timestamp shows a
+    // placeholder. dayjs(undefined) stays valid (= now), matching moment.
+    relativeTime(value) {
+      const parsed = dayjs(value);
+      return parsed.isValid() ? parsed.fromNow() : "N/A";
+    },
     deleteTag(tag) {
       agentApi
         .deleteTag(this.agent.session_id, tag.id)
@@ -308,7 +314,7 @@ export default {
     async updateKillDate() {
       let date = "";
       if (this.form.kill_date && this.form.kill_date.length > 0) {
-        date = moment(this.form.kill_date).format("MM/DD/YYYY");
+        date = dayjs(this.form.kill_date).format("MM/DD/YYYY");
       }
       if (this.agent.kill_date === date) return;
 

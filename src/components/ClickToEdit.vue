@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import moment from "moment";
+import dayjs from "@/plugins/dayjs";
 
 export default {
   props: {
@@ -147,7 +147,6 @@ export default {
       editing: false,
       menu: false,
       original: "",
-      moment,
     };
   },
   computed: {
@@ -210,7 +209,7 @@ export default {
       this.$emit("update");
     },
     onDatePicked(date) {
-      this.internalValue = date ? moment(date).format("YYYY-MM-DD") : "";
+      this.internalValue = date ? dayjs(date).format("YYYY-MM-DD") : "";
     },
     getColClass() {
       if (this.editing === false && this.editable === true) {

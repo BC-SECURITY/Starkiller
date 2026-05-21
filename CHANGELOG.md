@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   Replaced the deprecated `moment` dependency with `dayjs`
 -   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
 
 ### Fixed
