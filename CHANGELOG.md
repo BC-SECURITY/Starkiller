@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete
 -   Fixed a Vue Router "Missing required param" error logged after every successful module execution
+-   Fixed socket event-handler and timer leaks in the chat widget that caused duplicate messages and inflated unread counts after the chat widget was toggled
 -   Fixed unstable index-based `v-for` keys on chat messages and notifications that could corrupt list rendering on reorder
 -   Removed leftover debug `console.log` and `console.warn` calls from API modules
 

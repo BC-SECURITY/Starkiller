@@ -121,6 +121,7 @@
 import { nextTick } from "vue";
 import { useUserStore } from "@/stores/user-module";
 import { useApplicationStore } from "@/stores/application-module";
+import { useSocketHandlers } from "@/composables/useSocketHandlers";
 
 export default {
   name: "Chat",
@@ -129,6 +130,17 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  setup(props) {
+    // Register socket handlers through the composable so they are automatically
+    // removed when this component unmounts. Passing props.socket by value is
+    // intentional: the parent assigns the socket once and only clears it on
+    // disconnect, which unmounts this component (it renders us behind
+    // v-if="socket && chatWidget"). The reference never changes underneath us,
+    // so we don't need reactive access — hence the disable below.
+    // eslint-disable-next-line vue/no-setup-props-destructure
+    const { on, emit } = useSocketHandlers(props.socket);
+    return { on, emit };
   },
   data() {
     return {
@@ -140,6 +152,7 @@ export default {
       isChatOpen: false,
       inputText: "",
       showParticipants: false,
+      historyTimer: null,
     };
   },
   computed: {
@@ -180,17 +193,18 @@ export default {
   },
   mounted() {
     this.userStore.getUsers();
-    this.socket.on("chat/join", (data) => {
+    // Registered via the composable's on() so they are removed on unmount.
+    this.on("chat/join", (data) => {
       if (!this.isChatOpen && this.historyLoaded) this.newMessagesCount++;
       this.addMessage({ type: "system", text: data.message });
       this.addUser(data.user);
     });
-    this.socket.on("chat/leave", (data) => {
+    this.on("chat/leave", (data) => {
       if (!this.isChatOpen && this.historyLoaded) this.newMessagesCount++;
       this.addMessage({ type: "system", text: data.message });
       this.removeUser(data.user);
     });
-    this.socket.on("chat/message", (data) => {
+    this.on("chat/message", (data) => {
       // Skip our own messages — already added locally in send()
       // But allow them during history loading so past messages appear
       if (data.username === this.me && this.historyLoaded) return;
@@ -201,19 +215,24 @@ export default {
         text: data.message,
       });
     });
-    this.socket.on("chat/participants", (data) => {
+    this.on("chat/participants", (data) => {
       this.rawParticipants = data;
     });
-    this.socket.emit("chat/join");
-    this.socket.emit("chat/history");
-    this.socket.emit("chat/participants");
+    this.emit("chat/join");
+    this.emit("chat/history");
+    this.emit("chat/participants");
     // Mark history as loaded after a short delay to allow history messages through
-    setTimeout(() => {
+    this.historyTimer = setTimeout(() => {
       this.historyLoaded = true;
     }, 1000);
   },
   unmounted() {
-    this.socket.emit("chat/leave");
+    this.emit("chat/leave");
+    // Cancel the pending history-loaded timer if we unmount before it fires.
+    if (this.historyTimer) {
+      clearTimeout(this.historyTimer);
+      this.historyTimer = null;
+    }
   },
   methods: {
     open() {
@@ -225,7 +244,7 @@ export default {
     send() {
       const text = this.inputText.trim();
       if (!text) return;
-      this.socket.emit("chat/message", { message: text });
+      this.emit("chat/message", { message: text });
       this.addMessage({ type: "text", author: "me", text });
       this.inputText = "";
     },
