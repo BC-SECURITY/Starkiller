@@ -184,8 +184,7 @@
 
 <script>
 import dayjs from "@/plugins/dayjs";
-// eslint-disable-next-line import/no-named-default
-import { default as AnsiUp } from "ansi_up";
+import { AnsiUp } from "@/utils/ansi";
 import * as agentTaskApi from "@/api/agent-task-api";
 import pause from "@/utils/pause";
 import { useDownload } from "@/composables/useDownload";

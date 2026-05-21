@@ -360,9 +360,10 @@
 </template>
 
 <script>
+import { getCurrentInstance } from "vue";
 import debounce from "lodash.debounce";
-// eslint-disable-next-line import/no-named-default
-import { default as AnsiUp } from "ansi_up";
+import { isAnsi, ansiToHtml } from "@/utils/ansi";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TooltipButton from "@/components/TooltipButton.vue";
 import TagViewer from "@/components/TagViewer.vue";
@@ -420,8 +421,13 @@ export default {
   },
   emits: ["refresh-tags"],
   setup() {
+    const instance = getCurrentInstance();
+    const { start, stop } = useAutoRefresh(
+      () => instance.proxy.debouncedGetTasks(),
+      8000,
+    );
     const { downloadStager, downloadText } = useDownload();
-    return { downloadStager, downloadText };
+    return { start, stop, downloadStager, downloadText };
   },
   data() {
     return {
@@ -431,7 +437,6 @@ export default {
       itemsPerPage: 10,
       loading: false,
       sortBy: [{ key: "updated_at", order: "desc" }],
-      refreshInterval: null,
       expandedTasks: {},
       debouncedGetTasks: debounce(this.getTasks, 500),
       selectedHeadersTemp: [],
@@ -535,16 +540,9 @@ export default {
     refreshTasks: {
       handler(newVal) {
         if (newVal) {
-          if (this.debouncedGetTasks) {
-            this.debouncedGetTasks();
-          } else {
-            this.getTasks();
-          }
-          this.refreshInterval = setInterval(() => {
-            this.debouncedGetTasks();
-          }, 8000);
+          this.start();
         } else {
-          clearInterval(this.refreshInterval);
+          this.stop();
         }
       },
       immediate: true,
@@ -582,9 +580,6 @@ export default {
       this.applicationStore.taskHeaders.some((h2) => h2.title === h.title),
     );
   },
-  beforeUnmount() {
-    clearInterval(this.refreshInterval);
-  },
   methods: {
     submitHeaderForm(val) {
       this.selectedHeadersTemp = val;
@@ -598,21 +593,8 @@ export default {
         this.applicationStore.taskHeaders.some((h2) => h2.title === h.title),
       );
     },
-    // eslint-disable-next-line no-unused-vars
-    // from https://github.com/xpl/ansicolor
-    stripAnsi(text) {
-      return text.replace(
-        // eslint-disable-next-line no-control-regex
-        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-PRZcf-nqry=><]/g,
-        "",
-      ); // hope V8 caches the regexp
-    },
-    isAnsi(output) {
-      return this.stripAnsi(output) !== output;
-    },
-    ansiToHtml(output) {
-      return new AnsiUp().ansi_to_html(output);
-    },
+    isAnsi,
+    ansiToHtml,
     deleteTag(task, tag) {
       agentTaskApi
         .deleteTag(task.agent_id, task.id, tag.id)

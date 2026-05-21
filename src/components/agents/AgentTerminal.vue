@@ -45,7 +45,7 @@
 import pause from "@/utils/pause";
 import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
-import AnsiUp from "ansi_up";
+import { ansiToHtml } from "@/utils/ansi";
 import { table } from "table";
 import { useModuleStore } from "@/stores/module-module";
 import { useListenerStore } from "@/stores/listener-module";
@@ -819,13 +819,7 @@ export default {
         this.addLine(line, "indent-5-spaces");
       });
     },
-    ansiToHTML(input) {
-      let output = input;
-      const ansiUp = new AnsiUp();
-
-      output = ansiUp.ansi_to_html(output);
-      return output;
-    },
+    ansiToHTML: ansiToHtml,
     async useModule(moduleName) {
       const moduleData = this.allModules.find(
         (module) => module.id === moduleName,

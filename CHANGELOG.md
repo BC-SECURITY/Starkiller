@@ -21,18 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   Extracted duplicated ANSI-to-HTML helpers into a shared utility (`src/utils/ansi.js`) and auto-refresh polling into a reusable composable (`useAutoRefresh`)
 -   Declared explicit `emits` options on components that were emitting undeclared events
+-   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
+-   Replaced the deprecated `moment` dependency with `dayjs`
+-   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
 
 ### Removed
 
 -   Removed the unused `vue.config.js` (dead Vue CLI config carried over from Vue CLI / Webpack era, superseded by Vite)
 -   Removed the unused `uuid` dependency
-
-### Changed
-
--   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
--   Replaced the deprecated `moment` dependency with `dayjs`
--   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
 
 ### Fixed
 
