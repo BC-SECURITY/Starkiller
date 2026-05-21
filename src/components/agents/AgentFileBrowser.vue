@@ -81,6 +81,7 @@ export default {
       default: false,
     },
   },
+  emits: ["openUploadDialog"],
   data() {
     return {
       /**

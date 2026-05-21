@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
+-   Added `jsconfig.json` for editor path-alias resolution and a Node `engines` field to `package.json`
+
+### Changed
+
+-   Declared explicit `emits` options on components that were emitting undeclared events
+
+### Removed
+
+-   Removed the unused `vue.config.js` (dead Vue CLI config carried over from Vue CLI / Webpack era, superseded by Vite)
+-   Removed the unused `uuid` dependency
 
 ### Changed
 
@@ -27,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete
 -   Fixed a Vue Router "Missing required param" error logged after every successful module execution
+-   Fixed unstable index-based `v-for` keys on chat messages and notifications that could corrupt list rendering on reorder
+-   Removed leftover debug `console.log` and `console.warn` calls from API modules
 
 ## [3.5.0] - 2026-04-26
 

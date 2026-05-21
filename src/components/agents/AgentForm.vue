@@ -163,6 +163,7 @@ export default {
       default: false,
     },
   },
+  emits: ["refresh-agent"],
   data() {
     return {
       valid: true,

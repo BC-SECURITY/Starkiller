@@ -2,12 +2,21 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import { setInstance } from "@/api/axios-instance";
 
+// Monotonic counter for assigning stable notification ids. Combined with a
+// timestamp so ids stay unique across page reloads (notifications persist).
+let notificationCounter = 0;
+
 // eslint-disable-next-line import/prefer-default-export
 export const useApplicationStore = defineStore("application", {
   persist: {
     omit: ["chatUnreadCount"],
     afterRestore: (ctx) => {
       setInstance(ctx.store.url, ctx.store.token);
+      // Backfill ids on notifications persisted before ids existed, so
+      // they don't all key on `undefined` after a reload.
+      ctx.store.notifications.forEach((n) => {
+        if (n.id == null) n.id = `${Date.now()}-${notificationCounter++}`;
+      });
     },
   },
   state: () => ({
@@ -77,7 +86,8 @@ export const useApplicationStore = defineStore("application", {
       this.user = userResponse.data;
     },
     addNotification(notification) {
-      this.notifications = [notification, ...this.notifications];
+      const id = `${Date.now()}-${notificationCounter++}`;
+      this.notifications = [{ id, ...notification }, ...this.notifications];
     },
     markAllNotificationsAsRead() {
       this.notifications = this.notifications.map((n) => ({

@@ -418,6 +418,7 @@ export default {
       default: false,
     },
   },
+  emits: ["refresh-tags"],
   setup() {
     const { downloadStager, downloadText } = useDownload();
     return { downloadStager, downloadText };

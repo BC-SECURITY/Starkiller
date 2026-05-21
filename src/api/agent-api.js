@@ -36,7 +36,6 @@ export function renameAgent(agent, newName) {
  * @param {string} sessionId agent sessionId
  */
 export function killAgent(sessionId) {
-  console.log("killAgent", sessionId);
   return axios
     .post(`/agents/${sessionId}/tasks/exit`, {})
     .then(({ data }) => data)

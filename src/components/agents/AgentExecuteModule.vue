@@ -217,6 +217,7 @@ export default {
       default: () => ({}),
     },
   },
+  emits: ["moduleChange", "submitted"],
   data() {
     return {
       loading: false,

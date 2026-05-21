@@ -53,7 +53,7 @@
 
     <!-- Messages Area -->
     <div ref="messageContainer" class="chat-messages">
-      <template v-for="(m, i) in messages" :key="i">
+      <template v-for="m in messages" :key="m.id">
         <!-- System message -->
         <div v-if="m.type === 'system'" class="chat-msg-system">
           <span>{{ m.text }}</span>
@@ -134,6 +134,7 @@ export default {
     return {
       rawParticipants: [],
       messages: [],
+      nextMessageId: 0,
       newMessagesCount: 0,
       historyLoaded: false,
       isChatOpen: false,
@@ -181,12 +182,12 @@ export default {
     this.userStore.getUsers();
     this.socket.on("chat/join", (data) => {
       if (!this.isChatOpen && this.historyLoaded) this.newMessagesCount++;
-      this.messages.push({ type: "system", text: data.message });
+      this.addMessage({ type: "system", text: data.message });
       this.addUser(data.user);
     });
     this.socket.on("chat/leave", (data) => {
       if (!this.isChatOpen && this.historyLoaded) this.newMessagesCount++;
-      this.messages.push({ type: "system", text: data.message });
+      this.addMessage({ type: "system", text: data.message });
       this.removeUser(data.user);
     });
     this.socket.on("chat/message", (data) => {
@@ -194,7 +195,7 @@ export default {
       // But allow them during history loading so past messages appear
       if (data.username === this.me && this.historyLoaded) return;
       if (!this.isChatOpen && this.historyLoaded) this.newMessagesCount++;
-      this.messages.push({
+      this.addMessage({
         type: "text",
         author: data.username === this.me ? "me" : data.username,
         text: data.message,
@@ -218,11 +219,14 @@ export default {
     open() {
       this.isChatOpen = true;
     },
+    addMessage(message) {
+      this.messages.push({ id: this.nextMessageId++, ...message });
+    },
     send() {
       const text = this.inputText.trim();
       if (!text) return;
       this.socket.emit("chat/message", { message: text });
-      this.messages.push({ type: "text", author: "me", text });
+      this.addMessage({ type: "text", author: "me", text });
       this.inputText = "";
     },
     scrollToBottom() {

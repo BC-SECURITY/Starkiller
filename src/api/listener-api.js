@@ -39,10 +39,7 @@ export function createListener(template, options) {
   return axios
     .post("/listeners", { name: options.Name, template, options })
     .then(({ data }) => data)
-    .catch((error) => {
-      console.log(error);
-      return Promise.reject(handleError(error));
-    });
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 /**

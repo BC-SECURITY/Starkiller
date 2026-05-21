@@ -52,7 +52,6 @@ export const useListenerStore = defineStore("listener", {
     async saveAutorunTasks({ listenerId, modules }) {
       try {
         await listenerApi.saveAutorunTasks(listenerId, { records: modules }); // Remove extra 'records'
-        console.log("Autorun tasks saved successfully.");
       } catch (error) {
         console.error("Error saving autorun tasks:", error);
       }
