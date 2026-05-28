@@ -1,0 +1,1 @@
+import{cr as o}from"./index-ChoZvocb.js";import{g as s}from"./module-api-CNef-ooB.js";const u=o("module",{state:()=>({modules:[]}),actions:{async getModules(){const e=await s();this.modules=e}},getters:{}});export{u};
