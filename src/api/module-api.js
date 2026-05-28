@@ -18,6 +18,7 @@ export function executeModule(
   options,
   ignoreAdminCheck,
   ignoreLanguageCheck,
+  backgroundOverride,
 ) {
   return axios
     .post(`/agents/${options.Agent}/tasks/module/`, {
@@ -25,6 +26,7 @@ export function executeModule(
       options,
       ignore_admin_check: ignoreAdminCheck,
       ignore_language_version_check: ignoreLanguageCheck,
+      background_override: backgroundOverride,
     })
     .then(({ data }) => ({ agent: options.Agent, ...data }))
     .catch((error) =>

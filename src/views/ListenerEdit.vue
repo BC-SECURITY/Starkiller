@@ -41,7 +41,7 @@
         <v-menu v-if="!isNew && initialLoad" open-on-hover>
           <template #activator="{ props: activatorProps }">
             <v-btn
-              class="mr-5"
+              class="mr-2"
               variant="text"
               icon
               size="small"
@@ -117,7 +117,7 @@
               :readonly="!canEdit"
             />
             <v-alert v-if="validationMessage" prominent type="warning">
-              <v-row align="center">
+              <v-row class="align-center">
                 <v-col class="grow" style="word-wrap: word-break; width: 500px">
                   {{ validationMessage }}
                 </v-col>

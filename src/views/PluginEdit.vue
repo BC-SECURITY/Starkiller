@@ -109,7 +109,7 @@
               <v-col cols="12">
                 <span v-if="!plugin.loaded">
                   <v-alert prominent type="warning" variant="outlined">
-                    <v-row align="center">
+                    <v-row class="align-center">
                       <v-col class="grow">
                         <vue-markdown
                           :source="pluginPythonDeps"
@@ -123,12 +123,7 @@
                 Authors:
                 <author-chips :authors="plugin.authors" />
                 <v-spacer />
-                <v-card
-                  v-if="plugin.readme"
-                  class="pa-4"
-                  variant="outlined"
-                  elevation="2"
-                >
+                <v-card v-if="plugin.readme" class="pa-4" variant="outlined">
                   <vue-markdown :source="plugin.readme" />
                 </v-card>
               </v-col>

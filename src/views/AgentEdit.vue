@@ -194,11 +194,12 @@
                   <v-window v-model="interactTab">
                     <v-window-item
                       key="shell"
+                      style="height: auto"
                       value="shell"
                       :transition="false"
                       :reverse-transition="false"
                     >
-                      <agent-interact :agent="agent" />
+                      <agent-shell-session class="mt-2" :agent="agent" />
                     </v-window-item>
                     <v-window-item
                       key="module"
@@ -215,7 +216,13 @@
                       :transition="false"
                       :reverse-transition="false"
                     >
-                      <agent-terminal class="mt-2" :agent="agent" />
+                      <tabbed-terminal-container
+                        class="mt-2"
+                        :agent="agent"
+                        :child-component="terminalComponent"
+                        label="Terminal"
+                        :storage-key="`terminal-tabs-${id}`"
+                      />
                     </v-window-item>
                   </v-window>
                 </v-card>
@@ -296,12 +303,13 @@
 
 <script>
 import AgentForm from "@/components/agents/AgentForm.vue";
-import AgentInteract from "@/components/agents/AgentInteract.vue";
 import AgentTasksList from "@/components/agents/AgentTasksList.vue";
 import AgentJobs from "@/components/agents/AgentJobs.vue";
 import AgentExecuteModule from "@/components/agents/AgentExecuteModule.vue";
 import AgentFileBrowser from "@/components/agents/AgentFileBrowser.vue";
 import AgentTerminal from "@/components/agents/AgentTerminal.vue";
+import AgentShellSession from "@/components/agents/AgentShellSession.vue";
+import TabbedTerminalContainer from "@/components/agents/TabbedTerminalContainer.vue";
 import AgentUploadDialog from "@/components/agents/AgentUploadDialog.vue";
 import AgentDownloadDialog from "@/components/agents/AgentDownloadDialog.vue";
 import TooltipButtonToggle from "@/components/TooltipButtonToggle.vue";
@@ -317,12 +325,12 @@ export default {
   name: "AgentEdit",
   components: {
     AgentForm,
-    AgentInteract,
     AgentExecuteModule,
     AgentFileBrowser,
     AgentTasksList,
     AgentJobs,
-    AgentTerminal,
+    AgentShellSession,
+    TabbedTerminalContainer,
     AgentUploadDialog,
     AgentDownloadDialog,
     TooltipButtonToggle,
@@ -346,10 +354,15 @@ export default {
       rightPaneInitialized: false,
       pathToFile: "",
       isRefreshTasks: true,
-      interactTab: "module",
+      interactTab:
+        localStorage.getItem(`interact-tab-${this.$route.params.id}`) ||
+        "module",
     };
   },
   computed: {
+    terminalComponent() {
+      return AgentTerminal;
+    },
     agentStore() {
       return useAgentStore();
     },
@@ -400,6 +413,9 @@ export default {
     },
   },
   watch: {
+    interactTab(val) {
+      localStorage.setItem(`interact-tab-${this.id}`, val);
+    },
     id(val) {
       if (val) {
         this.getAgent(val);

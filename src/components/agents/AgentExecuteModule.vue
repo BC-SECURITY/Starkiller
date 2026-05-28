@@ -52,7 +52,7 @@
       <v-dialog v-model="showTreeDialog" max-width="500px">
         <v-card>
           <v-card-title>
-            <span class="headline">Browse Modules</span>
+            <span class="text-headline-small">Browse Modules</span>
           </v-card-title>
           <v-card-text>
             <v-treeview
@@ -80,7 +80,7 @@
       </v-dialog>
 
       <v-alert v-if="selectedItem.opsec_safe === false" type="warning">
-        <v-row align="center">
+        <v-row class="align-center">
           <v-col
             class="grow"
             style="word-wrap: break-word; word-break: break-word; width: 500px"
@@ -106,6 +106,12 @@
           label="Ignore Language Version Check"
           color="primary"
         />
+        <v-checkbox
+          v-model="backgroundOverride"
+          class="pa-1"
+          label="Run as Background Job"
+          color="primary"
+        />
       </div>
 
       <general-form
@@ -128,7 +134,7 @@
       <v-dialog ref="nameDialog" v-model="showDialog" max-width="900px">
         <v-card>
           <v-card-title>
-            <span class="headline">Execution Result</span>
+            <span class="text-headline-small">Execution Result</span>
           </v-card-title>
           <v-card-text>
             <v-data-table
@@ -227,6 +233,7 @@ export default {
       errorState: false,
       ignoreAdminCheck: false,
       ignoreLanguageCheck: false,
+      backgroundOverride: false,
       treeSelected: [],
       treeOpen: [],
       showTreeDialog: false,
@@ -401,6 +408,8 @@ export default {
       this.selectedItem = results || {};
       if (!Object.keys(this.selectedItem).length) {
         this.errorState = true;
+      } else {
+        this.backgroundOverride = !!this.selectedItem.background;
       }
     },
     handleTreeSelect(selected) {
@@ -438,6 +447,7 @@ export default {
             },
             this.ignoreAdminCheck,
             this.ignoreLanguageCheck,
+            this.backgroundOverride,
           ),
         ),
       );

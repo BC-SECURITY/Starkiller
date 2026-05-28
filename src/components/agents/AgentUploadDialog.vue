@@ -2,7 +2,7 @@
   <v-dialog ref="agentUploadDialog" v-model="show" max-width="750px">
     <v-card>
       <v-card-title>
-        <span class="headline">Upload To Agent</span>
+        <span class="text-headline-small">Upload To Agent</span>
       </v-card-title>
       <v-card-text>
         <p>Only showing files smaller than {{ formatBytes(maxBytes) }}</p>

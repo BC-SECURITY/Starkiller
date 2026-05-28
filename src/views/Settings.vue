@@ -1,7 +1,7 @@
 <template>
   <div>
     <list-page-top :breads="breads" />
-    <div class="page">
+    <div class="page" style="max-width: 900px">
       <div
         class="first-part point"
         style="display: flex; flex-direction: row; align-items: center"
@@ -47,33 +47,34 @@
         <v-text-field
           v-model="password.form.password"
           :type="showPassword ? 'text' : 'password'"
-          :append-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
+          :append-inner-icon="showPassword ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['password']"
           label="Password"
           autocomplete="off"
           variant="outlined"
           density="compact"
           required
-          @click:append="showPassword = !showPassword"
+          @click:append-inner="showPassword = !showPassword"
         />
         <v-text-field
           v-model="password.form.confirmPassword"
           :type="showConfirm ? 'text' : 'password'"
-          :append-icon="showConfirm ? 'fa-eye' : 'fa-eye-slash'"
+          :append-inner-icon="showConfirm ? 'fa-eye' : 'fa-eye-slash'"
           :rules="rules['confirmPassword']"
           label="Confirm Password"
           autocomplete="off"
           variant="outlined"
           density="compact"
           required
-          @click:append="showConfirm = !showConfirm"
+          @click:append-inner="showConfirm = !showConfirm"
         />
         <v-btn
           type="submit"
-          class="mt-4 mb-4 primary"
+          class="mt-4 mb-4"
+          color="primary"
           :loading="password.loading"
         >
-          submit
+          Submit
         </v-btn>
       </v-form>
       <div class="headers pl-0 mt-2">

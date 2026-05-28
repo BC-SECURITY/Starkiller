@@ -8,7 +8,11 @@
         ref="socketNotifications"
       />
       <starkiller-snackbar ref="snack" />
-      <v-app-bar v-if="isLoggedIn" scroll-behavior="elevate">
+      <v-app-bar
+        v-if="isLoggedIn"
+        density="comfortable"
+        scroll-behavior="elevate"
+      >
         <template
           v-if="
             $route.name === 'agentEdit' ||
@@ -48,33 +52,36 @@
         </v-container>
       </v-main>
 
-      <v-footer v-if="!hideSideBar" app>
-        <span class="mr-2">Copyright (c) 2023 BC Security |</span>
+      <v-footer
+        v-if="!hideSideBar"
+        app
+        class="text-body-small pa-2 justify-center"
+        style="font-size: 0.8rem"
+      >
+        <span class="mr-1">&copy; 2026 BC Security</span>
+        <span class="mr-1">&middot;</span>
         <a
-          class="mr-2"
+          class="mr-1"
           target="_blank"
           rel="noopener noreferrer"
           href="https://github.com/bc-security/starkiller"
+          >Starkiller</a
         >
-          Starkiller
-        </a>
-        <span class="mr-2">|</span>
+        <span class="mr-1">&middot;</span>
         <a
-          class="mr-2"
+          class="mr-1"
           target="_blank"
           rel="noopener noreferrer"
           href="https://github.com/bc-security/empire"
+          >Empire</a
         >
-          Empire</a
-        >
-        <span class="mr-2">|</span>
+        <span class="mr-1">&middot;</span>
         <a
-          class="mr-2"
+          class="mr-1"
           target="_blank"
           rel="noopener noreferrer"
           href="https://github.com/sponsors/BC-SECURITY"
-        >
-          Sponsor for extra features</a
+          >Sponsor</a
         >
       </v-footer>
     </v-app>

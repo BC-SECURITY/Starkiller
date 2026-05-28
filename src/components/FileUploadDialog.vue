@@ -2,7 +2,7 @@
   <v-dialog ref="uploadDialog" v-model="show" max-width="750px">
     <v-card>
       <v-card-title>
-        <span class="headline">Upload To Empire Server</span>
+        <span class="text-headline-small">Upload To Empire Server</span>
       </v-card-title>
       <v-card-text>
         <v-form ref="form" @submit.prevent>

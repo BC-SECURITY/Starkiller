@@ -14,6 +14,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-04-26
+
+### Changed
+
+-   Upgraded Vuetify from v3 to v4
+    -   Migrated deprecated VRow/VCol props (align, justify, dense) to utility classes
+    -   Migrated MD2 typography classes (headline, text-h5, subtitle-1/2) to MD3 equivalents
+    -   Adopted MD3 visual defaults (elevation, density, button styling)
+    -   Improved table UX with row hover highlighting
+    -   Improved Settings page layout with max-width constraint and inner password icons
+    -   Improved empty table state styling
+    -   Improved edit page toolbar button ordering and spacing
+    -   Refined footer, tag chips, and app bar density
+
+### Fixed
+
+-   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
+
 ## [3.4.0] - 2026-03-08
 
 ### Changed
@@ -459,7 +477,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...HEAD
+
+[3.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v3.5.0
 
 [3.4.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.3.0...v3.4.0
 
