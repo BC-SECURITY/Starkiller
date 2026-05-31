@@ -30,7 +30,24 @@ export function setInstance(url, token) {
   );
 }
 
+// Error carrying the FastAPI `detail` message while preserving the original
+// axios response so callers can still introspect err.response.status (e.g.
+// AgentStats's 404-terminal branch). toString() returns the bare message — no
+// "Error:" prefix — so existing `${err}` interpolations render exactly as they
+// did when handleError returned a bare detail string.
+class ApiError extends Error {
+  toString() {
+    return this.message;
+  }
+}
+
 export function handleError(error) {
   console.error(error);
-  return error?.response?.data?.detail || error;
+  const detail = error?.response?.data?.detail;
+  if (detail) {
+    const apiError = new ApiError(detail);
+    apiError.response = error.response;
+    return apiError;
+  }
+  return error;
 }

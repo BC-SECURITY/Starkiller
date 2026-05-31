@@ -20,6 +20,10 @@
               Jobs
               <v-icon size="x-small" class="ml-1"> fa-cogs </v-icon>
             </v-tab>
+            <v-tab key="stats" value="stats">
+              Stats
+              <v-icon size="x-small" class="ml-1"> fa-chart-bar </v-icon>
+            </v-tab>
             <v-tab key="view" value="view">
               View
               <v-icon size="x-small" class="ml-1"> fa-eye </v-icon>
@@ -273,6 +277,20 @@
                 </v-card>
               </v-window-item>
               <v-window-item
+                key="stats"
+                value="stats"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card flat>
+                  <agent-stats
+                    :agent="agent"
+                    :active="tab === 'stats'"
+                    :refresh-tasks="isRefreshTasks"
+                  />
+                </v-card>
+              </v-window-item>
+              <v-window-item
                 key="view"
                 value="view"
                 :transition="false"
@@ -305,6 +323,7 @@
 import AgentForm from "@/components/agents/AgentForm.vue";
 import AgentTasksList from "@/components/agents/AgentTasksList.vue";
 import AgentJobs from "@/components/agents/AgentJobs.vue";
+import AgentStats from "@/components/agents/AgentStats.vue";
 import AgentExecuteModule from "@/components/agents/AgentExecuteModule.vue";
 import AgentFileBrowser from "@/components/agents/AgentFileBrowser.vue";
 import AgentTerminal from "@/components/agents/AgentTerminal.vue";
@@ -329,6 +348,7 @@ export default {
     AgentFileBrowser,
     AgentTasksList,
     AgentJobs,
+    AgentStats,
     AgentShellSession,
     TabbedTerminalContainer,
     AgentUploadDialog,

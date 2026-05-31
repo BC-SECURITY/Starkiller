@@ -20,7 +20,6 @@ export function getAgents(includeArchived = false) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-// or even just id if we remove the numeric ids.
 /**
  * Rename an agent.
  */
@@ -111,6 +110,8 @@ export function getCheckinsAgg(
   bucketSize = "day",
   startDate = null,
   endDate = null,
+  sessionId = null,
+  signal = null,
 ) {
   return axios
     .get("/agents/checkins/aggregate", {
@@ -118,7 +119,9 @@ export function getCheckinsAgg(
         bucket_size: bucketSize.toLowerCase(),
         start_date: startDate,
         end_date: endDate,
+        session_id: sessionId,
       },
+      signal,
     })
     .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));

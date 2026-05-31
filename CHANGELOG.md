@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased - 4.x]
 
+### Added
+
+-   Per-agent **Stats** tab on agent edit: Last Seen, total/queued task counts, host/integrity/language, a per-agent Check Ins chart, and a Tasks Over Time chart
+-   Multi-agent selection on the Dashboard Check Ins card, persisted across sessions
+
 ### Changed
 
 -   **BREAKING**: Switched package manager from yarn to pnpm 11. Contributors now need Node 22+ and pnpm 11+ (`corepack enable` picks up the pinned version).

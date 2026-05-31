@@ -48,6 +48,19 @@ export const useApplicationStore = defineStore("application", {
     connectionError: 0,
     chatUnreadCount: 0,
     notifications: [],
+    dashboardSelectedAgentIds: [],
+    // Stats-page view preferences. Shared across all agents (a user who picks
+    // "Hour" on agent A sees "Hour" on agent B) and intentionally survive
+    // logout()/clear() — same precedent as dashboardSelectedAgentIds above.
+    // Cross-user caveat (all survive-logout keys): on a shared machine User B
+    // inherits User A's values. For dashboardSelectedAgentIds the leak is
+    // mitigated by pruneSelection() (in Dashboard.vue — drops ids absent from
+    // the current agent list); these timeframe prefs have no equivalent prune
+    // (a stale timeframe is harmless). Don't "fix" the survive-logout behavior
+    // without accounting for this.
+    dashboardCheckinTimeframe: "Second",
+    agentStatsCheckinTimeframe: "Second",
+    agentStatsTaskTimeframe: "Day",
   }),
   actions: {
     async login({ url, socketUrl, username, password }) {

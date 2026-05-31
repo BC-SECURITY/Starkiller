@@ -29,68 +29,71 @@
       <template #expanded-row="{ columns, item }">
         <td :colspan="columns.length" class="pa-4">
           <v-card flat>
-            <v-card-title class="text-subtitle-1 pb-4">
-              <v-row no-gutters class="align-center">
-                <v-col cols="4">
-                  <span class="font-weight-bold">Task #{{ item.id }}</span>
-                  <v-chip
-                    v-if="item.module_name || item.task_name"
-                    size="small"
-                    class="ml-2"
-                    color="primary"
-                    variant="outlined"
-                  >
-                    {{ item.module_name || item.task_name }}
-                  </v-chip>
-                </v-col>
-                <v-col
-                  v-if="
-                    (expandedTasks[item.uniqueId].options &&
-                      Object.keys(expandedTasks[item.uniqueId].options).length >
-                        0) ||
-                    (expandedTasks[item.uniqueId].module_options &&
-                      Object.keys(expandedTasks[item.uniqueId].module_options)
-                        .length > 0)
-                  "
-                  cols="6"
+            <div class="task-detail-header px-4 py-2">
+              <!-- Row 1: identity line (Task #, name chip) + Dark Mode switch -->
+              <div class="d-flex align-center ga-2">
+                <span class="font-weight-bold">Task #{{ item.id }}</span>
+                <!-- Keep this chip's content a single text node — the ellipsis
+                     CSS in <style> (.task-name-chip) breaks if you add an icon
+                     or wrapper span here. The v-tooltip wraps the chip from the
+                     outside (accessible to keyboard/touch, unlike native
+                     :title), so the single-text-node content is unaffected. -->
+                <v-tooltip
+                  v-if="item.module_name || item.task_name"
+                  location="top"
+                  :text="item.module_name || item.task_name"
                 >
-                  <div class="d-flex flex-wrap gap-2">
-                    <span class="font-weight-bold ml-2 mr-2 text-subtitle-1"
-                      >Options:</span
-                    >
+                  <template #activator="{ props: activatorProps }">
                     <v-chip
-                      v-for="(value, key) in expandedTasks[item.uniqueId]
-                        .options || expandedTasks[item.uniqueId].module_options"
-                      :key="key"
+                      v-bind="activatorProps"
                       size="small"
-                      label
-                      class="mr-1 mb-1"
+                      class="task-name-chip"
+                      color="primary"
+                      variant="outlined"
                     >
-                      <span class="text-subtitle-2 font-weight-bold mr-1"
-                        >{{ key }}:</span
-                      >
-                      <span class="text-subtitle-2">{{
-                        value.length > 20
-                          ? value.substring(0, 20) + "..."
-                          : value
-                      }}</span>
+                      {{ item.module_name || item.task_name }}
                     </v-chip>
-                  </div>
-                </v-col>
-                <v-col class="text-right">
-                  <v-switch
-                    v-model="expandedTasks[item.uniqueId].backgroundColor"
-                    color="primary"
-                    false-value="white"
-                    true-value="black"
-                    label="Dark Mode Output"
-                    hide-details
-                    class="mt-0 pt-0 d-inline-block"
-                    @update:model-value="updateTaskBackgroundColor(item)"
-                  />
-                </v-col>
-              </v-row>
-            </v-card-title>
+                  </template>
+                </v-tooltip>
+                <v-spacer />
+                <v-switch
+                  v-model="expandedTasks[item.uniqueId].backgroundColor"
+                  color="primary"
+                  false-value="white"
+                  true-value="black"
+                  label="Dark Mode Output"
+                  hide-details
+                  class="mt-0 pt-0 flex-shrink-0"
+                  @update:model-value="updateTaskBackgroundColor(item)"
+                />
+              </div>
+              <!-- Row 2: options line, full width (chips wrap) -->
+              <div
+                v-if="
+                  (expandedTasks[item.uniqueId].options &&
+                    Object.keys(expandedTasks[item.uniqueId].options).length >
+                      0) ||
+                  (expandedTasks[item.uniqueId].module_options &&
+                    Object.keys(expandedTasks[item.uniqueId].module_options)
+                      .length > 0)
+                "
+                class="d-flex flex-wrap align-center ga-2 mt-2"
+              >
+                <span class="task-options-label font-weight-bold"
+                  >Options:</span
+                >
+                <v-chip
+                  v-for="(value, key) in expandedTasks[item.uniqueId].options ||
+                  expandedTasks[item.uniqueId].module_options"
+                  :key="key"
+                  size="small"
+                  label
+                >
+                  <span class="font-weight-bold mr-1">{{ key }}:</span>
+                  <span>{{ truncateOption(value) }}</span>
+                </v-chip>
+              </div>
+            </div>
             <v-divider />
 
             <v-card-text>
@@ -164,7 +167,7 @@
                         )
                       "
                     >
-                      <div class="d-flex flex-wrap gap-2 mb-2">
+                      <div class="d-flex flex-wrap ga-2 mb-2">
                         <v-img
                           v-for="download in item.downloads"
                           :key="download.id"
@@ -633,6 +636,13 @@ export default {
       }
       return "";
     },
+    // Option values are untyped backend data (numbers, booleans, null are all
+    // possible), so coerce to string before measuring/slicing — calling
+    // .length/.substring on a non-string would throw and blank the row.
+    truncateOption(value) {
+      const str = value == null ? "" : String(value);
+      return str.length > 20 ? `${str.substring(0, 20)}...` : str;
+    },
     updateTaskBackgroundColor(task) {
       if (task.backgroundColor === "black") {
         task.backgroundColor = "white";
@@ -777,10 +787,16 @@ export default {
           };
           await moduleApi.executeModule(fullTask.module_name, options);
           this.snack.info(`Module ${fullTask.module_name} rerun queued.`);
-        } else if (fullTask.task_name === "TASK_SHELL") {
+        } else if (
+          fullTask.task_name === "TASK_SHELL" ||
+          fullTask.task_name === "shell"
+        ) {
           await agentTaskApi.shell(fullTask.agent_id, fullTask.full_input);
           this.snack.info("Shell command rerun queued.");
-        } else if (fullTask.task_name === "TASK_SYSINFO") {
+        } else if (
+          fullTask.task_name === "TASK_SYSINFO" ||
+          fullTask.task_name === "sysinfo"
+        ) {
           await agentTaskApi.sysinfo(fullTask.agent_id);
           this.snack.info("Sysinfo task rerun queued.");
         } else {
@@ -904,5 +920,24 @@ export default {
 
 .font-black {
   color: black;
+}
+
+.task-name-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Ellipsis here assumes the chip's only child is the bare task-name text
+   node; adding an icon or wrapper span inside the chip would break it. */
+.task-name-chip .v-chip__content {
+  font-size: 0.8125rem;
+  min-width: 0; /* allow the inner flex item to shrink so ellipsis triggers */
+  white-space: nowrap; /* all three needed for text-overflow to render */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-options-label {
+  font-size: 0.8125rem;
 }
 </style>

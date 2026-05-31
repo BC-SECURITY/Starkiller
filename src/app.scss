@@ -21,3 +21,38 @@
   color: rgba(255, 255, 255, 0.4);
   font-style: italic;
 }
+
+// Stats-page visual tokens. --sk-accent and --sk-chart-height mirror ACCENT
+// and CHART_HEIGHT_PX in src/components/charts/tokens.js — keep those two in
+// sync. --sk-metric-font-size is CSS-only (no JS consumer).
+.sk-stats-surface {
+  --sk-chart-height: 350px;
+  --sk-accent: #32cd32;
+  --sk-metric-font-size: 1.5rem;
+}
+
+// Fallbacks are intentional: if these classes are ever used outside a
+// .sk-stats-surface ancestor, var() resolves to the literal fallback rather
+// than the property's CSS initial value (height: auto). With Chart.js's
+// maintainAspectRatio: false the canvas needs a parent with an explicit
+// height — height: auto collapses it to ~0px. The fallback prevents that.
+.sk-chart-canvas {
+  position: relative;
+  height: var(--sk-chart-height, 350px);
+}
+
+.sk-metric-value {
+  color: var(--sk-accent, #32cd32);
+  // fallback must track the token above
+  font-size: var(--sk-metric-font-size, 1.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.sk-card-title-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}

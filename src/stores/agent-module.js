@@ -9,6 +9,9 @@ export const useAgentStore = defineStore("agent", {
   state: () => ({
     agents: [],
     status: "success",
+    // Real message from the last getAgents() failure, so consumers (Dashboard)
+    // can surface it instead of pointing users at devtools they don't have.
+    lastError: null,
     subscribed: {},
   }),
   actions: {
@@ -18,6 +21,7 @@ export const useAgentStore = defineStore("agent", {
         const agents = await agentApi.getAgents(true);
         this.agents = agents;
         this.status = "success";
+        this.lastError = null;
 
         const { autoSubscribeAgents } = useApplicationStore();
         if (autoSubscribeAgents) {
@@ -30,6 +34,7 @@ export const useAgentStore = defineStore("agent", {
       } catch (err) {
         console.error("[Starkiller] Failed to fetch agents:", err);
         this.status = "error";
+        this.lastError = err?.message || String(err);
       }
     },
     async getAgent({ sessionId }) {
