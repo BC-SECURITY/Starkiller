@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   Replaced axios with a centralized native Fetch API wrapper (`src/api/http.js`) for all HTTP requests, preserving the throw-on-non-2xx error contract; `qs` query serialization replaced by `URLSearchParams`
 -   Extracted duplicated ANSI-to-HTML helpers into a shared utility (`src/utils/ansi.js`) and auto-refresh polling into a reusable composable (`useAutoRefresh`)
 -   Declared explicit `emits` options on components that were emitting undeclared events
 -   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
@@ -39,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Removed the unused `vue.config.js` (dead Vue CLI config carried over from Vue CLI / Webpack era, superseded by Vite)
 -   Removed the unused `uuid` dependency
+-   Removed the `axios` and `qs` dependencies (replaced by the native Fetch wrapper)
 
 ### Fixed
 
@@ -47,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Fixed socket event-handler and timer leaks in the chat widget that caused duplicate messages and inflated unread counts after the chat widget was toggled
 -   Fixed unstable index-based `v-for` keys on chat messages and notifications that could corrupt list rendering on reorder
 -   Removed leftover debug `console.log` and `console.warn` calls from API modules
+-   Fixed FileInput in module-execution and obfuscation flows not auto-selecting the just-uploaded file (`createDownload` previously returned the full response wrapper instead of the parsed body, so `.id` was undefined)
 
 ## [3.5.0] - 2026-04-26
 

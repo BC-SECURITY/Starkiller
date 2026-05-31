@@ -1,6 +1,26 @@
 import { defineStore } from "pinia";
-import axios from "axios";
-import { setInstance } from "@/api/axios-instance";
+import { request, setInstance } from "@/api/http";
+
+// Login deliberately bypasses the http.js wrapper so a failed login does NOT
+// trigger logout() or bump connectionError. fetch does not throw on non-2xx,
+// so we check res.ok and throw an axios-shaped error extractErrorMessage can read.
+// (refreshMe goes through request() — it has the same logout-on-401 semantics
+// as every other authenticated endpoint and benefits from the wrapper's error contract.)
+async function rawFetchJson(url, options = {}) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = undefined;
+    }
+    const err = new Error(`HTTP ${res.status}`);
+    err.response = { status: res.status, statusText: res.statusText, data };
+    throw err;
+  }
+  return res.json();
+}
 
 // Monotonic counter for assigning stable notification ids. Combined with a
 // timestamp so ids stay unique across page reloads (notifications persist).
@@ -15,9 +35,9 @@ export const useApplicationStore = defineStore("application", {
         setInstance(ctx.store.url, ctx.store.token);
       } catch (err) {
         // persistedstate swallows hook errors unless debug is enabled, and
-        // this hook is the only path that re-initializes the axios instance
+        // this hook is the only path that re-initializes the API client
         // after a reload. Log explicitly so a failure here is visible instead
-        // of later surfacing as an opaque null-instance API crash.
+        // of later surfacing as an opaque uninitialized-client API crash.
         console.error(
           "[Starkiller] Failed to re-initialize API client after hydrate:",
           err,
@@ -56,27 +76,29 @@ export const useApplicationStore = defineStore("application", {
         const formData = new FormData();
         formData.append("username", username);
         formData.append("password", password);
-        const tokenResponse = await axios.post(`${url}/token`, formData);
-
-        const userResponse = await axios.get(`${url}/api/v2/users/me`, {
-          headers: {
-            "X-Empire-Token": `Bearer ${tokenResponse.data.access_token}`,
-          },
-        });
-        const versionResponse = await axios.get(`${url}/api/v2/meta/version`, {
-          headers: {
-            "X-Empire-Token": `Bearer ${tokenResponse.data.access_token}`,
-          },
+        const tokenData = await rawFetchJson(`${url}/token`, {
+          method: "POST",
+          body: formData,
         });
 
-        this.token = tokenResponse.data.access_token;
+        const headers = {
+          "X-Empire-Token": `Bearer ${tokenData.access_token}`,
+        };
+        const userData = await rawFetchJson(`${url}/api/v2/users/me`, {
+          headers,
+        });
+        const versionData = await rawFetchJson(`${url}/api/v2/meta/version`, {
+          headers,
+        });
+
+        this.token = tokenData.access_token;
         this.url = url;
         this.socketUrl = socketUrl;
-        this.user = userResponse.data;
-        this.empireVersion = versionResponse.data.version;
+        this.user = userData;
+        this.empireVersion = versionData.version;
         this.notifications = [];
 
-        setInstance(url, tokenResponse.data.access_token);
+        setInstance(url, tokenData.access_token);
       } catch (err) {
         this.loginError = this.extractErrorMessage(err);
       }
@@ -91,10 +113,7 @@ export const useApplicationStore = defineStore("application", {
       return "Unable to connect to server.";
     },
     async refreshMe() {
-      const userResponse = await axios.get(`${this.url}/api/v2/users/me`, {
-        headers: { "X-Empire-Token": `Bearer ${this.token}` },
-      });
-      this.user = userResponse.data;
+      this.user = await request.get("/users/me");
     },
     addNotification(notification) {
       const id = `${Date.now()}-${notificationCounter++}`;

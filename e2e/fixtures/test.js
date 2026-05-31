@@ -20,17 +20,21 @@ const CONSOLE_ERROR_ALLOWLIST = [
   // Vue dev mode warnings (not errors). console.warn is already filtered;
   // this catches edge cases where Vue uses console.error for warnings.
   /^\[Vue warn\]/,
-  // axios-instance.js handleError() logs every API error via console.error.
-  // This fires on expected error paths (login 401, blockUnmockedApi 599, etc.).
-  // Allowlisted here so the guard catches Vue/Vuetify/uncaught issues instead.
-  // Anchored alternation: ^(A|B) anchors both alternatives; /^A|B/ would only
-  // anchor A, letting B match anywhere in the string.
-  /^(Error:|AxiosError)/,
+  // http.js handleError() logs every API error via console.error.
+  // Thrown errors are plain Error objects with message "HTTP <status>", so the
+  // browser surfaces them as "Error: HTTP <status>" — the "Error:" prefix is
+  // what matches here. This fires on expected error paths (login 401,
+  // blockUnmockedApi 599, etc.). Allowlisted so the guard catches
+  // Vue/Vuetify/uncaught issues instead. No code produces "AxiosError" anymore.
+  /^Error:/,
   // Chromium emits a browser-level "Failed to load resource" console error for
   // non-2xx responses before JavaScript processes them. This fires in
   // login.spec.js's "failed login" test (POST /token → 401 Unauthorized).
   // Narrowed to the /token path so other URLs are not silently swallowed.
   /^Failed to load resource: the server responded with a status of 401 \(Unauthorized\)/,
+  // Chromium emits this when a request is aborted (route.abort()). Fires in
+  // login.spec.js's "network failure" test (POST /token → aborted).
+  /^Failed to load resource: net::ERR_FAILED/,
 ];
 
 export const test = base.extend({
