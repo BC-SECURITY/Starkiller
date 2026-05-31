@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Removed the unused `vue.config.js` (dead Vue CLI config carried over from Vue CLI / Webpack era, superseded by Vite)
 -   Removed the unused `uuid` dependency
 -   Removed the `axios` and `qs` dependencies (replaced by the native Fetch wrapper)
+-   Removed the `semver` dependency (replaced by a small inline parser/comparator in `src/utils/version.js`)
+-   Removed the `table` dependency (replaced by an inline ASCII renderer in `src/utils/ascii-table.js`)
 
 ### Fixed
 

@@ -46,7 +46,7 @@ import pause from "@/utils/pause";
 import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 import { ansiToHtml } from "@/utils/ansi";
-import { table } from "table";
+import { table, BOX_BORDER } from "@/utils/ascii-table";
 import { useModuleStore } from "@/stores/module-module";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
@@ -83,26 +83,7 @@ export default {
       suggestions: [],
       currentSuggestionIndex: -1,
       tableConfig: {
-        border: {
-          topBody: "─",
-          topJoin: "┬",
-          topLeft: "┌",
-          topRight: "┐",
-
-          bottomBody: "─",
-          bottomJoin: "┴",
-          bottomLeft: "└",
-          bottomRight: "┘",
-
-          bodyLeft: "│",
-          bodyRight: "│",
-          bodyJoin: "│",
-
-          joinBody: "─",
-          joinLeft: "├",
-          joinRight: "┤",
-          joinJoin: "┼",
-        },
+        border: BOX_BORDER,
       },
       helpCommands: [
         {
