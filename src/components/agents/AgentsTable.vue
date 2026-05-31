@@ -126,6 +126,7 @@ import { useAgentStore } from "@/stores/agent-module";
 import { useApplicationStore } from "@/stores/application-module";
 import * as agentTaskApi from "@/api/agent-task-api";
 import { useAutoRefresh } from "@/composables/useAutoRefresh";
+import truncate from "@/utils/truncate";
 
 export default {
   name: "AgentsTable",
@@ -396,10 +397,7 @@ export default {
       );
     },
     truncateMessage(str) {
-      if (str) {
-        return str.length > 30 ? `${str.substr(0, 30)}...` : str;
-      }
-      return "";
+      return truncate(str, 30);
     },
     getRowProps({ item }) {
       return { class: item.stale ? "warning-row" : "" };

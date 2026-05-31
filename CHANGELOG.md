@@ -23,6 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   **BREAKING**: Switched package manager from yarn to pnpm 11. Contributors now need Node 22+ and pnpm 11+ (`corepack enable` picks up the pinned version).
 
+### Fixed
+
+-   Fixed long task/module names overflowing onto the options in the expanded agent-task detail panel; the header now stacks into separate rows and truncates the name with a hover tooltip
+-   Fixed a render crash in the expanded agent-task panel when a task option value was not a string (e.g. numbers, booleans, null)
+-   Fixed the "Rerun Task" action erroring for shell/sysinfo tasks whose names were returned in lowercase
+-   Applied the same header-overflow and option-value render-crash fixes to the plugin task detail panel (`PluginTasksTable.vue`), which mirrored the pre-fix agent-task panel
+-   Extracted a shared, type-safe `truncate` utility and routed the duplicated truncation helpers across the agent/plugin tables and dynamic form input through it
+
 ## [4.0.0-a.1] - 2026-04-18
 
 ### Added

@@ -100,6 +100,7 @@
 
 <script>
 import FileInput from "@/components/FileInput.vue";
+import truncateText from "@/utils/truncate";
 
 export default {
   components: { FileInput },
@@ -145,10 +146,7 @@ export default {
   },
   methods: {
     truncate(msg) {
-      if (msg) {
-        return msg.length > 80 ? `${msg.substr(0, 80)}...` : msg;
-      }
-      return "";
+      return truncateText(msg, 80);
     },
   },
 };

@@ -22,6 +22,27 @@
   font-style: italic;
 }
 
+// Task-detail panel header: name chip with single-line ellipsis + options
+// label. Shared by AgentTasksTable.vue and PluginTasksTable.vue, which render
+// the same expanded-row header. Keep the chip's only child a bare text node —
+// adding an icon or wrapper span inside the chip breaks the ellipsis below.
+.task-name-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.task-name-chip .v-chip__content {
+  font-size: 0.8125rem;
+  min-width: 0; // allow the inner flex item to shrink so ellipsis triggers
+  white-space: nowrap; // all three needed for text-overflow to render
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-options-label {
+  font-size: 0.8125rem;
+}
+
 // Stats-page visual tokens. --sk-accent and --sk-chart-height mirror ACCENT
 // and CHART_HEIGHT_PX in src/components/charts/tokens.js — keep those two in
 // sync. --sk-metric-font-size is CSS-only (no JS consumer).

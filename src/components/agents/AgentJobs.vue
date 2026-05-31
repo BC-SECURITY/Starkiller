@@ -186,6 +186,7 @@
 import dayjs from "@/plugins/dayjs";
 import { AnsiUp } from "@/utils/ansi";
 import * as agentTaskApi from "@/api/agent-task-api";
+import truncate from "@/utils/truncate";
 import pause from "@/utils/pause";
 import { useDownload } from "@/composables/useDownload";
 
@@ -475,8 +476,7 @@ export default {
       return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
     },
     truncateInput(input) {
-      if (!input) return "";
-      return input.length > 50 ? `${input.substring(0, 50)}...` : input;
+      return truncate(input, 50);
     },
     isKillable(status) {
       return KILLABLE_STATUSES.includes(status);

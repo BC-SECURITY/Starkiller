@@ -40,18 +40,18 @@
  *   // cancel
  * }
  *
- * Alternatively you can place it in main App component and access it globally
- * via this.$root.$confirm
- * <template>
- *   <v-app>
- *     ...
- *     <confirm ref="confirm"></confirm>
- *   </v-app>
- * </template>
+ * Alternatively, place it once in the root App component and expose it to
+ * descendants via provide/inject (this is what App.vue does):
  *
- * mounted() {
- *   this.$root.$confirm = this.$refs.confirm.open
+ * // App.vue
+ * <confirm ref="confirm" />
+ * provide() {
+ *   return { confirm: (...args) => this.$refs.confirm.open(...args) };
  * }
+ *
+ * // any descendant component
+ * inject: ["confirm"]
+ * if (await this.confirm('Delete', 'Are you sure?', { color: 'red' })) { ... }
  */
 export default {
   data: () => ({

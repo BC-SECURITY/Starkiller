@@ -34,14 +34,13 @@
               <div class="d-flex align-center ga-2">
                 <span class="font-weight-bold">Task #{{ item.id }}</span>
                 <!-- Keep this chip's content a single text node — the ellipsis
-                     CSS in <style> (.task-name-chip) breaks if you add an icon
-                     or wrapper span here. The v-tooltip wraps the chip from the
-                     outside (accessible to keyboard/touch, unlike native
-                     :title), so the single-text-node content is unaffected. -->
+                     CSS for .task-name-chip (in src/app.scss) breaks if you add
+                     an icon or wrapper span here. The v-tooltip wraps the chip
+                     from the outside (the codebase-standard pattern, unlike a
+                     native :title), so the single-text-node content is intact. -->
                 <v-tooltip
                   v-if="item.module_name || item.task_name"
                   location="top"
-                  :text="item.module_name || item.task_name"
                 >
                   <template #activator="{ props: activatorProps }">
                     <v-chip
@@ -54,6 +53,7 @@
                       {{ item.module_name || item.task_name }}
                     </v-chip>
                   </template>
+                  {{ item.module_name || item.task_name }}
                 </v-tooltip>
                 <v-spacer />
                 <v-switch
@@ -377,6 +377,7 @@ import * as downloadApi from "@/api/download-api";
 import * as agentTaskApi from "@/api/agent-task-api";
 import * as moduleApi from "@/api/module-api";
 import { copyToClipboard } from "@/utils/clipboard";
+import truncate from "@/utils/truncate";
 
 export default {
   name: "AgentTasksTable",
@@ -631,17 +632,10 @@ export default {
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
     truncateMessage(task) {
-      if (task) {
-        return task.length > 30 ? `${task.substr(0, 30)}...` : task;
-      }
-      return "";
+      return truncate(task, 30);
     },
-    // Option values are untyped backend data (numbers, booleans, null are all
-    // possible), so coerce to string before measuring/slicing — calling
-    // .length/.substring on a non-string would throw and blank the row.
     truncateOption(value) {
-      const str = value == null ? "" : String(value);
-      return str.length > 20 ? `${str.substring(0, 20)}...` : str;
+      return truncate(value, 20);
     },
     updateTaskBackgroundColor(task) {
       if (task.backgroundColor === "black") {
@@ -787,38 +781,32 @@ export default {
           };
           await moduleApi.executeModule(fullTask.module_name, options);
           this.snack.info(`Module ${fullTask.module_name} rerun queued.`);
-        } else if (
-          fullTask.task_name === "TASK_SHELL" ||
-          fullTask.task_name === "shell"
-        ) {
+        } else if (this.taskKind(fullTask) === "shell") {
           await agentTaskApi.shell(fullTask.agent_id, fullTask.full_input);
           this.snack.info("Shell command rerun queued.");
-        } else if (
-          fullTask.task_name === "TASK_SYSINFO" ||
-          fullTask.task_name === "sysinfo"
-        ) {
+        } else if (this.taskKind(fullTask) === "sysinfo") {
           await agentTaskApi.sysinfo(fullTask.agent_id);
           this.snack.info("Sysinfo task rerun queued.");
         } else {
-          this.snack.error(`Rerunning ${fullTask.task_name} is not supported.`);
+          this.snack.error(
+            `Rerunning ${fullTask.task_name || "this task"} is not supported.`,
+          );
         }
       } catch (err) {
         this.snack.error(`Error rerunning task: ${err}`);
       }
     },
+    // Normalize a task's type to a lowercase, prefix-stripped key; the backend
+    // sends either "TASK_SHELL"/"TASK_SYSINFO" or "shell"/"sysinfo" for the same
+    // task. rerunTask's dispatch and supportsRerun stay in sync via this helper.
+    taskKind(item) {
+      return (item.task_name || "").toLowerCase().replace(/^task_/, "");
+    },
     supportsRerun(item) {
       if (item.module_name) {
         return true;
       }
-      if (
-        item.task_name === "shell" ||
-        item.task_name === "TASK_SHELL" ||
-        item.task_name === "sysinfo" ||
-        item.task_name === "TASK_SYSINFO"
-      ) {
-        return true;
-      }
-      return false;
+      return ["shell", "sysinfo"].includes(this.taskKind(item));
     },
     async stopTask(task) {
       try {
@@ -920,24 +908,5 @@ export default {
 
 .font-black {
   color: black;
-}
-
-.task-name-chip {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-/* Ellipsis here assumes the chip's only child is the bare task-name text
-   node; adding an icon or wrapper span inside the chip would break it. */
-.task-name-chip .v-chip__content {
-  font-size: 0.8125rem;
-  min-width: 0; /* allow the inner flex item to shrink so ellipsis triggers */
-  white-space: nowrap; /* all three needed for text-overflow to render */
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.task-options-label {
-  font-size: 0.8125rem;
 }
 </style>
