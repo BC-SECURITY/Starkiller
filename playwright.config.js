@@ -18,7 +18,7 @@ export default defineConfig({
   webServer: {
     // --strictPort: fail fast if 5173 is taken (Vite would otherwise pick
     // 5174+ and Playwright would silently hit the wrong app or time out).
-    command: "yarn dev --port 5173 --strictPort",
+    command: "pnpm dev --port 5173 --strictPort",
     url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

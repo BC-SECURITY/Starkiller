@@ -23,28 +23,44 @@ export const useBypassStore = defineStore("bypass", {
     bypassNames: (state) => state.bypasses.map((el) => el.name),
     defaultBypassNames: (state) =>
       state.bypasses.filter((el) => el.is_default).map((el) => el.name),
-    mergedBypassNames: (state) => {
-      const all = state.bypasses.map((el) => el.name);
-      const defaults = state.bypasses
-        .filter((el) => el.is_default)
+    mergedBypassNames: (state) => mergeNames(state.bypasses),
+    mergedBypassNamesByLanguage: (state) => (language) => {
+      if (!language) return mergeNames(state.bypasses);
+      const key = String(language).toLowerCase();
+      const filtered = state.bypasses.filter(
+        (b) => (b.language || "").toLowerCase() === key,
+      );
+      return mergeNames(filtered);
+    },
+    defaultBypassNamesByLanguage: (state) => (language) => {
+      const key = language ? String(language).toLowerCase() : null;
+      return state.bypasses
+        .filter(
+          (el) =>
+            el.is_default &&
+            (!key || (el.language || "").toLowerCase() === key),
+        )
         .map((el) => el.name);
-      const seen = new Set();
-      const ordered = [];
-      // defaults first
-      defaults.forEach((name) => {
-        if (!seen.has(name)) {
-          seen.add(name);
-          ordered.push(name);
-        }
-      });
-      // then rest
-      all.forEach((name) => {
-        if (!seen.has(name)) {
-          seen.add(name);
-          ordered.push(name);
-        }
-      });
-      return ordered;
     },
   },
 });
+
+function mergeNames(bypasses) {
+  const seen = new Set();
+  const ordered = [];
+  bypasses
+    .filter((el) => el.is_default)
+    .forEach((el) => {
+      if (!seen.has(el.name)) {
+        seen.add(el.name);
+        ordered.push(el.name);
+      }
+    });
+  bypasses.forEach((el) => {
+    if (!seen.has(el.name)) {
+      seen.add(el.name);
+      ordered.push(el.name);
+    }
+  });
+  return ordered;
+}

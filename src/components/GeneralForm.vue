@@ -75,6 +75,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    formLanguage: {
+      type: String,
+      default: null,
+    },
   },
   emits: ["update:modelValue"],
   data() {
@@ -108,12 +112,25 @@ export default {
     listeners() {
       return this.listenerStore.listenerNames;
     },
+    bypassLanguageMap() {
+      const bypassField = this.allFields.find((f) => f.name === "Bypasses");
+      return bypassField?.bypass_language_map || null;
+    },
+    activeLanguage() {
+      // form.Language is the payload language; bypass_language_map translates it
+      // into the launcher's execution language when the two differ (e.g. a
+      // csharp payload that ships as a PowerShell downloader oneliner).
+      const lang = this.form?.Language || this.formLanguage;
+      if (!lang) return null;
+      const lowered = String(lang).toLowerCase();
+      return this.bypassLanguageMap?.[lowered] ?? lowered;
+    },
     bypasses() {
-      // Use defaults first, then remaining bypass names
-      return this.bypassStore.mergedBypassNames;
+      // Defaults first, then remaining bypass names, filtered to the active language
+      return this.bypassStore.mergedBypassNamesByLanguage(this.activeLanguage);
     },
     defaultBypasses() {
-      return this.bypassStore.defaultBypassNames;
+      return this.bypassStore.defaultBypassNamesByLanguage(this.activeLanguage);
     },
     credentials() {
       return this.credentialStore.credentials;
@@ -214,6 +231,21 @@ export default {
         // When defaults arrive, initialize if needed
         this.tryInitializeBypassesDefaults();
       },
+    },
+    activeLanguage(newVal, oldVal) {
+      if (newVal === oldVal) return;
+      if (!Array.isArray(this.form?.Bypasses)) return;
+      const allowed = new Set(this.bypasses);
+      const currentArr = this.form.Bypasses;
+      const pruned = currentArr.filter((name) => allowed.has(name));
+      if (pruned.length === currentArr.length) return;
+      this.form.Bypasses = pruned;
+      // Re-seed defaults only when pruning emptied the selection. A user who
+      // deliberately cleared the field before switching language keeps it empty.
+      if (pruned.length === 0) {
+        this.initializedBypassesDefaults = false;
+        this.tryInitializeBypassesDefaults();
+      }
     },
   },
   mounted() {

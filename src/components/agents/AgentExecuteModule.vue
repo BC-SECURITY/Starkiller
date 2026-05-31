@@ -120,6 +120,7 @@
         ref="generalform"
         v-model="form"
         :options="moduleOptions"
+        :form-language="selectedItem.language"
       />
 
       <v-btn
