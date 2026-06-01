@@ -100,7 +100,11 @@ export async function request(
     let errBody;
     try {
       errBody = await safeParse(res, "json");
-    } catch {
+    } catch (parseErr) {
+      // A cancel during the error-body read is a deliberate abort, not a
+      // malformed body — re-throw so callers can still detect AbortError
+      // instead of seeing a synthetic "HTTP <status>".
+      if (parseErr?.name === "AbortError") throw parseErr;
       errBody = undefined;
     }
     // axios-compatible shape so handleError, extractErrorMessage, and direct
@@ -124,20 +128,30 @@ request.put = (path, data, opts) =>
   request(path, { ...opts, method: "PUT", data });
 request.delete = (path, opts) => request(path, { ...opts, method: "DELETE" });
 
-// handleError returns an Error subclass so callers keep `err.response.status`
+// handleError returns an ApiError so callers keep `err.response.status`
 // introspectable (e.g. AgentStats's 404-terminal branch) while still
 // stringifying to a bare, prefix-free message for `${err}` snackbars. The raw
 // `detail` (string | FastAPI 422 array | object) is preserved on `.detail` so
 // the form-error normalizer (normalizeSubmitError) can still route field-level
-// validation messages.
+// validation messages. `.response` / `.detail` are set in the constructor so
+// the shape can't drift across edits.
 class ApiError extends Error {
+  constructor(message, { response, detail } = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.response = response;
+    this.detail = detail;
+  }
+
   toString() {
     return this.message;
   }
 }
 
 // Best-effort readable string for the ApiError message. The structured detail
-// lives on `.detail`; this is only the `${err}` / snackbar fallback text.
+// lives on `.detail`; this is only the `${err}` / snackbar fallback text, so it
+// must always resolve to a string (an object/array would render "[object
+// Object]").
 function detailToMessage(detail) {
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) {
@@ -147,18 +161,21 @@ function detailToMessage(detail) {
     return withMsg ? withMsg.msg : "Validation failed.";
   }
   if (detail && typeof detail === "object") {
-    return detail.msg || detail.message || detail.detail || "Request failed.";
+    const msg = detail.msg || detail.message || detail.detail;
+    return typeof msg === "string" ? msg : "Request failed.";
   }
   return String(detail);
 }
 
-// Synchronous — same axios-shaped lookup as the old handleError.
+// Wraps response.data.detail in an ApiError (see ApiError above); returns the
+// raw error untouched when there's no detail (network / 5xx-with-no-body /
+// CORS), preserving its `.response` for status introspection.
 export function handleError(error) {
   console.error(error);
   const detail = error?.response?.data?.detail;
   if (detail == null) return error;
-  const apiError = new ApiError(detailToMessage(detail));
-  apiError.response = error.response;
-  apiError.detail = detail;
-  return apiError;
+  return new ApiError(detailToMessage(detail), {
+    response: error.response,
+    detail,
+  });
 }

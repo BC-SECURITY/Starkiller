@@ -168,6 +168,39 @@ describe("request — error contract", () => {
     expect(mockStore.logout).not.toHaveBeenCalled();
   });
 
+  it("rethrows an AbortError without bumping connectionError (deliberate cancel)", async () => {
+    const abortErr = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    global.fetch = vi.fn().mockRejectedValue(abortErr);
+    await expect(request("/x")).rejects.toBe(abortErr);
+    expect(mockStore.connectionError).toBe(0);
+    expect(mockStore.logout).not.toHaveBeenCalled();
+  });
+
+  it("forwards an AbortSignal to fetch", async () => {
+    mockFetch({ body: { ok: true } });
+    const controller = new AbortController();
+    await request("/x", { signal: controller.signal });
+    expect(global.fetch.mock.calls.at(-1)[1].signal).toBe(controller.signal);
+  });
+
+  it("rethrows an AbortError raised while reading a non-2xx error body (not a synthetic HTTP error)", async () => {
+    const abortErr = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: "Server Error",
+      headers: new Headers(),
+      text: vi.fn().mockRejectedValue(abortErr),
+      blob: vi.fn(),
+    });
+    await expect(request("/x")).rejects.toBe(abortErr);
+    expect(mockStore.connectionError).toBe(0);
+  });
+
   it("tolerates a non-JSON error body (data undefined, no parse throw)", async () => {
     mockFetch({ ok: false, status: 500, body: "Internal Server Error" });
     const err = await request("/x").catch((e) => e);

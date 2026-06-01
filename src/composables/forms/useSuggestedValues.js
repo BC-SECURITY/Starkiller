@@ -45,8 +45,8 @@ export function useSuggestedValues({ activeLanguage = null } = {}) {
   const listeners = computed(() => listenerStore.listenerNames);
   // Bypasses are filtered to the launcher's execution language when the form
   // provides one (GeneralForm passes activeLanguage). A null language returns
-  // the full set, so callers that don't care about language (e.g.
-  // AutoRunModules) can omit it and get the old behavior.
+  // the full set, so callers that don't filter by language can omit it and get
+  // the old (unfiltered) behavior.
   const bypasses = computed(() =>
     bypassStore.mergedBypassNamesByLanguage(unref(activeLanguage)),
   );

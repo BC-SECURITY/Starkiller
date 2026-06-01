@@ -66,7 +66,7 @@ const props = defineProps({
   priority: { type: Array, default: () => [] },
   serverErrors: { type: [Array, String, Object], default: null },
   // Launcher execution language used to filter the Bypasses picker (passed by
-  // AgentExecuteModule from the selected stager/agent). Falls back to the
+  // AgentExecuteModule as the selected module's language). Falls back to the
   // form's own Language field when not provided.
   formLanguage: { type: String, default: null },
 });
@@ -209,6 +209,12 @@ watch(activeLanguage, (newLang, oldLang) => {
   if (newLang === oldLang) return;
   if (!Array.isArray(form.value?.Bypasses)) return;
   const allowed = new Set(suggestedValuesFor({ name: "Bypasses" }));
+  // An empty allow-set almost always means the bypass store hasn't loaded yet
+  // (the load is fire-and-forget), not that every selection is invalid — defer
+  // pruning rather than wiping the user's bypasses on a language switch during
+  // load. A real language with zero bypasses is indistinguishable here, but the
+  // load race is the common case and silently clearing the field is worse.
+  if (allowed.size === 0) return;
   const current = form.value.Bypasses;
   const pruned = current.filter((name) => allowed.has(name));
   if (pruned.length === current.length) return;
