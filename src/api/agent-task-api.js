@@ -1,15 +1,13 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
-import qs from "qs";
+import { request, handleError } from "@/api/http";
 
 /**
  * Get a single task
  * @param {string} sessionId sessionId name
  */
 export function getTask(sessionId, taskId) {
-  return axios
-    .get(`/agents/${sessionId}/tasks/${taskId}`)
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(`/agents/${sessionId}/tasks/${taskId}`).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 /**
@@ -46,21 +44,16 @@ export function getTasks(
     params.agents = sessionId;
   }
 
-  let url = "";
+  let url;
   if (sessionId == null || Array.isArray(sessionId)) {
     url = "/agents/tasks";
   } else {
     url = `/agents/${sessionId}/tasks`;
   }
 
-  return axios
-    .get(url, {
-      params,
-      paramsSerializer: (p) =>
-        qs.stringify(p, { arrayFormat: "repeat", skipNulls: true }),
-    })
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(url, { params }).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 /**
@@ -68,18 +61,14 @@ export function getTasks(
  * @param {string} sessionId agent sessionId
  */
 export function shell(sessionId, command, literal = false) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/shell`, { command, literal })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function createSocksProxy(sessionId, portNumber) {
-  return axios
-    .post(`/agents/${sessionId}/tasks/socks`, {
-      port: portNumber,
-    })
-    .then(({ data }) => data)
+  return request
+    .post(`/agents/${sessionId}/tasks/socks`, { port: portNumber })
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -88,9 +77,8 @@ export function createSocksProxy(sessionId, portNumber) {
  * @param {*} sessionId agent sessionId
  */
 export function sysinfo(sessionId) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/sysinfo`, {})
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -99,7 +87,7 @@ export function sysinfo(sessionId) {
  * @param {string} sessionId agent sessionId
  */
 export function deleteTask(sessionId, taskId) {
-  return axios
+  return request
     .delete(`/agents/${sessionId}/tasks/${taskId}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
@@ -108,12 +96,11 @@ export function deleteTask(sessionId, taskId) {
  * Task agent to receive file upload.
  */
 export function uploadFile(sessionId, fileId, pathToFile) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/upload`, {
       path_to_file: pathToFile,
       file_id: fileId,
     })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -121,41 +108,36 @@ export function uploadFile(sessionId, fileId, pathToFile) {
  * Task agent to send file to Empire.
  */
 export function downloadFile(sessionId, pathToFile) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/download`, { path_to_file: pathToFile })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateComms(sessionId, listener) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/update_comms`, {
       new_listener_id: listener,
     })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateKillDate(sessionId, killDate) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/kill_date`, { kill_date: killDate })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateWorkingHours(sessionId, workingHours) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/working_hours`, {
       working_hours: workingHours,
     })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateSleep(sessionId, delay, jitter) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/sleep`, { delay, jitter })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -165,9 +147,8 @@ export function updateSleep(sessionId, delay, jitter) {
  * @param {string} sessionId agent sessionId
  */
 export function getJobs(sessionId) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/jobs`)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -177,42 +158,37 @@ export function getJobs(sessionId) {
  * @param {number} jobId job ID to kill
  */
 export function killJob(sessionId, jobId) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/kill_job`, { id: jobId })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateProxies(sessionId, proxies) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/proxy_list`, proxies)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteTag(agentId, taskId, tag) {
-  return axios
+  return request
     .delete(`agents/${agentId}/tasks/${taskId}/tags/${tag}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateTag(agentId, taskId, tag) {
-  return axios
+  return request
     .put(`agents/${agentId}/${taskId}/tags/${tag.id}`, tag)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function addTag(agentId, taskId, tag) {
-  return axios
+  return request
     .post(`agents/${agentId}/tasks/${taskId}/tags`, tag)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function stopTask(agentId, taskId) {
-  return axios
+  return request
     .post(`/agents/${agentId}/tasks/stop_job`, { id: taskId })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

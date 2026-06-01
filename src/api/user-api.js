@@ -1,22 +1,20 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
+import { request, handleError } from "@/api/http";
 
 /**
  * Returns a single users.
  */
 export function getUser(id) {
-  return axios
-    .get(`/users/${id}`)
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(`/users/${id}`).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 /**
  * Returns a full list of users.
  */
 export function getUsers() {
-  return axios
-    .get("/users")
-    .then(({ data }) => data.records)
+  return request("/users")
+    .then((data) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -26,9 +24,8 @@ export function getUsers() {
  * @param {string} password
  */
 export function createUser(user) {
-  return axios
+  return request
     .post("/users", user)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -36,9 +33,8 @@ export function createUser(user) {
  * Update a user.
  */
 export function updateUser(user) {
-  return axios
+  return request
     .put(`/users/${user.id}`, user)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -48,17 +44,11 @@ export function updateUser(user) {
  * @param {boolean} password new password
  */
 export function updatePassword(id, password) {
-  return axios
+  return request
     .put(`/users/${id}/password`, { password })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function uploadAvatar(userId, data) {
-  return axios({
-    method: "post",
-    url: `/users/${userId}/avatar`,
-    data,
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return request.post(`/users/${userId}/avatar`, data);
 }

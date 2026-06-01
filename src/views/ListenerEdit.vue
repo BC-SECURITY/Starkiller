@@ -116,13 +116,6 @@
               label="Type"
               :readonly="!canEdit"
             />
-            <v-alert v-if="validationMessage" prominent type="warning">
-              <v-row class="align-center">
-                <v-col class="grow" style="word-wrap: word-break; width: 500px">
-                  {{ validationMessage }}
-                </v-col>
-              </v-row>
-            </v-alert>
             <general-form
               v-if="initialLoad"
               :key="selectedTemplate"
@@ -131,6 +124,7 @@
               :options="listenerOptions"
               :priority="formPriorities"
               :readonly="!canEdit"
+              :server-errors="serverError"
             />
           </v-card>
         </v-card>
@@ -153,6 +147,7 @@
 
 <script>
 import * as listenerApi from "@/api/listener-api";
+import { normalizeSubmitError } from "@/composables/forms/normalizeServerErrors";
 import GeneralForm from "@/components/GeneralForm.vue";
 import InfoViewer from "@/components/InfoViewer.vue";
 import EditPageTop from "@/components/EditPageTop.vue";
@@ -182,7 +177,7 @@ export default {
       loadingTemplate: false,
       formPriorities: ["Name", "Host", "Port"],
       errorState: false,
-      validationMessage: null,
+      serverError: null,
       initialLoad: false,
       commonStagers: [
         "multi_launcher",
@@ -282,6 +277,11 @@ export default {
   watch: {
     selectedTemplate: {
       async handler(val) {
+        // A serverError held over from the previous template would re-route
+        // against the new template's fields — names from the old template
+        // wouldn't match the new one (or, worse, would coincidentally match
+        // and mis-attribute the error). Drop it on every switch.
+        this.serverError = null;
         this.loadingTemplate = true;
         const a = await listenerApi
           .getListenerTemplate(val)
@@ -347,6 +347,7 @@ export default {
       if (!valid) return;
 
       this.loading = true;
+      this.serverError = null;
       if (this.id > 0) {
         listenerApi
           .updateListener({ ...this.listener, options: this.form })
@@ -355,11 +356,7 @@ export default {
             this.loading = false;
           })
           .catch((err) => {
-            if (err.startsWith("[*]")) {
-              this.validationMessage = err;
-            } else {
-              this.snack.error(`Error: ${err}`);
-            }
+            this.handleSubmitError(err);
             this.loading = false;
           });
       } else {
@@ -371,13 +368,28 @@ export default {
             this.$router.push({ name: "listenerEdit", params: { id } });
           })
           .catch((err) => {
-            if (err.startsWith("[*]")) {
-              this.validationMessage = err;
-            } else {
-              this.snack.error(`Error: ${err}`);
-            }
+            this.handleSubmitError(err);
             this.loading = false;
           });
+      }
+    },
+    handleSubmitError(err) {
+      // normalizeSubmitError handles every shape we can see here: an array
+      // (422), a string detail (from handleError when the backend returns a
+      // plain message), an object (custom envelope), or a raw Error (network
+      // / 5xx / CORS). The banner inside <general-form> is the canonical
+      // surface; the snack only fires as a fallback when the banner can't
+      // render — form not mounted yet, errorState swapped it for the
+      // error-state alert, or the user is on the Autorun tab (banner lives
+      // inside the View tab's window-item) — so a submit error is never
+      // silently lost.
+      const { serverError, snackText } = normalizeSubmitError(
+        err,
+        "Failed to save listener.",
+      );
+      this.serverError = serverError;
+      if (!this.initialLoad || this.errorState || this.tab !== "view") {
+        this.snack.error(snackText);
       }
     },
     async kill() {

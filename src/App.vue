@@ -88,7 +88,7 @@
   </div>
 </template>
 <script>
-import semver from "semver";
+import { satisfies } from "@/utils/version";
 import { mapState } from "pinia";
 
 import SideNav from "@/components/SideNav.vue";
@@ -179,7 +179,7 @@ export default {
     empireVersion: {
       async handler(val) {
         if (val.length > 0) {
-          if (semver.satisfies(val.split(" ")[0].split("-")[0], "<5.2")) {
+          if (satisfies(val.split(" ")[0].split("-")[0], "<5.2")) {
             await this.$nextTick();
             this.snackProxy.warn(
               "This version of Starkiller is recommended to be used with Empire 5.2 or greater." +
@@ -201,10 +201,7 @@ export default {
       this.$refs.socketNotifications?.$refs.chat?.open();
     },
     versionSatisfies(version) {
-      return semver.satisfies(
-        this.empireVersion.split(" ")[0].split("-")[0],
-        version,
-      );
+      return satisfies(this.empireVersion.split(" ")[0].split("-")[0], version);
     },
   },
 };

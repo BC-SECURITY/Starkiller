@@ -1,20 +1,17 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
-import qs from "qs";
+import { request, handleError } from "@/api/http";
 
 export function getMarketplace() {
-  return axios
-    .get("/plugin-registries/marketplace")
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request("/plugin-registries/marketplace").catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 /**
  * Returns a full list of plugins.
  */
 export function getPlugins() {
-  return axios
-    .get("/plugins")
-    .then(({ data }) => data.records)
+  return request("/plugins")
+    .then((data) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -23,23 +20,20 @@ export function getPlugins() {
  * This endpoint appears to be broken atm, we just grab the plugin from the list.
  */
 export function getPlugin(name) {
-  return axios
-    .get(`/plugins/${name}`)
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(`/plugins/${name}`).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 export function updatePlugin(plugin) {
-  return axios
+  return request
     .put(`/plugins/${plugin.id}`, plugin)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updatePluginSettings(pluginId, settings) {
-  return axios
+  return request
     .put(`/plugins/${pluginId}/settings`, settings)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -47,9 +41,8 @@ export function updatePluginSettings(pluginId, settings) {
  * Execute a plugin command.
  */
 export function executePlugin(name, options) {
-  return axios
+  return request
     .post(`/plugins/${name}/execute`, { options })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -58,10 +51,9 @@ export function executePlugin(name, options) {
  * @param {string} pluginId
  */
 export function getTask(pluginId, taskId) {
-  return axios
-    .get(`/plugins/${pluginId}/tasks/${taskId}`)
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(`/plugins/${pluginId}/tasks/${taskId}`).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 /**
@@ -98,53 +90,48 @@ export function getTasks(
     params.plugins = pluginId;
   }
 
-  let url = "";
+  let url;
   if (pluginId == null || Array.isArray(pluginId)) {
     url = "/plugins/tasks";
   } else {
     url = `/plugins/${pluginId}/tasks`;
   }
 
-  return axios
-    .get(url, {
-      params,
-      paramsSerializer: (p) =>
-        qs.stringify(p, { arrayFormat: "repeat", skipNulls: true }),
-    })
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(url, { params }).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 export function reloadPlugins() {
-  return axios
+  return request
     .post("/plugins/reload")
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function installPlugin({ name, version, registry }) {
-  return axios
-    .post(`/plugin-registries/marketplace/install`, { name, version, registry })
-    .then(({ data }) => data)
+  return request
+    .post(`/plugin-registries/marketplace/install`, {
+      name,
+      version,
+      registry,
+    })
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteTag(pluginId, taskId, tag) {
-  return axios
+  return request
     .delete(`plugins/${pluginId}/tasks/${taskId}/tags/${tag}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateTag(pluginId, taskId, tag) {
-  return axios
+  return request
     .put(`plugins/${pluginId}/${taskId}/tags/${tag.id}`, tag)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function addTag(pluginId, taskId, tag) {
-  return axios
+  return request
     .post(`plugins/${pluginId}/tasks/${taskId}/tags`, tag)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }

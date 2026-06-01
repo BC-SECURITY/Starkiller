@@ -16,20 +16,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Per-agent **Stats** tab on agent edit: Last Seen, total/queued task counts, host/integrity/language, a per-agent Check Ins chart, and a Tasks Over Time chart
--   Multi-agent selection on the Dashboard Check Ins card, persisted across sessions
+-   Per-agent Stats tab on the agent page (task counts, host info, check-in and tasks-over-time charts)
+-   Multi-agent selection on the Dashboard Check Ins card
 
 ### Changed
 
--   **BREAKING**: Switched package manager from yarn to pnpm 11. Contributors now need Node 22+ and pnpm 11+ (`corepack enable` picks up the pinned version).
+-   **BREAKING**: Switched package manager from yarn to pnpm 11 (requires Node 22+)
 
 ### Fixed
 
--   Fixed long task/module names overflowing onto the options in the expanded agent-task detail panel; the header now stacks into separate rows and truncates the name with a hover tooltip
--   Fixed a render crash in the expanded agent-task panel when a task option value was not a string (e.g. numbers, booleans, null)
--   Fixed the "Rerun Task" action erroring for shell/sysinfo tasks whose names were returned in lowercase
--   Applied the same header-overflow and option-value render-crash fixes to the plugin task detail panel (`PluginTasksTable.vue`), which mirrored the pre-fix agent-task panel
--   Extracted a shared, type-safe `truncate` utility and routed the duplicated truncation helpers across the agent/plugin tables and dynamic form input through it
+-   Fixed long task/module names overflowing the expanded agent-task detail panel
+-   Fixed a render crash in the expanded task panel for non-string option values
+-   Fixed Rerun Task erroring for shell/sysinfo tasks with lowercase names
+-   Applied the same fixes to the plugin task detail panel
+-   Extracted a shared truncate utility for the agent/plugin tables and form input
 
 ## [4.0.0-a.1] - 2026-04-18
 
@@ -49,37 +49,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Added Playwright end-to-end test suite covering 22 feature areas with mocked Empire responses, run as a CI job on every PR
--   Added a Vitest unit-test harness (running in the `node` environment) with @pinia/testing, and initial unit tests for Pinia stores (bypass-module, listener-module) and utilities (tags)
--   Added `jsconfig.json` for editor path-alias resolution and a Node `engines` field to `package.json`
+-   Added server-side validation error feedback to dynamic forms
+-   Added Playwright end-to-end test suite, run as a CI job on every PR
+-   Added Vitest unit-test harness with initial store and utility tests
+-   Added `jsconfig.json` for editor path-alias resolution
 
 ### Changed
 
--   Extracted duplicated ANSI-to-HTML helpers into a shared utility (`src/utils/ansi.js`) and auto-refresh polling into a reusable composable (`useAutoRefresh`)
--   Declared explicit `emits` options on components that were emitting undeclared events
--   Migrated ESLint to v9 flat config on the official Vue stack (eslint-plugin-vue + @vue/eslint-config-prettier), removing the Airbnb config
--   Replaced the deprecated `moment` dependency with `dayjs`
--   Converted the global `copy-stager` and `download-stager` mixins to composables (`useCopyStager`, `useDownload`)
--   Upgraded the build and state-management stack to the latest majors:
-    -   Vite 5 → 8 (now powered by Rolldown/Oxc) and @vitejs/plugin-vue 5 → 6
-    -   Pinia 2 → 3 and pinia-plugin-persistedstate 3 → 4
-    -   Vitest 3 → 4 and @pinia/testing 0.1 → 1
-    -   Renamed the persistedstate `afterRestore` hook to `afterHydrate` in `application-module` (v4 hook rename); the hook still re-applies the axios instance URL/token after rehydration
-    -   `chatUnreadCount` is now correctly excluded from persisted state: persistedstate v4 honors the `omit` option, which v3 silently ignored (it had previously been persisted)
--   Bumped CI workflows to Node 22 and tightened the `engines` field to meet Vite 8's Node baseline (`^20.19.0 || >=22.12.0`)
+-   Refactored GeneralForm into reusable form composables
+-   Replaced axios with the native Fetch API
+-   Replaced moment with dayjs
+-   Converted global mixins to composables
+-   Extracted shared ANSI-to-HTML and auto-refresh helpers
+-   Migrated ESLint to v9 flat config
+-   Upgraded the build and state stack to latest majors (Vite 8, Pinia 3, persistedstate 4, Vitest 4)
+-   Bumped CI workflows to Node 22
 
 ### Removed
 
--   Removed the unused `vue.config.js` (dead Vue CLI config carried over from Vue CLI / Webpack era, superseded by Vite)
--   Removed the unused `uuid` dependency
+-   Removed unused `vue.config.js`
+-   Removed unused dependencies (uuid, axios, qs, semver, table)
 
 ### Fixed
 
--   Fixed module execution silently posting to `/agents/undefined/tasks/module/` when agents were selected from the autocomplete
--   Fixed a Vue Router "Missing required param" error logged after every successful module execution
--   Fixed socket event-handler and timer leaks in the chat widget that caused duplicate messages and inflated unread counts after the chat widget was toggled
--   Fixed unstable index-based `v-for` keys on chat messages and notifications that could corrupt list rendering on reorder
--   Removed leftover debug `console.log` and `console.warn` calls from API modules
+-   Fixed module execution posting to an undefined agent when selected from autocomplete
+-   Fixed Vue Router "Missing required param" error after module execution
+-   Fixed socket and timer leaks in the chat widget causing duplicate messages and inflated unread counts
+-   Fixed unstable list keys on chat messages and notifications
+-   Fixed file upload not auto-selecting the uploaded file in module execution and obfuscation forms
+-   Removed leftover debug logging from API modules
 
 ## [3.5.0] - 2026-04-26
 

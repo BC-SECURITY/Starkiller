@@ -15,11 +15,14 @@
 // blockUnmockedApi: registers a deny-all fallback for /api/v2/** that
 // fulfills with HTTP 599 if reached. Because Playwright applies routes in
 // LIFO order, call this FIRST in beforeEach so per-resource mocks added
-// afterward take precedence. Any unmocked call then returns 599, which
-// causes an axios Network Error visible in the test output — making silent
-// fall-through-to-network bugs immediately obvious. Do NOT add this to
-// specs that intentionally let some routes pass through (navigation.spec.js
-// stubs many endpoints inline; add it there once all stubs are in place).
+// afterward take precedence. Any unmocked call then returns 599: fetch()
+// resolves (not rejects), res.ok is false, and the http.js wrapper throws
+// Error: HTTP 599, surfaced via the consoleGuard fixture — making silent
+// fall-through-to-network bugs immediately obvious. A true network failure
+// (fetch itself rejects, e.g. route.abort()) bumps connectionError instead.
+// Do NOT add this to specs that intentionally let some routes pass through
+// (navigation.spec.js stubs many endpoints inline; add it there once all
+// stubs are in place).
 //
 // mockGeneralFormBackground: stubs the background fetches that
 // GeneralForm.vue fires on every mount — agents, listeners, bypasses,

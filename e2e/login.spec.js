@@ -60,4 +60,19 @@ test.describe("login form", () => {
     ).toBeVisible();
     await expect(page).toHaveURL(/#\/$/);
   });
+
+  test("network failure shows connection error and does not crash", async ({
+    page,
+  }) => {
+    await page.route("**/token", (route) => route.abort());
+
+    await loginViaForm(page, {
+      url: "http://localhost:1337",
+      username: "empireadmin",
+      password: "password123",
+    });
+
+    await expect(page.getByText(/unable to connect to server/i)).toBeVisible();
+    await expect(page).toHaveURL(/#\/$/);
+  });
 });

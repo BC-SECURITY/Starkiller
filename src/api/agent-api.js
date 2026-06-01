@@ -1,22 +1,20 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
+import { request, handleError } from "@/api/http";
 
 /**
  * Returns a single agent.
  */
 export function getAgent(sessionId) {
-  return axios
-    .get(`/agents/${sessionId}`)
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(`/agents/${sessionId}`).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 /**
  * Returns a full list of agents.
  */
 export function getAgents(includeArchived = false) {
-  return axios
-    .get("/agents", { params: { include_archived: includeArchived } })
-    .then(({ data }) => data.records)
+  return request("/agents", { params: { include_archived: includeArchived } })
+    .then((data) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -24,9 +22,8 @@ export function getAgents(includeArchived = false) {
  * Rename an agent.
  */
 export function renameAgent(agent, newName) {
-  return axios
+  return request
     .put(`/agents/${agent.session_id}`, { ...agent, name: newName })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -35,9 +32,8 @@ export function renameAgent(agent, newName) {
  * @param {string} sessionId agent sessionId
  */
 export function killAgent(sessionId) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/exit`, {})
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -50,9 +46,8 @@ export function getDirectory(sessionId, directory) {
   if (directory === "/") {
     uri = `/agents/${sessionId}/files/root`;
   }
-  return axios
-    .get(uri)
-    .then(({ data }) => data.children)
+  return request(uri)
+    .then((data) => data.children)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -61,48 +56,43 @@ export function getDirectory(sessionId, directory) {
  * @param {string} sessionId agent sessionId
  */
 export function scrapeDirectory(sessionId, directory) {
-  return axios
+  return request
     .post(`/agents/${sessionId}/tasks/directory_list`, { path: directory })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteTag(agentId, tag) {
-  return axios
+  return request
     .delete(`agents/${agentId}/tags/${tag}`)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateTag(agentId, tag) {
-  return axios
+  return request
     .put(`agents/${agentId}/tags/${tag.id}`, tag)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function addTag(agentId, tag) {
-  return axios
+  return request
     .post(`agents/${agentId}/tags`, tag)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getProcesses(hostId) {
-  return axios
-    .get(`/hosts/${hostId}/processes`)
-    .then(({ data }) => data.records)
+  return request(`/hosts/${hostId}/processes`)
+    .then((data) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getCheckinsLast() {
-  return axios
-    .get("/agents/checkins/", {
-      params: {
-        limit: 1,
-        order_direction: "desc",
-      },
-    })
-    .then(({ data }) => data.records[0])
+  return request("/agents/checkins/", {
+    params: {
+      limit: 1,
+      order_direction: "desc",
+    },
+  })
+    .then((data) => data.records[0])
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -113,16 +103,13 @@ export function getCheckinsAgg(
   sessionId = null,
   signal = null,
 ) {
-  return axios
-    .get("/agents/checkins/aggregate", {
-      params: {
-        bucket_size: bucketSize.toLowerCase(),
-        start_date: startDate,
-        end_date: endDate,
-        session_id: sessionId,
-      },
-      signal,
-    })
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request("/agents/checkins/aggregate", {
+    params: {
+      bucket_size: bucketSize.toLowerCase(),
+      start_date: startDate,
+      end_date: endDate,
+      session_id: sessionId,
+    },
+    signal,
+  }).catch((error) => Promise.reject(handleError(error)));
 }

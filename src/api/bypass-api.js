@@ -1,53 +1,46 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
+import { request, handleError } from "@/api/http";
 
 /**
  * Returns a full list of bypasses.
  */
 export function getBypasses() {
-  return axios
-    .get("/bypasses")
-    .then(({ data }) => data.records)
+  return request("/bypasses")
+    .then((data) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getBypass(id) {
-  return axios
-    .get(`/bypasses/${id}`)
-    .then(({ data }) => data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request(`/bypasses/${id}`).catch((error) =>
+    Promise.reject(handleError(error)),
+  );
 }
 
 export function createBypass(name, code, language) {
-  return axios
+  return request
     .post("/bypasses", { name, code, language })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function updateBypass(id, name, code, language) {
-  return axios
+  return request
     .put(`/bypasses/${id}`, { name, code, language })
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function deleteBypass(id) {
-  return axios
+  return request
     .delete(`/bypasses/${id}`)
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function reloadBypasses() {
-  return axios
+  return request
     .post("/bypasses/reload")
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function resetBypasses() {
-  return axios
+  return request
     .post("/bypasses/reset")
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
