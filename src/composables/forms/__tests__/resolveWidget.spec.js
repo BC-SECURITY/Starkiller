@@ -1,10 +1,42 @@
 import { resolveWidget } from "@/composables/forms/resolveWidget";
 
 describe("resolveWidget", () => {
-  it("returns a boolean switch when strict suggestions are exactly True/False", () => {
+  // Empire-Sponsors#1205: a typed boolean (type "boolean") is a switch.
+  it("returns a switch for a typed boolean with no suggested values", () => {
+    const w = resolveWidget({
+      name: "Compile",
+      type: "boolean",
+      strict: false,
+      suggestedValues: [],
+    });
+    expect(w.kind).toBe("switch");
+    expect(w.props).toMatchObject({
+      "false-value": "False",
+      "true-value": "True",
+    });
+  });
+
+  // Non-strict, non-True/False suggestions: a switch only via the typed branch,
+  // which guards that disjunct against removal.
+  it("returns a switch for a typed boolean that also has suggested values", () => {
     const w = resolveWidget({
       name: "Enabled",
       type: "boolean",
+      strict: false,
+      suggestedValues: ["Yes", "No"],
+    });
+    expect(w.kind).toBe("switch");
+    expect(w.props).toMatchObject({
+      "false-value": "False",
+      "true-value": "True",
+    });
+  });
+
+  // Legacy shape (pre Empire-Sponsors#960) still resolves to a switch.
+  it("still returns a switch for the legacy string-typed boolean shape", () => {
+    const w = resolveWidget({
+      name: "Obfuscate",
+      type: "string",
       strict: true,
       suggestedValues: ["True", "False"],
     });
@@ -100,13 +132,24 @@ describe("resolveWidget", () => {
     ).toBe("number");
   });
 
+  // Both the legacy and typed boolean shapes win the (first) switch branch
+  // over the name-based Bypasses branch below it.
   it("prioritises the switch branch over Bypasses when both could match", () => {
-    const w = resolveWidget({
-      name: "Bypasses",
-      type: "string",
-      strict: true,
-      suggestedValues: ["True", "False"],
-    });
-    expect(w.kind).toBe("switch");
+    expect(
+      resolveWidget({
+        name: "Bypasses",
+        type: "string",
+        strict: true,
+        suggestedValues: ["True", "False"],
+      }).kind,
+    ).toBe("switch");
+    expect(
+      resolveWidget({
+        name: "Bypasses",
+        type: "boolean",
+        strict: false,
+        suggestedValues: [],
+      }).kind,
+    ).toBe("switch");
   });
 });
