@@ -51,7 +51,9 @@ export function getDownloads({
 }
 
 export function createDownload(data) {
-  return request.post("/downloads", data);
+  return request
+    .post("/downloads", data)
+    .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function getDownload(id) {

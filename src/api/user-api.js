@@ -50,5 +50,7 @@ export function updatePassword(id, password) {
 }
 
 export function uploadAvatar(userId, data) {
-  return request.post(`/users/${userId}/avatar`, data);
+  return request
+    .post(`/users/${userId}/avatar`, data)
+    .catch((error) => Promise.reject(handleError(error)));
 }
