@@ -13,6 +13,7 @@ import {
   recordCredentialActions,
 } from "./helpers/api/credentials.js";
 import { defaultCredentials } from "./fixtures/credentials.js";
+import { jsonResponse } from "./helpers/responses.js";
 
 test.describe("credentials edit", () => {
   test.beforeEach(async ({ page }) => {
@@ -58,6 +59,56 @@ test.describe("credentials edit", () => {
     // Username/host should be sent unchanged.
     expect(actions.calls[0].body.username).toBe(defaultCredentials[0].username);
     expect(actions.calls[0].body.host).toBe(defaultCredentials[0].host);
+  });
+
+  // Regression test: getCredential() applied whichever response landed
+  // last, not whichever request was made last. Fast in-app navigation from
+  // credential A to credential B, where A's (older) request resolves after
+  // B's (newer) one, used to let A's stale data overwrite the view even
+  // though the route already points at B.
+  test("does not apply a stale response after fast navigation to another credential", async ({
+    page,
+  }) => {
+    const credA = defaultCredentials[0]; // username "admin"
+    const credB = defaultCredentials[1]; // username "user"
+
+    let releaseCredA;
+    const credAGate = new Promise((resolve) => {
+      releaseCredA = resolve;
+    });
+    await page.route(`**/api/v2/credentials/${credA.id}`, async (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      await credAGate;
+      return route.fulfill(jsonResponse(credA));
+    });
+    await mockCredentialDetail(page, credB);
+
+    const credARequest = page.waitForRequest(
+      `**/api/v2/credentials/${credA.id}`,
+    );
+    await page.goto(`/#/credentials/${credA.id}`);
+    await credARequest;
+
+    // In-app navigation, not page.goto — the same component instance's id
+    // watcher must fire getCredential(B).
+    await page.evaluate((id) => {
+      window.location.hash = `#/credentials/${id}`;
+    }, credB.id);
+    await expect(page.getByLabel(/^username$/i)).toHaveValue(credB.username);
+
+    // Now let credential A's stale, superseded response land, and wait for
+    // the page to actually receive and process it — toHaveValue() only
+    // polls until it first matches, so asserting immediately after
+    // releaseCredA() (before the response is even delivered) would pass
+    // trivially without ever observing a wrongful overwrite.
+    const credAResponse = page.waitForResponse(
+      `**/api/v2/credentials/${credA.id}`,
+    );
+    releaseCredA();
+    await credAResponse;
+
+    // The form must still show credential B's data.
+    await expect(page.getByLabel(/^username$/i)).toHaveValue(credB.username);
   });
 
   // Regression test: deleteCredential() used to fire the delete without

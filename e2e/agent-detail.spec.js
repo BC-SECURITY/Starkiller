@@ -57,6 +57,66 @@ test.describe("agent detail", () => {
     await expect(page.locator('[data-testid="agent-shell"]')).toBeVisible();
   });
 
+  // Regression test: getAgent() applied whichever response landed last,
+  // not whichever request was made last. Fast in-app navigation from agent
+  // A to agent B, where A's (older) request resolves after B's (newer)
+  // one, used to let A's stale data overwrite the view even though the
+  // route already points at B.
+  test("does not apply a stale response after fast navigation to another agent", async ({
+    page,
+  }) => {
+    const agentA = defaultAgents[0]; // session ABC12345
+    const agentB = defaultAgents[1]; // session DEF67890, name "renamed-agent"
+
+    // Agent A's detail response is held open until releaseAgentA() is
+    // called, simulating a slow request that resolves after a faster,
+    // more recent one.
+    let releaseAgentA;
+    const agentAGate = new Promise((resolve) => {
+      releaseAgentA = resolve;
+    });
+    await page.route(`**/api/v2/agents/${agentA.session_id}`, async (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      await agentAGate;
+      return route.fulfill(jsonResponse(agentA));
+    });
+    // Agent B resolves immediately.
+    await mockAgentDetail(page, agentB);
+
+    // Navigate to agent A — this fires mounted()'s getAgent(A), which is
+    // held pending by the gate above. Wait for the request to actually be
+    // in flight before navigating away, so the race is real rather than
+    // incidental to test timing.
+    const agentARequest = page.waitForRequest(
+      `**/api/v2/agents/${agentA.session_id}`,
+    );
+    await page.goto(`/#/agents/${agentA.session_id}`);
+    await agentARequest;
+
+    // In-app navigation to agent B (not page.goto, so the same component
+    // instance's id watcher fires getAgent(B) — page.goto risks a full
+    // reload that would sidestep the race entirely).
+    await page.evaluate((sessionId) => {
+      window.location.hash = `#/agents/${sessionId}`;
+    }, agentB.session_id);
+    await expect(page.getByText(agentB.name).first()).toBeVisible();
+
+    // Now let agent A's stale, superseded response land, and wait for the
+    // page to actually receive and process it — asserting immediately
+    // after releaseAgentA() (before the response is even delivered) would
+    // pass trivially without ever observing a wrongful overwrite.
+    const agentAResponse = page.waitForResponse(
+      `**/api/v2/agents/${agentA.session_id}`,
+    );
+    releaseAgentA();
+    await agentAResponse;
+
+    // The view must still show agent B — A's late response must not
+    // overwrite it.
+    await expect(page.getByText(agentB.name).first()).toBeVisible();
+    await expect(page.getByText(agentA.name).first()).not.toBeVisible();
+  });
+
   // Regression test: killAgent() used to fire the exit task without await,
   // show an unconditional success toast, and navigate away immediately —
   // so a failed kill request was invisible and the operator was already on

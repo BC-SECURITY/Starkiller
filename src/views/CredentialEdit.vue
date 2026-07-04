@@ -62,6 +62,11 @@ export default {
       credential: {},
       form: {},
       errorState: false,
+      // Incremented on every getCredential() call. A response is only
+      // applied if it's still the most recent call in flight — this
+      // prevents a slower, superseded fetch for a previous credential from
+      // landing on the current one after fast navigation between them.
+      fetchSeq: 0,
     };
   },
   computed: {
@@ -219,13 +224,17 @@ export default {
       }
     },
     getCredential(id) {
+      this.fetchSeq += 1;
+      const mySeq = this.fetchSeq;
       credentialApi
         .getCredential(id)
         .then((data) => {
+          if (mySeq !== this.fetchSeq) return;
           this.credential = data;
           this.initialLoad = true;
         })
         .catch((err) => {
+          if (mySeq !== this.fetchSeq) return;
           console.error(err);
           this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;

@@ -370,6 +370,11 @@ export default {
       downloadDialog: false,
       initialized: true,
       errorState: false,
+      // Incremented on every getAgent() call. A response is only applied if
+      // it's still the most recent call in flight — this prevents a slower,
+      // superseded fetch for a previous agent from landing on the current
+      // one after fast navigation between agents.
+      fetchSeq: 0,
       paneSize: 100,
       rightPaneInitialized: false,
       pathToFile: "",
@@ -506,12 +511,16 @@ export default {
       this.$router.push({ name: "agents" });
     },
     getAgent(id) {
+      this.fetchSeq += 1;
+      const mySeq = this.fetchSeq;
       agentApi
         .getAgent(id)
         .then((data) => {
+          if (mySeq !== this.fetchSeq) return;
           this.agent = data;
         })
         .catch((err) => {
+          if (mySeq !== this.fetchSeq) return;
           console.error(err);
           this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
