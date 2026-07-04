@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   Extracted the shared "terminal chrome" (output buffer, task polling, ANSI
+    coloring, command-history navigation) out of `AgentTerminal` and
+    `AgentShellSession` into reusable composables, so a fix to any of that
+    shared logic lands once instead of twice
 -   Support Empire 7.0's typed boolean module options, rendering them as toggle switches via the `value_type` option metadata
 -   **BREAKING**: Switched package manager from yarn to pnpm 11 (requires Node 22+)
 

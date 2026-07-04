@@ -26,9 +26,12 @@
 </template>
 
 <script>
-import pause from "@/utils/pause";
+import { getCurrentInstance } from "vue";
 import * as agentTaskApi from "@/api/agent-task-api";
-import { ansiToHtml } from "@/utils/ansi";
+import { ansiToHtml, colorizeText } from "@/utils/ansi";
+import { useTerminalOutput } from "@/composables/useTerminalOutput";
+import { usePollForResult } from "@/composables/usePollForResult";
+import { useCommandHistory } from "@/composables/useCommandHistory";
 
 export default {
   name: "AgentShellSession",
@@ -42,46 +45,45 @@ export default {
       default: null,
     },
   },
+  setup(props) {
+    const instance = getCurrentInstance();
+    const { output, outputLines, addLine, addError, addInfo, loadHistory } =
+      useTerminalOutput(() => instance.proxy.storageName());
+    const { pollForResult } = usePollForResult(() => props.agent, {
+      addLine,
+      addInfo,
+    });
+    const { pushCommand, navigatePrev, navigateNext } = useCommandHistory();
+    return {
+      output,
+      outputLines,
+      addLine,
+      addError,
+      addInfo,
+      loadHistory,
+      pollForResult,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+    };
+  },
   data() {
     return {
       currentInput: "",
-      outputLines: [],
-      commandHistory: [],
-      historyIndex: -1,
       currentDir: "loading...",
     };
   },
   computed: {
     currentPrompt() {
-      const prefix = this.colorizeText("(Empire: ", "white");
-      const suffix = this.colorizeText(" )>", "white");
-      const body = this.colorizeText(this.currentDir, "green");
+      const prefix = colorizeText("(Empire: ", "white");
+      const suffix = colorizeText(" )>", "white");
+      const body = colorizeText(this.currentDir, "green");
       return prefix + body + suffix;
-    },
-  },
-  watch: {
-    outputLines(val) {
-      try {
-        const toStore = val.length > 500 ? val.slice(-500) : val;
-        localStorage.setItem(this.storageName(), JSON.stringify(toStore));
-      } catch {
-        // localStorage quota exceeded — ignore
-      }
     },
   },
   async mounted() {
     this.$refs.inputField.focus();
-
-    try {
-      const savedHistory = localStorage.getItem(this.storageName());
-      if (savedHistory) {
-        this.outputLines = JSON.parse(savedHistory);
-      }
-    } catch {
-      localStorage.removeItem(this.storageName());
-    }
-
-    this.scrollToBottom();
+    this.loadHistory();
     this.updateCurrentDirectory();
   },
   methods: {
@@ -92,14 +94,14 @@ export default {
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
-        if (this.historyIndex > 0) {
-          this.historyIndex--;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const prev = this.navigatePrev();
+        if (prev !== undefined) {
+          this.currentInput = prev;
         }
       } else if (event.code === "ArrowDown") {
-        if (this.historyIndex < this.commandHistory.length - 1) {
-          this.historyIndex++;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const next = this.navigateNext();
+        if (next !== undefined) {
+          this.currentInput = next;
         }
       }
     },
@@ -120,8 +122,7 @@ export default {
         return;
       }
 
-      this.commandHistory.push(command);
-      this.historyIndex = this.commandHistory.length;
+      this.pushCommand(command);
       this.currentInput = "";
 
       await this.shellCommandOperator(command);
@@ -187,94 +188,7 @@ export default {
         this.currentDir = this.agent.session_id;
       }
     },
-    async pollForResult(
-      taskId,
-      config = { print: true, attempts: 30, delay: 5000 },
-    ) {
-      if (!config.attempts) config.attempts = 30;
-      config.delay = Math.max(
-        config.delay ||
-          (this.agent.delay != null ? this.agent.delay * 1000 : 5000),
-        1000,
-      );
-
-      let res = null;
-      let hasPrintedJobStarted = false;
-      let i = 0;
-      let complete = false;
-      while (i < config.attempts) {
-        // eslint-disable-next-line no-await-in-loop
-        res = await this.checkTaskComplete(taskId);
-        if (res) {
-          const { output } = res;
-          if (!output.toLowerCase().includes("job started")) {
-            if (config.print) {
-              const taskName = res.module_name || res.task_name || "shell";
-              this.addLine(
-                `[*] Task ${res.id} (${taskName}) completed`,
-                "info-text",
-              );
-              this.addLine(output, "indent-5-spaces");
-            }
-            complete = true;
-            break;
-          } else if (!hasPrintedJobStarted) {
-            this.addLine(output, "indent-5-spaces");
-            hasPrintedJobStarted = true;
-          }
-        }
-
-        // eslint-disable-next-line no-await-in-loop
-        await pause(config.delay);
-        i++;
-      }
-
-      if (!complete) {
-        this.addInfo(`No output received for task ${taskId}.`);
-      }
-
-      return res;
-    },
-    async checkTaskComplete(taskId) {
-      try {
-        const task = await agentTaskApi.getTask(this.agent.session_id, taskId);
-        if (task.output) {
-          return task;
-        }
-        return false;
-      } catch (_err) {
-        return false;
-      }
-    },
-    addLine(content, cssClasses = "preserve-newlines") {
-      this.outputLines.push({ content, cssClasses });
-      this.scrollToBottom();
-    },
-    addError(content) {
-      this.addLine(content, "error-text");
-    },
-    addInfo(content) {
-      this.addLine(content, "info-text");
-    },
-    scrollToBottom() {
-      this.$nextTick(() => {
-        const outputDiv = this.$refs.output;
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-      });
-    },
     ansiToHTML: ansiToHtml,
-    colorizeText(text, color = "") {
-      const ansiColors = {
-        red: "\u001b[91m",
-        green: "\u001b[92m",
-        blue: "\u001b[94m",
-        yellow: "\u001b[93m",
-        white: "\u001b[97m",
-      };
-      const colorCode = ansiColors[color.toLowerCase()];
-      if (!colorCode) return text;
-      return `\u001b[1m${colorCode}${text}\u001b[0m`;
-    },
   },
 };
 </script>
