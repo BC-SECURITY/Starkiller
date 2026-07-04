@@ -87,10 +87,10 @@ export const useAgentStore = defineStore("agent", {
         this.subscribe({ sessionId: agent.session_id });
       }
     },
-    clearQueue({ sessionId, tasks }) {
-      tasks.forEach((task) => {
-        agentTaskApi.deleteTask(sessionId, task);
-      });
+    async clearQueue({ sessionId, tasks }) {
+      return Promise.allSettled(
+        tasks.map((task) => agentTaskApi.deleteTask(sessionId, task)),
+      );
     },
     async subscribe({ sessionId }) {
       this.subscribed[sessionId] = true;

@@ -527,9 +527,17 @@ export default {
           },
         )
       ) {
-        this.agentStore.killAgent({ sessionId: this.agent.session_id });
-        this.snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
-        this.$router.push({ name: "agents" });
+        try {
+          await this.agentStore.killAgent({
+            sessionId: this.agent.session_id,
+          });
+          this.snack.success(
+            `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
+          );
+          this.$router.push({ name: "agents" });
+        } catch (err) {
+          this.snack.error(`Failed to kill agent ${this.agent.name}: ${err}`);
+        }
       }
     },
     async clearQueue() {
@@ -552,13 +560,20 @@ export default {
           },
         )
       ) {
-        this.agentStore.clearQueue({
+        const result = await this.agentStore.clearQueue({
           sessionId: this.agent.session_id,
           tasks: queuedIds,
         });
-        this.snack.success(
-          `Clearing queued tasks for Agent ${this.agent.session_id}.`,
-        );
+        const failed = result.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
+          this.snack.error(
+            `Failed to clear ${failed} of ${queuedIds.length} queued tasks.`,
+          );
+        } else {
+          this.snack.success(
+            `Cleared ${queuedIds.length} queued tasks for Agent ${this.agent.session_id}.`,
+          );
+        }
       }
     },
     openUploadDialogPrefilled({ pathToFile }) {

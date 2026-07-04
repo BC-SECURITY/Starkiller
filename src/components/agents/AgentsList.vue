@@ -150,12 +150,20 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.forEach((sessionId) => {
-          this.agentStore.killAgent({ sessionId });
-        });
-        this.snack.success(
-          `${this.selected.length} agents tasked to run TASK_EXIT.`,
+        const total = this.selected.length;
+        const result = await Promise.allSettled(
+          this.selected.map((sessionId) =>
+            this.agentStore.killAgent({ sessionId }),
+          ),
         );
+        const failed = result.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
+          this.snack.error(
+            `Failed to task ${failed} of ${total} agents to run TASK_EXIT.`,
+          );
+        } else {
+          this.snack.success(`${total} agents tasked to run TASK_EXIT.`);
+        }
         this.selected = [];
       }
     },
@@ -170,8 +178,12 @@ export default {
           { color: "red" },
         )
       ) {
-        this.agentStore.killAgent({ sessionId: item.session_id });
-        this.snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
+        try {
+          await this.agentStore.killAgent({ sessionId: item.session_id });
+          this.snack.success(`Agent ${item.name} tasked to run TASK_EXIT.`);
+        } catch (err) {
+          this.snack.error(`Failed to kill agent ${item.name}: ${err}`);
+        }
       }
     },
   },

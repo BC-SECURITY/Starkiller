@@ -32,6 +32,10 @@ const CONSOLE_ERROR_ALLOWLIST = [
   // login.spec.js's "failed login" test (POST /token → 401 Unauthorized).
   // Narrowed to the /token path so other URLs are not silently swallowed.
   /^Failed to load resource: the server responded with a status of 401 \(Unauthorized\)/,
+  // Same as above, for specs that intentionally mock a 500 to test
+  // error-surfacing UI behavior (e.g. agent-detail.spec.js's kill/clear-queue
+  // failure-path regression tests).
+  /^Failed to load resource: the server responded with a status of 500 \(Internal Server Error\)/,
   // Chromium emits this when a request is aborted (route.abort()). Fires in
   // login.spec.js's "network failure" test (POST /token → aborted).
   /^Failed to load resource: net::ERR_FAILED/,
