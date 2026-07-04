@@ -283,4 +283,54 @@ test.describe("agent terminal", () => {
     // Typed output never gets separately persisted (shallow-watch behavior).
     await expect(terminal.getByText(/whoami/)).toHaveCount(0);
   });
+
+  test("output history survives a reload while the Terminal tab is the active interact tab", async ({
+    page,
+  }) => {
+    // Companion to AgentShellSession's equivalent regression test. Under
+    // NORMAL timing, AgentTerminal doesn't hit the AgentEdit.vue
+    // mount-ordering bug -- its mounted() awaits three (fast, mocked) store
+    // fetches before calling loadHistory(), which reliably lets getAgent()
+    // resolve first. That's timing, not a structural guarantee, so an
+    // un-delayed version of this test would pass even without the
+    // session_id watch added alongside Shell's fix -- it wouldn't actually
+    // guard anything. To make this a real regression test, delay the
+    // agent-detail response below past those three awaits, forcing
+    // mounted()'s loadHistory() to run with the placeholder `agent: {}`
+    // (replicating Shell's bug for Terminal too), so the assertion below
+    // only passes because the watch retries loadHistory() once the real
+    // agent data arrives late.
+    await openTerminalTab(page);
+
+    const storageKey = `terminal-history-${agent.session_id}-1`;
+    await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+      key: storageKey,
+      value: JSON.stringify([
+        { content: "PRELOADED_MARKER_LINE", cssClasses: "preserve-newlines" },
+      ]),
+    });
+
+    // Delay the agent-detail response on the upcoming reload so it resolves
+    // well after AgentTerminal.mounted()'s three mocked store-fetch awaits,
+    // not before -- forcing the same "mounted before agent" race
+    // AgentShellSession hits by default.
+    await page.route(`**/api/v2/agents/${agent.session_id}`, async (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(agent),
+      });
+    });
+
+    // Reload WITHOUT switching off the Terminal tab first -- "terminal"
+    // stays the persisted interactTab, so AgentTerminal mounts eagerly on
+    // the very first render, racing the now-delayed getAgent() response.
+    // No tab click is needed after reload; that's exactly the mechanism
+    // under test.
+    await page.reload();
+    const terminal = page.locator('[data-testid="agent-terminal"]');
+    await expect(terminal.getByText("PRELOADED_MARKER_LINE")).toBeVisible();
+  });
 });

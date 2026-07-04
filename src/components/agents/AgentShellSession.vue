@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance, watch } from "vue";
 import * as agentTaskApi from "@/api/agent-task-api";
 import { ansiToHtml, colorizeText } from "@/utils/ansi";
 import { useTerminalOutput } from "@/composables/useTerminalOutput";
@@ -54,6 +54,22 @@ export default {
       addInfo,
     });
     const { pushCommand, navigatePrev, navigateNext } = useCommandHistory();
+    // AgentEdit.vue can mount this component before its own agent fetch
+    // resolves (it persists the active interact-tab and restores it as the
+    // initial render, and Vue mounts children before the parent's mounted()
+    // hook runs) -- when that happens, mounted()'s loadHistory() call reads
+    // the wrong storage key (agent.session_id is still undefined) and finds
+    // nothing. Retry once session_id actually arrives, so history isn't
+    // silently lost on a reload while this tab happens to be the persisted
+    // active one.
+    watch(
+      () => props.agent?.session_id,
+      (sessionId, previousSessionId) => {
+        if (sessionId && !previousSessionId) {
+          loadHistory();
+        }
+      },
+    );
     return {
       output,
       outputLines,

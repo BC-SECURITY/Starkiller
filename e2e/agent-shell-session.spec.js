@@ -238,4 +238,42 @@ test.describe("agent shell session", () => {
     // updated with anything typed during the session.
     await expect(shell.getByText(/whoami/)).toHaveCount(0);
   });
+
+  test("output history survives a reload while the Shell tab is the active interact tab", async ({
+    page,
+  }) => {
+    // Regression test for a real, 100%-reproducible bug fixed by watching
+    // the agent prop in AgentShellSession's setup(): AgentEdit.vue persists
+    // the active interact-tab to localStorage and restores it as the
+    // *initial* v-model value on the next load. If "shell" is the persisted
+    // tab, AgentShellSession mounts as part of that very first render --
+    // before AgentEdit's own mounted() hook fires (Vue mounts children
+    // before parents), i.e. before AgentEdit's getAgent() has resolved and
+    // replaced the placeholder `agent: {}`. storageName() read
+    // `this.agent.session_id` at that moment as undefined, computing
+    // "shell-session-undefined" instead of the real key, so history never
+    // loaded -- confirmed here directly rather than routed around, unlike
+    // the sibling persistence test above.
+    await page.goto(`/#/agents/${agent.session_id}`);
+    await page.locator(".v-tab", { hasText: /shell/i }).click();
+    await expect(
+      page.locator('[data-testid="agent-shell"] input').first(),
+    ).toBeVisible();
+
+    const storageKey = `shell-session-${agent.session_id}`;
+    await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+      key: storageKey,
+      value: JSON.stringify([
+        { content: "PRELOADED_MARKER_LINE", cssClasses: "preserve-newlines" },
+      ]),
+    });
+
+    // Reload WITHOUT switching off the Shell tab first -- "shell" stays the
+    // persisted interactTab, so AgentShellSession mounts eagerly on the very
+    // first render, before AgentEdit's getAgent() resolves. No tab click is
+    // needed after reload; that's exactly the mechanism under test.
+    await page.reload();
+    const shell = page.locator('[data-testid="agent-shell"]');
+    await expect(shell.getByText("PRELOADED_MARKER_LINE")).toBeVisible();
+  });
 });
