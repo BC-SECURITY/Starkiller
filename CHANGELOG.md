@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+-   Consolidated the agent and plugin task tables into a shared `TasksTable`
+    component driven by per-entity config/adapter modules, removing ~850 lines
+    of duplication so task-table fixes apply once instead of twice
 -   Extracted the shared "terminal chrome" (output buffer, task polling, ANSI
     coloring, command-history navigation) out of `AgentTerminal` and
     `AgentShellSession` into reusable composables, so a fix to any of that
