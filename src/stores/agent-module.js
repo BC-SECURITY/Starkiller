@@ -42,18 +42,15 @@ export const useAgentStore = defineStore("agent", {
       this.addAgent(agent);
     },
     async rename({ sessionId, newName }) {
-      const agentIndex = this.agents.findIndex(
-        (el) => el.session_id === sessionId,
-      );
-      if (agentIndex < 0) {
+      let agent = this.agents.find((el) => el.session_id === sessionId);
+      if (!agent) {
         await this.getAgents();
+        agent = this.agents.find((el) => el.session_id === sessionId);
       }
 
-      const agent = this.agents[agentIndex];
       await agentApi.renameAgent(agent, newName);
       if (agent) {
         agent.name = newName;
-        this.agents.splice(agentIndex, 1, agent);
       }
 
       return agent ? agent.name : null;
