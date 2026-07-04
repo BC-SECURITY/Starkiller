@@ -48,3 +48,19 @@ export function recordStagerCreate(page) {
   });
   return { calls };
 }
+
+// Records DELETE /stagers/{id} — the bulk-delete/single-delete action.
+export function recordStagerActions(page) {
+  const calls = [];
+  page.route("**/api/v2/stagers/*", async (route) => {
+    if (route.request().method() === "DELETE") {
+      calls.push({
+        method: "DELETE",
+        url: new URL(route.request().url()).pathname,
+      });
+      return route.fulfill(jsonResponse({ ok: true }));
+    }
+    return route.fallback();
+  });
+  return { calls };
+}

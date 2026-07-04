@@ -11,6 +11,7 @@ import {
   mockStagerTemplates,
   mockStagerTemplate,
   recordStagerCreate,
+  recordStagerActions,
 } from "./helpers/api/stagers.js";
 import { defaultStagers, launcherTemplate } from "./fixtures/stagers.js";
 import { jsonResponse } from "./helpers/responses.js";
@@ -78,5 +79,30 @@ test.describe("stagers", () => {
     await expect.poll(() => create.calls.length).toBe(1);
     expect(create.calls[0].body.template).toBe("multi_launcher");
     expect(create.calls[0].body.name).toBe("test-stager");
+  });
+
+  test("bulk delete calls DELETE for each selected stager (regression: bulk delete was a silent no-op)", async ({
+    page,
+  }) => {
+    await mockStagersList(page, defaultStagers);
+    const actions = recordStagerActions(page);
+    await page.goto("/#/stagers");
+
+    await expect(page.getByText("stager-1").first()).toBeVisible();
+
+    // Select all rows. v-data-table's "select all" checkbox is in thead.
+    await page.locator("thead input[type='checkbox']").first().check();
+
+    await page.getByRole("button", { name: /delete/i }).click();
+    await page.getByRole("button", { name: "Yes" }).click();
+
+    await expect.poll(() => actions.calls.length).toBe(defaultStagers.length);
+
+    // Regression assertion: each DELETE must target the stager's real id.
+    const got = new Set(
+      actions.calls.map((c) => c.url.match(/\/stagers\/([^/]+)$/)?.[1]),
+    );
+    const expected = new Set(defaultStagers.map((s) => String(s.id)));
+    expect(got).toEqual(expected);
   });
 });

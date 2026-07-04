@@ -28,5 +28,18 @@ export function recordBypassActions(page) {
     }
     return route.fallback();
   });
+  // DELETE /bypasses/{id} — separate route (mirrors listener/credential
+  // detail routes) since a bare trailing `*` on LIST doesn't match a
+  // sub-path segment.
+  page.route("**/api/v2/bypasses/*", async (route) => {
+    if (route.request().method() === "DELETE") {
+      calls.push({
+        method: "DELETE",
+        url: new URL(route.request().url()).pathname,
+      });
+      return route.fulfill(jsonResponse({ ok: true }));
+    }
+    return route.fallback();
+  });
   return { calls };
 }

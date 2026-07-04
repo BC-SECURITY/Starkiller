@@ -59,4 +59,28 @@ test.describe("listeners list", () => {
     expect(actions.calls[0].url).toMatch(/\/listeners\/1$/);
     expect(actions.calls[0].method).toBe("DELETE");
   });
+
+  test("bulk kill calls DELETE for each selected listener (regression: bulk delete was a silent no-op)", async ({
+    page,
+  }) => {
+    const actions = recordListenerActions(page);
+    await page.goto("/#/listeners");
+
+    await expect(page.getByText("http-1").first()).toBeVisible();
+
+    // Select all rows. v-data-table's "select all" checkbox is in thead.
+    await page.locator("thead input[type='checkbox']").first().check();
+
+    await page.getByRole("button", { name: /delete/i }).click();
+    await page.getByRole("button", { name: "Yes" }).click();
+
+    await expect.poll(() => actions.calls.length).toBe(defaultListeners.length);
+
+    // Regression assertion: each DELETE must target the listener's real id.
+    const got = new Set(
+      actions.calls.map((c) => c.url.match(/\/listeners\/([^/]+)$/)?.[1]),
+    );
+    const expected = new Set(defaultListeners.map((l) => String(l.id)));
+    expect(got).toEqual(expected);
+  });
 });

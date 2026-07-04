@@ -259,9 +259,10 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.map(async (credential) => {
-          await this.credentialStore.deleteCredential(credential.id);
+        this.selected.map(async (id) => {
+          await this.credentialStore.deleteCredential(id);
         });
+        this.selected = [];
         this.debouncedGetCredentials();
       }
     },

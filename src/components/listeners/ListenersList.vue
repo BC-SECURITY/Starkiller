@@ -123,8 +123,8 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.forEach((listener) => {
-          this.listenerStore.killListener(listener.id);
+        this.selected.forEach((id) => {
+          this.listenerStore.killListener(id);
         });
         this.selected = [];
       }

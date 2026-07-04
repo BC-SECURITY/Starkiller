@@ -60,4 +60,30 @@ test.describe("bypasses", () => {
     expect(actions.calls[0].body.language).toBe("powershell");
     expect(actions.calls[0].body.code).toBe("Write-Output 'test'");
   });
+
+  test("bulk delete calls DELETE for each selected bypass (regression: bulk delete was a silent no-op)", async ({
+    page,
+  }) => {
+    const actions = recordBypassActions(page);
+    await page.goto("/#/bypasses");
+
+    await expect(page.getByText(defaultBypasses[0].name).first()).toBeVisible();
+
+    // Select all rows. v-data-table's "select all" checkbox is in thead.
+    await page.locator("thead input[type='checkbox']").first().check();
+
+    await page.getByRole("button", { name: /delete/i }).click();
+    await page.getByRole("button", { name: "Yes" }).click();
+
+    await expect.poll(() => actions.calls.length).toBe(defaultBypasses.length);
+
+    // Regression assertion: each DELETE must target the bypass's real id, not
+    // "undefined" (item-value was "name", but the handler dereferenced .id
+    // off the resulting primitive).
+    const got = new Set(
+      actions.calls.map((c) => c.url.match(/\/bypasses\/([^/]+)$/)?.[1]),
+    );
+    const expected = new Set(defaultBypasses.map((b) => String(b.id)));
+    expect(got).toEqual(expected);
+  });
 });

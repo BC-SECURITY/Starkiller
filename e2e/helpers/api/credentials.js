@@ -35,7 +35,7 @@ export function recordCredentialActions(page) {
     }
     return route.fallback();
   });
-  // PUT updates go to /credentials/{id} — separate route so it doesn't
+  // PUT/DELETE go to /credentials/{id} — separate route so it doesn't
   // collide with mockCredentialDetail's GET.
   page.route("**/api/v2/credentials/*", async (route) => {
     if (route.request().method() === "PUT") {
@@ -44,6 +44,13 @@ export function recordCredentialActions(page) {
         method: "PUT",
         url: route.request().url(),
         body,
+      });
+      return route.fulfill(jsonResponse({ ok: true }));
+    }
+    if (route.request().method() === "DELETE") {
+      calls.push({
+        method: "DELETE",
+        url: route.request().url(),
       });
       return route.fulfill(jsonResponse({ ok: true }));
     }
