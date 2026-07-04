@@ -18,6 +18,13 @@ export function mockBypassesList(page, bypasses) {
   });
 }
 
+export function mockBypassDetail(page, bypass) {
+  return page.route(`**/api/v2/bypasses/${bypass.id}`, (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse(bypass));
+  });
+}
+
 export function recordBypassActions(page) {
   const calls = [];
   page.route(LIST, async (route) => {
@@ -33,11 +40,8 @@ export function recordBypassActions(page) {
   // sub-path segment.
   page.route("**/api/v2/bypasses/*", async (route) => {
     if (route.request().method() === "DELETE") {
-      calls.push({
-        method: "DELETE",
-        url: new URL(route.request().url()).pathname,
-      });
-      return route.fulfill(jsonResponse({ ok: true }));
+      calls.push({ method: "DELETE", url: route.request().url() });
+      return route.fulfill(jsonResponse({}, 204));
     }
     return route.fallback();
   });

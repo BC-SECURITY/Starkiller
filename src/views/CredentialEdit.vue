@@ -211,7 +211,7 @@ export default {
         )
       ) {
         try {
-          this.credentialStore.deleteCredential(this.id);
+          await this.credentialStore.deleteCredential(this.id);
           this.$router.push({ name: "credentials" });
         } catch (err) {
           this.snack.error(`Error: ${err}`);

@@ -48,11 +48,8 @@ export function recordCredentialActions(page) {
       return route.fulfill(jsonResponse({ ok: true }));
     }
     if (route.request().method() === "DELETE") {
-      calls.push({
-        method: "DELETE",
-        url: route.request().url(),
-      });
-      return route.fulfill(jsonResponse({ ok: true }));
+      calls.push({ method: "DELETE", url: route.request().url() });
+      return route.fulfill(jsonResponse({}, 204));
     }
     return route.fallback();
   });

@@ -33,7 +33,8 @@ const CONSOLE_ERROR_ALLOWLIST = [
   // Narrowed to the /token path so other URLs are not silently swallowed.
   /^Failed to load resource: the server responded with a status of 401 \(Unauthorized\)/,
   // Same as above, for specs that intentionally mock a 500 to test
-  // error-surfacing UI behavior (e.g. agent-detail.spec.js's kill/clear-queue
+  // error-surfacing UI behavior (e.g. bypasses.spec.js / credentials-edit.spec.js
+  // delete-failure regression tests, and agent-detail.spec.js's kill/clear-queue
   // failure-path regression tests).
   /^Failed to load resource: the server responded with a status of 500 \(Internal Server Error\)/,
   // Chromium emits this when a request is aborted (route.abort()). Fires in
