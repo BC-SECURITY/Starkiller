@@ -43,6 +43,16 @@
       </v-col>
     </v-row>
     <v-row class="ml-1 mr-1">
+      <v-col cols="12">
+        <v-card class="mx-auto">
+          <v-card-title>Topology</v-card-title>
+          <v-card-text>
+            <agent-graph expandable height="420px" />
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row class="ml-1 mr-1">
       <v-col cols="12" md="4">
         <v-card class="mx-auto">
           <v-card-title> Agents </v-card-title>
@@ -133,6 +143,7 @@ import { Doughnut } from "vue-chartjs";
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from "chart.js";
 
 import AgentTasksTable from "@/components/agents/AgentTasksTable.vue";
+import AgentGraph from "@/components/agents/AgentGraph.vue";
 import CheckinChart from "@/components/charts/CheckinChart.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
 import { CHART_HEIGHT_PX, CHART_PALETTE } from "@/components/charts/tokens";
@@ -151,6 +162,7 @@ export default {
     AgentTasksTable,
     CheckinChart,
     Doughnut,
+    AgentGraph,
   },
   inject: ["snack"],
   data() {

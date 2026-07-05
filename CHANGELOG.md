@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Per-agent Stats tab on the agent page (task counts, host info, check-in and tasks-over-time charts)
 -   Multi-agent selection on the Dashboard Check Ins card
+-   Interactive agent topology graph panel on the Dashboard with fullscreen expand and a context-aware right-click menu (Open, Popout, Execute shell/module, Kill, Focus); one shared `AgentGraph` component now powers both the panel and the Agents Graph page
+-   Playwright e2e smoke coverage for the Dashboard and Agents Graph pages
 
 ### Changed
 

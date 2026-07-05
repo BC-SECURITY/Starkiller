@@ -40,6 +40,20 @@ const CONSOLE_ERROR_ALLOWLIST = [
   // Chromium emits this when a request is aborted (route.abort()). Fires in
   // login.spec.js's "network failure" test (POST /token → aborted).
   /^Failed to load resource: net::ERR_FAILED/,
+  // Dashboard.refreshAll() logs each failed refresh leg via console.error
+  // ("[Dashboard] agents refresh failed: ..."). Intentional error path,
+  // exercised by dashboard.spec.js's error-isolation test. Anchored to the
+  // [Dashboard] prefix so unrelated errors still fail tests.
+  /^\[Dashboard\]/,
+  // Chromium logs a browser-level resource error for any non-2xx XHR.
+  // dashboard.spec.js's error-isolation test intentionally serves the agents
+  // list with HTTP 500. Same precedent as the 401 entry above.
+  /^Failed to load resource: the server responded with a status of 500 \(Internal Server Error\)/,
+  // The agent store intentionally logs fetch failures before swallowing them
+  // (status="error"); dashboard.spec.js's error-isolation test triggers this
+  // with its 500. Narrowly anchored to the fetch-agents message so OTHER
+  // [Starkiller]-prefixed errors (e.g. component update crashes) still fail.
+  /^\[Starkiller\] Failed to fetch agents/,
 ];
 
 export const test = base.extend({

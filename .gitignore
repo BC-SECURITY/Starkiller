@@ -32,3 +32,6 @@ pnpm-debug.log*
 /playwright-report/
 /playwright/.cache/
 .claude/
+
+# Superpowers brainstorm visual companion
+.superpowers/
