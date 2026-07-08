@@ -113,6 +113,12 @@ export default {
       formPriorities: ["Listener", "Language"],
       errorState: false,
       initialLoad: false,
+      // Incremented on every getStager()/selectedTemplate fetch. Each is
+      // its own independent race (entity nav vs. template dropdown), so
+      // each gets its own counter -- a shared counter would let one
+      // invalidate the other's still-relevant in-flight request.
+      stagerFetchSeq: 0,
+      templateFetchSeq: 0,
     };
   },
   computed: {
@@ -213,9 +219,14 @@ export default {
      */
     selectedTemplate: {
       async handler(val) {
+        this.templateFetchSeq += 1;
+        const mySeq = this.templateFetchSeq;
         const a = await stagerApi
           .getStagerTemplate(val)
           .catch((err) => this.snack.error(`Error: ${err}`));
+        // A superseded response must not overwrite a newer template
+        // selection's data.
+        if (mySeq !== this.templateFetchSeq) return;
         if (a) {
           this.stagerTemplate = a;
           this.initialLoad = true;
@@ -296,13 +307,19 @@ export default {
       }
     },
     getStager(id) {
+      this.stagerFetchSeq += 1;
+      const mySeq = this.stagerFetchSeq;
       stagerApi
         .getStager(id)
         .then((data) => {
+          // A slower, superseded fetch (e.g. from fast nav to another
+          // stager) must not overwrite the current one.
+          if (mySeq !== this.stagerFetchSeq) return;
           this.stager = data;
           this.selectedTemplate = data.template;
         })
         .catch((err) => {
+          if (mySeq !== this.stagerFetchSeq) return;
           console.error(err);
           this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;

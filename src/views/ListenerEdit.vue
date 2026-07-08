@@ -179,6 +179,13 @@ export default {
       errorState: false,
       serverError: null,
       initialLoad: false,
+      // Incremented on every getListener()/selectedTemplate fetch. Each is
+      // its own independent race (entity nav vs. template dropdown), so
+      // each gets its own counter -- a shared counter would let one
+      // invalidate the other's still-relevant in-flight request.
+      listenerFetchSeq: 0,
+      templateFetchSeq: 0,
+      togglingEnabled: false,
       commonStagers: [
         "multi_launcher",
         "multi_macro",
@@ -282,18 +289,26 @@ export default {
         // wouldn't match the new one (or, worse, would coincidentally match
         // and mis-attribute the error). Drop it on every switch.
         this.serverError = null;
+        this.templateFetchSeq += 1;
+        const mySeq = this.templateFetchSeq;
         this.loadingTemplate = true;
-        const a = await listenerApi
-          .getListenerTemplate(val)
-          .catch((err) =>
-            this.snack.error(
-              `Error: ${err?.response?.data?.detail || err?.message || err}`,
-            ),
-          );
-        this.loadingTemplate = false;
-        if (a) {
+        try {
+          const a = await listenerApi.getListenerTemplate(val);
+          // A superseded response must not overwrite a newer template
+          // selection's data.
+          if (mySeq !== this.templateFetchSeq) return;
           this.listenerTemplate = a;
           this.initialLoad = true;
+        } catch (err) {
+          if (mySeq !== this.templateFetchSeq) return;
+          this.snack.error(
+            `Error: ${err?.response?.data?.detail || err?.message || err}`,
+          );
+        } finally {
+          // Always clear the spinner, even for a superseded call -- a
+          // stuck-forever spinner is worse than one that clears a beat
+          // early while a newer, still-relevant fetch is in flight.
+          this.loadingTemplate = false;
         }
       },
     },
@@ -409,9 +424,14 @@ export default {
       }
     },
     getListener(id) {
+      this.listenerFetchSeq += 1;
+      const mySeq = this.listenerFetchSeq;
       listenerApi
         .getListener(id)
         .then((data) => {
+          // A slower, superseded fetch (e.g. from fast nav to another
+          // listener) must not overwrite the current one.
+          if (mySeq !== this.listenerFetchSeq) return;
           this.listener = data;
           this.listener.tags.forEach((tag) => {
             tag.color = tag.color || "#0E0CDA";
@@ -419,12 +439,21 @@ export default {
           this.selectedTemplate = data.template;
         })
         .catch((err) => {
+          if (mySeq !== this.listenerFetchSeq) return;
           console.error(err);
           this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
         });
     },
     async toggleEnabled(val) {
+      // Guard against overlapping toggles (e.g. a fast double-click on the
+      // switch) racing two updateListener calls -- without this, a slower
+      // request could land after a faster one and clobber it with a stale
+      // `enabled` value.
+      if (this.togglingEnabled) {
+        this.listener.enabled = !val;
+        return;
+      }
       this.listener.enabled = val;
 
       if (
@@ -439,6 +468,7 @@ export default {
         return;
       }
 
+      this.togglingEnabled = true;
       try {
         const response = await listenerApi.updateListener({
           ...this.listener,
@@ -448,6 +478,8 @@ export default {
       } catch (err) {
         this.listener.enabled = !val;
         this.snack.error(`Error: ${err}`);
+      } finally {
+        this.togglingEnabled = false;
       }
     },
   },

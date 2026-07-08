@@ -16,6 +16,13 @@ export function mockListenersList(page, listeners) {
   });
 }
 
+export function mockListenerDetail(page, listener) {
+  return page.route(`**/api/v2/listeners/${listener.id}`, (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse(listener));
+  });
+}
+
 export function mockListenerTemplates(page, templates) {
   return page.route(TEMPLATES_LIST, (route) => {
     const url = new URL(route.request().url());

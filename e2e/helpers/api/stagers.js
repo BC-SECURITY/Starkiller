@@ -16,6 +16,13 @@ export function mockStagersList(page, stagers) {
   });
 }
 
+export function mockStagerDetail(page, stager) {
+  return page.route(`**/api/v2/stagers/${stager.id}`, (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse(stager));
+  });
+}
+
 export function mockStagerTemplates(page, templates) {
   return page.route(TEMPLATES_LIST, (route) => {
     const url = new URL(route.request().url());
