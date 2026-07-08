@@ -20,6 +20,11 @@ import { ref, watch, nextTick } from "vue";
 // session is never separately persisted; only a full reassignment of
 // outputLines (a fresh load, or `clear`) triggers a write.
 //
+// MAX_LINES bounds both the persisted copy (below, a localStorage-quota
+// concern) and the live in-memory buffer (addLine, a DOM/memory-growth
+// concern over a long session) -- one constant so the two never drift apart.
+const MAX_LINES = 500;
+
 // The 500-line cap and quota-safe try/catch in persistHistory below are
 // applied uniformly to both components -- this is a harmonization, not a
 // restatement of prior behavior: AgentTerminal's original watcher had
@@ -37,7 +42,15 @@ export function useTerminalOutput(getStorageKey) {
   }
 
   function addLine(content, cssClasses = "preserve-newlines") {
+    // Push first, then trim from the front -- keeps the buffer at exactly
+    // MAX_LINES at rest instead of oscillating between MAX_LINES and
+    // MAX_LINES+1. Like `.push()`, `.splice()` mutates the array in place
+    // without reassigning `outputLines.value`, so it does not trigger the
+    // persist watch below either.
     outputLines.value.push({ content, cssClasses });
+    if (outputLines.value.length > MAX_LINES) {
+      outputLines.value.splice(0, outputLines.value.length - MAX_LINES);
+    }
     scrollToBottom();
   }
 
@@ -52,8 +65,8 @@ export function useTerminalOutput(getStorageKey) {
   function persistHistory() {
     try {
       const toStore =
-        outputLines.value.length > 500
-          ? outputLines.value.slice(-500)
+        outputLines.value.length > MAX_LINES
+          ? outputLines.value.slice(-MAX_LINES)
           : outputLines.value;
       localStorage.setItem(getStorageKey(), JSON.stringify(toStore));
     } catch {

@@ -51,6 +51,20 @@ describe("useTerminalOutput", () => {
     expect(setItemSpy).not.toHaveBeenCalled();
   });
 
+  it("caps the live in-memory buffer at 500 lines, without ever persisting to localStorage", async () => {
+    const setItemSpy = vi.spyOn(global.localStorage, "setItem");
+    const { outputLines, addLine } = useTerminalOutput(getStorageKey);
+    for (let i = 0; i < 600; i++) {
+      addLine(`line-${i}`);
+    }
+    await nextTick();
+    expect(outputLines.value).toHaveLength(500);
+    expect(outputLines.value[0].content).toBe("line-100");
+    expect(outputLines.value[499].content).toBe("line-599");
+    // addLine's in-place push+splice must never trigger the persist watch.
+    expect(setItemSpy).not.toHaveBeenCalled();
+  });
+
   it("persists on a full reassignment of outputLines, capped at 500 lines", async () => {
     const { outputLines } = useTerminalOutput(getStorageKey);
     const lines = Array.from({ length: 600 }, (_, i) => ({
