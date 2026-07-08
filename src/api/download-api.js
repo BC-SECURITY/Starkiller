@@ -1,18 +1,28 @@
 import { request, handleError } from "@/api/http";
 
-function getFilename(contentDisposition) {
+export function getFilename(contentDisposition) {
   if (!contentDisposition) return "download";
   // need to handle filename="filename.jpg" and filename*=UTF-8''filename.jpg
   if (contentDisposition.indexOf("filename*=") !== -1) {
-    return decodeURIComponent(
-      contentDisposition.split("filename*=")[1].split("'")[2],
-    );
+    const encodedName = contentDisposition.split("filename*=")[1].split("'")[2];
+    // A malformed/missing second `'` delimiter yields `undefined` here;
+    // decodeURIComponent(undefined) would otherwise coerce it to the
+    // literal string "undefined" and return that as the filename.
+    if (encodedName === undefined) return "download";
+    return decodeURIComponent(encodedName);
   }
 
   let filename = contentDisposition.split("filename=")[1];
+  // No filename= parameter at all (e.g. a bare "attachment" header).
+  if (filename === undefined) return "download";
+  // RFC 6266 allows further parameters (size, charset, ...) after
+  // filename=, so isolate just the value up to the next `;` before
+  // stripping surrounding quotes -- otherwise a header like
+  // `filename="report.csv"; size=123` mangles into `report.csv"; size=123`.
+  filename = filename.split(";")[0].trim();
   filename = filename.replace(/^["']|["']$/g, "");
 
-  return filename;
+  return filename || "download";
 }
 
 // Inlines the former createObjectURL -> anchor click -> cleanup side effect.

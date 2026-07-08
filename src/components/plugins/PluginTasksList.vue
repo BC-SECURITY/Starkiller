@@ -84,6 +84,7 @@ export default {
     PluginTasksTable,
     ListPageTop,
   },
+  inject: ["snack"],
   props: {
     plugin: {
       type: Object,
@@ -154,11 +155,15 @@ export default {
     },
   },
   async mounted() {
-    await Promise.all([
-      this.pluginStore.getPlugins(),
-      this.userStore.getUsers(),
-      this.getTags(),
-    ]);
+    try {
+      await Promise.all([
+        this.pluginStore.getPlugins(),
+        this.userStore.getUsers(),
+        this.getTags(),
+      ]);
+    } catch (err) {
+      this.snack.error(`Failed to load filter data: ${err}`);
+    }
   },
   methods: {
     async getTags() {
