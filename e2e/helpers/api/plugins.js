@@ -9,10 +9,14 @@
 //   src/components/plugins/PluginMarketplace.vue refreshMarketplace().
 //   The response uses { records: [...] } – the same paginated envelope
 //   as every other list endpoint.
-import { paginatedResponse } from "../responses.js";
+//
+// mockPluginDetail: intercepts GET /api/v2/plugins/<id> (single-plugin
+//   detail), the route PluginEdit.vue's getPlugin() hits on mount.
+import { jsonResponse, paginatedResponse } from "../responses.js";
 
 const INSTALLED = "**/api/v2/plugins*";
 const MARKETPLACE = "**/api/v2/plugin-registries/marketplace*";
+const PLUGIN_DETAIL = (id) => `**/api/v2/plugins/${id}`;
 
 export function mockInstalledPlugins(page, plugins) {
   return page.route(INSTALLED, (route) => {
@@ -28,5 +32,12 @@ export function mockPluginMarketplace(page, items) {
   return page.route(MARKETPLACE, (route) => {
     if (route.request().method() !== "GET") return route.fallback();
     return route.fulfill(paginatedResponse(items));
+  });
+}
+
+export function mockPluginDetail(page, plugin) {
+  return page.route(PLUGIN_DETAIL(plugin.id), (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse(plugin));
   });
 }
