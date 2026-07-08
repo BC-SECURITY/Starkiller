@@ -92,8 +92,19 @@ export async function request(
   }
 
   if (!res.ok) {
-    if (res.status === 401 || res.status === 403)
-      useApplicationStore().logout();
+    // login()/rawFetchJson() bypasses this wrapper entirely (see the
+    // comment on rawFetchJson in application-module.js), so a failed
+    // login attempt's 401 never reaches here -- this only fires for a
+    // previously-valid session going stale or losing permission mid-use.
+    if (res.status === 401) {
+      useApplicationStore().logout(
+        "Your session has expired. Please log in again.",
+      );
+    } else if (res.status === 403) {
+      useApplicationStore().logout(
+        "You no longer have permission to perform that action. Please log in again.",
+      );
+    }
     // safeParse handles its own parse failures; if the error body is malformed
     // we still want to surface the status, so swallow safeParse's throw here
     // and fall through to the synthetic error below with data=undefined.

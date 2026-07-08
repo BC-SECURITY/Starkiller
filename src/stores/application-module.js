@@ -29,7 +29,10 @@ let notificationCounter = 0;
 // eslint-disable-next-line import/prefer-default-export
 export const useApplicationStore = defineStore("application", {
   persist: {
-    omit: ["chatUnreadCount"],
+    // forcedLogoutReason is intentionally never persisted -- it's a
+    // same-session, fire-once signal for Login.vue to show a snack, not
+    // something that should ever survive a reload into a future session.
+    omit: ["chatUnreadCount", "forcedLogoutReason"],
     afterHydrate: (ctx) => {
       try {
         setInstance(ctx.store.url, ctx.store.token);
@@ -66,6 +69,11 @@ export const useApplicationStore = defineStore("application", {
     taskHeaders: [],
     pluginTaskHeaders: [],
     connectionError: 0,
+    // Set by logout(reason) when the interceptor forces a logout (401/403).
+    // Empty string means "no forced-logout message to show" -- cleared on
+    // every login() attempt and by clear(), so it can never linger into an
+    // unrelated future session or attempt. See the persist.omit note above.
+    forcedLogoutReason: "",
     chatUnreadCount: 0,
     notifications: [],
     dashboardSelectedAgentIds: [],
@@ -86,6 +94,8 @@ export const useApplicationStore = defineStore("application", {
     async login({ url, socketUrl, username, password }) {
       try {
         this.loginError = "";
+        // A fresh login attempt supersedes any prior forced-logout message.
+        this.forcedLogoutReason = "";
         const formData = new FormData();
         formData.append("username", username);
         formData.append("password", password);
@@ -141,13 +151,19 @@ export const useApplicationStore = defineStore("application", {
     clearNotifications() {
       this.notifications = [];
     },
-    async logout() {
+    // `reason`, if given, is shown as a snack once Login.vue mounts (see its
+    // forcedLogoutReason watcher) -- used by http.js's 401/403 interceptor
+    // to explain a forced logout. The voluntary "Log Out" button in
+    // Settings.vue calls this with no argument, which clears any stale
+    // reason from a previous forced logout.
+    async logout(reason = "") {
       this.token = "";
       this.url = "";
       this.socketUrl = "";
       this.user = {};
       this.empireVersion = "";
       this.notifications = [];
+      this.forcedLogoutReason = reason;
     },
     clear() {
       this.token = "";
@@ -164,6 +180,7 @@ export const useApplicationStore = defineStore("application", {
       this.taskHeaders = [];
       this.pluginTaskHeaders = [];
       this.notifications = [];
+      this.forcedLogoutReason = "";
     },
   },
   getters: {

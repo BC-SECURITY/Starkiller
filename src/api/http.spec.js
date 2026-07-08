@@ -161,6 +161,27 @@ describe("request — error contract", () => {
     expect(mockStore.logout).not.toHaveBeenCalled();
   });
 
+  // Regression test: 401 ("your session expired") and 403 ("you lack
+  // permission") are different operator-facing situations and must not
+  // share one hardcoded message.
+  it("passes distinct reason strings to logout() for 401 vs 403", async () => {
+    mockFetch({ ok: false, status: 401, body: {} });
+    await request("/x").catch(() => {});
+    expect(mockStore.logout).toHaveBeenCalledWith(
+      expect.stringMatching(/session has expired/i),
+    );
+
+    mockStore.logout.mockClear();
+    mockFetch({ ok: false, status: 403, body: {} });
+    await request("/x").catch(() => {});
+    expect(mockStore.logout).toHaveBeenCalledWith(
+      expect.stringMatching(/permission/i),
+    );
+    expect(mockStore.logout.mock.calls[0][0]).not.toMatch(
+      /session has expired/i,
+    );
+  });
+
   it("bumps connectionError and rethrows on network failure (no logout)", async () => {
     global.fetch = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
     await expect(request("/x")).rejects.toBeInstanceOf(TypeError);

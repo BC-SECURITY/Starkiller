@@ -32,6 +32,9 @@ const CONSOLE_ERROR_ALLOWLIST = [
   // login.spec.js's "failed login" test (POST /token → 401 Unauthorized).
   // Narrowed to the /token path so other URLs are not silently swallowed.
   /^Failed to load resource: the server responded with a status of 401 \(Unauthorized\)/,
+  // Same as above, for forced-logout.spec.js's 403 regression test (the
+  // http.js interceptor's 403 branch).
+  /^Failed to load resource: the server responded with a status of 403 \(Forbidden\)/,
   // Same as above, for specs that intentionally mock a 500 to test
   // error-surfacing UI behavior (e.g. bypasses.spec.js / credentials-edit.spec.js
   // delete-failure regression tests, and agent-detail.spec.js's kill/clear-queue

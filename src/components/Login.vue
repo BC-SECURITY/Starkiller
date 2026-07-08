@@ -58,6 +58,9 @@ export default {
     loginError() {
       return this.applicationStore.loginError;
     },
+    forcedLogoutReason() {
+      return this.applicationStore.forcedLogoutReason;
+    },
   },
   watch: {
     loginError(val) {
@@ -65,6 +68,18 @@ export default {
         this.loading = false;
         this.snack.error(`Error Logging In: ${val}`);
       }
+    },
+    // immediate: true because the reason is set (by the 401/403
+    // interceptor calling logout()) *before* the forced navigation to this
+    // view -- by the time Login.vue mounts, the value is already sitting
+    // in the store, so a non-immediate watcher would never see the change.
+    forcedLogoutReason: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.snack.error(val);
+        }
+      },
     },
   },
   mounted() {
