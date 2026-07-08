@@ -142,6 +142,7 @@ import { useModuleStore } from "@/stores/module-module";
 import DynamicFormInput from "@/components/DynamicFormInput.vue";
 import { resolveWidget } from "@/composables/forms/resolveWidget";
 import { mapValueType } from "@/composables/forms/useFieldDescriptors";
+import { visibleAutorunFields } from "@/composables/forms/autorunFieldVisibility";
 import { getAutorunTasks, saveAutorunTasks } from "@/api/listener-api";
 
 export default {
@@ -185,12 +186,7 @@ export default {
     },
     filteredOptions() {
       if (!this.selectedModuleForEdit) return [];
-      return Object.keys(this.selectedModuleForEdit.options)
-        .map((key) => ({
-          name: key,
-          ...this.selectedModuleForEdit.options[key],
-        }))
-        .filter((field) => field.name.toLowerCase() !== "agent");
+      return visibleAutorunFields(this.selectedModuleForEdit.options);
     },
   },
   watch: {
