@@ -312,18 +312,38 @@ test.describe("agent tasks table", () => {
     ).toHaveCount(0);
   });
 
-  test("stop task calls stop_job", async ({ page }) => {
+  test("stop task asks for confirmation before calling stop_job", async ({
+    page,
+  }) => {
     const tasks = recordAgentTasks(page);
     await mockTasks(page, [taskRow()], {});
     await page.goto(`/#/agents/${AGENT}?tab=tasks`);
     await openRowMenu(page);
     await page.getByText("Stop Task").click();
+    await page.getByRole("button", { name: "Yes" }).click();
     await expect
       .poll(
         () =>
           tasks.calls.filter((c) => c.url.endsWith("/tasks/stop_job")).length,
       )
       .toBe(1);
+  });
+
+  test("stop task does not call stop_job if the confirmation is declined", async ({
+    page,
+  }) => {
+    const tasks = recordAgentTasks(page);
+    await mockTasks(page, [taskRow()], {});
+    await page.goto(`/#/agents/${AGENT}?tab=tasks`);
+    await openRowMenu(page);
+    await page.getByText("Stop Task").click();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    // Give any (incorrect) fire-and-forget call a chance to land before
+    // asserting it never did.
+    await page.waitForTimeout(200);
+    expect(
+      tasks.calls.filter((c) => c.url.endsWith("/tasks/stop_job")).length,
+    ).toBe(0);
   });
 
   test("View Images renders the image at the correct download id when the row and detail download orders differ", async ({

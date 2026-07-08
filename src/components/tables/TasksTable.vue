@@ -399,7 +399,7 @@ export default {
     TooltipButton,
     HeaderMenu,
   },
-  inject: ["snack"],
+  inject: ["snack", "confirm"],
   props: {
     entity: {
       type: Object,
@@ -762,9 +762,14 @@ export default {
     rerunTask(item) {
       return this.adapter.rerunTask(item, { snack: this.snack });
     },
-    stopTask(item) {
+    async stopTask(item) {
       if (!this.adapter.stopTask) {
         this.snack.error("Stopping this task type is not supported.");
+        return;
+      }
+      if (
+        !(await this.confirm("Stop Task", "Do you want to stop this task?"))
+      ) {
         return;
       }
       return this.adapter.stopTask(item, { snack: this.snack });
