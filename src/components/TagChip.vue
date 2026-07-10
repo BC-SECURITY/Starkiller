@@ -1,134 +1,42 @@
 <template>
-  <v-menu
-    v-model="menu"
-    :close-on-content-click="false"
-    :close-on-click="false"
-    location="bottom end"
-    transition="scale-transition"
-    origin="top left"
+  <v-chip
+    :color="chipColor"
+    class="mt-1 mr-1 ml-1 mb-1"
+    :style="{ color: textColor }"
+    variant="flat"
+    size="small"
+    :closable="closable"
+    @click:close="$emit('detach-tag', tag)"
   >
-    <template #activator="{ props: activatorProps }">
-      <v-chip
-        :color="internalTag.color"
-        class="mt-4 mr-1 ml-1 mb-4"
-        :class="{ 'text-white': !isNew }"
-        :variant="isNew ? 'outlined' : 'flat'"
-        size="small"
-        :closable="close"
-        v-bind="activatorProps"
-        @click:close="deleteTag(internalTag)"
-      >
-        {{ `${tag.name}:${tag.value}` }}
-        <v-icon v-if="customIcon" end size="x-small">
-          {{ customIcon }}
-        </v-icon>
-      </v-chip>
-    </template>
-    <v-card width="400" style="display: flex; flex-direction: row-reverse">
-      <v-btn icon class="mt-2 mr-2" @click="menu = false">
-        <v-icon>mdi-close-circle</v-icon>
-      </v-btn>
-      <v-form ref="form">
-        <v-card-text>
-          <v-text-field
-            ref="nameField"
-            v-model="internalTag.name"
-            variant="outlined"
-            density="compact"
-            label="Name"
-            :rules="rules.noColon"
-            required
-          />
-          <v-text-field
-            v-model="internalTag.value"
-            variant="outlined"
-            density="compact"
-            label="Value"
-            :rules="rules.noColon"
-            required
-          />
-          <v-color-picker
-            v-model="internalTag.color"
-            hide-inputs
-            dot-size="16"
-            mode="hexa"
-            swatches-max-height="100"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="green" variant="text" @click="updateTag(internalTag)">
-            Update
-          </v-btn>
-        </v-card-actions>
-      </v-form>
-    </v-card>
-  </v-menu>
+    {{ tag.name }}
+  </v-chip>
 </template>
 
 <script>
+import { readableTextColor } from "@/utils/contrast";
+
 export default {
   name: "TagChip",
   props: {
-    isNew: {
-      type: Boolean,
-      default: false,
-    },
     tag: {
       type: Object,
-      default: () => ({ name: "New Tag", value: "", color: "#2196F3" }),
+      required: true,
     },
-    close: {
+    closable: {
       type: Boolean,
       default: true,
     },
-    customIcon: {
-      type: String,
-      default: null,
-    },
   },
-  emits: ["delete-tag", "update-tag"],
-  data() {
-    return {
-      menu: false,
-      internalTag: this.tag,
-      rules: {
-        noColon: [
-          (value) => !!value || "Required.",
-          (value) => !value.includes(":") || "Cannot contain a colon.",
-        ],
-      },
-    };
-  },
-  watch: {
-    menu(val) {
-      if (val) {
-        if (this.isNew) {
-          this.internalTag = { name: "", value: "", color: "#2196F3" };
-        }
-        this.$nextTick(() => {
-          this.$refs.form.resetValidation();
-
-          // kind of lame, but it doesn't focus without the setTimeout
-          setTimeout(() => {
-            this.$refs.nameField.focus();
-          }, 500);
-        });
-      } else {
-        this.internalTag = this.tag;
-      }
+  emits: ["detach-tag"],
+  computed: {
+    // Fall back to the material blue default for colorless quick-add tags.
+    chipColor() {
+      return this.tag.color || "#2196F3";
     },
-  },
-  methods: {
-    deleteTag(tag) {
-      this.$emit("delete-tag", tag);
-    },
-    async updateTag(tag) {
-      const { valid } = await this.$refs.form.validate();
-      if (!valid) return;
-      this.$emit("update-tag", tag);
-      this.menu = false;
-      this.$refs.form.resetValidation();
+    // variant="flat" doesn't auto-contrast its own text, so derive a readable
+    // color from the chip background — otherwise pale tags render white-on-light.
+    textColor() {
+      return readableTextColor(this.chipColor);
     },
   },
 };

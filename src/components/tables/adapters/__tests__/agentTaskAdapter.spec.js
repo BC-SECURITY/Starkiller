@@ -7,7 +7,6 @@ vi.mock("@/api/agent-task-api", () => ({
   sysinfo: vi.fn(),
   stopTask: vi.fn(),
   addTag: vi.fn(),
-  updateTag: vi.fn(),
   deleteTag: vi.fn(),
 }));
 vi.mock("@/api/module-api", () => ({ executeModule: vi.fn() }));
@@ -120,21 +119,11 @@ describe("agentTaskAdapter passthroughs", () => {
     expect(result).toBe("add-result");
   });
 
-  it("updateTag forwards args to agentTaskApi.updateTag unchanged", () => {
-    const tag = { id: 1, name: "foo" };
-    agentTaskApi.updateTag.mockReturnValue("update-result");
-    const result = agentTaskAdapter.updateTag("A1", 5, tag);
-    expect(agentTaskApi.updateTag).toHaveBeenCalledWith("A1", 5, tag);
-    expect(agentTaskApi.deleteTag).not.toHaveBeenCalled();
-    expect(result).toBe("update-result");
-  });
-
   it("deleteTag forwards args to agentTaskApi.deleteTag unchanged", () => {
     const tag = { id: 1 };
     agentTaskApi.deleteTag.mockReturnValue("delete-result");
     const result = agentTaskAdapter.deleteTag("A1", 5, tag);
     expect(agentTaskApi.deleteTag).toHaveBeenCalledWith("A1", 5, tag);
-    expect(agentTaskApi.updateTag).not.toHaveBeenCalled();
     expect(result).toBe("delete-result");
   });
 });

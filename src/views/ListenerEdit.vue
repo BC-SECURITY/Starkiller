@@ -96,9 +96,8 @@
           <tag-viewer
             v-if="!isNew"
             :tags="listener.tags"
-            @update-tag="updateTag"
-            @delete-tag="deleteTag"
-            @new-tag="addTag"
+            @attach-tag="addTag"
+            @detach-tag="deleteTag"
           />
           <error-state-alert
             v-if="errorState"
@@ -338,21 +337,12 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(tag) {
+    addTag(payload) {
       listenerApi
-        .updateTag(this.listener.id, tag)
+        .addTag(this.listener.id, payload)
         .then((t) => {
-          const index = this.listener.tags.findIndex((x) => x.id === t.id);
-          this.listener.tags.splice(index, 1, t);
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(tag) {
-      listenerApi
-        .addTag(this.listener.id, tag)
-        .then((t) => {
-          this.listener.tags.push(t);
+          if (!this.listener.tags.some((x) => x.id === t.id))
+            this.listener.tags.push(t);
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },

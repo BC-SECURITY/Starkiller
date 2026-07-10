@@ -15,9 +15,9 @@
         <expansion-panel-filter
           v-model="selectedTags"
           title="Tags"
-          label="label"
+          label="name"
           item-key="id"
-          item-value="label"
+          item-value="name"
           :items="tags"
           :empty-default="true"
         />
@@ -28,6 +28,7 @@
           v-model="selected"
           :selected-tags="selectedTags"
           @kill-listener="killListener"
+          @refresh-tags="getTags"
         />
       </template>
     </advanced-table>
@@ -39,7 +40,7 @@ import ListPageTop from "@/components/ListPageTop.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
 import ListenersTable from "@/components/listeners/ListenersTable.vue";
-import * as tagApi from "@/api/tag-api";
+import { fetchTags } from "@/utils/tags";
 import { useListenerStore } from "@/stores/listener-module";
 
 export default {
@@ -83,23 +84,7 @@ export default {
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({
-        page: 1,
-        limit: -1,
-        sources: "listener",
-      });
-
-      const dedupedTags = [];
-      tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find(
-          (t) => t.name === tag.name && t.value === tag.value,
-        );
-        if (!existingTag) {
-          dedupedTags.push(tag);
-        }
-      });
-
-      this.tags = dedupedTags;
+      this.tags = await fetchTags("listener");
     },
     create() {
       this.$router.push({ name: "listenerNew" });

@@ -184,6 +184,7 @@ export default {
         { title: "Obfuscation", pathName: "obfuscation", icon: "fa-mask" },
         { title: "Credentials", pathName: "credentials", icon: "fa-key" },
         { title: "Downloads", pathName: "downloads", icon: "fa-download" },
+        { title: "Tags", pathName: "tags", icon: "fa-tags" },
         {
           title: "Plugins",
           icon: "fa-puzzle-piece",

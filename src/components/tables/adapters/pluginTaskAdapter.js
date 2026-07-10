@@ -4,8 +4,7 @@ import * as pluginApi from "@/api/plugin-api";
 export default {
   getTasks: (selected, opts) => pluginApi.getTasks(selected, opts),
   getTask: (id, taskId) => pluginApi.getTask(id, taskId),
-  addTag: (id, taskId, tag) => pluginApi.addTag(id, taskId, tag),
-  updateTag: (id, taskId, tag) => pluginApi.updateTag(id, taskId, tag),
+  addTag: (id, taskId, payload) => pluginApi.addTag(id, taskId, payload),
   deleteTag: (id, taskId, tag) => pluginApi.deleteTag(id, taskId, tag),
 
   supportsRerun: () => true,

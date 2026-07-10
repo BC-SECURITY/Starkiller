@@ -280,9 +280,8 @@
       <template #item.tags="{ item }">
         <tag-viewer
           :tags="item.tags"
-          @update-tag="updateTag(item, ...arguments)"
-          @delete-tag="deleteTag(item, ...arguments)"
-          @new-tag="addTag(item, ...arguments)"
+          @attach-tag="addTag(item, $event)"
+          @detach-tag="deleteTag(item, $event)"
         />
       </template>
       <template #item.actions="{ item }">
@@ -559,25 +558,14 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(task, tag) {
-      this.adapter
-        .updateTag(task[this.config.idField], task.id, tag)
-        .then((t) => {
-          const index = task.tags.findIndex((x) => x.id === t.id);
-          task.tags.splice(index, 1, t);
-          this.$emit("refresh-tags");
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
     addBlankLines(text) {
       return `\n${text}\n`;
     },
-    addTag(task, tag) {
+    addTag(task, payload) {
       this.adapter
-        .addTag(task[this.config.idField], task.id, tag)
+        .addTag(task[this.config.idField], task.id, payload)
         .then((t) => {
-          task.tags = [...task.tags, t];
+          if (!task.tags.some((x) => x.id === t.id)) task.tags.push(t);
           this.$emit("refresh-tags");
         })
         .catch((err) => this.snack.error(`Error: ${err}`));

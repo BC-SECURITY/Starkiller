@@ -51,12 +51,6 @@ export function deleteTag(credentialId, tag) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateTag(credentialId, tag) {
-  return request
-    .put(`credentials/${credentialId}/tags/${tag.id}`, tag)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function addTag(credentialId, tag) {
   return request
     .post(`credentials/${credentialId}/tags`, tag)

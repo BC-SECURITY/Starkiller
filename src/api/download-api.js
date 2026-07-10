@@ -110,12 +110,6 @@ export function deleteTag(downloadId, tag) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateTag(downloadId, tag) {
-  return request
-    .put(`downloads/${downloadId}/tags/${tag.id}`, tag)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function addTag(downloadId, tag) {
   return request
     .post(`downloads/${downloadId}/tags`, tag)

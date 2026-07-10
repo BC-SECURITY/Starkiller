@@ -5,7 +5,6 @@ vi.mock("@/api/plugin-api", () => ({
   getTasks: vi.fn(),
   executePlugin: vi.fn(),
   addTag: vi.fn(),
-  updateTag: vi.fn(),
   deleteTag: vi.fn(),
 }));
 
@@ -65,21 +64,11 @@ describe("pluginTaskAdapter", () => {
     expect(result).toBe("add-result");
   });
 
-  it("updateTag forwards args to pluginApi.updateTag unchanged", () => {
-    const tag = { id: 1, name: "foo" };
-    pluginApi.updateTag.mockReturnValue("update-result");
-    const result = pluginTaskAdapter.updateTag("P1", 2, tag);
-    expect(pluginApi.updateTag).toHaveBeenCalledWith("P1", 2, tag);
-    expect(pluginApi.deleteTag).not.toHaveBeenCalled();
-    expect(result).toBe("update-result");
-  });
-
   it("deleteTag forwards args to pluginApi.deleteTag unchanged", () => {
     const tag = { id: 1 };
     pluginApi.deleteTag.mockReturnValue("delete-result");
     const result = pluginTaskAdapter.deleteTag("P1", 2, tag);
     expect(pluginApi.deleteTag).toHaveBeenCalledWith("P1", 2, tag);
-    expect(pluginApi.updateTag).not.toHaveBeenCalled();
     expect(result).toBe("delete-result");
   });
 });

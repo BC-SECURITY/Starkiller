@@ -29,9 +29,9 @@
         <expansion-panel-filter
           v-model="selectedTags"
           title="Tags"
-          label="label"
+          label="name"
           item-key="id"
-          item-value="label"
+          item-value="name"
           :items="tags"
           :empty-default="true"
         />
@@ -57,7 +57,7 @@ import ListPageTop from "@/components/ListPageTop.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import AgentsTable from "@/components/agents/AgentsTable.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
-import * as tagApi from "@/api/tag-api";
+import { fetchTags } from "@/utils/tags";
 import { useAgentStore } from "@/stores/agent-module";
 import { useApplicationStore } from "@/stores/application-module";
 
@@ -95,26 +95,6 @@ export default {
     agents() {
       return this.agentStore.agents;
     },
-    sortedAgents() {
-      let sorted = this.agents.slice();
-      sorted.sort((a, b) => -a.lastseen_time.localeCompare(b.lastseen_time));
-      if (this.hideStaleAgents) {
-        sorted = sorted.filter((agent) => !agent.stale);
-      }
-      if (this.hideArchivedAgents) {
-        sorted = sorted.filter((agent) => !agent.archived);
-      }
-      if (this.selectedTags.length === 0) {
-        return sorted;
-      }
-
-      sorted = sorted.filter((agent) => {
-        const agentTags = agent.tags.map((tag) => `${tag.name}:${tag.value}`);
-        return agentTags.some((tag) => this.selectedTags.includes(tag));
-      });
-
-      return sorted;
-    },
     showDelete() {
       return this.selected.length > 0;
     },
@@ -124,23 +104,7 @@ export default {
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({
-        page: 1,
-        limit: -1,
-        sources: "agent",
-      });
-
-      const dedupedTags = [];
-      tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find(
-          (t) => t.name === tag.name && t.value === tag.value,
-        );
-        if (!existingTag) {
-          dedupedTags.push(tag);
-        }
-      });
-
-      this.tags = dedupedTags;
+      this.tags = await fetchTags("agent");
     },
     async killAgents() {
       if (

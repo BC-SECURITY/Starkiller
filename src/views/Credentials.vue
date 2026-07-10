@@ -21,9 +21,9 @@
           <expansion-panel-filter
             v-model="selectedTags"
             title="Tags"
-            label="label"
+            label="name"
             item-key="id"
-            item-value="label"
+            item-value="name"
             :items="tags"
             :empty-default="true"
           />
@@ -62,9 +62,8 @@
           <template #item.tags="{ item }">
             <tag-viewer
               :tags="item.tags"
-              @update-tag="updateTag(item, ...arguments)"
-              @delete-tag="deleteTag(item, ...arguments)"
-              @new-tag="addTag(item, ...arguments)"
+              @attach-tag="addTag(item, $event)"
+              @detach-tag="deleteTag(item, $event)"
             />
           </template>
           <template #item.actions="{ item }">
@@ -131,7 +130,7 @@ import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import * as credentialApi from "@/api/credential-api";
 import { copyToClipboard } from "@/utils/clipboard";
-import { fetchDedupedTags } from "@/utils/tags";
+import { fetchTags } from "@/utils/tags";
 import { useCredentialStore } from "@/stores/credential-module";
 
 export default {
@@ -193,7 +192,7 @@ export default {
   },
   methods: {
     async getTags() {
-      this.tags = await fetchDedupedTags("credential");
+      this.tags = await fetchTags("credential");
     },
     deleteTag(credential, tag) {
       credentialApi
@@ -204,22 +203,12 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(credential, tag) {
+    addTag(credential, payload) {
       credentialApi
-        .updateTag(credential.id, tag)
+        .addTag(credential.id, payload)
         .then((t) => {
-          const index = credential.tags.findIndex((x) => x.id === t.id);
-          credential.tags.splice(index, 1, t);
-          this.getTags();
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(credential, tag) {
-      credentialApi
-        .addTag(credential.id, tag)
-        .then((t) => {
-          credential.tags.push(t);
+          if (!credential.tags.some((x) => x.id === t.id))
+            credential.tags.push(t);
           this.getTags();
         })
         .catch((err) => this.snack.error(`Error: ${err}`));

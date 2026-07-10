@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+-   Revamped v2 tag system with a new tag picker dialog for attaching tags to agents, listeners, and other taggable entities — a centered dialog with a filter box, a checklist of existing tags, and inline create-and-attach for a new tag typed into the filter
 -   Per-agent Stats tab on the agent page (task counts, host info, check-in and tasks-over-time charts)
 -   Multi-agent selection on the Dashboard Check Ins card
 -   Interactive agent topology graph panel on the Dashboard with fullscreen expand and a context-aware right-click menu (Open, Popout, Execute shell/module, Kill, Focus); one shared `AgentGraph` component now powers both the panel and the Agents Graph page

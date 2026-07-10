@@ -10,8 +10,7 @@ const taskKind = (item) =>
 export default {
   getTasks: (selected, opts) => agentTaskApi.getTasks(selected, opts),
   getTask: (id, taskId) => agentTaskApi.getTask(id, taskId),
-  addTag: (id, taskId, tag) => agentTaskApi.addTag(id, taskId, tag),
-  updateTag: (id, taskId, tag) => agentTaskApi.updateTag(id, taskId, tag),
+  addTag: (id, taskId, payload) => agentTaskApi.addTag(id, taskId, payload),
   deleteTag: (id, taskId, tag) => agentTaskApi.deleteTag(id, taskId, tag),
 
   supportsRerun(item) {

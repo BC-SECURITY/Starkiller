@@ -2,9 +2,8 @@
   <div style="padding: 10px">
     <tag-viewer
       :tags="agent.tags"
-      @update-tag="updateTag"
-      @delete-tag="deleteTag"
-      @new-tag="addTag"
+      @attach-tag="addTag"
+      @detach-tag="deleteTag"
     />
     <v-form v-if="agent.session_id" ref="form" v-model="valid">
       <click-to-edit
@@ -263,18 +262,9 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(tag) {
+    addTag(payload) {
       agentApi
-        .updateTag(this.agent.session_id, tag)
-        .then(() => {
-          this.$emit("refresh-agent");
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(tag) {
-      agentApi
-        .addTag(this.agent.session_id, tag)
+        .addTag(this.agent.session_id, payload)
         .then(() => {
           this.$emit("refresh-agent");
         })

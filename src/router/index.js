@@ -156,6 +156,11 @@ const routes = [
     component: () => import("../views/Downloads.vue"),
   },
   {
+    path: "/tags",
+    name: "tags",
+    component: () => import("../views/Tags.vue"),
+  },
+  {
     path: "/plugins",
     name: "plugins",
     component: () => import("../components/plugins/PluginsList.vue"),
