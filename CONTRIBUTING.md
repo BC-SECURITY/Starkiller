@@ -33,7 +33,7 @@ The more information you provide in a Github issue the easier it will be for us 
 
 ## Use a Consistent Coding Style
 
-We use Airbnb's and Vue's recommended ESLint configs. To make your life easier, consider installing an ESLint plugin in your editor of choice. You can also run `pnpm lint`.
+We use ESLint's and Vue's recommended configs (flat config), with Prettier for formatting. To make your life easier, consider installing an ESLint plugin in your editor of choice. You can also run `pnpm lint`.
 
 ## Running tests
 
