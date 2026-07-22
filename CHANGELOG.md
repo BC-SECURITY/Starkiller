@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
 -   Fixed agent upload path for Go/IronPython and removed file size limit
 
-## [Unreleased]
+## [3.6.0] - 2026-07-06
 
 ### Added
 
@@ -557,7 +557,7 @@ Including but not limited to:
 
 [4.0.0-a.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v4.0.0-a.1
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...HEAD
+[3.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...v3.6.0
 
 [3.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v3.5.0
 
