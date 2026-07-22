@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Fixed** for any bug fixes.
 **Security** in case of vulnerabilities.
 
-## [Unreleased - 4.x]
+## [Unreleased]
 
 ### Added
 
@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Multi-agent selection on the Dashboard Check Ins card
 -   Interactive agent topology graph panel on the Dashboard with fullscreen expand and a context-aware right-click menu (Open, Popout, Execute shell/module, Kill, Focus); one shared `AgentGraph` component now powers both the panel and the Agents Graph page
 -   Playwright e2e smoke coverage for the Dashboard and Agents Graph pages
+-   Auto-select best DotNetVersion based on agent's installed .NET
+-   Dashboard and Graph View available for all users
+-   Dedicated Shell session tab and multi-tab Terminal support
+-   Background override toggle to module execution
 
 ### Changed
 
@@ -53,25 +57,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Fixed edit pages (Agent, Bypass, Credential, Listener, Stager) applying stale data from out-of-order fetch responses and navigating before deletes completed
 -   Surfaced previously-silent failures on fire-and-forget actions (kill, clear queue, download, avatar upload) and hardened download filename parsing
 -   Fixed duplicate notification socket listeners stacking on reconnect and hardened the reconnect UX
+-   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
+-   Fixed agent upload path for Go/IronPython and removed file size limit
 
 ### Security
 
 -   Fixed a stored XSS vulnerability in the plugin dependency warning
 -   Validated plugin link URL schemes before binding them to `href`, blocking `javascript:` and other unsafe protocols
-
-## [4.0.0-a.1] - 2026-04-18
-
-### Added
-
--   Auto-select best DotNetVersion based on agent's installed .NET
--   Dashboard and Graph View available for all users
--   Dedicated Shell session tab and multi-tab Terminal support
--   Background override toggle to module execution
-
-### Fixed
-
--   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
--   Fixed agent upload path for Go/IronPython and removed file size limit
 
 ## [3.6.0] - 2026-07-06
 
@@ -570,9 +562,7 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased - 4.x]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0-a.1...HEAD
-
-[4.0.0-a.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v4.0.0-a.1
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...HEAD
 
 [3.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...v3.6.0
 
