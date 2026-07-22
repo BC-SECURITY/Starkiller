@@ -18,16 +18,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Revamped v2 tag system with a new tag picker dialog for attaching tags to agents, listeners, and other taggable entities — a centered dialog with a filter box, a checklist of existing tags, and inline create-and-attach for a new tag typed into the filter
 -   Per-agent Stats tab on the agent page (task counts, host info, check-in and tasks-over-time charts)
+-   Dashboard overview page with summary metrics, agent check-ins, a recent-tasks list, an agents breakdown chart, and an interactive topology panel
 -   Multi-agent selection on the Dashboard Check Ins card
 -   Interactive agent topology graph panel on the Dashboard with fullscreen expand and a context-aware right-click menu (Open, Popout, Execute shell/module, Kill, Focus); one shared `AgentGraph` component now powers both the panel and the Agents Graph page
--   Playwright e2e smoke coverage for the Dashboard and Agents Graph pages
 -   Auto-select best DotNetVersion based on agent's installed .NET
 -   Dashboard and Graph View available for all users
 -   Dedicated Shell session tab and multi-tab Terminal support
 -   Background override toggle to module execution
+-   Expanded Playwright end-to-end test coverage across the app
 
 ### Changed
 
+-   **BREAKING**: Switched package manager from yarn to pnpm 11 (requires Node 22+)
+-   Support Empire 7.0's typed boolean module options, rendering them as toggle switches via the `value_type` option metadata
+-   Filtered the bypass picker to stagers matching the selected execution language
+-   Added a confirmation prompt before stopping a running task
+-   Explained forced logouts to the user instead of silently returning to the sign-out screen
+-   Respected each module's `depends_on` metadata when rendering AutoRunModules options
+-   Capped the terminal's live output buffer at 500 lines to bound memory growth on long-running sessions
 -   Consolidated the agent and plugin task tables into a shared `TasksTable`
     component driven by per-entity config/adapter modules, removing ~850 lines
     of duplication so task-table fixes apply once instead of twice
@@ -35,21 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     coloring, command-history navigation) out of `AgentTerminal` and
     `AgentShellSession` into reusable composables, so a fix to any of that
     shared logic lands once instead of twice
--   Support Empire 7.0's typed boolean module options, rendering them as toggle switches via the `value_type` option metadata
--   Filtered the bypass picker to stagers matching the selected execution language
--   Added a confirmation prompt before stopping a running task
--   Explained forced logouts to the user instead of silently returning to the sign-out screen
--   Respected each module's `depends_on` metadata when rendering AutoRunModules options
--   Capped the terminal's live output buffer at 500 lines to bound memory growth on long-running sessions
--   **BREAKING**: Switched package manager from yarn to pnpm 11 (requires Node 22+)
 
 ### Fixed
 
--   Fixed long task/module names overflowing the expanded agent-task detail panel
+-   Fixed long task/module names overflowing the expanded agent- and plugin-task detail panels
 -   Fixed a render crash in the expanded task panel for non-string option values
 -   Fixed Rerun Task erroring for shell/sysinfo tasks with lowercase names
--   Applied the same fixes to the plugin task detail panel
--   Extracted a shared truncate utility for the agent/plugin tables and form input
 -   Fixed loss of terminal history when reloading while the Shell tab was active
 -   Fixed a stale-index bug that could rename the wrong agent
 -   Fixed bulk delete and kill silently doing nothing on the Bypasses, Credentials, Listeners, and Stagers pages
