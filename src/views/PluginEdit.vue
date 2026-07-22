@@ -111,10 +111,14 @@
                   <v-alert prominent type="warning" variant="outlined">
                     <v-row class="align-center">
                       <v-col class="grow">
-                        <vue-markdown
-                          :source="pluginPythonDeps"
-                          :options="{ html: true }"
-                        />
+                        <div class="plugin-deps-message">
+                          {{ pluginDepsMessage }}
+                        </div>
+                        <pre
+                          v-if="pluginDepsCommand"
+                          class="plugin-deps-command"
+                          >{{ pluginDepsCommand }}</pre
+                        >
                       </v-col>
                     </v-row>
                   </v-alert>
@@ -266,20 +270,15 @@ export default {
         !this.plugin.execution_enabled
       );
     },
-    pluginPythonDeps() {
+    pluginDepsMessage() {
       if (!this.plugin.python_deps.length > 0) {
-        return `
-Plugin wasn't loaded. Check the server logs.
-`;
+        return "Plugin wasn't loaded. Check the server logs.";
       }
-
-      return `
-This plugin requires additional Python dependencies.
-Please install and restart the server.
-\`\`\`sh
-poetry add ${this.plugin.python_deps.join(" ")}
-\`\`\`
-      `;
+      return "This plugin requires additional Python dependencies. Please install and restart the server.";
+    },
+    pluginDepsCommand() {
+      if (!this.plugin.python_deps.length > 0) return "";
+      return `poetry add ${this.plugin.python_deps.join(" ")}`;
     },
   },
   mounted() {
@@ -352,3 +351,15 @@ poetry add ${this.plugin.python_deps.join(" ")}
   },
 };
 </script>
+
+<style scoped>
+.plugin-deps-message {
+  white-space: normal;
+  margin: 0;
+}
+
+.plugin-deps-command {
+  white-space: pre-wrap;
+  margin: 8px 0 0;
+}
+</style>

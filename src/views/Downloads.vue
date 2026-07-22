@@ -41,9 +41,9 @@
           <expansion-panel-filter
             v-model="selectedTags"
             title="Tags"
-            label="label"
+            label="name"
             item-key="id"
-            item-value="label"
+            item-value="name"
             :items="tags"
             :empty-default="true"
           />
@@ -74,9 +74,8 @@
           <template #item.tags="{ item }">
             <tag-viewer
               :tags="item.tags"
-              @update-tag="updateTag(item, ...arguments)"
-              @delete-tag="deleteTag(item, ...arguments)"
-              @new-tag="addTag(item, ...arguments)"
+              @attach-tag="addTag(item, $event)"
+              @detach-tag="deleteTag(item, $event)"
             />
           </template>
           <template #item.actions="{ item }">
@@ -117,7 +116,7 @@ import TagViewer from "@/components/TagViewer.vue";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
-import { fetchDedupedTags } from "@/utils/tags";
+import { fetchTags } from "@/utils/tags";
 
 export default {
   name: "Downloads",
@@ -199,7 +198,7 @@ export default {
   },
   methods: {
     async getTags() {
-      this.tags = await fetchDedupedTags("download");
+      this.tags = await fetchTags("download");
     },
     deleteTag(download, tag) {
       downloadApi
@@ -210,22 +209,11 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(download, tag) {
+    addTag(download, payload) {
       downloadApi
-        .updateTag(download.id, tag)
+        .addTag(download.id, payload)
         .then((t) => {
-          const index = download.tags.findIndex((x) => x.id === t.id);
-          download.tags.splice(index, 1, t);
-          this.getTags();
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(download, tag) {
-      downloadApi
-        .addTag(download.id, tag)
-        .then((t) => {
-          download.tags.push(t);
+          if (!download.tags.some((x) => x.id === t.id)) download.tags.push(t);
           this.getTags();
         })
         .catch((err) => this.snack.error(`Error: ${err}`));

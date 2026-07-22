@@ -91,9 +91,14 @@ export default {
     },
   },
   data() {
-    const saved = this.storageKey
-      ? JSON.parse(localStorage.getItem(this.storageKey) || "null")
-      : null;
+    let saved = null;
+    if (this.storageKey) {
+      try {
+        saved = JSON.parse(localStorage.getItem(this.storageKey) || "null");
+      } catch {
+        localStorage.removeItem(this.storageKey);
+      }
+    }
     return {
       tabs: saved?.tabs || [{ id: 1, name: "" }],
       activeTab: saved?.activeTab || 1,

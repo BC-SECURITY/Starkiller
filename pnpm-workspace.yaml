@@ -1,0 +1,27 @@
+# pnpm project configuration.
+
+# Only these dependencies may run install/build scripts. pnpm 11 blocks
+# every other dependency's build scripts by default and errors with
+# ERR_PNPM_IGNORED_BUILDS unless the package is listed here.
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true
+  vue-demi: true
+
+# Supply-chain-security settings — see https://pnpm.io/supply-chain-security
+
+# Do not resolve package versions published less than 1 week ago.
+minimumReleaseAge: 10080
+
+# Transitive dependencies may not resolve from git repos or tarball URLs.
+blockExoticSubdeps: true
+
+# Block installs where a package's trust level dropped vs. a previous release.
+trustPolicy: no-downgrade
+
+# chokidar dropped npm provenance attestation in its 3.x -> 4.x rewrite, which
+# trustPolicy flags as a downgrade. It is a widely-used, year-old build-tool
+# dependency (pulled in transitively via sass/vite) and was already present in
+# the committed lockfile, so this is a vetted exception rather than a new risk.
+trustPolicyExclude:
+  - chokidar

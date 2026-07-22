@@ -175,12 +175,6 @@ export function deleteTag(agentId, taskId, tag) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateTag(agentId, taskId, tag) {
-  return request
-    .put(`agents/${agentId}/${taskId}/tags/${tag.id}`, tag)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function addTag(agentId, taskId, tag) {
   return request
     .post(`agents/${agentId}/tasks/${taskId}/tags`, tag)

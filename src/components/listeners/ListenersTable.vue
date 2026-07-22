@@ -31,9 +31,8 @@
       <template #item.tags="{ item }">
         <tag-viewer
           :tags="item.tags"
-          @update-tag="updateTag(item, ...arguments)"
-          @delete-tag="deleteTag(item, ...arguments)"
-          @new-tag="addTag(item, ...arguments)"
+          @attach-tag="addTag(item, $event)"
+          @detach-tag="deleteTag(item, $event)"
         />
       </template>
       <template #item.actions="{ item }">
@@ -140,7 +139,7 @@ export default {
       }
 
       sorted = sorted.filter((agent) => {
-        const agentTags = agent.tags.map((tag) => `${tag.name}:${tag.value}`);
+        const agentTags = agent.tags.map((tag) => tag.name);
         return agentTags.some((tag) => this.selectedTags.includes(tag));
       });
 
@@ -168,22 +167,11 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(listener, tag) {
+    addTag(listener, payload) {
       listenerApi
-        .updateTag(listener.id, tag)
+        .addTag(listener.id, payload)
         .then((t) => {
-          const index = listener.tags.findIndex((x) => x.id === t.id);
-          listener.tags.splice(index, 1, t);
-          this.$emit("refresh-tags");
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(listener, tag) {
-      listenerApi
-        .addTag(listener.id, tag)
-        .then((t) => {
-          listener.tags.push(t);
+          if (!listener.tags.some((x) => x.id === t.id)) listener.tags.push(t);
           this.$emit("refresh-tags");
         })
         .catch((err) => this.snack.error(`Error: ${err}`));

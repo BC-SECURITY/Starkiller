@@ -16,6 +16,13 @@ export function mockStagersList(page, stagers) {
   });
 }
 
+export function mockStagerDetail(page, stager) {
+  return page.route(`**/api/v2/stagers/${stager.id}`, (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse(stager));
+  });
+}
+
 export function mockStagerTemplates(page, templates) {
   return page.route(TEMPLATES_LIST, (route) => {
     const url = new URL(route.request().url());
@@ -43,6 +50,22 @@ export function recordStagerCreate(page) {
       const created = { id: 99, ...body };
       calls.push({ body });
       return route.fulfill(jsonResponse(created, 201));
+    }
+    return route.fallback();
+  });
+  return { calls };
+}
+
+// Records DELETE /stagers/{id} — the bulk-delete/single-delete action.
+export function recordStagerActions(page) {
+  const calls = [];
+  page.route("**/api/v2/stagers/*", async (route) => {
+    if (route.request().method() === "DELETE") {
+      calls.push({
+        method: "DELETE",
+        url: new URL(route.request().url()).pathname,
+      });
+      return route.fulfill(jsonResponse({ ok: true }));
     }
     return route.fallback();
   });

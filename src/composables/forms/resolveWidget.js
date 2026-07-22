@@ -5,7 +5,7 @@
 //
 // Branch order is load-bearing — do not reorder without re-checking each
 // invariant:
-//   1. switch first, so True/False detection isn't shadowed by name-based
+//   1. switch first, so boolean detection isn't shadowed by name-based
 //      branches below.
 //   2. Bypasses (name-based) wins over file/agent/cred, so a field literally
 //      named "Bypasses" never accidentally routes to those special-cases.
@@ -17,11 +17,17 @@
 export function resolveWidget({ name, type, strict, suggestedValues = [] }) {
   const has = suggestedValues.length > 0;
 
+  // A boolean is a switch: `type === "boolean"` is the typed contract
+  // (Empire-Sponsors#1205); the strict True/False heuristic is the legacy shape
+  // stagers/listeners/plugins still send. The wire value stays the string
+  // "True"/"False" and the backend re-types it on POST.
+  // TODO(Empire-Sponsors#960): drop the legacy heuristic once those emit BOOLEAN.
   if (
-    has &&
-    strict &&
-    suggestedValues.includes("True") &&
-    suggestedValues.includes("False")
+    type === "boolean" ||
+    (has &&
+      strict &&
+      suggestedValues.includes("True") &&
+      suggestedValues.includes("False"))
   ) {
     return {
       kind: "switch",

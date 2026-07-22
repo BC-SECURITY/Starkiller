@@ -39,9 +39,9 @@
         <expansion-panel-filter
           v-model="selectedTags"
           title="Tags"
-          label="label"
+          label="name"
           item-key="id"
-          item-value="label"
+          item-value="name"
           :items="tags"
           :empty-default="true"
         />
@@ -72,7 +72,7 @@ import { useDownload } from "@/composables/useDownload";
 import ExpansionPanelFilter from "@/components/tables/ExpansionPanelFilter.vue";
 import ExpansionPanelSearch from "@/components/tables/ExpansionPanelSearch.vue";
 import AdvancedTable from "@/components/tables/AdvancedTable.vue";
-import * as tagApi from "@/api/tag-api";
+import { fetchTags } from "@/utils/tags";
 import { useUserStore } from "@/stores/user-module";
 import { useAgentStore } from "@/stores/agent-module";
 
@@ -168,23 +168,7 @@ export default {
   },
   methods: {
     async getTags() {
-      const tags = await tagApi.getTags({
-        page: 1,
-        limit: -1,
-        sources: "agent_task",
-      });
-
-      const dedupedTags = [];
-      tags.records.forEach((tag) => {
-        const existingTag = dedupedTags.find(
-          (t) => t.name === tag.name && t.value === tag.value,
-        );
-        if (!existingTag) {
-          dedupedTags.push(tag);
-        }
-      });
-
-      this.tags = dedupedTags;
+      this.tags = await fetchTags("agent_task");
     },
     getTasks() {
       this.$refs.agentTasksTable.debouncedGetTasks();

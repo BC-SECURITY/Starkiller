@@ -9,6 +9,9 @@ export const useAgentStore = defineStore("agent", {
   state: () => ({
     agents: [],
     status: "success",
+    // Real message from the last getAgents() failure, so consumers (Dashboard)
+    // can surface it instead of pointing users at devtools they don't have.
+    lastError: null,
     subscribed: {},
   }),
   actions: {
@@ -18,6 +21,7 @@ export const useAgentStore = defineStore("agent", {
         const agents = await agentApi.getAgents(true);
         this.agents = agents;
         this.status = "success";
+        this.lastError = null;
 
         const { autoSubscribeAgents } = useApplicationStore();
         if (autoSubscribeAgents) {
@@ -30,6 +34,7 @@ export const useAgentStore = defineStore("agent", {
       } catch (err) {
         console.error("[Starkiller] Failed to fetch agents:", err);
         this.status = "error";
+        this.lastError = err?.message || String(err);
       }
     },
     async getAgent({ sessionId }) {
@@ -37,18 +42,15 @@ export const useAgentStore = defineStore("agent", {
       this.addAgent(agent);
     },
     async rename({ sessionId, newName }) {
-      const agentIndex = this.agents.findIndex(
-        (el) => el.session_id === sessionId,
-      );
-      if (agentIndex < 0) {
+      let agent = this.agents.find((el) => el.session_id === sessionId);
+      if (!agent) {
         await this.getAgents();
+        agent = this.agents.find((el) => el.session_id === sessionId);
       }
 
-      const agent = this.agents[agentIndex];
       await agentApi.renameAgent(agent, newName);
       if (agent) {
         agent.name = newName;
-        this.agents.splice(agentIndex, 1, agent);
       }
 
       return agent ? agent.name : null;
@@ -82,10 +84,10 @@ export const useAgentStore = defineStore("agent", {
         this.subscribe({ sessionId: agent.session_id });
       }
     },
-    clearQueue({ sessionId, tasks }) {
-      tasks.forEach((task) => {
-        agentTaskApi.deleteTask(sessionId, task);
-      });
+    async clearQueue({ sessionId, tasks }) {
+      return Promise.allSettled(
+        tasks.map((task) => agentTaskApi.deleteTask(sessionId, task)),
+      );
     },
     async subscribe({ sessionId }) {
       this.subscribed[sessionId] = true;

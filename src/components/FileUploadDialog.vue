@@ -45,6 +45,7 @@ import * as downloadApi from "@/api/download-api";
 
 export default {
   name: "FileUploadDialog",
+  inject: ["snack"],
   props: {
     modelValue: {
       type: Boolean,
@@ -80,9 +81,15 @@ export default {
       const formData = new FormData();
       formData.append("file", this.file);
 
-      const response = await downloadApi.createDownload(formData);
-
-      this.$emit("submit", { file: response });
+      this.loading = true;
+      try {
+        const response = await downloadApi.createDownload(formData);
+        this.$emit("submit", { file: response });
+      } catch (err) {
+        this.snack.error(`Failed to upload file: ${err}`);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };

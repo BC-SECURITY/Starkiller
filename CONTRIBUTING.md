@@ -33,26 +33,26 @@ The more information you provide in a Github issue the easier it will be for us 
 
 ## Use a Consistent Coding Style
 
-We use Airbnb's and Vue's recommended ESLint configs. To make your life easier, consider installing an ESLint plugin in your editor of choice. You can also run `yarn lint`.
+We use ESLint's and Vue's recommended configs (flat config), with Prettier for formatting. To make your life easier, consider installing an ESLint plugin in your editor of choice. You can also run `pnpm lint`.
 
 ## Running tests
 
 End-to-end tests live in `e2e/` and use [Playwright](https://playwright.dev/).
 
 ```bash
-yarn test:e2e          # headless
-yarn test:e2e:ui       # interactive UI mode
-yarn test:e2e e2e/agents-list.spec.js   # single spec
+pnpm test:e2e          # headless
+pnpm test:e2e:ui       # interactive UI mode
+pnpm test:e2e e2e/agents-list.spec.js   # single spec
 ```
 
-The dev server is auto-started by Playwright on port 5173. If you already have `yarn dev` running locally, it's reused.
+The dev server is auto-started by Playwright on port 5173. If you already have `pnpm dev` running locally, it's reused.
 
 ### Adding a spec
 
 1. Add or extend a fixture in `e2e/fixtures/<resource>.js`.
 2. Add or extend a mock helper in `e2e/helpers/api/<resource>.js`.
 3. Add a spec at `e2e/<feature>.spec.js`. Use `setFakeAuth(page)` (and `blockSockets`, `mockEmpireBootstrap`) in `beforeEach`.
-4. Run it: `yarn test:e2e e2e/<feature>.spec.js`.
+4. Run it: `pnpm test:e2e e2e/<feature>.spec.js`.
 
 ### Selectors and conventions
 

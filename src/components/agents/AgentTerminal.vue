@@ -42,14 +42,17 @@
 </template>
 
 <script>
-import pause from "@/utils/pause";
+import { getCurrentInstance, watch } from "vue";
 import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
-import { ansiToHtml } from "@/utils/ansi";
+import { ansiToHtml, colorizeText } from "@/utils/ansi";
 import { table, BOX_BORDER } from "@/utils/ascii-table";
 import { useModuleStore } from "@/stores/module-module";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
+import { useTerminalOutput } from "@/composables/useTerminalOutput";
+import { usePollForResult } from "@/composables/usePollForResult";
+import { useCommandHistory } from "@/composables/useCommandHistory";
 
 function fuzzyMatch(query, string) {
   const q = Array.from(query);
@@ -70,14 +73,52 @@ export default {
       default: null,
     },
   },
+  setup(props) {
+    const instance = getCurrentInstance();
+    const { output, outputLines, addLine, addError, addInfo, loadHistory } =
+      useTerminalOutput(() => instance.proxy.storageName());
+    const { pollForResult } = usePollForResult(() => props.agent, {
+      addLine,
+      addInfo,
+    });
+    const { pushCommand, navigatePrev, navigateNext } = useCommandHistory();
+    // AgentEdit.vue can mount this component before its own agent fetch
+    // resolves (it persists the active interact-tab and restores it as the
+    // initial render, and Vue mounts children before the parent's mounted()
+    // hook runs) -- when that happens, mounted()'s loadHistory() call reads
+    // the wrong storage key (agent.session_id is still undefined) and finds
+    // nothing. Retry once session_id actually arrives, so history isn't
+    // silently lost on a reload while this tab happens to be the persisted
+    // active one. AgentTerminal doesn't currently hit this in practice (its
+    // mounted() awaits three store fetches before calling loadHistory(),
+    // which reliably lets the agent fetch resolve first) but that's timing,
+    // not a structural guarantee -- this watch makes it robust either way.
+    watch(
+      () => props.agent?.session_id,
+      (sessionId, previousSessionId) => {
+        if (sessionId && !previousSessionId) {
+          loadHistory();
+        }
+      },
+    );
+    return {
+      output,
+      outputLines,
+      addLine,
+      addError,
+      addInfo,
+      loadHistory,
+      pollForResult,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+    };
+  },
   data() {
     return {
       currentInput: "",
-      outputLines: [],
       currentModule: null,
       moduleOptions: {},
-      commandHistory: [],
-      historyIndex: -1,
       moduleName: "",
       currentOptions: {},
       suggestions: [],
@@ -228,13 +269,13 @@ export default {
       return this.listenerStore.listeners;
     },
     currentPrompt() {
-      const prefix = this.colorizeText("(Empire: ", "white");
-      const suffix = this.colorizeText(" )>", "white");
+      const prefix = colorizeText("(Empire: ", "white");
+      const suffix = colorizeText(" )>", "white");
       let body = "";
       if (this.currentModule) {
-        body = this.colorizeText(`usemodule/${this.currentModule.id}`, "red");
+        body = colorizeText(`usemodule/${this.currentModule.id}`, "red");
       } else {
-        body = this.colorizeText(this.agent.session_id, "red");
+        body = colorizeText(this.agent.session_id, "red");
       }
       return prefix + body + suffix;
     },
@@ -243,9 +284,6 @@ export default {
     currentInput() {
       this.generateSuggestions();
       this.$nextTick(() => this.positionSuggestions());
-    },
-    outputLines(val) {
-      localStorage.setItem(this.storageName(), JSON.stringify(val));
     },
     suggestions() {
       this.$nextTick(() => this.positionSuggestions());
@@ -261,13 +299,7 @@ export default {
     await this.listenerStore.getListeners();
     await this.bypassStore.getBypasses();
 
-    // Load the command history from local storage
-    const savedHistory = localStorage.getItem(this.storageName());
-    if (savedHistory) {
-      this.outputLines = JSON.parse(savedHistory);
-    }
-
-    this.scrollToBottom();
+    this.loadHistory();
   },
   methods: {
     storageName() {
@@ -298,14 +330,14 @@ export default {
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
-        if (this.historyIndex > 0) {
-          this.historyIndex--;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const prev = this.navigatePrev();
+        if (prev !== undefined) {
+          this.currentInput = prev;
         }
       } else if (event.code === "ArrowDown") {
-        if (this.historyIndex < this.commandHistory.length - 1) {
-          this.historyIndex++;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const next = this.navigateNext();
+        if (next !== undefined) {
+          this.currentInput = next;
         }
       } else if (event.code === "Tab") {
         if (this.currentInput === "") {
@@ -492,11 +524,11 @@ export default {
       } else if (this.currentInput === "info") {
         if (this.currentModule) {
           this.addLine(
-            `${this.colorizeText("Module:", "green")} ${this.currentModule.name}`,
+            `${colorizeText("Module:", "green")} ${this.currentModule.name}`,
             "indent-5-spaces",
           );
           this.addLine(
-            `${this.colorizeText("Description:", "green")} ${
+            `${colorizeText("Description:", "green")} ${
               this.currentModule.description
             }`,
             "indent-5-spaces",
@@ -629,8 +661,7 @@ export default {
       }
 
       if (this.currentInput.trim()) {
-        this.commandHistory.push(this.currentInput);
-        this.historyIndex = this.commandHistory.length;
+        this.pushCommand(this.currentInput);
       }
       this.currentInput = "";
     },
@@ -718,83 +749,6 @@ export default {
         this.addError(`Error executing command: ${error.message}`);
       }
     },
-    async pollForResult(
-      taskId,
-      config = { print: true, attempts: 30, delay: 5000 },
-    ) {
-      if (!config.attempts) config.attempts = 30;
-      config.delay = Math.max(
-        config.delay ||
-          (this.agent.delay != null ? this.agent.delay * 1000 : 5000),
-        1000,
-      );
-
-      let res = null;
-      let hasPrintedJobStarted = false;
-      let i = 0;
-      let complete = false;
-      while (i < config.attempts) {
-        // eslint-disable-next-line no-await-in-loop
-        res = await this.checkTaskComplete(taskId);
-        if (res) {
-          const { output } = res;
-          if (!output.toLowerCase().includes("job started")) {
-            if (config.print) {
-              const taskName = res.module_name || res.task_name || "shell";
-              this.addLine(
-                `[*] Task ${res.id} (${taskName}) completed`,
-                "info-text",
-              );
-              this.addLine(output, "indent-5-spaces");
-            }
-            complete = true;
-            break;
-          } else if (!hasPrintedJobStarted) {
-            // Print 'Job Started' only once
-            this.addLine(output, "indent-5-spaces");
-            hasPrintedJobStarted = true;
-          }
-        }
-
-        // eslint-disable-next-line no-await-in-loop
-        await pause(config.delay);
-        i++;
-      }
-
-      if (!complete) {
-        this.addInfo(`No output received for task ${taskId}.`);
-      }
-
-      return res;
-    },
-    async checkTaskComplete(taskId) {
-      try {
-        const task = await agentTaskApi.getTask(this.agent.session_id, taskId);
-        if (task.output) {
-          return task;
-        }
-
-        return false;
-      } catch (err) {
-        return false;
-      }
-    },
-    addLine(content, cssClasses = "preserve-newlines") {
-      this.outputLines.push({ content, cssClasses });
-      this.scrollToBottom();
-    },
-    addError(content) {
-      this.addLine(content, "error-text");
-    },
-    addInfo(content) {
-      this.addLine(content, "info-text");
-    },
-    scrollToBottom() {
-      this.$nextTick(() => {
-        const outputDiv = this.$refs.output;
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-      });
-    },
     displayTable(tableText) {
       tableText.split("\n").forEach((line) => {
         this.addLine(line, "indent-5-spaces");
@@ -816,13 +770,11 @@ export default {
       this.currentOptions = { ...this.moduleOptions };
 
       this.addLine(
-        `${this.colorizeText("Module:", "green")} ${moduleData.name}`,
+        `${colorizeText("Module:", "green")} ${moduleData.name}`,
         "indent-5-spaces",
       );
       this.addLine(
-        `${this.colorizeText("Description:", "green")} ${
-          moduleData.description
-        }`,
+        `${colorizeText("Description:", "green")} ${moduleData.description}`,
         "indent-5-spaces",
       );
       this.displayModuleOptions();
@@ -838,10 +790,10 @@ export default {
       };
       const tableData = [
         [
-          this.colorizeText("Option Name", "green"),
-          this.colorizeText("Value", "green"),
-          this.colorizeText("Required", "green"),
-          this.colorizeText("Description", "green"),
+          colorizeText("Option Name", "green"),
+          colorizeText("Value", "green"),
+          colorizeText("Required", "green"),
+          colorizeText("Description", "green"),
         ],
       ];
 
@@ -863,7 +815,7 @@ export default {
     displayOptionValue(optionName) {
       const option = this.moduleOptions[optionName];
       const value = option && option.value ? option.value : "N/A";
-      this.addLine(`${this.colorizeText(optionName, "green")}: ${value}`);
+      this.addLine(`${colorizeText(optionName, "green")}: ${value}`);
     },
     setModuleOption(optionName, value) {
       if (!this.currentModule) {
@@ -965,9 +917,9 @@ export default {
       };
       const tableData = [
         [
-          this.colorizeText("Command", "green"),
-          this.colorizeText("Description", "green"),
-          this.colorizeText("Usage", "green"),
+          colorizeText("Command", "green"),
+          colorizeText("Description", "green"),
+          colorizeText("Usage", "green"),
         ],
       ];
 
@@ -975,30 +927,6 @@ export default {
         tableData.push([command.command, command.description, command.usage]);
       });
       this.displayTable(table(tableData, modifiedConfig));
-    },
-    colorizeText(text, color = "") {
-      let colorCode = "";
-      const boldCode = "\u001b[1m";
-      switch (color.toLowerCase()) {
-        case "red":
-          colorCode = "\u001b[91m";
-          break;
-        case "green":
-          colorCode = "\u001b[92m";
-          break;
-        case "blue":
-          colorCode = "\u001b[94m";
-          break;
-        case "yellow":
-          colorCode = "\u001b[93m";
-          break;
-        case "white":
-          colorCode = "\u001b[97m";
-          break;
-        default:
-          return text;
-      }
-      return `${boldCode}${colorCode}${text}\u001b[0m`;
     },
     async executeScreenshotModule() {
       try {

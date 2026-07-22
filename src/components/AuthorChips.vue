@@ -2,7 +2,7 @@
   <div>
     <template v-for="(author, index) in authors" :key="index">
       <a
-        v-if="author.link"
+        v-if="isSafeAuthorLink(author.link)"
         :href="author.link"
         target="_blank"
         rel="noopener noreferrer"
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { isSafeUrl } from "@/utils/is-safe-url";
+
 export default {
   name: "AuthorChips",
   props: {
@@ -30,6 +32,9 @@ export default {
     },
   },
   methods: {
+    isSafeAuthorLink(link) {
+      return isSafeUrl(link, { allowMailto: true });
+    },
     formatDisplayName(author) {
       if (author.name && author.handle) {
         return `${author.name} (${author.handle})`;

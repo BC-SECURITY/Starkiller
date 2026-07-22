@@ -26,9 +26,12 @@
 </template>
 
 <script>
-import pause from "@/utils/pause";
+import { getCurrentInstance, watch } from "vue";
 import * as agentTaskApi from "@/api/agent-task-api";
-import { ansiToHtml } from "@/utils/ansi";
+import { ansiToHtml, colorizeText } from "@/utils/ansi";
+import { useTerminalOutput } from "@/composables/useTerminalOutput";
+import { usePollForResult } from "@/composables/usePollForResult";
+import { useCommandHistory } from "@/composables/useCommandHistory";
 
 export default {
   name: "AgentShellSession",
@@ -42,37 +45,61 @@ export default {
       default: null,
     },
   },
+  setup(props) {
+    const instance = getCurrentInstance();
+    const { output, outputLines, addLine, addError, addInfo, loadHistory } =
+      useTerminalOutput(() => instance.proxy.storageName());
+    const { pollForResult } = usePollForResult(() => props.agent, {
+      addLine,
+      addInfo,
+    });
+    const { pushCommand, navigatePrev, navigateNext } = useCommandHistory();
+    // AgentEdit.vue can mount this component before its own agent fetch
+    // resolves (it persists the active interact-tab and restores it as the
+    // initial render, and Vue mounts children before the parent's mounted()
+    // hook runs) -- when that happens, mounted()'s loadHistory() call reads
+    // the wrong storage key (agent.session_id is still undefined) and finds
+    // nothing. Retry once session_id actually arrives, so history isn't
+    // silently lost on a reload while this tab happens to be the persisted
+    // active one.
+    watch(
+      () => props.agent?.session_id,
+      (sessionId, previousSessionId) => {
+        if (sessionId && !previousSessionId) {
+          loadHistory();
+        }
+      },
+    );
+    return {
+      output,
+      outputLines,
+      addLine,
+      addError,
+      addInfo,
+      loadHistory,
+      pollForResult,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+    };
+  },
   data() {
     return {
       currentInput: "",
-      outputLines: [],
-      commandHistory: [],
-      historyIndex: -1,
       currentDir: "loading...",
     };
   },
   computed: {
     currentPrompt() {
-      const prefix = this.colorizeText("(Empire: ", "white");
-      const suffix = this.colorizeText(" )>", "white");
-      const body = this.colorizeText(this.currentDir, "green");
+      const prefix = colorizeText("(Empire: ", "white");
+      const suffix = colorizeText(" )>", "white");
+      const body = colorizeText(this.currentDir, "green");
       return prefix + body + suffix;
-    },
-  },
-  watch: {
-    outputLines(val) {
-      localStorage.setItem(this.storageName(), JSON.stringify(val));
     },
   },
   async mounted() {
     this.$refs.inputField.focus();
-
-    const savedHistory = localStorage.getItem(this.storageName());
-    if (savedHistory) {
-      this.outputLines = JSON.parse(savedHistory);
-    }
-
-    this.scrollToBottom();
+    this.loadHistory();
     this.updateCurrentDirectory();
   },
   methods: {
@@ -83,14 +110,14 @@ export default {
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
-        if (this.historyIndex > 0) {
-          this.historyIndex--;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const prev = this.navigatePrev();
+        if (prev !== undefined) {
+          this.currentInput = prev;
         }
       } else if (event.code === "ArrowDown") {
-        if (this.historyIndex < this.commandHistory.length - 1) {
-          this.historyIndex++;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const next = this.navigateNext();
+        if (next !== undefined) {
+          this.currentInput = next;
         }
       }
     },
@@ -111,8 +138,7 @@ export default {
         return;
       }
 
-      this.commandHistory.push(command);
-      this.historyIndex = this.commandHistory.length;
+      this.pushCommand(command);
       this.currentInput = "";
 
       await this.shellCommandOperator(command);
@@ -137,11 +163,14 @@ export default {
       const complete = await this.pollForResult(response.id, { print: false });
 
       if (["cd", "set-location"].includes(stdin.toLowerCase().split(" ")[0])) {
+        if (complete?.output) {
+          this.addLine(complete.output, "indent-5-spaces");
+        }
         this.updateCurrentDirectory();
         return;
       }
 
-      if (complete) {
+      if (complete?.output) {
         this.addLine(complete.output, "indent-5-spaces");
       }
     },
@@ -156,120 +185,26 @@ export default {
     },
     async updateCurrentDirectory() {
       this.currentDir = "loading...";
-      const response = await agentTaskApi.shell(
-        this.agent.session_id,
-        this.getDirectoryCommand(),
-      );
-
-      const complete = await this.pollForResult(response.id, { print: false });
-
-      if (complete) {
-        // eslint-disable-next-line prefer-destructuring
-        this.currentDir = (
-          await this.checkTaskComplete(response.id)
-        ).output.split("\r")[0];
-      }
-    },
-    async pollForResult(
-      taskId,
-      config = { print: true, attempts: 30, delay: 5000 },
-    ) {
-      if (!config.attempts) config.attempts = 30;
-      config.delay = Math.max(
-        config.delay ||
-          (this.agent.delay != null ? this.agent.delay * 1000 : 5000),
-        1000,
-      );
-
-      let res = null;
-      let hasPrintedJobStarted = false;
-      let i = 0;
-      let complete = false;
-      while (i < config.attempts) {
-        // eslint-disable-next-line no-await-in-loop
-        res = await this.checkTaskComplete(taskId);
-        if (res) {
-          const { output } = res;
-          if (!output.toLowerCase().includes("job started")) {
-            if (config.print) {
-              const taskName = res.module_name || res.task_name || "shell";
-              this.addLine(
-                `[*] Task ${res.id} (${taskName}) completed`,
-                "info-text",
-              );
-              this.addLine(output, "indent-5-spaces");
-            }
-            complete = true;
-            break;
-          } else if (!hasPrintedJobStarted) {
-            this.addLine(output, "indent-5-spaces");
-            hasPrintedJobStarted = true;
-          }
-        }
-
-        // eslint-disable-next-line no-await-in-loop
-        await pause(config.delay);
-        i++;
-      }
-
-      if (!complete) {
-        this.addInfo(`No output received for task ${taskId}.`);
-      }
-
-      return res;
-    },
-    async checkTaskComplete(taskId) {
       try {
-        const task = await agentTaskApi.getTask(this.agent.session_id, taskId);
-        if (task.output) {
-          return task;
+        const response = await agentTaskApi.shell(
+          this.agent.session_id,
+          this.getDirectoryCommand(),
+        );
+
+        const complete = await this.pollForResult(response.id, {
+          print: false,
+        });
+
+        if (complete?.output) {
+          this.currentDir = complete.output.split("\r")[0];
+        } else {
+          this.currentDir = this.agent.session_id;
         }
-        return false;
-      } catch (_err) {
-        return false;
+      } catch {
+        this.currentDir = this.agent.session_id;
       }
-    },
-    addLine(content, cssClasses = "preserve-newlines") {
-      this.outputLines.push({ content, cssClasses });
-      this.scrollToBottom();
-    },
-    addError(content) {
-      this.addLine(content, "error-text");
-    },
-    addInfo(content) {
-      this.addLine(content, "info-text");
-    },
-    scrollToBottom() {
-      this.$nextTick(() => {
-        const outputDiv = this.$refs.output;
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-      });
     },
     ansiToHTML: ansiToHtml,
-    colorizeText(text, color = "") {
-      let colorCode = "";
-      const boldCode = "\u001b[1m";
-      switch (color.toLowerCase()) {
-        case "red":
-          colorCode = "\u001b[91m";
-          break;
-        case "green":
-          colorCode = "\u001b[92m";
-          break;
-        case "blue":
-          colorCode = "\u001b[94m";
-          break;
-        case "yellow":
-          colorCode = "\u001b[93m";
-          break;
-        case "white":
-          colorCode = "\u001b[97m";
-          break;
-        default:
-          return text;
-      }
-      return `${boldCode}${colorCode}${text}\u001b[0m`;
-    },
   },
 };
 </script>

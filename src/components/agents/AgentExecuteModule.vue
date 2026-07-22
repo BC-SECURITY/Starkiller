@@ -120,6 +120,7 @@
         ref="generalform"
         v-model="form"
         :options="moduleOptions"
+        :form-language="selectedItem.language"
       />
 
       <v-btn
@@ -339,6 +340,63 @@ export default {
     moduleOptions() {
       const options = this.selectedItem.options || {};
       if (options.Agent) delete options.Agent;
+
+      if (options.DotNetVersion && this.agents.length > 0) {
+        const agentDotNetStr = this.agents[0].dotnet_version;
+        if (agentDotNetStr) {
+          const versionOrder = [
+            "net35",
+            "net40",
+            "net45",
+            "net46",
+            "net47",
+            "net48",
+          ];
+          const clr4Set = new Set([
+            "net40",
+            "net45",
+            "net46",
+            "net47",
+            "net48",
+          ]);
+          const available = agentDotNetStr
+            .toLowerCase()
+            .split(",")
+            .map((v) => v.trim());
+          const clr4Available = available.filter((v) => clr4Set.has(v));
+          const hasClr2 = available.includes("net35");
+          const suggested = options.DotNetVersion.suggested_values || [];
+
+          let best = null;
+
+          if (clr4Available.length > 0) {
+            const agentClr4Max = clr4Available.reduce((a, b) =>
+              versionOrder.indexOf(a) >= versionOrder.indexOf(b) ? a : b,
+            );
+            const agentClr4Idx = versionOrder.indexOf(agentClr4Max);
+            const candidates = suggested
+              .filter((v) => {
+                const n = v.toLowerCase();
+                return (
+                  clr4Set.has(n) && versionOrder.indexOf(n) <= agentClr4Idx
+                );
+              })
+              .sort(
+                (a, b) =>
+                  versionOrder.indexOf(b.toLowerCase()) -
+                  versionOrder.indexOf(a.toLowerCase()),
+              );
+            if (candidates.length > 0) best = candidates[0];
+          }
+
+          if (!best && hasClr2) {
+            best = suggested.find((v) => v.toLowerCase() === "net35") || null;
+          }
+
+          if (best) options.DotNetVersion.value = best;
+        }
+      }
+
       Object.keys(this.moduleOptionDefaults || {}).forEach((key) => {
         if (options[key]) options[key].value = this.moduleOptionDefaults[key];
       });

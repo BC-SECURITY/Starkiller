@@ -15,32 +15,49 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: "yarn"
+          cache: "pnpm"
       - name: Get app version
         run: |
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
       - name: Install modules
-        run: yarn
+        run: pnpm install --frozen-lockfile
       - name: Run ESLint
-        run: yarn lint
+        run: pnpm lint
       - name: Run Prettier
-        run: yarn format:check
+        run: pnpm format:check
+
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - name: Install modules
+        run: pnpm install --frozen-lockfile
+      - name: Run unit tests
+        run: pnpm test:unit:run
 
   test:
-    needs: lint
+    needs: [lint, unit]
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: "yarn"
+          cache: "pnpm"
       - name: Install modules
-        run: yarn
+        run: pnpm install --frozen-lockfile
 
       - name: Cache Playwright browsers
         uses: actions/cache@v6
@@ -51,10 +68,10 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright browsers
-        run: yarn playwright install chromium --with-deps
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Run Playwright tests
-        run: yarn test:e2e
+        run: pnpm test:e2e
 
       - name: Upload Playwright report
         if: failure()

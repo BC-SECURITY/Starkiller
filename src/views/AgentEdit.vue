@@ -20,6 +20,10 @@
               Jobs
               <v-icon size="x-small" class="ml-1"> fa-cogs </v-icon>
             </v-tab>
+            <v-tab key="stats" value="stats">
+              Stats
+              <v-icon size="x-small" class="ml-1"> fa-chart-bar </v-icon>
+            </v-tab>
             <v-tab key="view" value="view">
               View
               <v-icon size="x-small" class="ml-1"> fa-eye </v-icon>
@@ -273,6 +277,20 @@
                 </v-card>
               </v-window-item>
               <v-window-item
+                key="stats"
+                value="stats"
+                :transition="false"
+                :reverse-transition="false"
+              >
+                <v-card flat>
+                  <agent-stats
+                    :agent="agent"
+                    :active="tab === 'stats'"
+                    :refresh-tasks="isRefreshTasks"
+                  />
+                </v-card>
+              </v-window-item>
+              <v-window-item
                 key="view"
                 value="view"
                 :transition="false"
@@ -305,6 +323,7 @@
 import AgentForm from "@/components/agents/AgentForm.vue";
 import AgentTasksList from "@/components/agents/AgentTasksList.vue";
 import AgentJobs from "@/components/agents/AgentJobs.vue";
+import AgentStats from "@/components/agents/AgentStats.vue";
 import AgentExecuteModule from "@/components/agents/AgentExecuteModule.vue";
 import AgentFileBrowser from "@/components/agents/AgentFileBrowser.vue";
 import AgentTerminal from "@/components/agents/AgentTerminal.vue";
@@ -329,6 +348,7 @@ export default {
     AgentFileBrowser,
     AgentTasksList,
     AgentJobs,
+    AgentStats,
     AgentShellSession,
     TabbedTerminalContainer,
     AgentUploadDialog,
@@ -350,6 +370,11 @@ export default {
       downloadDialog: false,
       initialized: true,
       errorState: false,
+      // Incremented on every getAgent() call. A response is only applied if
+      // it's still the most recent call in flight — this prevents a slower,
+      // superseded fetch for a previous agent from landing on the current
+      // one after fast navigation between agents.
+      fetchSeq: 0,
       paneSize: 100,
       rightPaneInitialized: false,
       pathToFile: "",
@@ -486,12 +511,16 @@ export default {
       this.$router.push({ name: "agents" });
     },
     getAgent(id) {
+      this.fetchSeq += 1;
+      const mySeq = this.fetchSeq;
       agentApi
         .getAgent(id)
         .then((data) => {
+          if (mySeq !== this.fetchSeq) return;
           this.agent = data;
         })
         .catch((err) => {
+          if (mySeq !== this.fetchSeq) return;
           console.error(err);
           this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;
@@ -507,9 +536,17 @@ export default {
           },
         )
       ) {
-        this.agentStore.killAgent({ sessionId: this.agent.session_id });
-        this.snack.success(`Agent ${this.agent.name} tasked to run TASK_EXIT.`);
-        this.$router.push({ name: "agents" });
+        try {
+          await this.agentStore.killAgent({
+            sessionId: this.agent.session_id,
+          });
+          this.snack.success(
+            `Agent ${this.agent.name} tasked to run TASK_EXIT.`,
+          );
+          this.$router.push({ name: "agents" });
+        } catch (err) {
+          this.snack.error(`Failed to kill agent ${this.agent.name}: ${err}`);
+        }
       }
     },
     async clearQueue() {
@@ -532,13 +569,20 @@ export default {
           },
         )
       ) {
-        this.agentStore.clearQueue({
+        const result = await this.agentStore.clearQueue({
           sessionId: this.agent.session_id,
           tasks: queuedIds,
         });
-        this.snack.success(
-          `Clearing queued tasks for Agent ${this.agent.session_id}.`,
-        );
+        const failed = result.filter((r) => r.status === "rejected").length;
+        if (failed > 0) {
+          this.snack.error(
+            `Failed to clear ${failed} of ${queuedIds.length} queued tasks.`,
+          );
+        } else {
+          this.snack.success(
+            `Cleared ${queuedIds.length} queued tasks for Agent ${this.agent.session_id}.`,
+          );
+        }
       }
     },
     openUploadDialogPrefilled({ pathToFile }) {

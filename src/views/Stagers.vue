@@ -101,8 +101,8 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.forEach((stager) => {
-          this.stagerStore.deleteStager(stager.id);
+        this.selected.forEach((id) => {
+          this.stagerStore.deleteStager(id);
         });
         this.selected = [];
       }

@@ -178,6 +178,33 @@ describe("normalizeSubmitError", () => {
     expect(snackText).toBe(FALLBACK);
   });
 
+  it("unwraps an ApiError's .detail (422 array) so fields route, not the message string", () => {
+    // The shape handleError() now produces: an Error that also carries the raw
+    // structured detail on `.detail`. The array must survive to serverError so
+    // useServerErrors routes per-field messages, instead of collapsing into a
+    // single banner line via err.message.
+    const detail = [{ loc: ["body", "options", "Name"], msg: "required" }];
+    const err = Object.assign(new Error("required"), { detail });
+    const { serverError, snackText } = normalizeSubmitError(err, FALLBACK);
+    expect(serverError).toBe(detail);
+    expect(snackText).toBe("required");
+  });
+
+  it("unwraps an ApiError's string .detail", () => {
+    const err = Object.assign(new Error("bad listener"), {
+      detail: "bad listener",
+    });
+    const { serverError } = normalizeSubmitError(err, FALLBACK);
+    expect(serverError).toBe("bad listener");
+  });
+
+  it("treats an Error with null .detail as a plain Error (no recursion)", () => {
+    const err = Object.assign(new Error("network down"), { detail: null });
+    const { serverError, snackText } = normalizeSubmitError(err, FALLBACK);
+    expect(serverError).toEqual(["network down"]);
+    expect(snackText).toBe("network down");
+  });
+
   it("preserves a pre-unwrapped 422 array detail and snacks the first item's msg", () => {
     const detail = [
       { loc: ["body", "options", "Name"], msg: "required" },

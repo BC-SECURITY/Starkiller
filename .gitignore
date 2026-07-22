@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+.claude/settings.local.json
 
 # As of 2.0, we will commit /dist on tagged releases.
 # /dist
@@ -13,8 +14,7 @@ node_modules
 
 # Log files
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
 
 # Editor directories and files
 .idea
@@ -32,3 +32,6 @@ yarn-error.log*
 /playwright-report/
 /playwright/.cache/
 .claude/
+
+# Superpowers brainstorm visual companion
+.superpowers/

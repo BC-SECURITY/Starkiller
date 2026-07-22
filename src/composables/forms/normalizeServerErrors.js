@@ -111,10 +111,18 @@ export function normalizeServerErrors(detail, knownFieldNames = []) {
 // :server-errors (array | string | object), and `snackText` is a short
 // user-readable string for an inline toast.
 //
-// Context: axios-instance handleError() unwraps `response.data.detail` when
-// present and otherwise returns the raw Error. So `err` here is either the
-// unwrapped detail or an Error instance.
+// Context: http.js handleError() returns an ApiError that preserves the raw
+// `response.data.detail` on `.detail` (string | 422 array | object) while
+// staying an Error for status introspection. When no detail is present it
+// returns the raw Error. So `err` here is an ApiError carrying `.detail`, a
+// plain Error (network / 5xx / CORS), or — when a caller passes the detail
+// directly — the unwrapped detail itself.
 export function normalizeSubmitError(err, fallback = "Operation failed.") {
+  // Prefer the structured detail so field-level 422s still route to inputs
+  // instead of collapsing into a single banner line via the message string.
+  if (err instanceof Error && err.detail != null) {
+    return normalizeSubmitError(err.detail, fallback);
+  }
   if (err instanceof Error) {
     // Trim before the truthy check so a whitespace-only message ("   ")
     // falls back to the supplied fallback rather than rendering blank.

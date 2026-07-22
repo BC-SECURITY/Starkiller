@@ -1,6 +1,33 @@
 <template>
   <div>
     <chat v-if="socket && chatWidget" ref="chat" :socket="socket" />
+    <!-- Persistent connection-state banner. :timeout="-1" means it never
+         auto-dismisses, since it reflects ongoing connection state rather
+         than a one-off event -- deliberately a separate v-snackbar from
+         the shared `snack` queue (StarkillerSnackbar.vue), which is
+         transient/dismissable and could bury or be buried by unrelated
+         snackbar traffic. -->
+    <v-snackbar
+      :model-value="showDisconnectedBanner || showReconnectFailedBanner"
+      :timeout="-1"
+      color="warning"
+      location="top"
+      multi-line
+    >
+      <span v-if="showReconnectFailedBanner">
+        Lost connection to the server. Live notifications have stopped.
+      </span>
+      <span v-else>Connection lost — reconnecting…</span>
+      <template #actions>
+        <v-btn
+          v-if="showReconnectFailedBanner"
+          variant="text"
+          @click="manualReconnect"
+        >
+          Reconnect
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -20,6 +47,19 @@ export default {
   data() {
     return {
       socket: null,
+      // Debounced "reconnecting" indicator -- only shown if still
+      // disconnected after a short grace period, so a transient blip that
+      // reconnects in under ~2.5s never flashes the banner at all.
+      showDisconnectedBanner: false,
+      disconnectDebounceTimer: null,
+      // Set once socket.io's automatic reconnection cycle gives up
+      // entirely (reconnect_failed). Cleared by a successful (re)connect
+      // or by the manual "Reconnect" button.
+      showReconnectFailedBanner: false,
+      // Plugin event names currently registered via setPluginHandlers, so a
+      // plugin that drops out of the list (removed) can have its listener
+      // torn down explicitly -- nothing else iterates it once it's gone.
+      registeredPluginNames: [],
     };
   },
   computed: {
@@ -48,6 +88,14 @@ export default {
     }),
   },
   watch: {
+    // `!this.socket` below means "no socket object has been created yet
+    // this session", NOT "is currently connected" -- once created, this.socket
+    // stays truthy for the whole session (through disconnects, reconnect
+    // attempts, and even a permanent reconnect_failed) and is only ever
+    // reset to null in disconnect() (called from beforeUnmount). Recovery
+    // from a dropped connection is handled entirely by socket.io's own
+    // Manager (automatic reconnection) or by manualReconnect() below --
+    // never by recreating the socket object itself.
     isLoggedIn(val) {
       if (val === true && !this.socket) {
         this.connect();
@@ -82,6 +130,7 @@ export default {
     }
   },
   beforeUnmount() {
+    this.clearDisconnectDebounceTimer();
     this.disconnect();
   },
   methods: {
@@ -102,10 +151,15 @@ export default {
       this.socket = null;
     },
     setAgentHandlers() {
+      // This watcher re-fires on every agent checkin (subscribedAgents is a
+      // new object each time), so always off() immediately before on() --
+      // without it, every prior registration for a still-subscribed agent
+      // stacks another duplicate handler, and later task-result events for
+      // that agent fire the bell push once per stacked handler.
       Object.entries(this.subscribedAgents).forEach(
         ([sessionId, subscribed]) => {
+          this.socket.off(`agents/${sessionId}/task`);
           if (!subscribed) {
-            this.socket.off(`agents/${sessionId}/task`);
             return;
           }
 
@@ -124,7 +178,20 @@ export default {
       );
     },
     setPluginHandlers() {
+      const currentNames = this.plugins.map((plugin) => plugin.name);
+      // A plugin removed from the list stops being iterated below, so its
+      // listener would otherwise never get torn down -- off() it explicitly.
+      this.registeredPluginNames
+        .filter((name) => !currentNames.includes(name))
+        .forEach((name) => {
+          this.socket.off(`plugins/${name}/notifications`);
+        });
+
       this.plugins.forEach((plugin) => {
+        // This watcher re-fires on every plugin-list change, so always
+        // off() immediately before on() -- same stacking bug as
+        // setAgentHandlers above, otherwise.
+        this.socket.off(`plugins/${plugin.name}/notifications`);
         this.socket.on(`plugins/${plugin.name}/notifications`, (data) => {
           this.bell.push({
             title: `${plugin.name}`,
@@ -134,6 +201,8 @@ export default {
           });
         });
       });
+
+      this.registeredPluginNames = currentNames;
     },
     setHandlers() {
       this.socket.on("listeners/new", (data) => {
@@ -161,15 +230,62 @@ export default {
         this.agentStore.addAgent(data);
       });
 
-      this.socket.on("reconnect_failed", () => {
-        console.log("Failed to connect to SocketIO");
-        this.snack.error("Failed to connect to SocketIO");
-      });
       this.socket.on("connect_error", () => {
         console.log("SocketIO Connection Error, retrying.");
         // a bit too noisy to popup on every reconnect attempt.
         // this.snack.warn('SocketIO Connection Error, retrying.');
       });
+
+      // "connect" fires on the initial connection AND on every successful
+      // automatic reconnect -- clears whichever banner was showing.
+      this.socket.on("connect", () => {
+        this.clearDisconnectDebounceTimer();
+        this.showDisconnectedBanner = false;
+        this.showReconnectFailedBanner = false;
+      });
+      this.socket.on("disconnect", () => {
+        this.scheduleDisconnectIndicator();
+      });
+
+      // reconnect/reconnect_attempt/reconnect_error/reconnect_failed are
+      // emitted on the Manager (this.socket.io), NOT on the socket itself --
+      // confirmed by reading socket.io-client's source (Socket.subEvents()
+      // only relays open/packet/error/close from the Manager) and verified
+      // empirically against a live client instance. Registering these on
+      // `this.socket` (as this code previously did for reconnect_failed)
+      // silently never fires.
+      this.socket.io.on("reconnect_failed", () => {
+        this.clearDisconnectDebounceTimer();
+        this.showDisconnectedBanner = false;
+        this.showReconnectFailedBanner = true;
+        console.log("Failed to connect to SocketIO");
+        this.snack.error("Failed to connect to SocketIO");
+      });
+    },
+    scheduleDisconnectIndicator() {
+      this.clearDisconnectDebounceTimer();
+      // Debounced so a transient blip that reconnects quickly never flashes
+      // the banner at all -- only a connection that's still down after the
+      // grace period is worth interrupting the operator about.
+      this.disconnectDebounceTimer = setTimeout(() => {
+        this.showDisconnectedBanner = true;
+        this.disconnectDebounceTimer = null;
+      }, 2500);
+    },
+    clearDisconnectDebounceTimer() {
+      if (this.disconnectDebounceTimer) {
+        clearTimeout(this.disconnectDebounceTimer);
+        this.disconnectDebounceTimer = null;
+      }
+    },
+    // Resumes socket.io's reconnection cycle after it's given up
+    // permanently (reconnect_failed). Calls .connect() on the existing
+    // socket/Manager rather than this.connect(), which would tear down and
+    // replace the whole socket (and re-register every handler) instead of
+    // just asking it to retry.
+    manualReconnect() {
+      this.showReconnectFailedBanner = false;
+      this.socket.connect();
     },
     getColorForPluginMessage(message) {
       if (message.startsWith("[!]")) {

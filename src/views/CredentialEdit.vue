@@ -16,9 +16,8 @@
     <tag-viewer
       v-if="!isNew"
       :tags="credential.tags"
-      @update-tag="updateTag"
-      @delete-tag="deleteTag"
-      @new-tag="addTag"
+      @attach-tag="addTag"
+      @detach-tag="deleteTag"
     />
     <error-state-alert
       v-if="errorState"
@@ -62,6 +61,11 @@ export default {
       credential: {},
       form: {},
       errorState: false,
+      // Incremented on every getCredential() call. A response is only
+      // applied if it's still the most recent call in flight — this
+      // prevents a slower, superseded fetch for a previous credential from
+      // landing on the current one after fast navigation between them.
+      fetchSeq: 0,
     };
   },
   computed: {
@@ -150,25 +154,18 @@ export default {
       credentialApi
         .deleteTag(this.credential.id, tag.id)
         .then(() => {
-          this.credential.tags = this.credential.tags.filter((t) => t !== tag);
+          this.credential.tags = this.credential.tags.filter(
+            (t) => t.id !== tag.id,
+          );
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(tag) {
+    addTag(payload) {
       credentialApi
-        .updateTag(this.credential.id, tag)
+        .addTag(this.credential.id, payload)
         .then((t) => {
-          const index = this.credential.tags.findIndex((x) => x.id === t.id);
-          this.credential.tags.splice(index, 1, t);
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(tag) {
-      credentialApi
-        .addTag(this.credential.id, tag)
-        .then((t) => {
-          this.credential.tags.push(t);
+          if (!this.credential.tags.some((x) => x.id === t.id))
+            this.credential.tags.push(t);
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
@@ -211,7 +208,7 @@ export default {
         )
       ) {
         try {
-          this.credentialStore.deleteCredential(this.id);
+          await this.credentialStore.deleteCredential(this.id);
           this.$router.push({ name: "credentials" });
         } catch (err) {
           this.snack.error(`Error: ${err}`);
@@ -219,13 +216,17 @@ export default {
       }
     },
     getCredential(id) {
+      this.fetchSeq += 1;
+      const mySeq = this.fetchSeq;
       credentialApi
         .getCredential(id)
         .then((data) => {
+          if (mySeq !== this.fetchSeq) return;
           this.credential = data;
           this.initialLoad = true;
         })
         .catch((err) => {
+          if (mySeq !== this.fetchSeq) return;
           console.error(err);
           this.snack.error(`Failed to load resource: ${err}`);
           this.errorState = true;

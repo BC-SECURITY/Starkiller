@@ -124,12 +124,6 @@ export function deleteTag(pluginId, taskId, tag) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateTag(pluginId, taskId, tag) {
-  return request
-    .put(`plugins/${pluginId}/${taskId}/tags/${tag.id}`, tag)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function addTag(pluginId, taskId, tag) {
   return request
     .post(`plugins/${pluginId}/tasks/${taskId}/tags`, tag)

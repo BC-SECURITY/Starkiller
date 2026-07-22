@@ -37,6 +37,7 @@
 import { computed } from "vue";
 import FileInput from "@/components/FileInput.vue";
 import { KIND_TO_COMPONENT } from "@/composables/forms/kindToComponent";
+import truncateText from "@/utils/truncate";
 
 // Kinds rendered by the generic <component :is> that take a list of items.
 const LIST_KINDS = ["multiselect", "agent", "combobox", "select"];
@@ -68,9 +69,6 @@ const bind = computed(() => {
 });
 
 function truncate(msg) {
-  if (msg) {
-    return msg.length > 80 ? `${msg.substr(0, 80)}...` : msg;
-  }
-  return "";
+  return truncateText(msg, 80);
 }
 </script>
