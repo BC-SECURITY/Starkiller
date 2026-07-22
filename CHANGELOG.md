@@ -32,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `AgentShellSession` into reusable composables, so a fix to any of that
     shared logic lands once instead of twice
 -   Support Empire 7.0's typed boolean module options, rendering them as toggle switches via the `value_type` option metadata
+-   Filtered the bypass picker to stagers matching the selected execution language
+-   Added a confirmation prompt before stopping a running task
+-   Explained forced logouts to the user instead of silently returning to the sign-out screen
+-   Respected each module's `depends_on` metadata when rendering AutoRunModules options
+-   Capped the terminal's live output buffer at 500 lines to bound memory growth on long-running sessions
 -   **BREAKING**: Switched package manager from yarn to pnpm 11 (requires Node 22+)
 
 ### Fixed
@@ -41,6 +46,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Fixed Rerun Task erroring for shell/sysinfo tasks with lowercase names
 -   Applied the same fixes to the plugin task detail panel
 -   Extracted a shared truncate utility for the agent/plugin tables and form input
+-   Fixed loss of terminal history when reloading while the Shell tab was active
+-   Fixed a stale-index bug that could rename the wrong agent
+-   Fixed bulk delete and kill silently doing nothing on the Bypasses, Credentials, Listeners, and Stagers pages
+-   Fixed the shell command input double-submitting on rapid Enter presses
+-   Fixed edit pages (Agent, Bypass, Credential, Listener, Stager) applying stale data from out-of-order fetch responses and navigating before deletes completed
+-   Surfaced previously-silent failures on fire-and-forget actions (kill, clear queue, download, avatar upload) and hardened download filename parsing
+-   Fixed duplicate notification socket listeners stacking on reconnect and hardened the reconnect UX
+
+### Security
+
+-   Fixed a stored XSS vulnerability in the plugin dependency warning
+-   Validated plugin link URL schemes before binding them to `href`, blocking `javascript:` and other unsafe protocols
 
 ## [4.0.0-a.1] - 2026-04-18
 
@@ -56,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
 -   Fixed agent upload path for Go/IronPython and removed file size limit
 
-## [Unreleased]
+## [3.6.0] - 2026-07-06
 
 ### Added
 
@@ -557,7 +574,7 @@ Including but not limited to:
 
 [4.0.0-a.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v4.0.0-a.1
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...HEAD
+[3.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...v3.6.0
 
 [3.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v3.5.0
 
