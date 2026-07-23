@@ -76,6 +76,24 @@ export function mockAgentDetail(page, agent) {
   });
 }
 
+// Endpoints only the Dashboard hits, stubbed empty:
+// - GET /agents/tasks (Recent Tasks table, plus its auto-refresh poller)
+// - GET /agents/checkins/ and /agents/checkins/aggregate (Check Ins chart);
+//   regex because the endpoint has both a trailing-slash and a nested form,
+//   which a single glob can't cover (* doesn't cross "/").
+// Shared by dashboard.spec.js and login.spec.js (login redirects to the
+// Dashboard, so it mounts the same fetches).
+export async function mockDashboardOnlyEndpoints(page) {
+  await page.route("**/api/v2/agents/tasks*", (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(paginatedResponse([]));
+  });
+  await page.route(/\/api\/v2\/agents\/checkins\//, (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(paginatedResponse([]));
+  });
+}
+
 // Records URL + body for every POST to any /agents/*/tasks/* endpoint.
 // Specs assert against the recorder to verify session_ids are real.
 export function recordAgentTasks(page) {

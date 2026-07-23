@@ -163,7 +163,7 @@ export default {
       immediate: true,
       handler(val) {
         if (val === true && this.isLoggedIn === true) {
-          this.$router.push({ name: "listeners" });
+          this.$router.push({ name: "dashboard" });
         } else if (val === false && this.isLoggedIn === false) {
           this.$router.push({ name: "home" });
         }
@@ -172,8 +172,8 @@ export default {
     isLoggedIn(val) {
       if (val === false && !this.isLoginPage) {
         this.$router.push({ name: "home" });
-      } else if (val === true && this.$route.name !== "listeners") {
-        this.$router.push({ name: "listeners" });
+      } else if (val === true && this.$route.name !== "dashboard") {
+        this.$router.push({ name: "dashboard" });
       }
     },
     empireVersion: {

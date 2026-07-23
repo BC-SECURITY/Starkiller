@@ -33,10 +33,6 @@
 // mockTagsEndpoint: stubs GET /tags* with an empty list. Used by many list
 // views (AgentsList, ListenersList, CredentialsList, Downloads). Extracted
 // to avoid repeating the same 4-line block across specs.
-//
-// mockListenersPage: stubs GET /listeners and GET /tags?sources=listener,
-// both of which are fetched whenever the app redirects to the listeners
-// list (App.vue redirects there on login and after some actions).
 
 import { jsonResponse, paginatedResponse } from "./responses.js";
 
@@ -112,22 +108,6 @@ export async function mockGeneralFormBackground(page) {
 // Always returns an empty list — specs don't currently test tags.
 export function mockTagsEndpoint(page) {
   return page.route("**/api/v2/tags*", (route) => {
-    if (route.request().method() !== "GET") return route.fallback();
-    return route.fulfill(paginatedResponse([]));
-  });
-}
-
-// Stubs GET /listeners and GET /tags?sources=listener.
-// Called by specs where the app may redirect to the listeners page
-// (App.vue redirects there on successful login and on isLoggedIn transitions).
-export async function mockListenersPage(page) {
-  await page.route("**/api/v2/listeners*", (route) => {
-    const url = new URL(route.request().url());
-    if (route.request().method() !== "GET") return route.fallback();
-    if (url.pathname.match(/\/listeners\/[^/]+/)) return route.fallback();
-    return route.fulfill(paginatedResponse([]));
-  });
-  await page.route("**/api/v2/tags*", (route) => {
     if (route.request().method() !== "GET") return route.fallback();
     return route.fulfill(paginatedResponse([]));
   });

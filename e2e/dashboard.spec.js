@@ -11,31 +11,17 @@ import {
   mockEmpireBootstrap,
   mockTagsEndpoint,
 } from "./helpers/network.js";
-import { mockAgentsList } from "./helpers/api/agents.js";
+import {
+  mockAgentsList,
+  mockDashboardOnlyEndpoints,
+} from "./helpers/api/agents.js";
 import {
   mockListenersList,
   mockListenerTemplates,
 } from "./helpers/api/listeners.js";
 import { mockCredentialsList } from "./helpers/api/credentials.js";
-import { paginatedResponse } from "./helpers/responses.js";
 import { defaultAgents } from "./fixtures/agents.js";
 import { defaultListeners, httpTemplate } from "./fixtures/listeners.js";
-
-// Endpoints only the Dashboard hits, stubbed empty inline:
-// - GET /agents/tasks (Recent Tasks table, plus its auto-refresh poller)
-// - GET /agents/checkins/ and /agents/checkins/aggregate (Check Ins chart);
-//   regex because the endpoint has both a trailing-slash and a nested form,
-//   which a single glob can't cover (* doesn't cross "/").
-async function mockDashboardOnlyEndpoints(page) {
-  await page.route("**/api/v2/agents/tasks*", (route) => {
-    if (route.request().method() !== "GET") return route.fallback();
-    return route.fulfill(paginatedResponse([]));
-  });
-  await page.route(/\/api\/v2\/agents\/checkins\//, (route) => {
-    if (route.request().method() !== "GET") return route.fallback();
-    return route.fulfill(paginatedResponse([]));
-  });
-}
 
 // The Dashboard stacks tiles above the Topology card; on the default 720px
 // viewport the graph canvas sits below the fold and SVG nodes aren't
