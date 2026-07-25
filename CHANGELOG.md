@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-07-25
+
 ### Added
 
 -   Revamped v2 tag system with a new tag picker dialog for attaching tags to agents, listeners, and other taggable entities — a centered dialog with a filter box, a checklist of existing tags, and inline create-and-attach for a new tag typed into the filter
@@ -561,7 +563,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0...HEAD
+
+[4.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...v4.0.0
 
 [3.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...v3.6.0
 
