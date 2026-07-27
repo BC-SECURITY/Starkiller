@@ -113,14 +113,6 @@ export function downloadFile(sessionId, pathToFile) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateComms(sessionId, listener) {
-  return request
-    .post(`/agents/${sessionId}/tasks/update_comms`, {
-      new_listener_id: listener,
-    })
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function updateKillDate(sessionId, killDate) {
   return request
     .post(`/agents/${sessionId}/tasks/kill_date`, { kill_date: killDate })

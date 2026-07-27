@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+-   Agent **Listener** field is now read-only on the agent view — Empire 7.0 removed the server-side ability to reassign an agent's listener, so the edit control (which called a `tasks/update_comms` endpoint that no longer exists) has been removed while the value is still displayed
+
 ## [4.0.0] - 2026-07-25
 
 ### Added

@@ -39,14 +39,9 @@
         :editable="false"
       />
       <click-to-edit
-        v-model="form.listener"
         label="Listener"
-        info-text="The listener to task the agent to use"
-        data-type="string"
-        :suggested-values="listeners.map((l) => l.name)"
-        :strict="true"
-        :editable="!readOnly"
-        @update="updateListener"
+        :model-value="form.listener"
+        :editable="false"
       />
       <click-to-edit
         v-model="form.kill_date"
@@ -143,7 +138,6 @@ import TagViewer from "@/components/TagViewer.vue";
 import ClickToEdit from "@/components/ClickToEdit.vue";
 import * as agentTaskApi from "@/api/agent-task-api";
 import * as agentApi from "@/api/agent-api";
-import { useListenerStore } from "@/stores/listener-module";
 import { useAgentStore } from "@/stores/agent-module";
 
 export default {
@@ -194,12 +188,6 @@ export default {
     agentStore() {
       return useAgentStore();
     },
-    listenerStore() {
-      return useListenerStore();
-    },
-    listeners() {
-      return this.listenerStore.listeners;
-    },
     fields() {
       // stale comes back as a boolean, while no other property does and el-input
       // doesn't accept booleans so this will do.
@@ -243,9 +231,6 @@ export default {
       },
     },
   },
-  mounted() {
-    this.listenerStore.getListeners();
-  },
   methods: {
     // dayjs(null|"") is "valid" and yields a bogus relative time (moment
     // rendered "Invalid date"); guard so an unparseable timestamp shows a
@@ -279,27 +264,10 @@ export default {
           newName: this.form.name,
         });
       } catch (err) {
-        this.snack.error(`Update agent listener failed: ${err}`);
+        this.snack.error(`Update agent name failed: ${err}`);
         return;
       }
       this.snack.info(`Agent ${this.agent.name} name updated`);
-      this.$emit("refresh-agent");
-    },
-    async updateListener() {
-      if (this.agent.listener === this.form.listener) return;
-
-      try {
-        const listenerId = this.listeners.filter(
-          (l) => l.name === this.form.listener,
-        )[0].id;
-        await agentTaskApi.updateComms(this.agent.session_id, listenerId);
-      } catch (err) {
-        this.snack.error(`Update agent listener failed: ${err}`);
-        return;
-      }
-      this.snack.info(
-        `Tasked agent to change listener to: ${this.form.listener}`,
-      );
       this.$emit("refresh-agent");
     },
     async updateKillDate() {
