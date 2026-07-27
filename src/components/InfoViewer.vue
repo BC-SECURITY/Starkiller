@@ -1,11 +1,8 @@
 <template>
   <div>
-    <v-expansion-panels
-      :disabled="Object.keys(info).length < 1"
-      class="collapse"
-    >
+    <v-expansion-panels v-if="hasInfo" class="collapse">
       <v-expansion-panel>
-        <v-expansion-panel-title v-if="Object.keys(info).length > 0">
+        <v-expansion-panel-title>
           {{ info.description }}
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -52,7 +49,23 @@ export default {
   props: {
     info: {
       type: Object,
-      default: () => {},
+      default: () => ({}),
+    },
+  },
+  computed: {
+    // Only render when there is real content to show. The template objects are
+    // initialized to `{ options: {} }`, so listenerInfo/stagerInfo yield an
+    // object with description/authors/comments keys whose values are all
+    // undefined until a template is actually selected — a plain key-count check
+    // would treat that as "has info" and render an empty, titleless panel.
+    hasInfo() {
+      const { description, authors, comments, extraDetails } = this.info || {};
+      return Boolean(
+        description ||
+          authors?.length ||
+          comments?.length ||
+          extraDetails?.length,
+      );
     },
   },
 };

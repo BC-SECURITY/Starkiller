@@ -155,4 +155,32 @@ test.describe("stager edit", () => {
       dllTemplate.options.Language.value,
     );
   });
+
+  // Regression test: InfoViewer used to render an empty, titleless expansion
+  // panel before a template was selected. stagerTemplate starts as
+  // `{ options: {} }`, so stagerInfo is `{ description, authors, comments }`
+  // with all-undefined values -- present keys, no content -- which the old
+  // Object.keys()-based guard mistook for "has info".
+  test("does not show the info panel until a template with info is selected", async ({
+    page,
+  }) => {
+    await page.goto("/#/stagers/new");
+
+    const panel = page.locator(".info-viewer .v-expansion-panels");
+    // Type field is up, but no template chosen yet -> no info panel.
+    await expect(page.getByLabel(/^type$/i).first()).toBeVisible();
+    await expect(panel).toHaveCount(0);
+
+    await page
+      .getByLabel(/^type$/i)
+      .first()
+      .click();
+    await page
+      .getByRole("option", { name: "multi_launcher", exact: true })
+      .click();
+
+    // Once the template loads, the panel appears showing its description.
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText(launcherTemplate.description);
+  });
 });
