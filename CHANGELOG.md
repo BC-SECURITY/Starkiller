@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-07-28
+
 ### Changed
 
 -   Agent **Listener** field is now read-only on the agent view — Empire 7.0 removed the server-side ability to reassign an agent's listener, so the edit control (which called a `tasks/update_comms` endpoint that no longer exists) has been removed while the value is still displayed
@@ -567,7 +569,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.1...HEAD
+
+[4.0.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0...v4.0.1
 
 [4.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...v4.0.0
 
