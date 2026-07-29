@@ -25,24 +25,30 @@
       show-select
     >
       <template #item.name="{ item }">
-        <v-tooltip location="top">
-          <template #activator="{ props: activatorProps }">
-            <v-icon
-              v-if="item.high_integrity"
-              size="small"
-              v-bind="activatorProps"
-            >
-              fa-user-cog
-            </v-icon>
-          </template>
-          <span>Elevated Process</span>
-        </v-tooltip>
-        <router-link
-          style="color: inherit"
-          :to="{ name: 'agentEdit', params: { id: item.session_id } }"
-        >
-          {{ item.name }}
-        </router-link>
+        <div class="d-flex align-center">
+          <v-tooltip location="top">
+            <template #activator="{ props: activatorProps }">
+              <!-- transform is an optical nudge to center the fa-user-cog glyph against the name text -->
+              <v-icon
+                v-if="item.high_integrity"
+                class="mr-1"
+                style="transform: translate(-2px, -2px)"
+                size="small"
+                v-bind="activatorProps"
+              >
+                fa-user-cog
+              </v-icon>
+            </template>
+            <span>Elevated Process</span>
+          </v-tooltip>
+          <router-link
+            class="text-no-wrap"
+            style="color: inherit"
+            :to="{ name: 'agentEdit', params: { id: item.session_id } }"
+          >
+            {{ item.name }}
+          </router-link>
+        </div>
       </template>
       <template #item.lastseen_time="{ item }">
         <date-time-display :timestamp="item.lastseen_time" />
