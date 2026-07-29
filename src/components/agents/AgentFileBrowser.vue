@@ -2,7 +2,7 @@
   <div>
     <execute-module-dialog
       v-model="executeDialog"
-      :agent="agent.session_id"
+      :agent="agent"
       :module-name="moduleName"
       :module-option-defaults="moduleOptionDefaults"
     />

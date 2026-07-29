@@ -124,7 +124,7 @@
       />
 
       <v-btn
-        v-if="selectedModule"
+        v-if="showSubmit && selectedModule"
         :loading="loading"
         color="primary"
         @click="create"

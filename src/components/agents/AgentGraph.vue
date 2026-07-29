@@ -9,7 +9,7 @@
   >
     <execute-module-dialog
       v-model="executeModule.showDialog"
-      :agent="executeModule.sessionId"
+      :agent="executeModule.agent"
       :module-name="executeModule.moduleName"
       :module-option-defaults="executeModule.moduleOptionDefaults"
     />
@@ -139,7 +139,7 @@ export default {
       focusedNode: null,
       executeModule: {
         showDialog: false,
-        sessionId: "",
+        agent: {},
         moduleName: "",
         moduleOptionDefaults: {},
       },
@@ -507,7 +507,7 @@ export default {
     },
     doExecuteModule(action, item) {
       this.executeModule.showDialog = true;
-      this.executeModule.sessionId = item.session_id;
+      this.executeModule.agent = item;
     },
     doFocusNode(action, item) {
       this.focusNode(item);
