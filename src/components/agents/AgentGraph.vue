@@ -396,8 +396,17 @@ export default {
       this.simulationSvg = null;
     },
     showAllNodes() {
-      if (this.simulation && this.graph) {
-        this.simulation.moveTo({ nodes: this.graph.nodes });
+      // Fit against the simulation's OWN nodes, not the `graph` computed. The
+      // computed rebuilds a fresh model (via buildGraph) whose nodes have no
+      // live x/y — only the hardcoded root at (0,0) — so whenever a store
+      // refresh invalidates it between render and this fit, moveTo() would
+      // center on the origin (only the pinned root sits there) instead of the
+      // drifted cluster.
+      // The force layout mutates positions onto the objects it was handed,
+      // which live on `this.simulation.graph.nodes`.
+      const nodes = this.simulation?.graph?.nodes;
+      if (this.simulation && nodes?.length) {
+        this.simulation.moveTo({ nodes });
       }
     },
     toggleExpand() {
