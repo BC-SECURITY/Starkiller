@@ -277,8 +277,13 @@ export default {
       return this.headersFull
         .filter(
           (h) =>
+            // alwaysShow columns bypass the persisted header selection —
+            // they render regardless of the stored choices and are never
+            // HeaderMenu options or persisted (same model as
+            // TasksTable.vue).
+            h.alwaysShow ||
             this.applicationStore.agentHeaders.findIndex(
-              (h2) => h2.title === h.title,
+              (h2) => h2.key === h.key,
             ) > -1,
         )
         .sort((a, b) => a.order - b.order);
@@ -322,18 +327,30 @@ export default {
       immediate: true,
     },
   },
-  async mounted() {
+  mounted() {
     this.getAgents();
-    if (
-      this.applicationStore.agentHeaders.length === 0 ||
-      !this.applicationStore.agentHeaders[0].title
-    ) {
+    // Same persisted-header model as TasksTable.vue: the store holds only
+    // the user's selectable picks (alwaysShow columns render via the
+    // `headers` short-circuit and are never persisted). Strip alwaysShow
+    // entries persisted by older builds BEFORE judging the store — a
+    // pre-fix deselect-all left exactly the four titled alwaysShow
+    // entries, which would otherwise defeat the reseed guard and leave an
+    // already-affected install stuck at four columns. After cleaning,
+    // reseed when nothing titled remains — an empty store or a legacy
+    // {text, value} shape.
+    const storedHeaders = this.applicationStore.agentHeaders;
+    const cleanedHeaders = storedHeaders.filter((h) => !h.alwaysShow);
+    if (!cleanedHeaders.some((h) => h.title)) {
       this.applicationStore.agentHeaders = this.headersFull.filter(
-        (h) => h.defaultHeader === true,
+        (h) => h.defaultHeader === true && !h.alwaysShow,
       );
+    } else if (cleanedHeaders.length !== storedHeaders.length) {
+      // Write back only when the cleanup actually removed something —
+      // every store write re-serializes the whole persisted state.
+      this.applicationStore.agentHeaders = cleanedHeaders;
     }
     this.selectedHeadersTemp = this.headersFull.filter((h) =>
-      this.applicationStore.agentHeaders.some((h2) => h2.title === h.title),
+      this.applicationStore.agentHeaders.some((h2) => h2.key === h.key),
     );
   },
   methods: {
@@ -358,14 +375,6 @@ export default {
     submitHeaderForm(val) {
       this.selectedHeadersTemp = val;
       this.applicationStore.agentHeaders = [...this.selectedHeadersTemp];
-    },
-    resetHeaders() {
-      this.applicationStore.agentHeaders = this.headersFull.filter(
-        (h) => h.defaultHeader === true,
-      );
-      this.selectedHeadersTemp = this.headersFull.filter((h) =>
-        this.applicationStore.agentHeaders.some((h2) => h2.title === h.title),
-      );
     },
     getAgents() {
       this.agentStore.getAgents();

@@ -8,9 +8,7 @@
       <header-menu
         :headers-full="headersForMenu"
         :initial-selected-headers="selectedHeadersTemp"
-        :default-headers="
-          headersForMenu.filter((h) => h.defaultHeader === true)
-        "
+        :default-headers="headersFull.filter((h) => h.defaultHeader === true)"
         @submit="submitHeaderForm"
       />
     </div>
@@ -485,11 +483,13 @@ export default {
             // a hidden column can't be brought back by picking it in the
             // HeaderMenu, since that only affects the store, not this prop.
             !this.hideColumns.includes(h.key) &&
-            // No-op for configs whose columns have no "data-table-expand"
-            // entry (e.g. pluginTaskConfig) — the check just never matches.
-            (h.key === "data-table-expand" ||
+            // alwaysShow columns bypass the persisted header selection —
+            // they render regardless of the stored choices (they are
+            // never HeaderMenu options and are never persisted; only the
+            // hideColumns prop above can suppress them).
+            (h.alwaysShow ||
               this.applicationStore[this.config.headerStoreKey].findIndex(
-                (h2) => h2.title === h.title,
+                (h2) => h2.key === h.key,
               ) > -1),
         )
         .sort((a, b) => a.order - b.order);
@@ -525,18 +525,33 @@ export default {
       this.debouncedGetTasks();
     },
   },
-  async mounted() {
+  mounted() {
     this.debouncedGetTasks();
-    if (
-      this.applicationStore[this.config.headerStoreKey].length === 0 ||
-      !this.applicationStore[this.config.headerStoreKey][0].title
-    ) {
+    // The store holds only the user's selectable picks — alwaysShow
+    // columns are never persisted (they render regardless of the stored
+    // selection via the `headers` short-circuit). Strip alwaysShow
+    // entries persisted by older builds BEFORE judging the store: a
+    // pre-fix deselect-all left exactly [expand, Actions], whose truthy
+    // "Actions" title would otherwise defeat the reseed guard and leave
+    // an already-affected install stuck with no data columns. After
+    // cleaning, reseed when nothing titled remains — an empty store
+    // (deselect-all save) or a legacy {text, value} shape with no titled
+    // entries; [].some() is false, so one check covers both.
+    const storedHeaders = this.applicationStore[this.config.headerStoreKey];
+    const cleanedHeaders = storedHeaders.filter((h) => !h.alwaysShow);
+    if (!cleanedHeaders.some((h) => h.title)) {
       this.applicationStore[this.config.headerStoreKey] =
-        this.headersFull.filter((h) => h.defaultHeader === true);
+        this.headersFull.filter(
+          (h) => h.defaultHeader === true && !h.alwaysShow,
+        );
+    } else if (cleanedHeaders.length !== storedHeaders.length) {
+      // Write back only when the cleanup actually removed something —
+      // every store write re-serializes the whole persisted state.
+      this.applicationStore[this.config.headerStoreKey] = cleanedHeaders;
     }
     this.selectedHeadersTemp = this.headersFull.filter((h) =>
       this.applicationStore[this.config.headerStoreKey].some(
-        (h2) => h2.title === h.title,
+        (h2) => h2.key === h.key,
       ),
     );
   },

@@ -1,6 +1,7 @@
 // e2e/stager-edit.spec.js
 import { test, expect } from "./fixtures/test.js";
 import { setFakeAuth } from "./helpers/auth.js";
+import { navigateInApp } from "./helpers/navigation.js";
 import {
   blockSockets,
   mockEmpireBootstrap,
@@ -64,11 +65,9 @@ test.describe("stager edit", () => {
     await page.goto(`/#/stagers/${stagerA.id}`);
     await requestA;
 
-    // In-app navigation, not page.goto -- the same component instance's id
-    // watcher must fire getStager(B).
-    await page.evaluate((id) => {
-      window.location.hash = `#/stagers/${id}`;
-    }, stagerB.id);
+    // In-app navigation -- the same component instance's id watcher must
+    // fire getStager(B).
+    await navigateInApp(page, `#/stagers/${stagerB.id}`);
     await expect(page.getByLabel(/^name$/i)).toHaveValue(stagerB.name);
 
     // Now let stager A's stale, superseded response land, and wait for the

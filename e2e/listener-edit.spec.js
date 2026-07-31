@@ -1,6 +1,7 @@
 // e2e/listener-edit.spec.js
 import { test, expect } from "./fixtures/test.js";
 import { setFakeAuth } from "./helpers/auth.js";
+import { navigateInApp } from "./helpers/navigation.js";
 import {
   blockSockets,
   mockEmpireBootstrap,
@@ -62,11 +63,9 @@ test.describe("listener edit", () => {
     await page.goto(`/#/listeners/${listenerA.id}`);
     await requestA;
 
-    // In-app navigation, not page.goto -- the same component instance's id
-    // watcher must fire getListener(B).
-    await page.evaluate((id) => {
-      window.location.hash = `#/listeners/${id}`;
-    }, listenerB.id);
+    // In-app navigation -- the same component instance's id watcher must
+    // fire getListener(B).
+    await navigateInApp(page, `#/listeners/${listenerB.id}`);
     await expect(page.getByLabel(/^host$/i)).toHaveValue(
       listenerB.options.Host,
     );

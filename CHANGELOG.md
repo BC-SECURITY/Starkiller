@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+-   Plugin tasks table now matches the agent tasks table layout — the expand chevron renders in the leftmost column (it was previously appended on the right), the Status icon is centered, and shared columns follow the same order
+
+### Fixed
+
+-   Column selections made in the agent tasks table's column picker no longer reset on every page mount — its persisted header preferences were being reseeded to defaults whenever the table remounted (the plugin tasks table was unaffected; it is protected by the same fix as it adopts the expand column in this release)
+-   Always-visible columns are no longer persisted with the column-picker selection (agents, agent tasks, and plugin tasks tables), so deselecting every column now restores the default columns on the next visit — previously this left the agents and plugin tasks tables permanently reduced to their always-visible columns; installs already stuck in that state are repaired on the next visit
+
 ## [4.0.1] - 2026-07-28
 
 ### Changed

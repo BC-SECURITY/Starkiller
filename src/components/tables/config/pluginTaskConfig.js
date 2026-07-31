@@ -5,11 +5,19 @@ export default {
   inProgressStatus: "started",
   headerStoreKey: "pluginTaskHeaders",
   canStop: false,
-  // Originally sourced from PluginTasksTable.vue's data().headersFull,
-  // removed when it became a thin wrapper during the task-table
-  // consolidation; this config is now the single source of truth for
-  // the columns.
+  // Single source of truth for the columns. Column set and ordering
+  // mirror agentTaskConfig (same `order` values for shared columns;
+  // plugin_id takes agent_id's slot). Order 3 is agentTaskConfig's
+  // Task Name, which plugin tasks don't have.
   columns: [
+    {
+      title: "",
+      key: "data-table-expand",
+      sortable: false,
+      defaultHeader: true,
+      alwaysShow: true,
+      order: 0,
+    },
     {
       title: "Task ID",
       key: "id",
@@ -24,20 +32,21 @@ export default {
       key: "status",
       sortable: true,
       defaultHeader: true,
+      align: "center",
       order: 2,
-    },
-    {
-      title: "Plugin",
-      key: "plugin_id",
-      sortable: true,
-      defaultHeader: true,
-      order: 3,
     },
     {
       title: "Task Input",
       key: "input",
       sortable: false,
       defaultHeader: false,
+      order: 4,
+    },
+    {
+      title: "Plugin",
+      key: "plugin_id",
+      sortable: true,
+      defaultHeader: true,
       order: 5,
     },
     {

@@ -1,6 +1,7 @@
 // e2e/credentials-edit.spec.js
 import { test, expect } from "./fixtures/test.js";
 import { setFakeAuth } from "./helpers/auth.js";
+import { navigateInApp } from "./helpers/navigation.js";
 import {
   blockSockets,
   mockEmpireBootstrap,
@@ -89,11 +90,9 @@ test.describe("credentials edit", () => {
     await page.goto(`/#/credentials/${credA.id}`);
     await credARequest;
 
-    // In-app navigation, not page.goto — the same component instance's id
-    // watcher must fire getCredential(B).
-    await page.evaluate((id) => {
-      window.location.hash = `#/credentials/${id}`;
-    }, credB.id);
+    // In-app navigation — the same component instance's id watcher must
+    // fire getCredential(B).
+    await navigateInApp(page, `#/credentials/${credB.id}`);
     await expect(page.getByLabel(/^username$/i)).toHaveValue(credB.username);
 
     // Now let credential A's stale, superseded response land, and wait for

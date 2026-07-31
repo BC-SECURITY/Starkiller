@@ -17,14 +17,19 @@ describe("agentTaskConfig", () => {
     expect(keys).toContain("task_name");
     expect(keys).toContain("agent_id");
   });
-  it("maintains exact column order to guard against drift", () => {
-    const keys = agentTaskConfig.columns.map((c) => c.key);
+  it("maintains exact rendered column order to guard against drift", () => {
+    // TasksTable renders headersFull sorted by `order`, so assert the
+    // sorted sequence — the raw array order is not what users see (and
+    // in this config the two disagree: task_name renders before input).
+    const keys = [...agentTaskConfig.columns]
+      .sort((a, b) => a.order - b.order)
+      .map((c) => c.key);
     expect(keys).toEqual([
       "data-table-expand",
       "id",
       "status",
-      "input",
       "task_name",
+      "input",
       "agent_id",
       "username",
       "updated_at",
@@ -60,35 +65,54 @@ describe("pluginTaskConfig", () => {
     expect(keys).toContain("plugin_id");
     expect(keys).not.toContain("task_name");
   });
-  it("maintains exact column order to guard against drift", () => {
-    const keys = pluginTaskConfig.columns.map((c) => c.key);
+  it("maintains exact rendered column order to guard against drift", () => {
+    // TasksTable renders headersFull sorted by `order`, so assert the
+    // sorted sequence rather than the raw array order.
+    const keys = [...pluginTaskConfig.columns]
+      .sort((a, b) => a.order - b.order)
+      .map((c) => c.key);
     expect(keys).toEqual([
+      "data-table-expand",
       "id",
       "status",
-      "plugin_id",
       "input",
+      "plugin_id",
       "username",
       "updated_at",
       "tags",
       "actions",
     ]);
   });
-  it("enforces distinguishing properties on drift-prone columns", () => {
-    const pluginIdCol = pluginTaskConfig.columns.find(
-      (c) => c.key === "plugin_id",
-    );
-    expect(pluginIdCol).toBeDefined();
-
+  it("pins the expand column as always visible", () => {
+    // Load-bearing for the persisted-header model: alwaysShow columns
+    // bypass the header store entirely and are never persisted.
     const expandCol = pluginTaskConfig.columns.find(
       (c) => c.key === "data-table-expand",
     );
-    expect(expandCol).toBeUndefined();
-
-    const statusCol = pluginTaskConfig.columns.find((c) => c.key === "status");
-    expect(statusCol.align).toBeUndefined();
-
-    const tagsCol = pluginTaskConfig.columns.find((c) => c.key === "tags");
-    expect(tagsCol.width).toBe(400);
+    expect(expandCol.alwaysShow).toBe(true);
+  });
+  it("keeps display order aligned with agentTaskConfig for shared columns", () => {
+    // The two tables should render shared columns in the same relative
+    // positions (the entity column sits where agent_id sits). Shared keys
+    // are derived as the intersection of the two configs so a future
+    // shared column is covered automatically — as long as the
+    // intersection stays non-empty, which the guard below pins so the
+    // loop can't silently pass vacuously.
+    const orderOf = (config, key) =>
+      config.columns.find((c) => c.key === key).order;
+    const agentKeys = new Set(agentTaskConfig.columns.map((c) => c.key));
+    const sharedKeys = pluginTaskConfig.columns
+      .map((c) => c.key)
+      .filter((k) => agentKeys.has(k));
+    expect(sharedKeys.length).toBeGreaterThan(0);
+    for (const key of sharedKeys) {
+      expect(orderOf(pluginTaskConfig, key)).toBe(
+        orderOf(agentTaskConfig, key),
+      );
+    }
+    expect(orderOf(pluginTaskConfig, "plugin_id")).toBe(
+      orderOf(agentTaskConfig, "agent_id"),
+    );
   });
 });
 

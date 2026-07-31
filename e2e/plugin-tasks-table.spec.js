@@ -6,9 +6,14 @@
 //     branching the way agent rerun has for module/shell/sysinfo).
 //   - There is NO "Stop Task" action at all — plugin tasks have no
 //     stop_job equivalent.
-// Both must PASS against the current, unmodified PluginTasksTable.vue.
+// Plus alignment pins for behavior the plugin table shares with the agent
+// table: the expand chevron renders as the leftmost column (pluginTaskConfig
+// declares data-table-expand at order 0 rather than letting Vuetify
+// auto-append it on the right), and a HeaderMenu column selection survives
+// remounts via the persisted pluginTaskHeaders store.
 import { test, expect } from "./fixtures/test.js";
 import { setFakeAuth } from "./helpers/auth.js";
+import { navigateInApp } from "./helpers/navigation.js";
 import {
   blockSockets,
   mockEmpireBootstrap,
@@ -116,5 +121,182 @@ test.describe("plugin tasks table", () => {
     await openRowMenu(page);
     await expect(page.getByText("Rerun Task")).toBeVisible();
     await expect(page.getByText("Stop Task")).toHaveCount(0);
+  });
+
+  test("expand chevron renders in the leftmost column", async ({ page }) => {
+    await page.goto(`/#/plugins/${PLUGIN}?tab=tasks`);
+    // Non-vacuity: the row has rendered its actions cell before we assert
+    // on cell positions.
+    const row = page.locator(".v-data-table tbody tr").first();
+    await expect(row.locator("button:has(.fa-ellipsis-v)")).toBeVisible();
+    await expect(
+      row.locator("td").first().locator("button:has(.fa-chevron-down)"),
+    ).toHaveCount(1);
+  });
+
+  test("header selection survives a remount via the persisted store", async ({
+    page,
+  }) => {
+    // Regression: TasksTable.mounted() reseeds the persisted header store
+    // whenever its legacy-shape guard fires. With the expand column
+    // (title: "", defaultHeader: true) seeded at index 0, a guard of
+    // `!store[0].title` fired on every mount and wiped the user's
+    // HeaderMenu selection.
+    await page.goto(`/#/plugins/${PLUGIN}?tab=tasks`);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Tags" }),
+    ).toHaveCount(1);
+
+    // Deselect "Tags" in the column picker and save.
+    await page.locator("button:has(.mdi-format-columns)").click();
+    const menu = page.locator(".v-overlay__content");
+    await menu.getByLabel("Tags", { exact: true }).click();
+    await menu.getByRole("button", { name: "Save" }).click();
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Tags" }),
+    ).toHaveCount(0);
+
+    // Route away and back so PluginEdit — and TasksTable's mounted() —
+    // runs again against the stored selection (navigateInApp, because
+    // goto() wouldn't remount and reload() would reset the store).
+    // The return route lands directly on ?tab=tasks because the default
+    // Interact tab fires suggestion endpoints this spec doesn't mock.
+    // Non-vacuity: another selected column must render after the round
+    // trip, proving the table remounted with seeded headers.
+    await navigateInApp(page, "#/plugins");
+    // Positive proof PluginEdit unmounted: the plugins list renders no
+    // data table. The breadcrumb link-name check alone is satisfiable on
+    // the source page — PluginEdit's own breadcrumb renders plugin.name
+    // as a link even while disabled — so without this the test could go
+    // green against a table that never remounted.
+    await expect(page.locator(".v-data-table")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: plugin.name })).toBeVisible();
+    await navigateInApp(page, `#/plugins/${PLUGIN}?tab=tasks`);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Tags" }),
+    ).toHaveCount(0);
+  });
+
+  test("deselecting every column and saving reseeds defaults on the next mount", async ({
+    page,
+  }) => {
+    // Regression: HeaderMenu used to keep alwaysShow columns in its
+    // working selection (they were seeded into selectedHeadersTemp, and
+    // the old Select-All uncheck reassigned them as staticHeaders), so a
+    // deselect-all save persisted [expand, Actions]. "Actions" has a
+    // truthy title, which defeated the mount guard — the store never
+    // reseeded and the table was stuck with zero data columns. alwaysShow
+    // columns are no longer persisted at all: a deselect-all save writes
+    // an empty store, which mounted() reseeds to defaults on remount.
+    await page.goto(`/#/plugins/${PLUGIN}?tab=tasks`);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(1);
+
+    await page.locator("button:has(.mdi-format-columns)").click();
+    const menu = page.locator(".v-overlay__content");
+    // Two clicks: check "Select All" (every selectable column), then
+    // uncheck it (none), and save the empty selection.
+    await menu.getByLabel("Select All", { exact: true }).click();
+    await menu.getByLabel("Select All", { exact: true }).click();
+    await menu.getByRole("button", { name: "Save" }).click();
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(0);
+
+    await navigateInApp(page, "#/plugins");
+    await expect(page.locator(".v-data-table")).toHaveCount(0);
+    await navigateInApp(page, `#/plugins/${PLUGIN}?tab=tasks`);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Tags" }),
+    ).toHaveCount(1);
+  });
+
+  test("a legacy-shaped store with no titled entries reseeds to defaults", async ({
+    page,
+  }) => {
+    // Pre-4.0 stores persisted {text, value} header objects. None of
+    // those entries has a `title`, so mounted()'s reseed guard must fire
+    // — otherwise nothing would match the current header shape and the
+    // table would render only its alwaysShow columns.
+    await page.addInitScript(() => {
+      const state = JSON.parse(localStorage.getItem("application"));
+      state.pluginTaskHeaders = [
+        { text: "Status", value: "status" },
+        { text: "Tags", value: "tags" },
+      ];
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+    await page.goto(`/#/plugins/${PLUGIN}?tab=tasks`);
+    // Non-vacuity: the reseeded defaults must render while a
+    // defaultHeader:false column stays hidden.
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Task ID" }),
+    ).toHaveCount(0);
+  });
+
+  test("a store contaminated by a pre-fix deselect-all reseeds to defaults", async ({
+    page,
+  }) => {
+    // Migration: a deselect-all save under the shipped 4.0.1 build
+    // persisted exactly [Actions] — the plugin config's only alwaysShow
+    // column back then (it gains the expand column in this release).
+    // "Actions" has a truthy title, so without mounted() stripping
+    // alwaysShow entries before the reseed guard, an already-affected
+    // install would stay stuck showing only that column forever.
+    await page.addInitScript(() => {
+      const state = JSON.parse(localStorage.getItem("application"));
+      state.pluginTaskHeaders = [
+        {
+          title: "Actions",
+          key: "actions",
+          sortable: false,
+          defaultHeader: true,
+          alwaysShow: true,
+          order: 9,
+        },
+      ];
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+    await page.goto(`/#/plugins/${PLUGIN}?tab=tasks`);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Task ID" }),
+    ).toHaveCount(0);
+  });
+
+  test("cleaning a contaminated store preserves the user's real picks", async ({
+    page,
+  }) => {
+    // Migration: alwaysShow entries persisted by older builds are
+    // stripped, but a store that still holds titled real picks must NOT
+    // be reseeded — the user's selection survives the cleanup.
+    await page.addInitScript(() => {
+      const state = JSON.parse(localStorage.getItem("application"));
+      state.pluginTaskHeaders = [
+        { title: "Actions", key: "actions", alwaysShow: true, order: 9 },
+        { title: "Status", key: "status", defaultHeader: true, order: 2 },
+      ];
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+    await page.goto(`/#/plugins/${PLUGIN}?tab=tasks`);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Status" }),
+    ).toHaveCount(1);
+    // Tags is a default — if the store had been reseeded it would render.
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Tags" }),
+    ).toHaveCount(0);
   });
 });

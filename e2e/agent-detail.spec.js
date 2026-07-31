@@ -1,6 +1,7 @@
 // e2e/agent-detail.spec.js
 import { test, expect } from "./fixtures/test.js";
 import { setFakeAuth } from "./helpers/auth.js";
+import { navigateInApp } from "./helpers/navigation.js";
 import { blockSockets, mockEmpireBootstrap } from "./helpers/network.js";
 import {
   mockAgentsList,
@@ -93,12 +94,9 @@ test.describe("agent detail", () => {
     await page.goto(`/#/agents/${agentA.session_id}`);
     await agentARequest;
 
-    // In-app navigation to agent B (not page.goto, so the same component
-    // instance's id watcher fires getAgent(B) — page.goto risks a full
-    // reload that would sidestep the race entirely).
-    await page.evaluate((sessionId) => {
-      window.location.hash = `#/agents/${sessionId}`;
-    }, agentB.session_id);
+    // In-app navigation to agent B, so the same component instance's id
+    // watcher fires getAgent(B) rather than sidestepping the race.
+    await navigateInApp(page, `#/agents/${agentB.session_id}`);
     await expect(page.getByText(agentB.name).first()).toBeVisible();
 
     // Now let agent A's stale, superseded response land, and wait for the
