@@ -11,8 +11,13 @@
         />
       </div>
       <div class="terminal-input">
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <span class="prompt" v-html="ansiToHTML(currentPrompt)" />
+        <!-- eslint-disable vue/no-v-html -->
+        <span
+          ref="promptSpan"
+          class="prompt"
+          v-html="ansiToHTML(currentPrompt)"
+        />
+        <!-- eslint-enable vue/no-v-html -->
         <input
           ref="inputField"
           v-model="currentInput"
@@ -22,22 +27,12 @@
       </div>
     </div>
 
-    <div
-      v-show="suggestions.length"
-      ref="suggestionList"
-      class="autocomplete-suggestions"
-    >
-      <div
-        v-for="(suggestion, index) in suggestions"
-        :key="index"
-        :class="{ highlighted: index === currentSuggestionIndex }"
-        class="suggestion"
-        @click="applySuggestion(suggestion)"
-        @keyup.enter="applySuggestion(suggestion)"
-      >
-        {{ suggestion }}
-      </div>
-    </div>
+    <TerminalSuggestions
+      :suggestions="suggestions"
+      :highlighted-index="currentSuggestionIndex"
+      :anchor="() => ({ input: $refs.inputField, prompt: $refs.promptSpan })"
+      @select="applySuggestion"
+    />
   </div>
 </template>
 
@@ -53,6 +48,7 @@ import { useBypassStore } from "@/stores/bypass-module";
 import { useTerminalOutput } from "@/composables/useTerminalOutput";
 import { usePollForResult } from "@/composables/usePollForResult";
 import { useCommandHistory } from "@/composables/useCommandHistory";
+import TerminalSuggestions from "@/components/agents/TerminalSuggestions.vue";
 
 function fuzzyMatch(query, string) {
   const q = Array.from(query);
@@ -63,6 +59,7 @@ function fuzzyMatch(query, string) {
 
 export default {
   name: "AgentTerminal",
+  components: { TerminalSuggestions },
   props: {
     agent: {
       type: Object,
@@ -81,7 +78,13 @@ export default {
       addLine,
       addInfo,
     });
-    const { pushCommand, navigatePrev, navigateNext } = useCommandHistory();
+    const {
+      commandHistory,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+      loadCommandHistory,
+    } = useCommandHistory(() => instance.proxy.historyStorageKey());
     // AgentEdit.vue can mount this component before its own agent fetch
     // resolves (it persists the active interact-tab and restores it as the
     // initial render, and Vue mounts children before the parent's mounted()
@@ -96,7 +99,15 @@ export default {
     watch(
       () => props.agent?.session_id,
       (sessionId, previousSessionId) => {
-        if (sessionId && !previousSessionId) {
+        if (!sessionId || sessionId === previousSessionId) return;
+        // Command history reloads on ANY change of agent, not just the
+        // undefined -> real one. AgentEdit swaps the agent prop when the route
+        // param changes and nothing here is keyed, so on a real -> real switch
+        // the instance is reused: without this, the previous agent's commands
+        // stay in memory and the next push persists them under the new
+        // agent's key.
+        loadCommandHistory();
+        if (!previousSessionId) {
           loadHistory();
         }
       },
@@ -109,9 +120,11 @@ export default {
       addInfo,
       loadHistory,
       pollForResult,
+      commandHistory,
       pushCommand,
       navigatePrev,
       navigateNext,
+      loadCommandHistory,
     };
   },
   data() {
@@ -283,10 +296,6 @@ export default {
   watch: {
     currentInput() {
       this.generateSuggestions();
-      this.$nextTick(() => this.positionSuggestions());
-    },
-    suggestions() {
-      this.$nextTick(() => this.positionSuggestions());
     },
   },
   async mounted() {
@@ -300,28 +309,25 @@ export default {
     await this.bypassStore.getBypasses();
 
     this.loadHistory();
+    this.loadCommandHistory();
   },
   methods: {
     storageName() {
       const suffix = this.tabId != null ? `-${this.tabId}` : "";
       return `terminal-history-${this.agent.session_id}${suffix}`;
     },
-    positionSuggestions() {
-      const { inputField } = this.$refs;
-      const { suggestionList } = this.$refs;
-      const promptSpan = this.$el.querySelector(".prompt"); // Select the prompt span
-
-      if (inputField && suggestionList && promptSpan) {
-        const inputRect = inputField.getBoundingClientRect();
-        const promptRect = promptSpan.getBoundingClientRect();
-
-        const promptWidth = promptSpan.offsetWidth;
-
-        suggestionList.style.top = `${inputRect.bottom}px`;
-        suggestionList.style.left = `${promptRect.left + promptWidth}px`;
-      }
+    // Null until session_id lands -- see the mount-ordering note above. This
+    // component always renders under TabbedTerminalContainer, which passes a
+    // tabId (first tab is 1), so an unguarded key would be
+    // "terminal-history-undefined-<tabId>:history": shared by every agent at
+    // that tab index, in both directions -- the first read can surface another
+    // agent's commands and anything typed in that window is written where the
+    // next agent reads it. Note this guards the command history only; the
+    // output buffer above still keys off the unguarded storageName().
+    historyStorageKey() {
+      if (!this.agent?.session_id) return null;
+      return `${this.storageName()}:history`;
     },
-
     applySuggestion(suggestion) {
       this.currentInput = suggestion;
       this.suggestions = [];
@@ -330,7 +336,7 @@ export default {
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
-        const prev = this.navigatePrev();
+        const prev = this.navigatePrev(this.currentInput);
         if (prev !== undefined) {
           this.currentInput = prev;
         }
@@ -340,38 +346,27 @@ export default {
           this.currentInput = next;
         }
       } else if (event.code === "Tab") {
+        // Shift+Tab is reverse focus navigation, never completion. event.code
+        // is the physical key, so it lands in this branch too.
+        if (event.shiftKey) return;
         if (this.currentInput === "") {
           this.generateSuggestions();
         }
-        event.preventDefault();
+        // preventDefault only once there is something to complete.
+        // generateSuggestions() clears the list on an empty query, so Tab there
+        // produces no completions -- swallowing it would trap a keyboard-only
+        // operator in an input mounted() autofocuses, exactly as the comment in
+        // AgentShellSession describes. Listing on empty input and swallowing a
+        // no-op Tab are separable, so only the former is kept.
         if (this.suggestions.length > 1) {
+          event.preventDefault();
           this.currentSuggestionIndex =
             (this.currentSuggestionIndex + 1) % this.suggestions.length;
         } else if (this.suggestions.length === 1) {
+          event.preventDefault();
           this.currentInput = this.suggestions[0];
           this.suggestions = [];
         }
-
-        // This scrolls the suggestion list if the highlighted element is not visible
-        this.$nextTick(() => {
-          const listElement = this.$refs.suggestionList;
-          const highlightedElement =
-            listElement.children[this.currentSuggestionIndex];
-
-          if (highlightedElement) {
-            if (
-              highlightedElement.offsetTop + highlightedElement.clientHeight >
-              listElement.clientHeight
-            ) {
-              listElement.scrollTop =
-                highlightedElement.offsetTop +
-                highlightedElement.clientHeight -
-                listElement.clientHeight;
-            } else if (highlightedElement.offsetTop < listElement.scrollTop) {
-              listElement.scrollTop = highlightedElement.offsetTop;
-            }
-          }
-        });
       } else if (event.code === "Space") {
         if (this.currentSuggestionIndex !== -1) {
           event.preventDefault();
@@ -1011,30 +1006,6 @@ export default {
   margin-right: 5px;
 }
 
-.autocomplete-suggestions {
-  position: fixed;
-  background-color: #3c3f43;
-  border: 1px solid #57d9a3;
-  border-radius: 5px;
-  z-index: 10;
-  max-height: 150px;
-  overflow-y: auto;
-  box-sizing: border-box;
-  margin-top: 5px;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 14px;
-  color: white;
-}
-
-.suggestion {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-.suggestion:hover {
-  background-color: #3c3f43;
-}
-
 .empire-text {
   color: white;
 }
@@ -1046,10 +1017,5 @@ export default {
 .indent-5-spaces {
   padding-left: 5ch;
   white-space: pre-wrap;
-}
-
-.highlighted {
-  background-color: #007bff;
-  color: white;
 }
 </style>

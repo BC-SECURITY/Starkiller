@@ -13,7 +13,11 @@
       </div>
       <div class="terminal-input">
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <span class="prompt" v-html="ansiToHTML(currentPrompt)" />
+        <span
+          ref="promptSpan"
+          class="prompt"
+          v-html="ansiToHTML(currentPrompt)"
+        />
         <input
           ref="inputField"
           v-model="currentInput"
@@ -22,6 +26,13 @@
         />
       </div>
     </div>
+
+    <TerminalSuggestions
+      :suggestions="suggestions"
+      :highlighted-index="currentSuggestionIndex"
+      :anchor="() => ({ input: $refs.inputField, prompt: $refs.promptSpan })"
+      @select="applySuggestion"
+    />
   </div>
 </template>
 
@@ -31,10 +42,15 @@ import * as agentTaskApi from "@/api/agent-task-api";
 import { ansiToHtml, colorizeText } from "@/utils/ansi";
 import { useTerminalOutput } from "@/composables/useTerminalOutput";
 import { usePollForResult } from "@/composables/usePollForResult";
-import { useCommandHistory } from "@/composables/useCommandHistory";
+import {
+  useCommandHistory,
+  historyMatches,
+} from "@/composables/useCommandHistory";
+import TerminalSuggestions from "@/components/agents/TerminalSuggestions.vue";
 
 export default {
   name: "AgentShellSession",
+  components: { TerminalSuggestions },
   props: {
     agent: {
       type: Object,
@@ -53,7 +69,13 @@ export default {
       addLine,
       addInfo,
     });
-    const { pushCommand, navigatePrev, navigateNext } = useCommandHistory();
+    const {
+      commandHistory,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+      loadCommandHistory,
+    } = useCommandHistory(() => instance.proxy.historyStorageKey());
     // AgentEdit.vue can mount this component before its own agent fetch
     // resolves (it persists the active interact-tab and restores it as the
     // initial render, and Vue mounts children before the parent's mounted()
@@ -65,8 +87,22 @@ export default {
     watch(
       () => props.agent?.session_id,
       (sessionId, previousSessionId) => {
-        if (sessionId && !previousSessionId) {
+        if (!sessionId || sessionId === previousSessionId) return;
+        // Command history reloads on ANY change of agent, not just the
+        // undefined -> real one. AgentEdit renders this component without a
+        // :key and swaps the agent prop when the route param changes, so on a
+        // real -> real switch the instance is reused: without this, the
+        // previous agent's commands stay in memory and the next push persists
+        // them under the new agent's key.
+        loadCommandHistory();
+        if (!previousSessionId) {
           loadHistory();
+          // updateCurrentDirectory() probes the agent by session_id; if it ran
+          // in mounted() while session_id was still undefined (Shell mounted as
+          // the persisted active tab before AgentEdit's getAgent() resolved),
+          // the probe hit /agents/undefined/... and the prompt fell back to an
+          // undefined directory. Re-run it here once the real session_id lands.
+          instance.proxy.updateCurrentDirectory();
         }
       },
     );
@@ -78,15 +114,19 @@ export default {
       addInfo,
       loadHistory,
       pollForResult,
+      commandHistory,
       pushCommand,
       navigatePrev,
       navigateNext,
+      loadCommandHistory,
     };
   },
   data() {
     return {
       currentInput: "",
       currentDir: "loading...",
+      suggestions: [],
+      currentSuggestionIndex: -1,
     };
   },
   computed: {
@@ -97,20 +137,46 @@ export default {
       return prefix + body + suffix;
     },
   },
+  watch: {
+    currentInput() {
+      // Any manual edit dismisses an open completion list. (Applying a
+      // suggestion sets currentInput too, but the list is already cleared by
+      // then, so this is a harmless no-op in that path.)
+      if (this.suggestions.length) {
+        this.suggestions = [];
+        this.currentSuggestionIndex = -1;
+      }
+    },
+  },
   async mounted() {
     this.$refs.inputField.focus();
     this.loadHistory();
-    this.updateCurrentDirectory();
+    this.loadCommandHistory();
+    // Probe only with a real session_id; the setup() watch retries otherwise.
+    if (this.agent?.session_id) {
+      this.updateCurrentDirectory();
+    }
   },
   methods: {
     storageName() {
       const suffix = this.tabId != null ? `-${this.tabId}` : "";
       return `shell-session-${this.agent.session_id}${suffix}`;
     },
+    // Null until session_id lands. mounted() runs before AgentEdit's getAgent()
+    // resolves on the persisted-active-tab path, and AgentEdit passes no tabId,
+    // so an unguarded key would be the literal "shell-session-undefined:history"
+    // -- shared by every agent, in both directions: the initial read can pull
+    // another agent's commands into this session, and anything typed in that
+    // window is written where the next agent will read it. The setup() watch
+    // re-loads once the real id arrives.
+    historyStorageKey() {
+      if (!this.agent?.session_id) return null;
+      return `${this.storageName()}:history`;
+    },
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
-        const prev = this.navigatePrev();
+        const prev = this.navigatePrev(this.currentInput);
         if (prev !== undefined) {
           this.currentInput = prev;
         }
@@ -119,9 +185,41 @@ export default {
         if (next !== undefined) {
           this.currentInput = next;
         }
+      } else if (event.code === "Tab") {
+        // Shift+Tab is reverse focus navigation, never completion. event.code
+        // is the physical key, so it lands in this branch too.
+        if (event.shiftKey) return;
+        const matches = historyMatches(this.commandHistory, this.currentInput);
+        // preventDefault only once there is something to complete: matching is
+        // synchronous, so it still suppresses the default during keydown.
+        // Swallowing Tab with no matches (or empty input) leaves a
+        // keyboard-only operator no way out of an input mounted() focuses.
+        if (matches.length === 1) {
+          event.preventDefault();
+          this.currentInput = matches[0];
+          this.suggestions = [];
+          this.currentSuggestionIndex = -1;
+        } else if (matches.length > 1) {
+          event.preventDefault();
+          this.suggestions = matches;
+          this.currentSuggestionIndex =
+            (this.currentSuggestionIndex + 1) % matches.length;
+        }
       }
     },
+    applySuggestion(suggestion) {
+      this.currentInput = suggestion;
+      this.suggestions = [];
+      this.currentSuggestionIndex = -1;
+    },
     async processCommand() {
+      if (this.suggestions.length > 0 && this.currentSuggestionIndex !== -1) {
+        this.currentInput = this.suggestions[this.currentSuggestionIndex];
+        this.suggestions = [];
+        this.currentSuggestionIndex = -1;
+        return;
+      }
+
       if (!this.currentInput.trim()) {
         this.addLine("");
         this.addLine(this.currentPrompt);

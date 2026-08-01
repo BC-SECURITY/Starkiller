@@ -276,4 +276,47 @@ test.describe("agent shell session", () => {
     const shell = page.locator('[data-testid="agent-shell"]');
     await expect(shell.getByText("PRELOADED_MARKER_LINE")).toBeVisible();
   });
+
+  test("re-probes the working directory once session_id arrives on a reload with Shell active", async ({
+    page,
+  }) => {
+    // Regression test for the "(Empire: undefined )>" prompt. Same mount-timing
+    // trap as the test above: when "shell" is the persisted interact tab,
+    // AgentShellSession mounts before AgentEdit's getAgent() resolves, so
+    // agent.session_id is undefined in mounted(). updateCurrentDirectory() ran
+    // there, probed /agents/undefined/..., failed, and fell back to the
+    // (undefined) session_id -- the prompt showed "undefined" and never
+    // recovered because the probe was never retried. The fix guards the
+    // mounted() probe and re-runs it from the session_id watch. Here we assert
+    // a directory probe is issued against the REAL session_id after reload.
+    const dirCommand = "(Resolve-Path .\\).Path"; // powershell agent
+    await page.goto(`/#/agents/${agent.session_id}`);
+    await page.locator(".v-tab", { hasText: /shell/i }).click();
+    await expect(
+      page.locator('[data-testid="agent-shell"] input').first(),
+    ).toBeVisible();
+
+    // Start recording only now, then reload with Shell still the active tab.
+    const tasks = recordAgentTasks(page);
+    await page.reload();
+    await expect(
+      page.locator('[data-testid="agent-shell"] input').first(),
+    ).toBeVisible();
+
+    // The directory probe must target the real session_id, not "undefined".
+    await expect
+      .poll(
+        () =>
+          tasks.calls.filter(
+            (c) =>
+              c.url.includes(`/agents/${agent.session_id}/tasks/shell`) &&
+              c.body.command === dirCommand,
+          ).length,
+      )
+      .toBeGreaterThan(0);
+    // And no probe should have gone out against an undefined session.
+    expect(
+      tasks.calls.filter((c) => c.url.includes("/agents/undefined/")).length,
+    ).toBe(0);
+  });
 });
