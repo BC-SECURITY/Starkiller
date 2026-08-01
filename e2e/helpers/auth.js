@@ -6,10 +6,19 @@
 // array — currently chatUnreadCount). If the store gains a new persisted
 // field that the UI reads on boot, add it here too.
 //
+// The default empireVersion is deliberately a placeholder that satisfies no
+// real version range: App.vue gates <socket-notifications> behind
+// versionSatisfies(">=4.0"), so "0.0.0-test" keeps the socket layer (and
+// everything it renders, including chat) out of specs that don't want it.
+// Pass a real version to opt in — see chat.spec.js.
+//
 // loginViaForm: walks through the real Login.vue form. Used only by
 // login.spec.js; every other spec uses setFakeAuth to skip the form.
 
-export async function setFakeAuth(page, { admin = false } = {}) {
+export async function setFakeAuth(
+  page,
+  { admin = false, empireVersion = "0.0.0-test" } = {},
+) {
   await page.addInitScript(
     (opts) => {
       const state = {
@@ -18,7 +27,7 @@ export async function setFakeAuth(page, { admin = false } = {}) {
         socketUrl: "ws://localhost:1337",
         user: { id: 1, username: "test", is_admin: opts.admin },
         loginError: "",
-        empireVersion: "0.0.0-test",
+        empireVersion: opts.empireVersion,
         chatWidget: true,
         hideStaleAgents: false,
         hideArchivedAgents: true,
@@ -32,7 +41,7 @@ export async function setFakeAuth(page, { admin = false } = {}) {
       };
       localStorage.setItem("application", JSON.stringify(state));
     },
-    { admin },
+    { admin, empireVersion },
   );
 }
 

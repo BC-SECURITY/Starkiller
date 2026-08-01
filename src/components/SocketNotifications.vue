@@ -1,6 +1,6 @@
 <template>
   <div>
-    <chat v-if="socket && chatWidget" ref="chat" :socket="socket" />
+    <chat v-if="socket && chatWidget" :socket="socket" />
     <!-- Persistent connection-state banner. :timeout="-1" means it never
          auto-dismisses, since it reflects ongoing connection state rather
          than a one-off event -- deliberately a separate v-snackbar from
@@ -33,12 +33,26 @@
 
 <script>
 import io from "socket.io-client";
+import { defineAsyncComponent } from "vue";
 import { mapState } from "pinia";
-import Chat from "@/components/Chat.vue";
 import { useListenerStore } from "@/stores/listener-module";
 import { usePluginStore } from "@/stores/plugin-module";
 import { useApplicationStore } from "@/stores/application-module";
 import { useAgentStore } from "@/stores/agent-module";
+
+// Async so markdown-it and the chat components stay off the critical path —
+// a static import puts ~50 kB gzipped into the entry chunk (measured:
+// 206.5 kB gz vs 155.6 kB gz), which blocks first paint for every user on
+// every load. chatWidget defaults to true, so in practice the chunk is
+// fetched moments after login anyway; the win is that it fetches in parallel
+// rather than delaying the rest of the app. Total shipped bytes go up by
+// ~3.5 kB, which is the trade.
+//
+// Because this resolves late — and because this whole component is itself
+// gated on empireVersion and on the socket connecting — nothing outside may
+// reach into the chat instance via $refs to drive it. Open/closed state lives
+// in the application store (`chatOpen`) so a click can precede the component.
+const Chat = defineAsyncComponent(() => import("@/components/Chat.vue"));
 
 export default {
   name: "SocketNotifications",

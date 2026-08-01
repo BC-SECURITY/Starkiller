@@ -62,7 +62,7 @@
         <!-- My message -->
         <div v-else-if="m.author === 'me'" class="chat-msg chat-msg--me">
           <div class="chat-msg__bubble chat-msg__bubble--me">
-            {{ m.text }}
+            <chat-message-content :text="m.text" />
           </div>
         </div>
 
@@ -73,10 +73,10 @@
             :image="getAvatar(m.author)"
             class="chat-msg__avatar"
           />
-          <div>
+          <div class="chat-msg__body">
             <span class="chat-msg__author">{{ m.author }}</span>
             <div class="chat-msg__bubble chat-msg__bubble--other">
-              {{ m.text }}
+              <chat-message-content :text="m.text" />
             </div>
           </div>
         </div>
@@ -85,34 +85,11 @@
 
     <!-- Input -->
     <template #append>
-      <div class="chat-input">
-        <v-text-field
-          v-model="inputText"
-          placeholder="Message..."
-          variant="plain"
-          density="compact"
-          hide-details
-          class="chat-input__field"
-          @keyup.enter="send"
-        >
-          <template #append-inner>
-            <v-btn
-              icon
-              variant="text"
-              size="x-small"
-              :disabled="!inputText.trim()"
-              @click="send"
-            >
-              <v-icon
-                size="18"
-                :color="inputText.trim() ? '#F37C22' : undefined"
-              >
-                mdi-send
-              </v-icon>
-            </v-btn>
-          </template>
-        </v-text-field>
-      </div>
+      <chat-composer
+        v-model="inputText"
+        @send="send"
+        @resize="scrollToBottom"
+      />
     </template>
   </v-navigation-drawer>
 </template>
@@ -122,9 +99,15 @@ import { nextTick } from "vue";
 import { useUserStore } from "@/stores/user-module";
 import { useApplicationStore } from "@/stores/application-module";
 import { useSocketHandlers } from "@/composables/useSocketHandlers";
+import ChatMessageContent from "@/components/chat/ChatMessageContent.vue";
+import ChatComposer from "@/components/chat/ChatComposer.vue";
 
 export default {
   name: "Chat",
+  components: {
+    ChatMessageContent,
+    ChatComposer,
+  },
   props: {
     socket: {
       type: Object,
@@ -149,13 +132,23 @@ export default {
       nextMessageId: 0,
       newMessagesCount: 0,
       historyLoaded: false,
-      isChatOpen: false,
       inputText: "",
       showParticipants: false,
       historyTimer: null,
     };
   },
   computed: {
+    // Backed by the store rather than local state: the app bar's chat button
+    // can be clicked before this component exists (it is async, and gated on
+    // the socket), so the flag has to outlive and predate the component.
+    isChatOpen: {
+      get() {
+        return this.applicationStore.chatOpen;
+      },
+      set(val) {
+        this.applicationStore.chatOpen = val;
+      },
+    },
     userStore() {
       return useUserStore();
     },
@@ -181,7 +174,13 @@ export default {
     },
   },
   watch: {
-    messages() {
+    // Must be "messages.length", not "messages". addMessage() push()es onto
+    // the array without replacing it, and an Options API watcher on the array
+    // itself only tracks the property, not its contents — so it never fired
+    // and the list never followed a new message. Watching length tracks the
+    // mutation directly, and is cheaper than deep: true (which would walk
+    // every message object on every insert).
+    "messages.length"() {
       this.scrollToBottom();
     },
     newMessagesCount(val) {
@@ -235,9 +234,6 @@ export default {
     }
   },
   methods: {
-    open() {
-      this.isChatOpen = true;
-    },
     addMessage(message) {
       this.messages.push({ id: this.nextMessageId++, ...message });
     },
@@ -373,6 +369,19 @@ export default {
     gap: 8px;
   }
 
+  // A bubble holding a code block or a table takes the full drawer width:
+  // code wraps rather than scrolls, and a table needs the extra room before
+  // its own scroll container kicks in — either way width determines
+  // legibility. Driven off the class names the markdown renderer already
+  // emits, so nothing has to parse the message a second time to derive it.
+  &:has(.chat-code, .chat-table) {
+    max-width: 100%;
+  }
+
+  &__body {
+    min-width: 0;
+  }
+
   &__avatar {
     flex-shrink: 0;
     margin-top: 14px;
@@ -389,6 +398,13 @@ export default {
   }
 
   &__bubble {
+    // Required, not cosmetic. In the "me" branch the bubble is a direct flex
+    // item of .chat-msg (the "other" branch nests it inside .chat-msg__body,
+    // which sets this above), so it would otherwise keep min-width: auto —
+    // and a table's nowrap cells then drive its min-content size straight
+    // past the drawer, defeating .chat-table's own overflow-x and putting a
+    // horizontal scrollbar on the whole message list.
+    min-width: 0;
     padding: 8px 12px;
     font-size: 13px;
     line-height: 1.4;
@@ -407,16 +423,6 @@ export default {
       border-radius: 12px 12px 12px 2px;
       color: rgba(255, 255, 255, 0.75);
     }
-  }
-}
-
-.chat-input {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 6px 12px;
-  background: rgba(0, 0, 0, 0.15);
-
-  &__field {
-    font-size: 13px;
   }
 }
 </style>

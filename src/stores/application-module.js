@@ -32,7 +32,7 @@ export const useApplicationStore = defineStore("application", {
     // forcedLogoutReason is intentionally never persisted -- it's a
     // same-session, fire-once signal for Login.vue to show a snack, not
     // something that should ever survive a reload into a future session.
-    omit: ["chatUnreadCount", "forcedLogoutReason"],
+    omit: ["chatUnreadCount", "forcedLogoutReason", "chatOpen"],
     afterHydrate: (ctx) => {
       try {
         setInstance(ctx.store.url, ctx.store.token);
@@ -75,6 +75,15 @@ export const useApplicationStore = defineStore("application", {
     // unrelated future session or attempt. See the persist.omit note above.
     forcedLogoutReason: "",
     chatUnreadCount: 0,
+    // Whether the chat drawer is open. Lives here rather than inside Chat.vue
+    // because the two components that drive it mount independently: the app
+    // bar's chat button renders as soon as `chatWidget` is true, while
+    // <socket-notifications> (and the async <chat> beneath it) waits on
+    // `empireVersion` satisfying >=4.0 and on the socket connecting. Holding
+    // the flag in a component meant an early click had nothing to set and was
+    // silently swallowed. Not persisted — reopening the app should not
+    // reopen the drawer.
+    chatOpen: false,
     notifications: [],
     dashboardSelectedAgentIds: [],
     // Stats-page view preferences. Shared across all agents (a user who picks
@@ -163,6 +172,7 @@ export const useApplicationStore = defineStore("application", {
       this.user = {};
       this.empireVersion = "";
       this.notifications = [];
+      this.chatOpen = false;
       this.forcedLogoutReason = reason;
     },
     clear() {
@@ -172,6 +182,7 @@ export const useApplicationStore = defineStore("application", {
       this.loginError = "";
       this.empireVersion = "";
       this.chatWidget = true;
+      this.chatOpen = false;
       this.hideStaleAgents = false;
       this.hideArchivedAgents = true;
       this.filterOnlyMyStagers = true;

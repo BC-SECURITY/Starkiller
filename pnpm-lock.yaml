@@ -35,6 +35,9 @@ importers:
       lodash.debounce:
         specifier: ^4.0.8
         version: 4.0.8
+      markdown-it:
+        specifier: ^14.1.1
+        version: 14.1.1
       pinia:
         specifier: ^3
         version: 3.0.4(vue@3.5.29)

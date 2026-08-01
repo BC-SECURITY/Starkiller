@@ -1,5 +1,11 @@
 // Allowlists URL schemes before binding untrusted plugin/marketplace
-// metadata to href. Uses the URL constructor rather than a regex: per the
+// metadata to href.
+//
+// Also installed as markdown-it's `validateLink` in utils/chat-markdown.js,
+// where it REPLACES the library's own scheme denylist — so it is the entire
+// link-scheme policy for operator-to-operator chat messages, not just a
+// marketplace concern. Loosening it (allowing relative URLs, defaulting
+// allowMailto to true) widens that too. Uses the URL constructor rather than a regex: per the
 // WHATWG URL spec it lowercases the scheme and strips leading/embedded
 // control characters before parsing, so "JavaScript:", "  javascript:", and
 // "java\nscript:" are all correctly rejected without extra code. A

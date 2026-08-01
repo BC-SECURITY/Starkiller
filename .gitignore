@@ -33,5 +33,8 @@ pnpm-debug.log*
 /playwright/.cache/
 .claude/
 
-# Superpowers brainstorm visual companion
+# Superpowers working files — brainstorm visual companion, subagent
+# execution ledgers, and the specs/plans generated alongside a change.
+# Kept local; they describe how a change was produced, not how the app works.
 .superpowers/
+docs/superpowers/
