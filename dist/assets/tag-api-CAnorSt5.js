@@ -1,1 +1,0 @@
-import{cp as c,er as n,cq as d}from"./index-ChoZvocb.js";function g({page:a,limit:e,sortBy:t="updated_at",sortOrder:s="desc",query:i,sources:o}){return c.get("/tags",{params:{page:a,limit:e,query:i,sources:o,order_by:t,order_direction:s},paramsSerializer:r=>n.stringify(r,{arrayFormat:"repeat",skipNulls:!0})}).then(r=>r.data).catch(r=>Promise.reject(d(r)))}export{g};

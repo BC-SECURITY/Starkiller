@@ -1,0 +1,1 @@
+import{t as e}from"./tag-api-DBJFg3tz.js";async function t(t){let n=await e({page:1,limit:-1,sources:t}),r=[];return n.records.forEach(e=>{r.find(t=>t.name===e.name&&t.value===e.value)||r.push(e)}),r}export{t};

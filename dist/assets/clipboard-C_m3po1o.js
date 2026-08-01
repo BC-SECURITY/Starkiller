@@ -1,0 +1,1 @@
+async function e(e,t){try{await navigator.clipboard.writeText(e),t.success(`Copied to clipboard`)}catch(e){console.error(`[Starkiller] Clipboard write failed:`,e),t.warn(`Failed to copy to clipboard. You must be on HTTPS or localhost.`)}}export{e as t};

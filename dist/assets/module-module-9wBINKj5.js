@@ -1,0 +1,1 @@
+import{Oi as e}from"./index-CUSKKFIU.js";import{n as t}from"./module-api-CfzrzSgk.js";var n=e(`module`,{state:()=>({modules:[]}),actions:{async getModules(){let e=await t();this.modules=e}},getters:{}});export{n as t};

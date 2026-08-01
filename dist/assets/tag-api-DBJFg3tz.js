@@ -1,0 +1,1 @@
+import{Di as e,Ei as t}from"./index-CUSKKFIU.js";function n({page:n,limit:r,sortBy:i=`updated_at`,sortOrder:a=`desc`,query:o,sources:s}){return e(`/tags`,{params:{page:n,limit:r,query:o,sources:s,order_by:i,order_direction:a}}).catch(e=>Promise.reject(t(e)))}export{n as t};
