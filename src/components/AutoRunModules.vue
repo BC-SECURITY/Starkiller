@@ -112,7 +112,7 @@
                   :suggested-values="field.suggested_values"
                   :strict="strictForField(field)"
                   :name="field.name"
-                  :type="fieldType(field)"
+                  :widget="widgetFor(field)"
                 />
                 <v-list-subheader>{{ field.description }}</v-list-subheader>
               </v-col>
@@ -140,7 +140,9 @@
 import draggable from "vuedraggable";
 import { useModuleStore } from "@/stores/module-module";
 import DynamicFormInput from "@/components/DynamicFormInput.vue";
-import { getAutorunTasks, saveAutorunTasks } from "@/api/listener-api"; // Import the correct API methods
+import { resolveWidget } from "@/composables/forms/resolveWidget";
+import { mapValueType } from "@/composables/forms/useFieldDescriptors";
+import { getAutorunTasks, saveAutorunTasks } from "@/api/listener-api";
 
 export default {
   name: "AutoRunModules",
@@ -154,12 +156,12 @@ export default {
   },
   data() {
     return {
-      selectedModule: null, // Selected module to be added
-      moduleList: [], // Default empty module list
-      availableModules: [], // List of available modules to add
-      showDialog: false, // Show/Hide options dialog
-      selectedModuleForEdit: null, // Module selected for editing options
-      searchText: "", // Track search input for autocomplete
+      selectedModule: null,
+      moduleList: [],
+      availableModules: [],
+      showDialog: false,
+      selectedModuleForEdit: null,
+      searchText: "",
     };
   },
   computed: {
@@ -318,18 +320,18 @@ export default {
       this.moduleList.splice(index, 1);
     },
     fieldType(field) {
-      return (
-        {
-          INTEGER: "number",
-          FLOAT: "float",
-          BOOLEAN: "boolean",
-          STRING: "string",
-          FILE: "file",
-        }[field.value_type] || "string"
-      );
+      return mapValueType(field.value_type);
     },
     strictForField(field) {
       return field.strict || false;
+    },
+    widgetFor(field) {
+      return resolveWidget({
+        name: field.name,
+        type: this.fieldType(field),
+        strict: this.strictForField(field),
+        suggestedValues: field.suggested_values,
+      });
     },
   },
 };

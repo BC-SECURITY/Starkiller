@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Initialize mandatory git config
@@ -27,7 +27,7 @@ jobs:
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: "yarn"
       - name: Set application version as variable
         run: |

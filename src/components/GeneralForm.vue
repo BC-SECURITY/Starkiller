@@ -1,315 +1,206 @@
 <template>
-  <v-form ref="form" v-model="valid" :readonly="readonly" @submit.prevent>
-    <v-row
+  <v-form ref="formRef" v-model="valid" :readonly="readonly" @submit.prevent>
+    <v-alert
+      v-if="formLevelMessages.length > 0"
+      type="warning"
+      prominent
+      class="mb-4"
+    >
+      <div v-for="(msg, i) in formLevelMessages" :key="i">{{ msg }}</div>
+    </v-alert>
+
+    <form-field-row
       v-for="field in requiredFields"
       :key="field.name"
-      :class="{ 'highlight-flash': recentlyVisibleFields.includes(field.name) }"
-    >
-      <v-col cols="6">
-        <dynamic-form-input
-          v-model="form[field.name]"
-          :suggested-values="suggestedValuesForField(field)"
-          :strict="strictForField(field)"
-          :name="field.name"
-          :rules="rules[field.name]"
-          :type="field.type"
-        />
-      </v-col>
-      <v-col cols="6">
-        <v-list-subheader>{{ field.description }}</v-list-subheader>
-      </v-col>
-    </v-row>
+      v-model="form[field.name]"
+      :field="field"
+      :widget="widgetByField[field.name]"
+      :suggested-values="suggestedValuesFor(field)"
+      :strict="strictFor(field)"
+      :rules="rules[field.name]"
+      :error-messages="messagesFor(field.name)"
+      :flash="recentlyVisibleFields.includes(field.name)"
+      @clear="clearField(field.name)"
+    />
 
-    <v-list-subheader v-if="optionalFields.length > 0"
-      >Optional Fields</v-list-subheader
-    >
-    <v-divider v-if="optionalFields.length > 0" class="mb-8" />
-    <v-row
+    <template v-if="optionalFields.length > 0">
+      <v-list-subheader>Optional Fields</v-list-subheader>
+      <v-divider class="mb-8" />
+    </template>
+
+    <form-field-row
       v-for="field in optionalFields"
       :key="field.name"
-      :class="{ 'highlight-flash': recentlyVisibleFields.includes(field.name) }"
-    >
-      <v-col cols="6">
-        <dynamic-form-input
-          v-model="form[field.name]"
-          :suggested-values="suggestedValuesForField(field)"
-          :strict="strictForField(field)"
-          :name="field.name"
-          :rules="rules[field.name]"
-          :type="field.type"
-        />
-      </v-col>
-      <v-col cols="6">
-        <v-list-subheader>{{ field.description }}</v-list-subheader>
-      </v-col>
-    </v-row>
+      v-model="form[field.name]"
+      :field="field"
+      :widget="widgetByField[field.name]"
+      :suggested-values="suggestedValuesFor(field)"
+      :strict="strictFor(field)"
+      :rules="rules[field.name]"
+      :error-messages="messagesFor(field.name)"
+      :flash="recentlyVisibleFields.includes(field.name)"
+      @clear="clearField(field.name)"
+    />
   </v-form>
 </template>
-<script>
-import { useListenerStore } from "@/stores/listener-module";
-import { useBypassStore } from "@/stores/bypass-module";
-import { useCredentialStore } from "@/stores/credential-module";
-import { useMalleableProfileStore } from "@/stores/malleable-module";
-import { useAgentStore } from "@/stores/agent-module";
-import DynamicFormInput from "./DynamicFormInput.vue";
 
-export default {
-  components: {
-    DynamicFormInput,
-  },
-  inheritAttrs: false,
-  props: {
-    modelValue: {
-      type: Object,
-      default: () => ({}),
-    },
-    options: {
-      type: Object,
-      required: true,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
-    priority: {
-      type: Array,
-      default: () => [],
-    },
-  },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      form: {},
-      valid: true,
-      visibleFields: {},
-      recentlyVisibleFields: [],
-      initializedBypassesDefaults: false,
-    };
-  },
-  computed: {
-    agentStore() {
-      return useAgentStore();
-    },
-    listenerStore() {
-      return useListenerStore();
-    },
-    bypassStore() {
-      return useBypassStore();
-    },
-    credentialStore() {
-      return useCredentialStore();
-    },
-    malleableProfileStore() {
-      return useMalleableProfileStore();
-    },
-    agents() {
-      return this.agentStore.agents;
-    },
-    listeners() {
-      return this.listenerStore.listenerNames;
-    },
-    bypasses() {
-      // Use defaults first, then remaining bypass names
-      return this.bypassStore.mergedBypassNames;
-    },
-    defaultBypasses() {
-      return this.bypassStore.defaultBypassNames;
-    },
-    credentials() {
-      return this.credentialStore.credentials;
-    },
-    malleableProfiles() {
-      return this.malleableProfileStore.profileNames;
-    },
-    optionalFields() {
-      return this.allFields.filter(
-        (el) => el.required === false && this.isFieldVisible(el),
-      );
-    },
-    requiredFields() {
-      return this.allFields.filter(
-        (el) => el.required === true && this.isFieldVisible(el),
-      );
-    },
-    allFields() {
-      const fields = Object.keys(this.options).map((key) => ({
-        name: key,
-        ...this.options[key],
-      }));
+<script setup>
+import { ref, computed, watch, toRef } from "vue";
+import FormFieldRow from "./FormFieldRow.vue";
+import { useFieldDescriptors } from "@/composables/forms/useFieldDescriptors";
+import { useFieldVisibility } from "@/composables/forms/useFieldVisibility";
+import { useFieldCoercion } from "@/composables/forms/useFieldCoercion";
+import {
+  useSuggestedValues,
+  shouldSeedBypasses,
+} from "@/composables/forms/useSuggestedValues";
+import { useServerErrors } from "@/composables/forms/useServerErrors";
+import { resolveWidget } from "@/composables/forms/resolveWidget";
 
-      this.priority
-        .slice()
-        .reverse()
-        .forEach((item) => {
-          const index = fields.findIndex((f) => f.name === item);
-          if (index > -1) {
-            const fItem = fields.splice(index, 1)[0];
-            fields.unshift(fItem);
-          }
-        });
+defineOptions({ inheritAttrs: false });
 
-      return fields.map((el) => ({
-        ...el,
-        type: this.fieldType(el),
-      }));
-    },
-    rules() {
-      return this.allFields.reduce((map, field) => {
-        if (this.isFieldVisible(field)) {
-          map[field.name] = [];
-          if (field.required === true) {
-            map[field.name].push((v) => !!v || `${field.name} is required`);
-          }
-        }
-        return map;
-      }, {});
-    },
-  },
-  watch: {
-    options: {
-      immediate: true,
-      handler(newOptions) {
-        this.initializeForm(newOptions);
-        this.updateFieldVisibility(this.form, true);
-      },
-    },
-    form: {
-      handler(val) {
-        this.updateFieldVisibility(val);
-        const updatedForm = { ...val };
+const props = defineProps({
+  modelValue: { type: Object, default: () => ({}) },
+  options: { type: Object, required: true },
+  readonly: { type: Boolean, default: false },
+  priority: { type: Array, default: () => [] },
+  serverErrors: { type: [Array, String, Object], default: null },
+});
+const emit = defineEmits(["update:modelValue"]);
 
-        if (updatedForm.Bypasses) {
-          updatedForm.Bypasses = updatedForm.Bypasses.join(" ");
-        }
+const form = ref({});
+const valid = ref(true);
+const formRef = ref(null);
 
-        this.$emit("update:modelValue", updatedForm);
-      },
-      deep: true,
-    },
-    allFields: {
-      immediate: true,
-      handler(arr) {
-        const map2 = arr.reduce((map, obj) => {
-          if (obj.name === "Bypasses") {
-            if (Array.isArray(obj.value)) {
-              map[obj.name] = obj.value;
-            } else {
-              const raw = obj.value == null ? "" : String(obj.value);
-              map[obj.name] = raw
-                .split(" ")
-                .map((s) => s.trim())
-                .filter((s) => s.length > 0);
-            }
-          } else {
-            map[obj.name] = obj.value == null ? "" : obj.value;
-          }
-          return map;
-        }, {});
-        this.form = map2;
-      },
-    },
-    defaultBypasses: {
-      immediate: true,
-      handler() {
-        // When defaults arrive, initialize if needed
-        this.tryInitializeBypassesDefaults();
-      },
-    },
-  },
-  mounted() {
-    this.agentStore.getAgents();
-    this.listenerStore.getListeners();
-    this.bypassStore.getBypasses();
-    this.malleableProfileStore.getMalleableProfiles();
-    this.credentialStore.getCredentials();
-  },
-  methods: {
-    async validate() {
-      const { valid } = await this.$refs.form.validate();
-      return valid;
-    },
-    initializeForm(options) {
-      this.form = {};
-      Object.keys(options).forEach((key) => {
-        this.form[key] = options[key].value || null;
-      });
-    },
-    tryInitializeBypassesDefaults() {
-      if (this.initializedBypassesDefaults) return;
-      if (
-        !this.form ||
-        !Object.prototype.hasOwnProperty.call(this.form, "Bypasses")
-      )
-        return;
-      const current = this.form.Bypasses;
-      const isEmpty =
-        current == null ||
-        (Array.isArray(current) && current.length === 0) ||
-        (typeof current === "string" && current.trim() === "");
-      if (!isEmpty) return;
-      if (!this.defaultBypasses || this.defaultBypasses.length === 0) return;
-      this.form.Bypasses = [...this.defaultBypasses];
-      this.initializedBypassesDefaults = true;
-    },
-    updateFieldVisibility(form, initial = false) {
-      const newlyVisibleFields = [];
-      const oldVisibleFields = { ...this.visibleFields };
-      this.visibleFields = {};
-      this.allFields.forEach((field) => {
-        if (field.depends_on && Array.isArray(field.depends_on)) {
-          const shouldBeVisible = field.depends_on.every((dependency) =>
-            dependency.values.includes(form[dependency.name]),
-          );
-          if (shouldBeVisible && !oldVisibleFields[field.name]) {
-            if (!initial) newlyVisibleFields.push(field.name);
-          }
-          this.visibleFields[field.name] = shouldBeVisible;
-        } else {
-          if (!this.visibleFields[field.name]) {
-            if (!initial) newlyVisibleFields.push(field.name);
-          }
-          this.visibleFields[field.name] = true;
-        }
-      });
+const { allFields } = useFieldDescriptors(
+  toRef(props, "options"),
+  toRef(props, "priority"),
+);
+const { suggestedValuesFor, strictFor, defaultBypasses } = useSuggestedValues();
+const { isFieldVisible, recentlyVisibleFields, updateVisibility } =
+  useFieldVisibility(allFields);
+const { buildInitialForm, serializeForm } = useFieldCoercion();
 
-      this.highlightNewlyVisibleFields(newlyVisibleFields);
-    },
-    highlightNewlyVisibleFields(fields) {
-      this.recentlyVisibleFields = fields;
-      setTimeout(() => {
-        this.recentlyVisibleFields = [];
-      }, 7000);
-    },
-    isFieldVisible(field) {
-      return this.visibleFields[field.name] !== false;
-    },
-    suggestedValuesForField(field) {
-      if (field.name === "Agent") return this.agents;
-      if (["Listener", "RedirectListener"].includes(field.name))
-        return this.listeners;
-      if (field.name === "Bypasses") return this.bypasses;
-      if (field.name === "Profile") return this.malleableProfiles;
-      if (field.name === "CredID") return this.credentials;
-      return field.suggested_values;
-    },
-    strictForField(field) {
-      return ["Listener", "Bypasses", "Profile", "CredID"].includes(field.name)
-        ? true
-        : field.strict;
-    },
-    fieldType(el) {
-      return (
-        {
-          INTEGER: "number",
-          FLOAT: "float",
-          BOOLEAN: "boolean",
-          STRING: "string",
-          FILE: "file",
-        }[el.value_type] || "string"
-      );
-    },
+// One descriptor per field, shared by render + error routing (avoids drift).
+const widgetByField = computed(() => {
+  const map = {};
+  allFields.value.forEach((field) => {
+    map[field.name] = resolveWidget({
+      name: field.name,
+      type: field.type,
+      strict: strictFor(field),
+      suggestedValues: suggestedValuesFor(field),
+    });
+  });
+  return map;
+});
+// Only renderable fields (visible AND with a boolean `required`) get a kind
+// entry. A hidden field's error then hits routeErrorsByKind's "kind unknown"
+// fail-safe and surfaces in the banner with the field-name prefix instead of
+// being routed inline to a FormFieldRow that the template never renders —
+// otherwise a 422 against a depends_on-hidden field disappears entirely.
+function isRenderable(field) {
+  return (
+    (field.required === true || field.required === false) &&
+    isFieldVisible(field)
+  );
+}
+const kindByField = computed(() => {
+  const map = {};
+  allFields.value.forEach((field) => {
+    if (isRenderable(field)) {
+      map[field.name] = widgetByField.value[field.name].kind;
+    }
+  });
+  return map;
+});
+const knownFieldNames = computed(() => allFields.value.map((f) => f.name));
+
+const { messagesFor, formLevelMessages, clearField } = useServerErrors({
+  serverErrors: toRef(props, "serverErrors"),
+  knownFieldNames,
+  kindByField,
+});
+
+const requiredFields = computed(() =>
+  allFields.value.filter((f) => f.required === true && isFieldVisible(f)),
+);
+const optionalFields = computed(() =>
+  allFields.value.filter((f) => f.required === false && isFieldVisible(f)),
+);
+const rules = computed(() =>
+  allFields.value.reduce((map, field) => {
+    if (isFieldVisible(field)) {
+      map[field.name] = [];
+      if (field.required === true) {
+        map[field.name].push((v) => !!v || `${field.name} is required`);
+      }
+    }
+    return map;
+  }, {}),
+);
+
+// Seed Bypasses with the store's defaults the first time both the form has a
+// Bypasses slot AND the defaults have resolved. One-shot per form rebuild —
+// re-armed when props.options changes so a fresh template gets fresh defaults.
+//
+// Side effect: this mutation feeds update:modelValue. When defaults resolve
+// asynchronously (the common case) the seed runs after the deep `form` watch
+// below is registered, so the mutation triggers that watch and it emits.
+// During initial setup the seed runs before that watch exists, so the initial
+// emit instead comes from the watch's own `immediate` callback reading the
+// seeded form (see below). Either way the emit is programmatic (setup, not
+// user input) — a future parent tracking a dirty-state flag should account for
+// it.
+let bypassDefaultsSeeded = false;
+function trySeedBypassDefaults() {
+  if (bypassDefaultsSeeded) return;
+  if (!shouldSeedBypasses(form.value, defaultBypasses.value)) return;
+  form.value.Bypasses = [...defaultBypasses.value];
+  bypassDefaultsSeeded = true;
+}
+
+watch(
+  () => props.options,
+  () => {
+    form.value = buildInitialForm(allFields.value);
+    updateVisibility(form.value, true);
+    bypassDefaultsSeeded = false;
+    trySeedBypassDefaults();
   },
-};
+  { immediate: true },
+);
+
+// Defaults usually arrive async, after the form is already built. Re-attempt
+// the seed when they do. `immediate: true` is harmless — if the options
+// watch above already seeded, the bypassDefaultsSeeded guard no-ops this
+// call; otherwise it covers the warm-store case (Pinia cache survives
+// navigation, so defaults are already populated at mount).
+watch(defaultBypasses, trySeedBypassDefaults, { immediate: true });
+
+// `immediate: true` is load-bearing. The options watch above (also immediate)
+// builds form.value during setup, BEFORE this watch is registered, so a plain
+// (non-immediate) watch never observes that initial build and the parent's
+// v-model stays {} until the first user edit. Submitting / re-enabling / killing
+// an unedited form would then POST `options: {}`. Because this watch is declared
+// after the options watch, its immediate callback runs against the
+// already-built form and emits it exactly once at mount.
+watch(
+  form,
+  (val) => {
+    updateVisibility(val);
+    emit("update:modelValue", serializeForm(val));
+  },
+  { deep: true, immediate: true },
+);
+
+// <script setup> is closed by default; parents call validate() via this ref to
+// block submit, so it must be exposed. Load-bearing — do not remove.
+async function validate() {
+  const { valid: isValid } = await formRef.value.validate();
+  return isValid;
+}
+defineExpose({ validate });
 </script>
 
 <style scoped>

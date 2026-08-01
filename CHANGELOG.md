@@ -14,6 +14,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-07-06
+
+### Added
+
+-   Added server-side validation error feedback to dynamic forms
+-   Added Playwright end-to-end test suite, run as a CI job on every PR
+-   Added Vitest unit-test harness with initial store and utility tests
+-   Added `jsconfig.json` for editor path-alias resolution
+
+### Changed
+
+-   Refactored GeneralForm into reusable form composables
+-   Replaced axios with the native Fetch API
+-   Replaced moment with dayjs
+-   Converted global mixins to composables
+-   Extracted shared ANSI-to-HTML and auto-refresh helpers
+-   Migrated ESLint to v9 flat config
+-   Upgraded the build and state stack to latest majors (Vite 8, Pinia 3, persistedstate 4, Vitest 4)
+-   Bumped CI workflows to Node 22
+
+### Removed
+
+-   Removed unused `vue.config.js`
+-   Removed unused dependencies (uuid, axios, qs, semver, table)
+
+### Fixed
+
+-   Fixed module execution posting to an undefined agent when selected from autocomplete
+-   Fixed Vue Router "Missing required param" error after module execution
+-   Fixed socket and timer leaks in the chat widget causing duplicate messages and inflated unread counts
+-   Fixed unstable list keys on chat messages and notifications
+-   Fixed file upload not auto-selecting the uploaded file in module execution and obfuscation forms
+-   Removed leftover debug logging from API modules
+
 ## [3.5.0] - 2026-04-26
 
 ### Changed
@@ -477,7 +511,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...HEAD
+
+[3.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...v3.6.0
 
 [3.5.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.4.0...v3.5.0
 

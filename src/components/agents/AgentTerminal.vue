@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="terminal-container">
+    <div class="terminal-container" data-testid="agent-terminal">
       <div ref="output" class="terminal-output">
         <div
           v-for="(line, index) in outputLines"
@@ -45,8 +45,8 @@
 import pause from "@/utils/pause";
 import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
-import AnsiUp from "ansi_up";
-import { table } from "table";
+import { ansiToHtml } from "@/utils/ansi";
+import { table, BOX_BORDER } from "@/utils/ascii-table";
 import { useModuleStore } from "@/stores/module-module";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
@@ -83,26 +83,7 @@ export default {
       suggestions: [],
       currentSuggestionIndex: -1,
       tableConfig: {
-        border: {
-          topBody: "─",
-          topJoin: "┬",
-          topLeft: "┌",
-          topRight: "┐",
-
-          bottomBody: "─",
-          bottomJoin: "┴",
-          bottomLeft: "└",
-          bottomRight: "┘",
-
-          bodyLeft: "│",
-          bodyRight: "│",
-          bodyJoin: "│",
-
-          joinBody: "─",
-          joinLeft: "├",
-          joinRight: "┤",
-          joinJoin: "┼",
-        },
+        border: BOX_BORDER,
       },
       helpCommands: [
         {
@@ -819,13 +800,7 @@ export default {
         this.addLine(line, "indent-5-spaces");
       });
     },
-    ansiToHTML(input) {
-      let output = input;
-      const ansiUp = new AnsiUp();
-
-      output = ansiUp.ansi_to_html(output);
-      return output;
-    },
+    ansiToHTML: ansiToHtml,
     async useModule(moduleName) {
       const moduleData = this.allModules.find(
         (module) => module.id === moduleName,

@@ -82,7 +82,7 @@ export default {
 
       const response = await downloadApi.createDownload(formData);
 
-      this.$emit("submit", { file: response.data });
+      this.$emit("submit", { file: response });
     },
   },
 };

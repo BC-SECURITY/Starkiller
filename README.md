@@ -97,6 +97,14 @@ yarn dev
 yarn build
 ```
 
+### Run end-to-end tests
+
+```
+yarn test:e2e
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#running-tests) for the testing workflow.
+
 ## Changelog
 
 Detailed changes for each release are documented in the [changelog](./CHANGELOG.md).

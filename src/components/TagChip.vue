@@ -87,6 +87,7 @@ export default {
       default: null,
     },
   },
+  emits: ["delete-tag", "update-tag"],
   data() {
     return {
       menu: false,

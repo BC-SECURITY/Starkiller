@@ -86,7 +86,6 @@ export default {
   },
   methods: {
     connect() {
-      console.log("Opening Socket");
       this.socket = io(`${this.socketUrl}`, {
         reconnection: true,
         reconnectionAttempts: 10,
@@ -99,7 +98,6 @@ export default {
     },
     disconnect() {
       if (!this.socket) return;
-      console.log("Closing Socket");
       this.socket.close();
       this.socket = null;
     },

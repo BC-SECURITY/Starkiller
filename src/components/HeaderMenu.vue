@@ -54,6 +54,7 @@ export default {
       required: true,
     },
   },
+  emits: ["submit"],
   data() {
     return {
       show: false,

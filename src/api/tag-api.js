@@ -1,5 +1,4 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
-import qs from "qs";
+import { request, handleError } from "@/api/http";
 
 /**
  * Returns a full list of tags.
@@ -13,19 +12,14 @@ export function getTags({
   query,
   sources,
 }) {
-  return axios
-    .get("/tags", {
-      params: {
-        page,
-        limit,
-        query,
-        sources,
-        order_by: sortBy,
-        order_direction: sortOrder,
-      },
-      paramsSerializer: (p) =>
-        qs.stringify(p, { arrayFormat: "repeat", skipNulls: true }),
-    })
-    .then((response) => response.data)
-    .catch((error) => Promise.reject(handleError(error)));
+  return request("/tags", {
+    params: {
+      page,
+      limit,
+      query,
+      sources,
+      order_by: sortBy,
+      order_direction: sortOrder,
+    },
+  }).catch((error) => Promise.reject(handleError(error)));
 }

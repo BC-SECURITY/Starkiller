@@ -12,7 +12,7 @@ jobs:
         run: |
           echo "TARGET_BRANCH=sponsors-main" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: sponsors-main
           fetch-depth: 0
@@ -23,7 +23,7 @@ jobs:
           git config user.email noreply@github.com
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
       - name: Get app version
         run: |
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV

@@ -12,9 +12,14 @@ export const useListenerStore = defineStore("listener", {
   actions: {
     async getListeners() {
       this.status = "loading";
-      const listeners = await listenerApi.getListeners();
-      this.listeners = listeners;
-      this.status = "success";
+      try {
+        const listeners = await listenerApi.getListeners();
+        this.listeners = listeners;
+        this.status = "success";
+      } catch (err) {
+        console.error("[Starkiller] Failed to fetch listeners:", err);
+        this.status = "error";
+      }
     },
     async getListenerTemplates() {
       const templates = await listenerApi.getListenerTemplates();
@@ -52,7 +57,6 @@ export const useListenerStore = defineStore("listener", {
     async saveAutorunTasks({ listenerId, modules }) {
       try {
         await listenerApi.saveAutorunTasks(listenerId, { records: modules }); // Remove extra 'records'
-        console.log("Autorun tasks saved successfully.");
       } catch (error) {
         console.error("Error saving autorun tasks:", error);
       }

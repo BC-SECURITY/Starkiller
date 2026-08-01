@@ -99,6 +99,7 @@ export default {
       default: () => [],
     },
   },
+  emits: ["languages-changed"],
   data() {
     return {};
   },

@@ -117,6 +117,7 @@
 </template>
 
 <script>
+import { getCurrentInstance } from "vue";
 import DateTimeDisplay from "@/components/DateTimeDisplay.vue";
 import TagViewer from "@/components/TagViewer.vue";
 import HeaderMenu from "@/components/HeaderMenu.vue";
@@ -124,6 +125,7 @@ import * as agentApi from "@/api/agent-api";
 import { useAgentStore } from "@/stores/agent-module";
 import { useApplicationStore } from "@/stores/application-module";
 import * as agentTaskApi from "@/api/agent-task-api";
+import { useAutoRefresh } from "@/composables/useAutoRefresh";
 
 export default {
   name: "AgentsTable",
@@ -156,6 +158,14 @@ export default {
     },
   },
   emits: ["update:modelValue", "refresh-tags", "kill-agent"],
+  setup() {
+    const instance = getCurrentInstance();
+    const { start, stop } = useAutoRefresh(
+      () => instance.proxy.getAgents(),
+      8000,
+    );
+    return { start, stop };
+  },
   data() {
     return {
       loading: false,
@@ -242,7 +252,6 @@ export default {
       ],
       selectedHeadersTemp: [],
       selected: [],
-      refreshInterval: null,
     };
   },
   computed: {
@@ -299,19 +308,13 @@ export default {
     refreshAgents: {
       handler(newVal) {
         if (newVal) {
-          this.getAgents();
-          this.refreshInterval = setInterval(() => {
-            this.getAgents();
-          }, 8000);
+          this.start();
         } else {
-          clearInterval(this.refreshInterval);
+          this.stop();
         }
       },
       immediate: true,
     },
-  },
-  beforeUnmount() {
-    clearInterval(this.refreshInterval);
   },
   async mounted() {
     this.getAgents();

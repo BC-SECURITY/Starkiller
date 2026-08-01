@@ -312,7 +312,7 @@ export default {
 
       try {
         await userApi.uploadAvatar(this.userId, data);
-        this.applicationStore.refreshMe();
+        await this.applicationStore.refreshMe();
         this.snack.success("Upload complete");
       } catch (err) {
         this.snack.error(`Error uploading avatar: ${err}`);

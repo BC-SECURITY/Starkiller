@@ -15,7 +15,7 @@ jobs:
         run: |
           echo "TAG_NAME=$(echo ${{ github.head_ref }} | sed 's/release\///')" >> $GITHUB_ENV
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.base_ref }}
           token: ${{ secrets.RELEASE_TOKEN }}
@@ -25,7 +25,7 @@ jobs:
           git config user.email noreply@github.com
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: "yarn"
       - name: Set application version as variable
         run: |

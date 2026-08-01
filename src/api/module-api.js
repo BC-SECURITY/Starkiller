@@ -1,12 +1,11 @@
-import { axiosInstance as axios, handleError } from "@/api/axios-instance";
+import { request, handleError } from "@/api/http";
 
 /**
  * Returns a full list of modules.
  */
 export function getModules() {
-  return axios
-    .get("/modules")
-    .then(({ data }) => data.records)
+  return request("/modules")
+    .then((data) => data.records)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
@@ -20,7 +19,7 @@ export function executeModule(
   ignoreLanguageCheck,
   backgroundOverride,
 ) {
-  return axios
+  return request
     .post(`/agents/${options.Agent}/tasks/module/`, {
       module_id: name,
       options,
@@ -28,7 +27,7 @@ export function executeModule(
       ignore_language_version_check: ignoreLanguageCheck,
       background_override: backgroundOverride,
     })
-    .then(({ data }) => ({ agent: options.Agent, ...data }))
+    .then((data) => ({ agent: options.Agent, ...data }))
     .catch((error) =>
       // eslint-disable-next-line prefer-promise-reject-errors
       Promise.reject({ agent: options.Agent, error: handleError(error) }),
@@ -36,15 +35,13 @@ export function executeModule(
 }
 
 export function reloadModules() {
-  return axios
+  return request
     .post("/modules/reload")
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
 
 export function resetModules() {
-  return axios
+  return request
     .post("/modules/reset")
-    .then(({ data }) => data)
     .catch((error) => Promise.reject(handleError(error)));
 }
