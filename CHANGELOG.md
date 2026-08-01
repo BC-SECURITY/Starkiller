@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.2] - 2026-08-01
+
 ### Added
 
 -   Chat messages now render Markdown — bold, italic, strikethrough, inline code, code blocks, links, lists, blockquotes, and tables. Code blocks wrap rather than scroll and have a copy button; tables scroll horizontally in their own container instead of stretching the drawer. Headings and raw HTML are intentionally not rendered, and images render as their alt text only (never as an `<img>`, so a message cannot beacon out). Links open in a new tab, hardened with `noopener`/`noreferrer`/`no-referrer`, and are restricted to `http`/`https`. Markdown's backslash-escapes are disabled so pasted Windows/UNC paths survive intact — the tradeoff is that `\*literal\*` now shows its backslashes instead of suppressing emphasis. The message box is now multi-line: Enter sends, Shift+Enter adds a newline
@@ -25,11 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -   Clicking the chat button in the top bar no longer does nothing when pressed right after the app loads — the button appears before the chat panel is ready, and clicks landing in that window were silently dropped
+
 -   The chat panel now scrolls to the newest message again — the watcher driving it was watching the message array rather than its length, so it never fired on a new message and the panel stayed wherever the operator had left it. It also stays pinned to the bottom while the message box grows to fit a multi-line message
+
 -   A wide table in your own chat message no longer escapes its bubble and puts a horizontal scrollbar on the message list; it now scrolls inside its own container the way it already did for other operators' messages
+
 -   Chat no longer loads its Markdown renderer as part of the initial app bundle, cutting roughly 50 kB (gzipped) off the critical path
 
 -   Column selections made in the agent tasks table's column picker no longer reset on every page mount — its persisted header preferences were being reseeded to defaults whenever the table remounted (the plugin tasks table was unaffected; it is protected by the same fix as it adopts the expand column in this release)
+
 -   Always-visible columns are no longer persisted with the column-picker selection (agents, agent tasks, and plugin tasks tables), so deselecting every column now restores the default columns on the next visit — previously this left the agents and plugin tasks tables permanently reduced to their always-visible columns; installs already stuck in that state are repaired on the next visit
 
 ## [4.0.1] - 2026-07-28
@@ -587,7 +593,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.2...HEAD
+
+[4.0.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.1...v4.0.2
 
 [4.0.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0...v4.0.1
 
