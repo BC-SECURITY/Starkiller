@@ -12,8 +12,13 @@ import {
   mockListenersList,
   mockListenerTemplates,
 } from "./helpers/api/listeners.js";
-import { defaultAgents } from "./fixtures/agents.js";
-import { defaultListeners, httpTemplate } from "./fixtures/listeners.js";
+import { defaultAgents, pivotedAgent } from "./fixtures/agents.js";
+import {
+  defaultListeners,
+  httpTemplate,
+  pivotListener,
+  smbTemplate,
+} from "./fixtures/listeners.js";
 import { jsonResponse } from "./helpers/responses.js";
 
 test.describe("agents graph page", () => {
@@ -34,6 +39,50 @@ test.describe("agents graph page", () => {
     for (const agent of defaultAgents) {
       await expect(graph.getByText(agent.name)).toBeVisible();
     }
+  });
+
+  // A peer-to-peer relay is not a top-level C2 endpoint -- it runs *on* an
+  // agent, so the graph hides the relay's own listener node and chains the
+  // agent behind it off its host agent instead. This is the first e2e coverage
+  // of that path; its absence is why the detection break shipped unnoticed.
+  test("hides a peer-to-peer relay listener and still shows the agent behind it", async ({
+    page,
+  }) => {
+    await mockListenersList(page, [...defaultListeners, pivotListener]);
+    await mockListenerTemplates(page, [httpTemplate, smbTemplate]);
+    await mockAgentsList(page, [...defaultAgents, pivotedAgent]);
+
+    await page.goto("/#/agents-graph");
+    const graph = page.locator(".agent-graph");
+
+    // Ordinary listeners still render...
+    await expect(graph.getByText("http-1", { exact: true })).toBeVisible();
+    // ...the agent reached through the relay renders...
+    await expect(graph.getByText("pivoted-agent")).toBeVisible();
+    // ...as does the agent hosting the relay...
+    await expect(graph.getByText("ABC12345")).toBeVisible();
+    // ...but the relay listener itself must never appear as its own node.
+    await expect(graph.getByText("smb-pivot-1")).toHaveCount(0);
+
+    // Hiding the relay is only half the fix: the pivoted agent must chain off
+    // its HOST agent, not dangle. graphly-d3 gives links a random data-id, so
+    // the edge can't be selected by name -- assert the edge count instead,
+    // which is what separates "chained" from "orphaned". One link per visible
+    // listener (to root), one per defaultAgent (to its listener), plus one for
+    // pivoted-agent chaining to its host. Derived rather than hardcoded because
+    // defaultListeners/defaultAgents are shared with 15 other specs: a fixture
+    // gaining an entry should not read as a pivot regression here. If the chain
+    // regressed to an orphan this is one fewer; if the relay node came back,
+    // one more.
+    const expectedLinks = defaultListeners.length + defaultAgents.length + 1;
+    await expect(graph.locator('[data-object="link"]')).toHaveCount(
+      expectedLinks,
+    );
+    // And the relay must not be a node under root by id either, not just by
+    // rendered label.
+    await expect(graph.locator('[data-id="listener_smb-pivot-1"]')).toHaveCount(
+      0,
+    );
   });
 
   test("right-clicking an agent node opens its context menu", async ({

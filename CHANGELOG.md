@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+-   Agent graph draws pivot chains again against Empire 7.0 — peer-to-peer (SMB / port-forward) listeners are now detected by their `Agent` option instead of the listener-template `category` field that Empire 7.0 removed
+
 ## [4.0.2] - 2026-08-01
 
 ### Added

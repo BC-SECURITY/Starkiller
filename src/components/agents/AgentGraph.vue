@@ -171,8 +171,8 @@ export default {
         focusedNode: this.focusedNode,
       });
     },
-    // Watched: repaint only when the topology actually changes (incl. pivot
-    // links flipping after templates load) — see build-agent-graph.js.
+    // Watched: repaint only when the topology actually changes, rather than on
+    // every store write — see build-agent-graph.js.
     signature() {
       return graphSignature(this.graph);
     },
@@ -197,8 +197,9 @@ export default {
     },
   },
   watch: {
-    // Repaint when the topology id-set changes (host refresh, own refresh,
-    // focus change, or templates arriving late).
+    // Repaint when the topology id-set changes (host refresh, own refresh, or
+    // focus change). Listener templates no longer affect the topology, so their
+    // arrival is not one of these — see build-agent-graph.js.
     signature(newSig, oldSig) {
       if (newSig !== oldSig && this.nodeDataStatus === "success") {
         this.renderGraph();
@@ -235,9 +236,16 @@ export default {
     //     refresh(), focusNode(node), unfocus(), showAllNodes() ---
 
     // Mount-time load with a double-fetch guard: render from existing store
-    // data when present and fetch only what is missing. Templates are ALWAYS
-    // ensured because no host (incl. the Dashboard) fetches them and the
-    // listener store is not persisted.
+    // data when present and fetch only what is missing.
+    //
+    // The templates fetch below is vestigial: pivot detection moved to the
+    // listener's `Agent` option, so the graph reads nothing from it, and it
+    // gates nothing either (buildGraph's guard passes on the store's initial
+    // []). It is a live liability -- getListenerTemplates() is the one store
+    // action that does not swallow its errors, so a failing
+    // GET /listener-templates rejects out of the Promise.all below and shows
+    // "Failed to load graph data." for a graph already holding everything it
+    // needs. Removing it is safe; left for its own pass. See build-agent-graph.js.
     async ensureData() {
       this.nodeDataStatus = "loading";
       this.$emit("loading-change", true);
@@ -273,8 +281,9 @@ export default {
           this.agentStore.getAgents(),
           this.listenerStore.getListeners(),
         ]);
-        // Templates are static-ish; only fetch when we have none. A force
-        // refresh intentionally does not refetch already-loaded templates.
+        // Templates are static-ish and unread by the graph (see ensureData);
+        // only fetch when we have none. A force refresh intentionally does not
+        // refetch already-loaded templates.
         if (this.listenerTemplatesList.length === 0) {
           await this.listenerStore.getListenerTemplates();
         }

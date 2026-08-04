@@ -49,3 +49,18 @@ export const defaultAgents = [
     checkin_time: "2026-04-30T12:00:00Z",
   },
 ];
+
+// An agent reached *through* the SMB relay in fixtures/listeners.js: its
+// `listener` is `pivotListener.name`, so the graph should chain it off the
+// relay's host agent (ABC12345) rather than off a listener node. Kept out of
+// defaultAgents so the many specs asserting on that list are unaffected —
+// graph specs opt in by concatenating.
+export const pivotedAgent = {
+  ...defaultAgents[0],
+  session_id: "PIV99999",
+  name: "pivoted-agent",
+  hostname: "DESKTOP-4",
+  username: "user4",
+  listener: "smb-pivot-1",
+  checkin_time: "2026-04-30T13:00:00Z",
+};
