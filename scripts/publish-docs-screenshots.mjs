@@ -45,9 +45,19 @@ if (!fs.existsSync(resultPath)) {
   );
 }
 
+// Read and parse separately. Wrapping both in one try reports an EACCES or
+// EISDIR as "not valid JSON" and tells the operator to re-run the capture,
+// which fixes neither.
+let raw;
+try {
+  raw = fs.readFileSync(resultPath, "utf8");
+} catch (err) {
+  fail(`cannot read ${resultPath} (${err.message}).`);
+}
+
 let result;
 try {
-  result = JSON.parse(fs.readFileSync(resultPath, "utf8"));
+  result = JSON.parse(raw);
 } catch (err) {
   fail(
     `${resultPath} is not valid JSON (${err.message}). A capture run was ` +

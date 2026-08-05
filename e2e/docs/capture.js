@@ -86,9 +86,13 @@ export async function tickUntil(page, check) {
     .toBe(true);
 }
 
-export async function emptyOutputDir() {
-  await fs.promises.rm(OUTPUT_DIR, { recursive: true, force: true });
-  await fs.promises.mkdir(OUTPUT_DIR, { recursive: true });
+// `dir` exists for this helper's own test, same as captureDocsShot's: pointing
+// the test at OUTPUT_DIR would delete the real capture set out from under a
+// run, depending on which spec file the runner reached first. Real callers
+// always use the default.
+export async function emptyOutputDir(dir = OUTPUT_DIR) {
+  await fs.promises.rm(dir, { recursive: true, force: true });
+  await fs.promises.mkdir(dir, { recursive: true });
 }
 
 // Call AFTER setFakeAuth (init scripts run in registration order, and the
@@ -172,6 +176,76 @@ export function countFailedApiResponses(page) {
 // Adding rows to scenario.js can break that — re-measure before assuming it
 // still holds.
 //
+// Settles an opened-then-closed VAutocomplete/VMenu so the shot shows the
+// field at rest. `menuId` is the aria-controls id read off the field BEFORE
+// the menu was opened — it is a property of the field, not of the menu's open
+// state, so it survives both opening and (for autocompletes) the placeholder
+// being suppressed once a selection lands.
+//
+// Three steps, in an order that matters:
+//
+// 1. Assert the LOGICAL close first. "v-overlay--active" is applied straight
+//    off VOverlay's isActive computed with no transition involved, so it flips
+//    immediately and cannot be confused with a menu that is merely still
+//    fading. Scoped to this overlay via menuId so a future shot with a
+//    legitimately-visible overlay isn't caught by a copy-pasted selector.
+// 2. Then tick the clock until the content element actually reaches
+//    display:none. Its <Transition> leave hook is rAF-driven and pauseAt()
+//    freezes rAF, so it makes no progress on its own — the menu lingering
+//    visibly after Escape is that, not a starved transitionend.
+// 3. Blur. Closing leaves the field focused, which paints a white focus ring —
+//    a mid-interaction artifact of the test's own verification click, not
+//    something a reader landing on the page fresh would see. Measured on the
+//    malleable listener form: a focused field renders v-field--focused with a
+//    2px white outline against the dark theme versus 1px grey at rest, sitting
+//    directly above an unfocused sibling. It goes through document.activeElement
+//    rather than a passed-in locator because a VAutocomplete suppresses its own
+//    placeholder once a selection lands, so the getByPlaceholder locator that
+//    opened the menu no longer resolves by the time it would be blurred.
+//
+// The pointer is deliberately left where it is: moving it to clear the
+// residual hover border would land it on some other element (app bar, table
+// row) and trade one hover artifact for another.
+export async function closeDocsOverlay(page, menuId) {
+  expect(
+    menuId,
+    "no aria-controls on the field — Vuetify may have stopped exposing it, " +
+      "which would make the overlay lookup below resolve to #null",
+  ).toBeTruthy();
+
+  const overlay = page.locator(`#${menuId}`);
+  await expect(overlay).not.toHaveClass(/v-overlay--active/);
+
+  const content = overlay.locator(".v-overlay__content");
+  await tickUntil(page, () => content.isHidden());
+  await expect(page.getByRole("listbox")).toBeHidden();
+
+  await page.evaluate(() => document.activeElement?.blur());
+  // Assert the ring is gone rather than trusting the blur landed. Page-wide on
+  // purpose: ANY focused field in a docs shot is a mid-interaction artifact.
+  await expect(page.locator(".v-field--focused")).toHaveCount(0);
+}
+
+// Ticks the clock until a teleported #app-bar-extension tab strip has real
+// height. AgentEdit and ListenerEdit both teleport their tab strips there;
+// VToolbar wraps that slot in a VExpandTransition, and it is
+// VExpandTransition's onEnter hook (transitions/expand-transition.js) that
+// drives the height — it collapses the element to height:0 synchronously, then
+// restores the real height inside a requestAnimationFrame callback. VToolbar's
+// own render-time work (isExtended, extensionHeight) is not rAF-gated at all.
+// pauseAt() freezes rAF, so without ticking, that restoring assignment never
+// runs and the extension row renders at height:0 (overflow hidden) — the tabs
+// exist in the DOM and still pass toBeVisible(), but are clipped out of the
+// capture entirely.
+export async function tickUntilTabStripSized(page) {
+  const extension = page.locator(".v-toolbar__extension");
+  await tickUntil(
+    page,
+    async () =>
+      (await extension.evaluate((el) => getComputedStyle(el).height)) !== "0px",
+  );
+}
+
 // Pass `clip` as a Locator to capture one element (delegates to
 // locator.screenshot(), which handles teleported Vuetify overlays). Use
 // page.screenshot({clip: box}) directly only if the scrim and background are

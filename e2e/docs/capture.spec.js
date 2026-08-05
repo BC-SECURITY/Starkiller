@@ -10,6 +10,7 @@ import {
   mockDocsBackground,
   captureDocsShot,
   countFailedApiResponses,
+  emptyOutputDir,
 } from "./capture.js";
 
 // Probe images go to a temp dir, never to e2e/docs/output/. Anything landing
@@ -97,6 +98,56 @@ test.describe("capture helpers", () => {
     const buf = fs.readFileSync(file);
     expect(buf.readUInt32BE(16)).toBe(2880);
     expect(buf.readUInt32BE(20)).toBe(1440);
+  });
+
+  test("captureDocsShot clips to a locator when given one @docs", async ({
+    page,
+  }) => {
+    // The clip branch has exactly one caller (plugin-dependencies.png). If it
+    // were ignored, or the two branches swapped, that shot would publish as a
+    // full-viewport screenshot where the docs expect a cropped alert — a
+    // difference nothing else in the suite would notice.
+    await gotoListeners(page);
+    const file = await captureDocsShot(page, "clip_probe.png", {
+      clip: page.getByRole("table").first(),
+      dir: PROBE_DIR,
+    });
+    const buf = fs.readFileSync(file);
+    expect(buf.readUInt32BE(16)).toBeLessThan(2880);
+    expect(buf.readUInt32BE(20)).toBeLessThan(1440);
+  });
+
+  test("captureDocsShot rejects an asset missing from the manifest @docs", async ({
+    page,
+  }) => {
+    // The capture-time manifest check is what turns a renamed shot into an
+    // immediate, named failure instead of a confusing set mismatch at publish
+    // time. No `dir` here — that is what puts it on the real-shot path.
+    await gotoListeners(page);
+    await expect(
+      captureDocsShot(page, "not_in_the_manifest.png"),
+    ).rejects.toThrow(/assets\.json/);
+  });
+
+  test("emptyOutputDir clears stale files and leaves the dir @docs", async () => {
+    // This is the "a renamed asset cannot leave a stale PNG behind" guarantee
+    // docs.spec.js's beforeAll depends on. Worth pinning: if it regressed to a
+    // mkdir without the rm, a renamed shot would leave its old PNG in output/,
+    // and the publish gate's orphan arm is the only thing then standing
+    // between that and a wrong image shipping.
+    //
+    // Run against a scratch dir, NOT outputDir() — see emptyOutputDir's header.
+    const scratch = path.join(PROBE_DIR, "empty-probe");
+    const stale = path.join(scratch, "STALE_probe.png");
+    await fs.promises.mkdir(scratch, { recursive: true });
+    await fs.promises.writeFile(stale, "not really a png");
+    expect(fs.existsSync(stale)).toBe(true);
+
+    await emptyOutputDir(scratch);
+
+    expect(fs.existsSync(stale)).toBe(false);
+    expect(fs.existsSync(scratch)).toBe(true);
+    expect(fs.readdirSync(scratch)).toEqual([]);
   });
 
   // Populated by the test below, asserted on in the afterAll beneath it.

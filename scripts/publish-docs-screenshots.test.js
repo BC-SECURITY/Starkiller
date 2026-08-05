@@ -248,6 +248,16 @@ describe("publish-docs-screenshots", () => {
     expect(published()).toBe(false);
   });
 
+  it("distinguishes an unreadable result.json from a malformed one", () => {
+    // A read error (EACCES, EISDIR) reported as "not valid JSON" would tell
+    // the operator to re-run the capture, which fixes neither.
+    fs.writeFileSync(path.join(outputDir, FIRST_ASSET), "fake-png");
+    fs.mkdirSync(path.join(outputDir, "result.json"));
+    const out = expectFailure();
+    expect(out).toMatch(/cannot read/i);
+    expect(out).not.toMatch(/not valid JSON/i);
+  });
+
   it("aborts when result.json has no results array", () => {
     fs.writeFileSync(path.join(outputDir, FIRST_ASSET), "fake-png");
     fs.writeFileSync(

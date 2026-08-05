@@ -37,7 +37,15 @@ export default defineConfig({
     globals: true,
     environment: "node",
     // Unit/component tests live in src/, Node tooling tests in scripts/. The
-    // e2e/ directory is owned by Playwright (test:e2e); keep Vitest out of it.
-    include: ["src/**/*.{test,spec}.{js,jsx}", "scripts/**/*.{test,spec}.js"],
+    // e2e/ directory is owned by Playwright, which claims "**/*.spec.js" — so
+    // the one narrow exception is e2e/**/*.test.js: browser-free data
+    // validation (e2e/docs/scenario.test.js) that must run on every PR rather
+    // than only when someone invokes the capture suite by hand. The differing
+    // extension is what keeps the two runners from ever claiming a file twice.
+    include: [
+      "src/**/*.{test,spec}.{js,jsx}",
+      "scripts/**/*.{test,spec}.js",
+      "e2e/**/*.test.js",
+    ],
   },
 });

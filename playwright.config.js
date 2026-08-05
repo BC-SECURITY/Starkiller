@@ -40,24 +40,29 @@ export default defineConfig({
     // different binary for headed ones, which rasterize text differently —
     // so the same shot would look different depending on how it was invoked.
     //
-    // grep: /@docs/ matches @docs-tagged tests across three files (docs.spec.js,
-    // capture.spec.js, scenario.spec.js). fullyParallel: false only serializes
-    // tests WITHIN a single file — it does nothing to stop those three files
-    // from running concurrently across workers, so without workers: 1 the five
-    // real captures in docs.spec.js still race the other @docs specs' browser
-    // tests. workers: 1 is what actually keeps this project off a contended
-    // CPU; fullyParallel: false on top of that guarantees docs.spec.js's
-    // afterAll (which writes result.json) runs exactly once and after all its
-    // own tests, rather than racing a same-file parallel worker.
+    // grep: /@docs/ matches @docs-tagged tests across two files (docs.spec.js
+    // and capture.spec.js — the dataset validation is browser-free and lives
+    // in Vitest, see e2e/docs/scenario.test.js). fullyParallel: false only
+    // serializes tests WITHIN a single file — it does nothing to stop those
+    // files from running concurrently across workers, so without workers: 1
+    // the real captures in docs.spec.js still race the other @docs specs'
+    // browser tests. workers: 1 is what actually keeps this project off a
+    // contended CPU; fullyParallel: false on top of that guarantees
+    // docs.spec.js's afterAll (which writes result.json) runs exactly once and
+    // after all its own tests, rather than racing a same-file parallel worker.
+    //
+    // retries: 0 overrides the top-level CI retry count for this project only.
+    // A retry re-runs the test in a fresh worker, which re-runs docs.spec.js's
+    // beforeAll — and that empties output/, destroying every PNG already
+    // captured in the run. The retried shot also pushes a SECOND result.json
+    // entry for one image. Capture is a deterministic, fully-mocked pipeline
+    // with nothing to gain from retrying; a flake here should be read, not
+    // papered over.
     {
       name: "docs",
       grep: /@docs/,
       fullyParallel: false,
       workers: 1,
-      // Explicitly 0 rather than inheriting the base retries: docs.spec.js
-      // pushes one entry per test run into the array it writes to result.json,
-      // so a retry would record a duplicate and the publish gate's per-asset
-      // count check would reject a run that actually succeeded.
       retries: 0,
       use: {
         ...devices["Desktop Chrome"],

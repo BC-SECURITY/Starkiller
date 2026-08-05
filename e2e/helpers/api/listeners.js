@@ -42,6 +42,17 @@ export function mockListenerTemplate(page, template) {
   });
 }
 
+// AutoRunModules.vue's selectedListener watcher is `immediate: true`, and the
+// parent's initial value is the placeholder `{ options: {} }` — so this fires
+// TWICE, once with an undefined id. The wildcard covers both; a route bound to
+// a specific listener id would let the first call reach the 599 sentinel.
+export function mockAutorunTasks(page, tasks) {
+  return page.route("**/api/v2/listeners/*/autorun", (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(paginatedResponse(tasks));
+  });
+}
+
 // Records URL + method + body for every mutating request to /listeners/*.
 // The kill action uses DELETE /listeners/{id} (no body).
 export function recordListenerActions(page) {
