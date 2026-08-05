@@ -38,3 +38,6 @@ pnpm-debug.log*
 # Kept local; they describe how a change was produced, not how the app works.
 .superpowers/
 docs/superpowers/
+
+# Generated documentation screenshots (published into the Empire repo)
+/e2e/docs/output/

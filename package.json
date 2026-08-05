@@ -13,8 +13,10 @@
     "lint": "eslint --fix .",
     "format": "prettier .  --write",
     "format:check": "prettier .  --check",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:ui": "playwright test --project=chromium --ui",
+    "docs:screenshots": "playwright test --project=docs",
+    "docs:publish": "node scripts/publish-docs-screenshots.mjs",
     "test:unit": "vitest",
     "test:unit:run": "vitest run"
   },

@@ -36,8 +36,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    // Unit/component tests live in src/. The e2e/ directory is owned by
-    // Playwright (test:e2e); keep Vitest out of it.
-    include: ["src/**/*.{test,spec}.{js,jsx}"],
+    // Unit/component tests live in src/, Node tooling tests in scripts/. The
+    // e2e/ directory is owned by Playwright (test:e2e); keep Vitest out of it.
+    include: ["src/**/*.{test,spec}.{js,jsx}", "scripts/**/*.{test,spec}.js"],
   },
 });

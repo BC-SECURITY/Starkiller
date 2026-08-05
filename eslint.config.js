@@ -121,12 +121,12 @@ export default [
     },
   },
 
-  // Node-context files: build config and the Playwright e2e suite. These were
-  // outside the old `eslint ... src` scope; the new `eslint .` scope includes
-  // them, so grant Node globals (process, etc.) to avoid no-undef noise. There
-  // are no unit tests / mocha env to port.
+  // Node-context files: build config, the Playwright e2e suite, and Node
+  // tooling scripts. These were outside the old `eslint ... src` scope; the
+  // new `eslint .` scope includes them, so grant Node globals (process, etc.)
+  // to avoid no-undef noise. There are no unit tests / mocha env to port.
   {
-    files: ["*.config.js", "e2e/**/*.js"],
+    files: ["*.config.js", "e2e/**/*.js", "scripts/**/*.mjs"],
     languageOptions: {
       globals: globals.node,
     },
