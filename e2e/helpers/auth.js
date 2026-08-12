@@ -45,6 +45,23 @@ export async function setFakeAuth(
   );
 }
 
+// Flips the already-seeded user to admin AFTER prepareDocsPage has run,
+// touching only user.is_admin so empireVersion (7.0.0) survives and the
+// compatibility banner stays suppressed. Mirrors seedNotifications.
+export async function seedAdmin(page) {
+  await page.addInitScript(() => {
+    const raw = localStorage.getItem("application");
+    if (!raw) {
+      throw new Error(
+        "seedAdmin: localStorage 'application' is empty — call setFakeAuth (via mockDocsBackground in beforeEach) before seedAdmin.",
+      );
+    }
+    const state = JSON.parse(raw);
+    state.user = { ...state.user, is_admin: true };
+    localStorage.setItem("application", JSON.stringify(state));
+  });
+}
+
 export async function loginViaForm(page, { url, username, password }) {
   await page.goto("/");
   // Exact-match avoids colliding with the "Remember URL and Username"

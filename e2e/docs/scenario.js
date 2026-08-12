@@ -711,6 +711,42 @@ export const scenario = {
     { id: 3, keyword: "Invoke-PowerDump", replacement: "T8MC3" },
   ],
 
+  users: [
+    { id: 1, username: "admin", is_admin: true, enabled: true },
+    { id: 2, username: "operator", is_admin: false, enabled: true },
+    { id: 3, username: "analyst", is_admin: false, enabled: false },
+  ],
+
+  // Bypasses.vue renders Name, Updated At and Actions columns
+  // (Bypasses.vue:100-104). `name` renders as a router-link to bypassEdit;
+  // updated_at goes through DateTimeDisplay, same relative-time/N/A rule as
+  // malleableProfiles above. etw carries the real PowerShell ETW-patch
+  // one-liner (BypassEdit.vue's code editor is the eventual Task 6 target),
+  // the others are illustrative shorter stand-ins.
+  bypasses: [
+    {
+      id: 1,
+      name: "etw",
+      language: "powershell",
+      code: "[System.Diagnostics.Eventing.EventProvider].GetField('m_enabled','NonPublic,Instance').SetValue([Ref].Assembly.GetType('System.Management.Automation.Tracing.PSEtwLogProvider').GetField('etwProvider','NonPublic,Static').GetValue($null),0);",
+      updated_at: hoursAgo(6),
+    },
+    {
+      id: 2,
+      name: "mattifestation",
+      language: "powershell",
+      code: "$a=[Ref].Assembly.GetTypes();...",
+      updated_at: daysAgo(2),
+    },
+    {
+      id: 3,
+      name: "SafeChecksPython",
+      language: "python",
+      code: "import os\n# aborts the launcher on hosts running Little Snitch",
+      updated_at: daysAgo(5),
+    },
+  ],
+
   // Exact shipped defaults from empire/server/config.yaml:34-49. All three
   // ship disabled; only powershell is preobfuscatable, which is why the
   // Preobfuscate and Remove buttons render disabled on the other two.

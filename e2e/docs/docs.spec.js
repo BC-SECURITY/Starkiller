@@ -28,6 +28,7 @@ import {
   mockAgentTasksFeed,
 } from "../helpers/api/agents.js";
 import { mockMalleableProfilesList } from "../helpers/api/malleable.js";
+import { mockBypassesList, mockBypassDetail } from "../helpers/api/bypasses.js";
 import { mockModulesList, mockModuleDetail } from "../helpers/api/modules.js";
 import {
   mockPluginMarketplace,
@@ -37,6 +38,8 @@ import { seedNotifications } from "../helpers/api/notifications.js";
 import { mockCredentialsList } from "../helpers/api/credentials.js";
 import { mockDownloadsList } from "../helpers/api/downloads.js";
 import { mockTagsRegistry } from "../helpers/api/tags.js";
+import { mockUsersList } from "../helpers/api/users.js";
+import { seedAdmin } from "../helpers/auth.js";
 import {
   mockObfuscationKeywords,
   mockObfuscationGlobal,
@@ -403,6 +406,45 @@ test.describe("documentation screenshots", () => {
     await expect(page.getByText("a day ago")).toBeVisible();
 
     await captureDocsShot(page, "malleable_profiles.png");
+  });
+
+  test("bypasses list @docs", async ({ page }) => {
+    await mockBypassesList(page, scenario.bypasses);
+
+    await gotoDocs(page, "/#/bypasses");
+
+    // Name column: renders as a router-link to the edit route.
+    await expect(
+      page.getByRole("link", { name: "etw", exact: true }),
+    ).toBeVisible();
+    // Updated At column: routes through DateTimeDisplay, which silently shows
+    // "N/A" for an unparseable value — assert the relative string so a bad
+    // timestamp fails instead of publishing "N/A". FROZEN_TIME is 2026-06-15
+    // 14:30Z and etw's updated_at is hoursAgo(6), so it renders "6 hours ago".
+    await expect(page.getByText("6 hours ago")).toBeVisible();
+
+    await captureDocsShot(page, "bypasses_list.png");
+  });
+
+  test("bypass edit @docs", async ({ page }) => {
+    const bypass = scenario.bypasses[0]; // etw, has real code
+    await mockBypassesList(page, scenario.bypasses);
+    await mockBypassDetail(page, bypass);
+
+    await gotoDocs(page, `/#/bypasses/${bypass.id}`);
+
+    // The mode computed returns "View" for a non-new, non-copy record, so the
+    // heading self-labels "View Bypass" (see the docs page, which matches this).
+    await expect(
+      page.getByRole("heading", { name: "View Bypass" }),
+    ).toBeVisible();
+    // The code control is a text field bound to form.code — assert its VALUE
+    // (getByText will not match an input/textarea value). "PSEtwLogProvider" is
+    // a unique substring of the etw code; a renamed field publishes an empty
+    // editor and this fails.
+    await expect(page.getByLabel("code")).toHaveValue(/PSEtwLogProvider/);
+
+    await captureDocsShot(page, "bypass_edit.png");
   });
 
   test("malleable listener form @docs", async ({ page }) => {
@@ -1051,5 +1093,117 @@ test.describe("documentation screenshots", () => {
     await page.clock.runFor(500);
 
     await captureDocsShot(page, "dashboard.png");
+  });
+
+  test("users list @docs", async ({ page }) => {
+    await seedAdmin(page);
+    await mockUsersList(page, scenario.users);
+
+    await gotoDocs(page, "/#/users");
+
+    // Name column: a non-admin username renders as a router-link to the edit
+    // route ONLY on the admin path (Users.vue #item.username v-if="isAdmin").
+    // Asserting the link therefore guards the Name column AND proves seedAdmin
+    // took — without it the cell is a plain <span> and this fails.
+    await expect(
+      page.getByRole("link", { name: "operator", exact: true }),
+    ).toBeVisible();
+    // Actions column: the per-row Enabled switch is wrapped in v-if="isAdmin".
+    // Its label confirms the admin-gated Actions column rendered.
+    await expect(page.getByText("Enabled").first()).toBeVisible();
+
+    await captureDocsShot(page, "users_list.png");
+  });
+
+  test("user edit @docs", async ({ page }) => {
+    // The New-user form is gated on isNew === ($route.name === "userNew"), so
+    // navigate to the NAMED /users/new route, not merely a URL without an id.
+    // requiresAdmin on that route needs seedAdmin or the guard blocks it.
+    await seedAdmin(page);
+
+    await gotoDocs(page, "/#/users/new");
+
+    // The three New-state markers. Password + Confirm render only when isNew,
+    // so asserting them proves the correct route resolved.
+    // exact: true on Password/Confirm Password: each field's show/hide toggle
+    // icon carries an aria-label of "<Label> appended action" (e.g. "Confirm
+    // Password appended action"), which is otherwise a substring match for
+    // the same getByLabel call and trips Playwright's strict mode.
+    await expect(page.getByLabel("Username")).toBeVisible();
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+    await expect(
+      page.getByLabel("Confirm Password", { exact: true }),
+    ).toBeVisible();
+
+    await captureDocsShot(page, "user_edit.png");
+  });
+
+  test("notifications @docs", async ({ page }) => {
+    await seedNotifications(page, scenario.notifications);
+
+    await gotoDocs(page, "/#/notifications");
+
+    // Title AND the text subtitle. The store field is item.text (NOT
+    // item.message); asserting both guards a renamed field publishing blank
+    // list rows, matching the check-in notification test's precedent.
+    await expect(page.getByText("New Agent", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("New Agent 'R9TF6NCV' callback!"),
+    ).toBeVisible();
+
+    await captureDocsShot(page, "notifications.png");
+  });
+
+  test("settings @docs", async ({ page }) => {
+    // With no uploaded avatar the component renders <v-img src="ui-avatars.com
+    // /...&background=random">. Fulfill it with a valid local PNG: deterministic,
+    // no external dependency, and (unlike route.abort) it does not trip
+    // settleImages' broken-asset throw.
+    const png1x1 = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "base64",
+    );
+    await page.route("**ui-avatars.com/**", (route) =>
+      route.fulfill({ contentType: "image/png", body: png1x1 }),
+    );
+
+    await gotoDocs(page, "/#/settings");
+
+    // Top-of-page and bottom-of-page markers. "Reload Plugins" is the last
+    // section; asserting it visible proves the clipped capture spans the full
+    // content, not just the 720px fold.
+    await expect(
+      page.getByRole("heading", { name: "Update Password" }),
+    ).toBeVisible();
+    await expect(page.getByText("Reload Plugins")).toBeVisible();
+
+    // Clip to the content container (Settings.vue's <div class="page">) so the
+    // full tall page is captured instead of the top 720px. ".page" is unique
+    // across src/ (grep confirmed), so this resolves to exactly one element.
+    const pageEl = page.locator(".page");
+
+    // .page (measured ~2000px) exceeds the 720px viewport, so
+    // locator.screenshot() would otherwise fall back to CDP's
+    // captureBeyondViewport rather than a normal in-viewport capture. As
+    // documented for obfuscation_global.png/dashboard.png above, App.vue
+    // wraps every real route in a fixed v-app-bar (top) and fixed v-footer
+    // (bottom); captureBeyondViewport paints position:fixed chrome at its
+    // viewport-relative coordinates onto the oversized canvas instead of
+    // scrolling it out of frame. Measured directly here: at the default
+    // 720px viewport the fixed chrome was baked into the middle of the
+    // capture, stamped over "Clear Application State" and hiding the avatar
+    // row entirely under it. Growing the viewport to the page's full
+    // height (plus the footer) up front avoids captureBeyondViewport
+    // altogether.
+    const pageBox = await pageEl.boundingBox();
+    const footerBox = await page.locator(".v-footer").boundingBox();
+    await page.setViewportSize({
+      width: 1440,
+      height: Math.ceil(pageBox.y + pageBox.height + footerBox.height + 40),
+    });
+
+    await captureDocsShot(page, "settings.png", {
+      clip: pageEl,
+    });
   });
 });

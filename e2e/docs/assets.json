@@ -9,6 +9,8 @@
   "plugin-dependencies.png",
   "malleable_profiles.png",
   "malleable_listener.png",
+  "bypasses_list.png",
+  "bypass_edit.png",
   "agent_interact.png",
   "agent_file_browser.png",
   "starkiller_checkin.png",
@@ -18,5 +20,9 @@
   "tags.png",
   "obfuscation_keywords.png",
   "obfuscation_global.png",
-  "dashboard.png"
+  "dashboard.png",
+  "users_list.png",
+  "user_edit.png",
+  "notifications.png",
+  "settings.png"
 ]
