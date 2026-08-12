@@ -826,6 +826,73 @@ test.describe("documentation screenshots", () => {
     await captureDocsShot(page, "malleable_listener.png");
   });
 
+  test("http hop listener form @docs", async ({ page }) => {
+    const hop = scenario.listenerTemplates.find((t) => t.id === "http_hop");
+    await mockGeneralFormBackground(page);
+    await mockListenerTemplates(page, scenario.listenerTemplates);
+    await mockListenerTemplate(page, hop);
+    // RedirectListener is a frontend-populated combobox (useSuggestedValues.js
+    // maps it to listenerStore.listenerNames), so the existing listeners MUST
+    // be mocked or the dropdown renders with no options.
+    await mockListenersList(page, scenario.listeners);
+    await mockUsersList(page, []);
+
+    await gotoDocs(page, "/#/listeners/new");
+
+    // Select the http_hop template from the Type dropdown (same pattern as the
+    // malleable form test's virtual-scroller handling).
+    const typeField = page.getByRole("combobox", { name: "Type" });
+    await typeField.click();
+    await tickUntil(
+      page,
+      async () => (await page.getByRole("option").count()) > 0,
+    );
+    await page.getByRole("option", { name: "http_hop" }).click();
+
+    // The RedirectListener dropdown is what this page's prose is about — assert
+    // it renders and, when opened, is populated from the existing listeners.
+    // If getByLabel misses, read ListenerEdit.vue/general-form for the actual
+    // accessible name rather than guessing (as the malleable test's comments do).
+    await expect(page.getByLabel("RedirectListener")).toBeVisible();
+    await expect(page.getByLabel("OutFolder")).toBeVisible();
+
+    const redirectField = page.getByRole("combobox", {
+      name: "RedirectListener",
+    });
+    // RedirectListener sits low enough in the form that, at the default
+    // 720px viewport, Vuetify's VMenu has no room to open downward and
+    // flips upward instead — covering the Host field and Port's label
+    // above it (measured: without this, the shot showed the option list
+    // overlapping the fields above rather than sitting cleanly under
+    // RedirectListener). Grow the viewport so the menu has headroom below
+    // the field before opening it; scenario.listeners is small (2 entries)
+    // so a fixed margin comfortably covers the rendered option list.
+    const redirectBox = await redirectField.boundingBox();
+    await page.setViewportSize({
+      width: 1440,
+      height: Math.ceil(redirectBox.y + redirectBox.height + 250),
+    });
+    await redirectField.click();
+    await tickUntil(
+      page,
+      async () => (await page.getByRole("option").count()) > 0,
+    );
+    await expect(
+      page.getByRole("option", { name: scenario.listeners[0].name }),
+    ).toBeVisible();
+
+    // Leave the menu open so the shot shows the populated dropdown. Unlike
+    // the malleable/multi-agent shots, this one does NOT call
+    // closeDocsOverlay afterward: that helper's first assertion requires the
+    // overlay to have already closed LOGICALLY (no v-overlay--active), which
+    // is true for a selection that closes its own menu but false here, where
+    // the menu is deliberately still open at capture time — confirmed by
+    // running it and reading closeDocsOverlay's own assertion in capture.js
+    // rather than guessing. The options were already settled by the
+    // tickUntil above, so no further rAF wait is needed before capturing.
+    await captureDocsShot(page, "http_hop_listener.png");
+  });
+
   test("agent interact view @docs", async ({ page }) => {
     // K3H8P2WQ is powershell. AgentExecuteModule intersects the selected
     // agent's language group against each module's language, so a python

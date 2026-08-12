@@ -426,6 +426,38 @@ export const scenario = {
         },
       },
     },
+    {
+      id: "http_hop",
+      name: "http_hop",
+      description: "Starts a http[s] listener that uses a GET/POST approach.",
+      options: {
+        Name: {
+          value: "hop-redirector",
+          required: true,
+          description: "Name for the listener.",
+        },
+        RedirectListener: {
+          value: "",
+          required: true,
+          description: "Existing listener to redirect the hop traffic to.",
+        },
+        Host: {
+          value: "http://192.0.2.20",
+          required: true,
+          description: "Hostname/IP for staging.",
+        },
+        Port: {
+          value: "80",
+          required: true,
+          description: "Port for the listener.",
+        },
+        OutFolder: {
+          value: "/tmp/http_hop/",
+          required: true,
+          description: "Folder to output redirectors to.",
+        },
+      },
+    },
   ],
 
   // Matched by module_id against scenario.modules[].id. AutoRunModules renders
