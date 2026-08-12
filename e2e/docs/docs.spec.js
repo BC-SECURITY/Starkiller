@@ -31,6 +31,7 @@ import {
   mockDashboardOnlyEndpoints,
   mockCheckinsAggregate,
   mockAgentTasksFeed,
+  mockAgentTaskList,
 } from "../helpers/api/agents.js";
 import {
   mockMalleableProfilesList,
@@ -50,11 +51,12 @@ import { mockDownloadsList } from "../helpers/api/downloads.js";
 import { mockTagsRegistry } from "../helpers/api/tags.js";
 import { mockUsersList } from "../helpers/api/users.js";
 import { seedAdmin } from "../helpers/auth.js";
+import { jsonResponse } from "../helpers/responses.js";
 import {
   mockObfuscationKeywords,
   mockObfuscationGlobal,
 } from "../helpers/api/obfuscation.js";
-import { scenario } from "./scenario.js";
+import { scenario, FROZEN_TIME } from "./scenario.js";
 import {
   prepareDocsPage,
   mockDocsBackground,
@@ -991,6 +993,404 @@ test.describe("documentation screenshots", () => {
     await expect(page.getByText("Users")).toBeVisible();
 
     await captureDocsShot(page, "agent_file_browser.png");
+  });
+
+  test("agent tasks page @docs", async ({ page }) => {
+    // Reuse the interact/file-browser shots' powershell agent (WIN-DC01);
+    // every scenario.agentTasks record is agent_id: "K3H8P2WQ".
+    const agent = scenario.agents.find((a) => a.session_id === "K3H8P2WQ");
+    await mockAgentDetail(page, agent);
+    await mockAgentDetailSubResources(page);
+    // NOT mockAgentTaskList: AgentTasksList (the Tasks tab) drives
+    // TasksTable with `selectedAgents: [agent.session_id]`, and
+    // TasksTable.getTasks() always calls the adapter with that ARRAY as
+    // `selected`. agent-task-api.js's getTasks() routes an array sessionId
+    // to the aggregate `GET /agents/tasks?agents=<id>` endpoint, never the
+    // singular `/agents/{id}/tasks` — confirmed empirically: with
+    // mockAgentTaskList only, the request never matched and the afterEach's
+    // apiFailures check caught the real request hitting the 599 sentinel at
+    // `/agents/tasks?...&agents=K3H8P2WQ`. mockAgentTasksFeed (already used
+    // for the Dashboard's Recent Tasks card) targets that same aggregate
+    // endpoint, so it's the correct mock here too.
+    await mockAgentTasksFeed(page, scenario.agentTasks);
+
+    await gotoDocs(page, `/#/agents/${agent.session_id}?tab=tasks`);
+
+    // AgentEdit teleports its tab strip into #app-bar-extension; the
+    // VExpandTransition height restore runs in an rAF the paused clock never
+    // fires, so without this the tab row is height:0 and clipped out of the
+    // capture though every tab still passes toBeVisible().
+    await tickUntilTabStripSized(page);
+
+    await expect(page.getByRole("tab", { name: "Tasks" })).toBeVisible();
+
+    // Same debounce mechanism as the "plugin tasks" shot above:
+    // TasksTable.vue's mounted() fires its 500ms-debounced getTasks()
+    // immediately, before AgentTasksList's own async store fetches
+    // (agentStore.getAgents()/userStore.getUsers()) resolve — so that first
+    // call sees empty selectedEntities/selectedUsers and no-ops. The Users
+    // filter's items only populate once those fetches resolve, which
+    // re-triggers the debounce via TasksTable's selectedUsers watcher.
+    // Resolving the mocked fetches needs the REAL event loop, which
+    // page.clock.runFor() does not provide (it only advances the fake
+    // in-page timer clock); a real wait has to come first, then the fake
+    // clock is ticked to let the rescheduled debounce fire.
+    await page.waitForTimeout(500);
+    await page.clock.runFor(600);
+
+    // Assert-before-capture: a real fixture row must render. `task_name` is
+    // the column to assert on — agentTaskConfig.js marks it
+    // `defaultHeader: true` (rendered directly in the table), whereas
+    // `input` is `defaultHeader: false` and only shows up once a column is
+    // manually enabled. Using `input` here would pass locally against a
+    // stale build but publish blank cells for the real default view.
+    const firstTaskName = scenario.agentTasks[0].task_name;
+    await tickUntil(
+      page,
+      async () =>
+        (await page.getByText(firstTaskName, { exact: false }).count()) > 0,
+    );
+    await expect(
+      page.getByText(firstTaskName, { exact: false }).first(),
+    ).toBeVisible();
+
+    await captureDocsShot(page, "agent_tasks_page.png");
+  });
+
+  test("agent jobs @docs", async ({ page }) => {
+    // Reuse the interact/file-browser/tasks-page shots' powershell agent
+    // (WIN-DC01), delay: 5.
+    const agent = scenario.agents.find((a) => a.session_id === "K3H8P2WQ");
+    await mockAgentDetail(page, agent);
+    await mockAgentDetailSubResources(page);
+
+    // AgentJobs.vue's `agent` watcher fires refreshJobs() immediately on
+    // mount: POST /tasks/jobs (task the agent to report jobs), then poll
+    // GET /tasks/{id} until output is set, then GET /tasks (list) to match
+    // each reported job to the task that started it.
+    const jobsTaskId = "jobs-poll-1";
+    const jobId = 42;
+
+    // mockAgentDetailSubResources stubs POST /tasks/shell specifically but
+    // does NOT stub /tasks/jobs -- without this it falls through to the 599
+    // sentinel.
+    await page.route("**/api/v2/agents/*/tasks/jobs", (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      return route.fulfill(
+        jsonResponse({ id: jobsTaskId, status: "queued" }, 201),
+      );
+    });
+
+    // GET /tasks/{jobsTaskId}: the polled task result. mockAgentDetailSubResources
+    // already stubs a generic single-task GET returning output:"/" for ANY
+    // task id; this route uses jobsTaskId's exact literal id (not a wildcard),
+    // so it only intercepts THIS poll and is registered after sub-resources so
+    // LIFO tries it first. Output matches TASK_GETJOBS's real format --
+    // AgentJobs.parseGetJobsOutput() reads "<jobId> | <status>" lines,
+    // skipping the header and separator.
+    await page.route(`**/api/v2/agents/*/tasks/${jobsTaskId}`, (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      return route.fulfill(
+        jsonResponse({
+          id: jobsTaskId,
+          status: "completed",
+          output: `Task ID | Status\n--------------------\n${jobId} | running`,
+        }),
+      );
+    });
+
+    // GET /agents/{id}/tasks (creator-task matching): AgentJobs looks for the
+    // task whose output includes `Job started: ${jobId}` to source the job
+    // row's task_name/input/created_at. sessionId is passed as a plain string
+    // here (not an array), so agent-task-api's getTasks() routes to the
+    // singular endpoint -- mockAgentTaskList, registered after
+    // mockAgentDetailSubResources so LIFO serves this populated list instead
+    // of that helper's empty stub.
+    const creatorTaskTime = new Date(
+      FROZEN_TIME.getTime() - 12 * 60_000,
+    ).toISOString();
+    await mockAgentTaskList(page, [
+      {
+        id: 250,
+        agent_id: agent.session_id,
+        task_name: "powershell_collection_keylogger",
+        input: "Start-Keylogger -Background True",
+        status: "completed",
+        username: "ACME\\Administrator",
+        created_at: creatorTaskTime,
+        updated_at: creatorTaskTime,
+        output: `Job started: ${jobId}`,
+        tags: [],
+      },
+    ]);
+
+    await gotoDocs(page, `/#/agents/${agent.session_id}?tab=jobs`);
+
+    // AgentEdit teleports its tab strip into #app-bar-extension; the
+    // VExpandTransition height restore runs in an rAF the paused clock never
+    // fires, so without this the tab row is height:0 and clipped out of the
+    // capture though every tab still passes toBeVisible().
+    await tickUntilTabStripSized(page);
+
+    await expect(page.getByRole("tab", { name: "Jobs" })).toBeVisible();
+
+    // refreshJobs() awaits the POST above, then pause()s for
+    // max(agent.delay * 1000, 1000) = 5000ms (this agent's delay: 5) via a
+    // real setTimeout before its first GET /tasks/{id} poll attempt. A single
+    // bounded tick past that pause -- same mechanism gotoDocs's own
+    // clock.runFor(500) uses to flush the first routed fetch -- advances the
+    // fake clock far enough to fire that timer and let the poll + creator
+    // match resolve.
+    await page.clock.runFor(5500);
+
+    await expect(page.getByText("Background Jobs")).toBeVisible();
+    // Assert-before-capture, load-bearing: a real job row rendered -- the
+    // creator task's name, not the "Unknown" fallback AgentJobs shows when
+    // creator-matching fails to find a task whose output names this job.
+    await expect(
+      page.getByText("powershell_collection_keylogger"),
+    ).toBeVisible();
+    // The job's own reported status (from the polled TASK_GETJOBS output,
+    // independent of the creator task's own "completed" status) renders as a
+    // status chip.
+    await expect(page.getByText("running", { exact: true })).toBeVisible();
+
+    await captureDocsShot(page, "agent_jobs.png");
+  });
+
+  test("agent stats @docs", async ({ page }) => {
+    // Reuse the interact/file-browser/tasks-page shots' powershell agent
+    // (WIN-DC01); every scenario.agentTasks record is agent_id: "K3H8P2WQ".
+    const agent = scenario.agents.find((a) => a.session_id === "K3H8P2WQ");
+    await mockAgentDetail(page, agent);
+    await mockAgentDetailSubResources(page);
+    // AgentStats calls agentTaskApi.getTasks(sessionId, {...}) with a
+    // plain-string sessionId (not the array the Tasks tab's TasksTable
+    // uses), which routes to the singular GET /agents/{id}/tasks endpoint —
+    // mockAgentTaskList, not mockAgentTasksFeed (that's the aggregate
+    // endpoint the Tasks tab test above needs). This one mock covers all
+    // three calls AgentStats fires against that route: the total-count
+    // probe (limit=1), the queued-count probe (limit=1&status=queued), and
+    // the full task-history fetch that feeds the "Tasks Over Time" chart.
+    await mockAgentTaskList(page, scenario.agentTasks);
+    // CheckinChart (the "Check Ins" card) is a separate component that
+    // fetches its own data via agentApi.getCheckinsAgg() -> GET
+    // /agents/checkins/aggregate?session_id=<id>, independent of the tasks
+    // endpoint above. Without this mock the request falls through to the
+    // 599 sentinel and the afterEach's apiFailures check fails. The mock
+    // ignores query params (bucket_size/start_date/session_id), so it
+    // always returns the fixed checkinAggregate records regardless of the
+    // component's default "Second" (1-minute lookback) timeframe — those
+    // six hoursAgo(...) records render as six distinct bars.
+    await mockCheckinsAggregate(page, scenario.checkinAggregate);
+
+    await gotoDocs(page, `/#/agents/${agent.session_id}?tab=stats`);
+
+    // AgentEdit teleports its tab strip into #app-bar-extension; the
+    // VExpandTransition height restore runs in an rAF the paused clock never
+    // fires, so without this the tab row is height:0 and clipped out of the
+    // capture though every tab still passes toBeVisible().
+    await tickUntilTabStripSized(page);
+
+    await expect(page.getByRole("tab", { name: "Stats" })).toBeVisible();
+
+    // Assert-before-capture, load-bearing: prove data rendered rather than
+    // an empty shell.
+    //
+    // 1. The Total Tasks tile: deriveCounts() reads the mocked response's
+    //    `.total` (paginatedResponse sets total = agentTasks.length = 7), so
+    //    a non-"—" numeric value here proves the count endpoint's response
+    //    shape wasn't silently broken. Targeted directly via the tile's
+    //    `aria-label="${tile.title}: ${tile.value}"` attribute (set in
+    //    AgentStats.vue's toplineTiles template) rather than scoping from a
+    //    ".v-card" ancestor — AgentEdit.vue wraps the whole Stats tab in its
+    //    own `<v-card flat>`, which also matches ".v-card" and contains
+    //    "Total Tasks" in its combined text, so a hasText filter on ".v-card"
+    //    resolves to both that outer wrapper AND the real tile card.
+    const totalTasksValue = page.locator('[aria-label^="Total Tasks:"]');
+    await tickUntil(page, async () => {
+      const text = await totalTasksValue.innerText();
+      return text.trim() === String(scenario.agentTasks.length);
+    });
+    await expect(totalTasksValue).toHaveText(
+      String(scenario.agentTasks.length),
+    );
+
+    // 2. The Check Ins card's own canvas (from CheckinChart.vue): it only
+    //    mounts a <Bar> (and therefore a <canvas>) when hasData is true —
+    //    scoping to this specific card (rather than a page-wide canvas
+    //    count) proves THIS chart got data, not just the separate "Tasks
+    //    Over Time" LineChart lower on the page. Scoped via the immediate
+    //    parent of the "Check Ins" v-card-title (that title's direct
+    //    container is the tile's own v-card), same reasoning as above for
+    //    avoiding a ".v-card" hasText filter.
+    const checkinsCard = page
+      .locator(".v-card-title", { hasText: "Check Ins" })
+      .locator("xpath=..");
+    await tickUntil(
+      page,
+      async () => (await checkinsCard.locator("canvas").count()) > 0,
+    );
+    await expect(checkinsCard.locator("canvas").first()).toBeVisible();
+
+    // AgentStats stacks six cards (topline x3, info x3, Check Ins,
+    // Tasks Over Time) taller than the default 720px viewport. Without
+    // resizing, the fixed footer (position: fixed, per App.vue) sits over
+    // the lower half of the Check Ins chart and the Tasks Over Time card
+    // never appears at all — every assertion above still passes since they
+    // check the real DOM, not clipped pixels, exactly the "toBeVisible()
+    // doesn't detect clipping" trap the credentials-list shot's comment
+    // warns about. Grow the viewport to the full stack's height (same
+    // approach as the "dashboard @docs" shot) so both charts are captured
+    // whole.
+    const statsSurfaceBox = await page
+      .locator(".sk-stats-surface")
+      .boundingBox();
+    const footerBox = await page.locator(".v-footer").boundingBox();
+    await page.setViewportSize({
+      width: 1440,
+      height: Math.ceil(
+        statsSurfaceBox.y + statsSurfaceBox.height + footerBox.height + 40,
+      ),
+    });
+    // Let chart.js's responsive resize settle under the paused clock before
+    // capturing.
+    await page.clock.runFor(500);
+    await expect(checkinsCard.locator("canvas").first()).toBeVisible();
+
+    await captureDocsShot(page, "agent_stats.png");
+  });
+
+  test("agent shell @docs", async ({ page }) => {
+    // Reuse the interact/file-browser/tasks-page/stats shots' powershell
+    // agent (WIN-DC01).
+    const agent = scenario.agents.find((a) => a.session_id === "K3H8P2WQ");
+    await mockAgentDetail(page, agent);
+    // mockAgentDetailSubResources stubs POST /tasks/shell + the single-task
+    // GET with output:"/" -- keep that default for the initial mount round
+    // trip (see below) and only override it once that's settled.
+    await mockAgentDetailSubResources(page);
+
+    await gotoDocs(page, `/#/agents/${agent.session_id}`);
+
+    // AgentEdit teleports its tab strip into #app-bar-extension; the
+    // VExpandTransition height restore runs in an rAF the paused clock never
+    // fires, so without this the tab row is height:0 and clipped out of the
+    // capture though every tab still passes toBeVisible().
+    await tickUntilTabStripSized(page);
+
+    // interactTab defaults to "module" (see the "agent interact view" shot
+    // above); AgentShellSession only mounts -- and fires its cwd probe --
+    // once "Shell" is selected.
+    await page.getByRole("tab", { name: "Shell" }).click();
+
+    const shellPane = page.locator('[data-testid="agent-shell"]');
+    await expect(shellPane).toBeVisible();
+
+    // Let the mount-time cwd probe resolve (currentDir: "loading..." -> "/")
+    // before installing the richer stub below. AgentShellSession.vue's
+    // mounted() hook feeds POST /tasks/shell's response into currentDir --
+    // which renders as the PROMPT, not an output line -- so overriding that
+    // endpoint with multi-line output up front (as originally drafted)
+    // would corrupt the prompt into a garbled multi-line blob rather than
+    // producing a realistic session. Driving the richer output through a
+    // typed command instead renders exactly like a real session: unchanged
+    // prompt, echoed command, output line.
+    await tickUntil(
+      page,
+      async () => !(await page.getByText("loading...").count()),
+    );
+
+    const shellOutput =
+      "PATH          : C:\\Windows\\system32\nUSERNAME      : ACME\\Administrator\nCOMPUTERNAME  : WIN-DC01";
+    await page.route("**/api/v2/agents/*/tasks/shell", (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      return route.fulfill(
+        jsonResponse(
+          { id: "shell-cmd", output: shellOutput, status: "completed" },
+          201,
+        ),
+      );
+    });
+    await page.route("**/api/v2/agents/*/tasks/*", (route) => {
+      const url = new URL(route.request().url());
+      if (route.request().method() !== "GET") return route.fallback();
+      // Only match single-task GETs (e.g. /tasks/shell-cmd), not the list.
+      if (!url.pathname.match(/\/tasks\/[^/]+$/)) return route.fallback();
+      return route.fulfill(
+        jsonResponse({
+          id: "shell-cmd",
+          output: shellOutput,
+          status: "completed",
+        }),
+      );
+    });
+
+    const shellInput = shellPane.locator("input");
+    await shellInput.fill("systeminfo");
+    await shellInput.press("Enter");
+
+    // Assert-before-capture, load-bearing: the seeded output renders as real
+    // output in the pane, not just the unchanged "/" prompt.
+    await tickUntil(
+      page,
+      async () => (await page.getByText("COMPUTERNAME").count()) > 0,
+    );
+    await expect(shellPane.getByText("COMPUTERNAME")).toBeVisible();
+    // The echoed command line proves this is a typed session, not a static
+    // dump: prompt + command + output, like a real interactive shell.
+    await expect(shellPane.getByText("systeminfo")).toBeVisible();
+
+    await captureDocsShot(page, "agent_shell.png");
+  });
+
+  test("agent terminal tabs @docs", async ({ page }) => {
+    // Reuse the interact/file-browser/tasks-page/stats/shell shots' agent
+    // (WIN-DC01).
+    const agent = scenario.agents.find((a) => a.session_id === "K3H8P2WQ");
+    await mockAgentDetail(page, agent);
+    await mockAgentDetailSubResources(page);
+
+    await gotoDocs(page, `/#/agents/${agent.session_id}?tab=interact`);
+
+    // AgentEdit teleports its tab strip into #app-bar-extension, same as the
+    // other agent-detail shots above.
+    await tickUntilTabStripSized(page);
+
+    // interactTab defaults to "module" (see the "agent interact view" shot
+    // above); TabbedTerminalContainer only mounts -- and reads/writes
+    // localStorage under storage-key `terminal-tabs-${id}` -- once "Terminal"
+    // is selected.
+    await page.getByRole("tab", { name: "Terminal" }).click();
+
+    // AgentTerminal (the child rendered per-tab) carries this testid; wait
+    // for the first tab's pane to actually mount before touching the add-tab
+    // control.
+    await tickUntil(
+      page,
+      async () =>
+        (await page.locator('[data-testid="agent-terminal"]').count()) > 0,
+    );
+
+    // TabbedTerminalContainer always starts with exactly one tab.
+    const terminalTabs = page.locator(".tabbed-terminal-tab");
+    await expect(terminalTabs).toHaveCount(1);
+
+    // The add-tab (+) control is the lone `v-btn` with an `fa-plus` icon
+    // (TabbedTerminalContainer.vue's `@click="addTab"` button after the
+    // v-tabs strip) -- `fa-plus` (not `fa-plus-square`) is unique to this
+    // component on the page.
+    const addTab = page.locator("button:has(.fa-plus)");
+    await addTab.click();
+
+    // Assert-before-capture, load-bearing: a second terminal tab now exists,
+    // proving the multi-tab feature -- not just the outer Interact/File
+    // Browser/... tabs or the inner Module/Shell/Terminal sub-tabs -- is
+    // visibly demonstrated.
+    await tickUntil(page, async () => (await terminalTabs.count()) >= 2);
+    await expect(terminalTabs).toHaveCount(2);
+
+    await captureDocsShot(page, "agent_terminal_tabs.png");
   });
 
   test("agent check-in notification @docs", async ({ page }) => {

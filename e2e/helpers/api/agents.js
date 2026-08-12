@@ -52,8 +52,12 @@ export async function mockAgentDetailSubResources(page) {
       jsonResponse({ id: "shell-init", output: "/", status: "completed" }),
     );
   });
-  // Task list poller (AgentTasksList tabs): GET /agents/*/tasks (with optional query).
-  await page.route("**/api/v2/agents/*/tasks", (route) => {
+  // Task list poller (AgentTasksList tabs): GET /agents/*/tasks (with optional
+  // query). getTasks() always sends query params (limit/page/order_by/...), so
+  // a bare "**/api/v2/agents/*/tasks" glob — anchored with nothing after
+  // "tasks" — never matches the real request and falls through to the 599
+  // sentinel. Regex instead, anchored on "?" or end-of-string.
+  await page.route(/\/api\/v2\/agents\/[^/]+\/tasks(\?|$)/, (route) => {
     if (route.request().method() !== "GET") return route.fallback();
     return route.fulfill(paginatedResponse([]));
   });
@@ -120,6 +124,18 @@ export function mockCheckinsAggregate(page, payload) {
 // populated feed instead of its empty stub.
 export function mockAgentTasksFeed(page, tasks) {
   return page.route("**/api/v2/agents/tasks*", (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(paginatedResponse(tasks));
+  });
+}
+
+// GET /agents/{id}/tasks (the per-agent Tasks tab + Stats counts/chart source).
+// Register AFTER mockAgentDetailSubResources so LIFO serves this populated list
+// instead of that helper's empty stub. Matches the list route only, never
+// /tasks/<id> single-task GETs. Regex (not a glob), same reasoning as the
+// empty stub above: getTasks() always appends a query string.
+export function mockAgentTaskList(page, tasks) {
+  return page.route(/\/api\/v2\/agents\/[^/]+\/tasks(\?|$)/, (route) => {
     if (route.request().method() !== "GET") return route.fallback();
     return route.fulfill(paginatedResponse(tasks));
   });

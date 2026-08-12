@@ -261,6 +261,117 @@ export const scenario = {
     },
   ],
 
+  // Per-agent Tasks tab (AgentTasksTable.vue, columns from
+  // agentTaskConfig.js) and AgentStats' topline counts + CheckinChart bucket
+  // source share this fixture, but hit DIFFERENT endpoints. AgentStats and
+  // CheckinChart call agentTaskApi.getTasks(sessionId, ...) with a plain
+  // string, which routes to GET /agents/{id}/tasks (mockAgentTaskList in
+  // e2e/helpers/api/agents.js). The Tasks tab (AgentTasksList ->
+  // AgentTasksTable -> TasksTable) always calls getTasks() with
+  // selectedEntities, an ARRAY (even when it holds one agent), which
+  // getTasks() routes to the aggregate GET /agents/tasks?agents=<id>
+  // endpoint instead — the same one Dashboard's Recent Tasks card uses
+  // (mockAgentTasksFeed). Confirmed empirically capturing agent_tasks_page.png:
+  // mocking only /agents/{id}/tasks left the Tasks tab's real request
+  // (.../agents/tasks?...&agents=K3H8P2WQ) unmocked, hitting the 599
+  // sentinel. Field names are locked to
+  // agentTaskAdapter.js + agentTaskConfig.js: idField is `agent_id` (NOT
+  // `agent` — it's also the router-link param agentTaskAdapter reads), and
+  // the visible columns read id/status/input/task_name/agent_id/username/
+  // updated_at/tags. `output` feeds TasksTable.vue's expanded-row detail.
+  // Every record is agent_id: "K3H8P2WQ". created_at/updated_at are spread
+  // across a few hours so AgentStats' taskChartData (buckets on
+  // task.created_at) renders multiple bars instead of one spike.
+  agentTasks: [
+    {
+      id: 101,
+      agent_id: "K3H8P2WQ",
+      task_name: "TASK_SYSINFO",
+      input: "sysinfo",
+      status: "completed",
+      username: "ACME\\Administrator",
+      created_at: hoursAgo(5),
+      updated_at: hoursAgo(5),
+      output:
+        "Listener: http-primary\nInternal IP: 192.0.2.10\nUsername: ACME\\Administrator\nHostname: WIN-DC01\nOS: Windows Server 2022\nHigh Integrity: 1\nProcess: powershell.exe (4812)",
+      tags: [],
+    },
+    {
+      id: 102,
+      agent_id: "K3H8P2WQ",
+      task_name: "shell whoami",
+      input: "shell whoami",
+      status: "completed",
+      username: "ACME\\Administrator",
+      created_at: hoursAgo(4),
+      updated_at: hoursAgo(4),
+      output: "acme\\administrator",
+      tags: [],
+    },
+    {
+      id: 103,
+      agent_id: "K3H8P2WQ",
+      task_name: "powershell_situational_awareness_host_processes",
+      input: "Get-Process",
+      status: "completed",
+      username: "ACME\\Administrator",
+      created_at: hoursAgo(3),
+      updated_at: hoursAgo(3),
+      output:
+        "Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName\n-------  ------    -----      -----     ------     --  -- -----------\n    412      21    18344      24212       1.23   4812   1 powershell",
+      tags: [],
+    },
+    {
+      id: 104,
+      agent_id: "K3H8P2WQ",
+      task_name: "powershell_credentials_mimikatz_logonpasswords",
+      input: 'Invoke-Mimikatz -Command "sekurlsa::logonpasswords"',
+      status: "completed",
+      username: "ACME\\Administrator",
+      created_at: hoursAgo(2),
+      updated_at: hoursAgo(2),
+      output:
+        "Authentication Id : 0 ; 999999\nsession           : Interactive\nuser name         : Administrator\ndomain            : ACME",
+      tags: [{ id: 2, name: "domain-admin", color: "#d63031" }],
+    },
+    {
+      id: 105,
+      agent_id: "K3H8P2WQ",
+      task_name: "shell whoami /priv",
+      input: "shell whoami /priv",
+      status: "error",
+      username: "ACME\\Administrator",
+      created_at: hoursAgo(1),
+      updated_at: minutesAgo(55),
+      output: "Error: task timed out waiting for agent checkin.",
+      tags: [],
+    },
+    {
+      id: 106,
+      agent_id: "K3H8P2WQ",
+      task_name: "shell ipconfig /all",
+      input: "shell ipconfig /all",
+      status: "queued",
+      username: "ACME\\Administrator",
+      created_at: minutesAgo(20),
+      updated_at: minutesAgo(20),
+      output: "",
+      tags: [],
+    },
+    {
+      id: 107,
+      agent_id: "K3H8P2WQ",
+      task_name: "TASK_SYSINFO",
+      input: "sysinfo",
+      status: "queued",
+      username: "ACME\\Administrator",
+      created_at: minutesAgo(4),
+      updated_at: minutesAgo(4),
+      output: "",
+      tags: [],
+    },
+  ],
+
   // enabled: true is required — AgentExecuteModule filters on it.
   modules: [
     {
