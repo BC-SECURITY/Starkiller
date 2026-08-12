@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.3] - 2026-08-12
+
 ### Fixed
 
 -   The `poetry add` command shown for a plugin's missing Python dependencies is now shell-quoted, so a version-pinned requirement like `mcp>=1.2,<2` can be pasted as-is — previously the shell read `>`/`<` as redirection and installed the package unpinned
@@ -598,7 +600,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.3...HEAD
+
+[4.0.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.2...v4.0.3
 
 [4.0.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.1...v4.0.2
 
