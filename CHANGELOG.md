@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+-   The `poetry add` command shown for a plugin's missing Python dependencies is now shell-quoted, so a version-pinned requirement like `mcp>=1.2,<2` can be pasted as-is — previously the shell read `>`/`<` as redirection and installed the package unpinned
 -   Agent graph draws pivot chains again against Empire 7.0 — peer-to-peer (SMB / port-forward) listeners are now detected by their `Agent` option instead of the listener-template `category` field that Empire 7.0 removed
 
 ## [4.0.2] - 2026-08-01

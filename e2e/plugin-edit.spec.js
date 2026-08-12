@@ -7,6 +7,7 @@ import {
   mockGeneralFormBackground,
 } from "./helpers/network.js";
 import { mockPluginDetail } from "./helpers/api/plugins.js";
+import { notLoadedPluginDetail } from "./fixtures/plugins.js";
 
 test.describe("plugin edit", () => {
   test.beforeEach(async ({ page }) => {
@@ -33,14 +34,9 @@ test.describe("plugin edit", () => {
     // is what actually exercises the sink. It must now render as literal,
     // escaped text regardless.
     const plugin = {
+      ...notLoadedPluginDetail,
       id: "evilplugin",
       name: "evilplugin",
-      loaded: false,
-      enabled: false,
-      execution_enabled: false,
-      authors: [],
-      execution_options: {},
-      settings_options: {},
       python_deps: [
         '\n```\n<img src=x onerror="window.__xssFired = true">\n![beacon](https://evil.example/beacon.png)\n```\n',
       ],
@@ -76,14 +72,9 @@ test.describe("plugin edit", () => {
     page,
   }) => {
     const plugin = {
+      ...notLoadedPluginDetail,
       id: "needsdeps",
       name: "needsdeps",
-      loaded: false,
-      enabled: false,
-      execution_enabled: false,
-      authors: [],
-      execution_options: {},
-      settings_options: {},
       python_deps: ["requests", "pyyaml"],
     };
     await mockPluginDetail(page, plugin);
@@ -101,5 +92,29 @@ test.describe("plugin edit", () => {
     const command = page.locator(".plugin-deps-command");
     await expect(command).toHaveText("poetry add requests pyyaml");
     await expect(command).toHaveCSS("font-family", /mono/i);
+  });
+
+  test("shell-quotes version-pinned dependencies so the command survives a paste", async ({
+    page,
+  }) => {
+    // A requirement like `mcp>=1.2,<2` is not pasteable unquoted: `>` and `<`
+    // are redirection operators, so the shell splits the word into an
+    // argument plus redirection operands and poetry receives a bare, unpinned
+    // `mcp`. Plain names stay bare — only the requirements that need quoting
+    // get it. See src/utils/__tests__/shell.spec.js for the per-shell detail.
+    const plugin = {
+      ...notLoadedPluginDetail,
+      id: "pinneddeps",
+      name: "pinneddeps",
+      python_deps: ["mcp>=1.2,<2", "anthropic>=0.40", "requests"],
+    };
+    await mockPluginDetail(page, plugin);
+
+    await page.goto("/#/plugins/pinneddeps");
+    await page.getByRole("tab", { name: "Details" }).click();
+
+    await expect(page.locator(".plugin-deps-command")).toHaveText(
+      "poetry add 'mcp>=1.2,<2' 'anthropic>=0.40' requests",
+    );
   });
 });

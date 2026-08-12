@@ -184,6 +184,7 @@ import TooltipButtonToggle from "@/components/TooltipButtonToggle.vue";
 import ErrorStateAlert from "@/components/ErrorStateAlert.vue";
 import VueMarkdown from "vue-markdown-render";
 import AuthorChips from "@/components/AuthorChips.vue";
+import { shellQuote } from "@/utils/shell";
 
 export default {
   name: "PluginEdit",
@@ -278,7 +279,9 @@ export default {
     },
     pluginDepsCommand() {
       if (!this.plugin.python_deps.length > 0) return "";
-      return `poetry add ${this.plugin.python_deps.join(" ")}`;
+      // Quoted per-requirement: version specifiers carry `>`/`<`, which the
+      // shell would otherwise take as redirection when this is pasted.
+      return `poetry add ${this.plugin.python_deps.map(shellQuote).join(" ")}`;
     },
   },
   mounted() {
