@@ -172,6 +172,95 @@ export const scenario = {
     },
   ],
 
+  // AgentFileBrowser's root load calls getDirectory(sessionId, "/") → GET
+  // /agents/{id}/files/root, whose response is { children: [...] }
+  // (agent-api.js's getDirectory unwraps .children into the array the treeview
+  // sorts). Each node needs is_file / name / id / path; transform() maps
+  // is_file → `file` and gives folders `children: []` so they render
+  // expandable. A missing/non-array children would throw in items.sort and
+  // fall into the scrape path — so this must be a populated array.
+  agentFiles: [
+    { id: "C:\\Users", name: "Users", is_file: false, path: "C:\\Users" },
+    { id: "C:\\Windows", name: "Windows", is_file: false, path: "C:\\Windows" },
+    { id: "C:\\Temp", name: "Temp", is_file: false, path: "C:\\Temp" },
+    {
+      id: "C:\\loot.zip",
+      name: "loot.zip",
+      is_file: true,
+      path: "C:\\loot.zip",
+    },
+    {
+      id: "C:\\seatbelt-output.txt",
+      name: "seatbelt-output.txt",
+      is_file: true,
+      path: "C:\\seatbelt-output.txt",
+    },
+  ],
+
+  // Dashboard CheckinChart (no agents selected) -> getCheckinsAgg() -> GET
+  // /agents/checkins/aggregate, reads response.records, buildDataset maps
+  // { x: checkin_time, y: count }. Timestamps derived from FROZEN_TIME.
+  //
+  // This 10-hour span only reads correctly under the "Hour" timeframe (24h
+  // window, hourly buckets), which the dashboard test seeds explicitly — the
+  // app's own default is "Second", a 60-second window. Move these timestamps
+  // and that seed together, or the card captions a window it doesn't plot.
+  checkinAggregate: {
+    records: [
+      { checkin_time: hoursAgo(10), count: 3 },
+      { checkin_time: hoursAgo(8), count: 7 },
+      { checkin_time: hoursAgo(6), count: 5 },
+      { checkin_time: hoursAgo(4), count: 9 },
+      { checkin_time: hoursAgo(2), count: 6 },
+      { checkin_time: hoursAgo(1), count: 8 },
+    ],
+  },
+
+  // Recent Tasks card = <agent-tasks-table :hide-columns="['id','task_name']">,
+  // fed by GET /agents/tasks (paginated). Kept at <=10 rows (real data table).
+  // `agent_id` is the config.idField (agentTaskConfig.js) the row's router-link
+  // reads — a missing/renamed one throws "Missing required param id" — and it
+  // renders in the non-hidden Agent column.
+  //
+  // `updated_at`, NOT created_at, is what the card actually shows: it is the
+  // defaultHeader "Updated At" column and the table's default sort key. Omit it
+  // and DateTimeDisplay renders fromNow(undefined) as "a few seconds ago" on
+  // every row, behind an allowlisted [Vue warn] — a plausible-looking wrong
+  // value rather than a blank one. Descending updated_at fixes the row order.
+  recentTasks: [
+    {
+      id: 1,
+      agent_id: "K3H8P2WQ",
+      task_name: "powershell_situational_awareness_host_processes",
+      input: "Get-Process",
+      status: "completed",
+      username: "ACME\\Administrator",
+      created_at: minutesAgo(4),
+      updated_at: minutesAgo(3),
+    },
+    {
+      id: 2,
+      agent_id: "M7QX4LZB",
+      task_name: "shell whoami",
+      input: "shell whoami",
+      status: "completed",
+      username: "ACME\\j.mercer",
+      created_at: minutesAgo(11),
+      updated_at: minutesAgo(10),
+    },
+    {
+      id: 3,
+      agent_id: "R9TF6NCV",
+      task_name: "python_collection_linux_pillage",
+      input: "pillage /home",
+      status: "queued",
+      username: "svc_deploy",
+      // Still queued, so it has never been updated since creation.
+      created_at: minutesAgo(18),
+      updated_at: minutesAgo(18),
+    },
+  ],
+
   // enabled: true is required — AgentExecuteModule filters on it.
   modules: [
     {

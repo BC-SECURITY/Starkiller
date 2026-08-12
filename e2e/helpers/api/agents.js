@@ -76,6 +76,16 @@ export function mockAgentDetail(page, agent) {
   });
 }
 
+// GET /agents/{id}/files/{dir} (root load hits /files/root). getDirectory
+// unwraps the `children` array; the docs shot must NOT trigger the POST
+// /tasks/directory_list scrape, so return a populated children array here.
+export function mockAgentDirectory(page, sessionId, children) {
+  return page.route(`**/api/v2/agents/${sessionId}/files/**`, (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse({ children }));
+  });
+}
+
 // Endpoints only the Dashboard hits, stubbed empty:
 // - GET /agents/tasks (Recent Tasks table, plus its auto-refresh poller)
 // - GET /agents/checkins/ and /agents/checkins/aggregate (Check Ins chart);
@@ -91,6 +101,27 @@ export async function mockDashboardOnlyEndpoints(page) {
   await page.route(/\/api\/v2\/agents\/checkins\//, (route) => {
     if (route.request().method() !== "GET") return route.fallback();
     return route.fulfill(paginatedResponse([]));
+  });
+}
+
+// GET /agents/checkins/aggregate -> { records: [{ checkin_time, count }] }.
+// Register AFTER mockDashboardOnlyEndpoints: its /checkins/ regex also matches
+// /checkins/aggregate, and route resolution is LIFO, so this populated payload
+// wins for the aggregate call while the empty stub covers the unused path.
+export function mockCheckinsAggregate(page, payload) {
+  return page.route("**/api/v2/agents/checkins/aggregate*", (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(jsonResponse(payload));
+  });
+}
+
+// GET /agents/tasks (the aggregated feed behind the Dashboard's Recent Tasks
+// card). Register AFTER mockDashboardOnlyEndpoints so LIFO serves this
+// populated feed instead of its empty stub.
+export function mockAgentTasksFeed(page, tasks) {
+  return page.route("**/api/v2/agents/tasks*", (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    return route.fulfill(paginatedResponse(tasks));
   });
 }
 

@@ -10,11 +10,13 @@
   "malleable_profiles.png",
   "malleable_listener.png",
   "agent_interact.png",
+  "agent_file_browser.png",
   "starkiller_checkin.png",
   "credentials.png",
   "tag_picker.png",
   "downloads.png",
   "tags.png",
   "obfuscation_keywords.png",
-  "obfuscation_global.png"
+  "obfuscation_global.png",
+  "dashboard.png"
 ]

@@ -22,6 +22,10 @@ import {
   mockAgentsList,
   mockAgentDetail,
   mockAgentDetailSubResources,
+  mockAgentDirectory,
+  mockDashboardOnlyEndpoints,
+  mockCheckinsAggregate,
+  mockAgentTasksFeed,
 } from "../helpers/api/agents.js";
 import { mockMalleableProfilesList } from "../helpers/api/malleable.js";
 import { mockModulesList, mockModuleDetail } from "../helpers/api/modules.js";
@@ -41,6 +45,7 @@ import { scenario } from "./scenario.js";
 import {
   prepareDocsPage,
   mockDocsBackground,
+  gotoDocs,
   captureDocsShot,
   closeDocsOverlay,
   tickUntil,
@@ -136,7 +141,7 @@ test.describe("documentation screenshots", () => {
 
   test("listeners list @docs", async ({ page }) => {
     await mockListenersList(page, scenario.listeners);
-    await page.goto("/#/listeners");
+    await gotoDocs(page, "/#/listeners");
     await expect(page.getByText("http-primary").first()).toBeVisible();
     await expect(page.getByText("smb-pivot").first()).toBeVisible();
     // A second column, distinct from Name: options.Host renders in the Host
@@ -148,7 +153,7 @@ test.describe("documentation screenshots", () => {
 
   test("stagers list @docs", async ({ page }) => {
     await mockStagersList(page, scenario.stagers);
-    await page.goto("/#/stagers");
+    await gotoDocs(page, "/#/stagers");
     await expect(
       page.getByText("acme-powershell-launcher").first(),
     ).toBeVisible();
@@ -160,7 +165,7 @@ test.describe("documentation screenshots", () => {
 
   test("agents list @docs", async ({ page }) => {
     await mockAgentsList(page, scenario.agents);
-    await page.goto("/#/agents");
+    await gotoDocs(page, "/#/agents");
     // Assert a value from every default-visible column (AgentsTable.vue's
     // defaultHeader entries), so a rename of any one of them shows up as a
     // failure rather than a blank cell in the screenshot. hostname and
@@ -193,7 +198,7 @@ test.describe("documentation screenshots", () => {
 
   test("modules list @docs", async ({ page }) => {
     await mockModulesList(page, scenario.modules);
-    await page.goto("/#/modules");
+    await gotoDocs(page, "/#/modules");
     await expect(
       page.getByText("powershell_situational_awareness_host_processes").first(),
     ).toBeVisible();
@@ -215,7 +220,7 @@ test.describe("documentation screenshots", () => {
     await mockModulesList(page, scenario.modules);
     await mockModuleDetail(page, scenario.modules[0]);
 
-    await page.goto(`/#/modules/${scenario.modules[0].id}`);
+    await gotoDocs(page, `/#/modules/${scenario.modules[0].id}`);
     await expect(page.getByRole("button", { name: /submit/i })).toBeVisible();
 
     // Select three agents to show multi-agent tasking. They must share a
@@ -276,7 +281,10 @@ test.describe("documentation screenshots", () => {
     await mockModulesList(page, scenario.modules);
     await mockAutorunTasks(page, scenario.autorunTasks);
 
-    await page.goto(`/#/listeners/${scenario.listeners[0].id}?tab=autorun`);
+    await gotoDocs(
+      page,
+      `/#/listeners/${scenario.listeners[0].id}?tab=autorun`,
+    );
 
     // ListenerEdit teleports its View/Autorun tabs into #app-bar-extension —
     // see tickUntilTabStripSized's header for why they need an explicit tick.
@@ -322,7 +330,7 @@ test.describe("documentation screenshots", () => {
   test("plugin marketplace @docs", async ({ page }) => {
     await mockPluginMarketplace(page, scenario.marketplace);
 
-    await page.goto("/#/plugin-marketplace");
+    await gotoDocs(page, "/#/plugin-marketplace");
 
     // Left rail: both entries. PluginMarketplace sorts by name.localeCompare,
     // so a record without a string `name` throws before anything renders.
@@ -351,7 +359,15 @@ test.describe("documentation screenshots", () => {
     // With loaded/enabled/execution_enabled all false, interactDisabled is
     // true and PluginEdit defaults to the details tab on its own — but pass
     // it explicitly so the shot does not depend on that fallback.
-    await page.goto(`/#/plugins/${scenario.plugins[0].id}?tab=details`);
+    // tick: 0 is load-bearing. settleImages' header spells out why: the first
+    // clock tick on this page flips VTabs' mandatory-selection fallback onto a
+    // DISABLED tab (three of PluginEdit's four are disabled for this fixture),
+    // which hides the alert this shot exists to show. The toHaveText checks
+    // below still pass on a display:none element, so the breakage would only
+    // surface as an opaque locator.screenshot() timeout.
+    await gotoDocs(page, `/#/plugins/${scenario.plugins[0].id}?tab=details`, {
+      tick: 0,
+    });
 
     // Both strings are generated, not literal: pluginDepsMessage branches on
     // python_deps being non-empty, and pluginDepsCommand joins the same array.
@@ -371,7 +387,7 @@ test.describe("documentation screenshots", () => {
   test("malleable profiles list @docs", async ({ page }) => {
     await mockMalleableProfilesList(page, scenario.malleableProfiles);
 
-    await page.goto("/#/malleable-profiles");
+    await gotoDocs(page, "/#/malleable-profiles");
 
     // One assertion per default-visible column (Name, Category, Updated At).
     // Name renders as a router-link; Updated At goes through
@@ -397,7 +413,7 @@ test.describe("documentation screenshots", () => {
 
     // /listeners/new has no listener to fetch — only the template list. The
     // type dropdown drives the template detail fetch.
-    await page.goto("/#/listeners/new");
+    await gotoDocs(page, "/#/listeners/new");
 
     // The type selector is the only combobox on a fresh /listeners/new form:
     // general-form (which could render other comboboxes, e.g. Profile once a
@@ -451,7 +467,7 @@ test.describe("documentation screenshots", () => {
     // the shot publishes an agent with an empty module dropdown.
     await mockModulesList(page, scenario.modules);
 
-    await page.goto(`/#/agents/${agent.session_id}`);
+    await gotoDocs(page, `/#/agents/${agent.session_id}`);
 
     // AgentEdit teleports its tab strip into #app-bar-extension, same as
     // ListenerEdit above. Verified empirically: without this tick the whole
@@ -502,11 +518,47 @@ test.describe("documentation screenshots", () => {
     await captureDocsShot(page, "agent_interact.png");
   });
 
+  test("agent file browser @docs", async ({ page }) => {
+    // Reuse the interact shot's powershell agent (WIN-DC01). mockAgentDetail
+    // is required: navigating to /agents/{id} fetches the bare
+    // GET /agents/{id}, which neither mockAgentsList nor
+    // mockAgentDetailSubResources serves — without it that GET hits the 599
+    // sentinel and the afterEach fails.
+    const agent = scenario.agents.find((a) => a.session_id === "K3H8P2WQ");
+    await mockAgentDetail(page, agent);
+    await mockAgentDetailSubResources(page);
+    await mockAgentDirectory(page, agent.session_id, scenario.agentFiles);
+
+    await gotoDocs(page, `/#/agents/${agent.session_id}`);
+
+    // AgentEdit teleports its tab strip into #app-bar-extension; the
+    // VExpandTransition height restore runs in an rAF the paused clock never
+    // fires, so without this the six-tab row is height:0 and clipped out of
+    // the capture though every tab still passes toBeVisible().
+    await tickUntilTabStripSized(page);
+
+    await page.getByRole("tab", { name: "File Browser" }).click();
+
+    // Let the tab-panel transition + treeview render settle (rAF-driven).
+    await tickUntil(
+      page,
+      async () => (await page.getByText("seatbelt-output.txt").count()) > 0,
+    );
+
+    // Load-bearing: scenario filenames render as treeview nodes. This is a
+    // v-treeview (not a data-table), so assert on node text, not table cells,
+    // and there is no ≤10-row paginator concern here.
+    await expect(page.getByText("seatbelt-output.txt")).toBeVisible();
+    await expect(page.getByText("Users")).toBeVisible();
+
+    await captureDocsShot(page, "agent_file_browser.png");
+  });
+
   test("agent check-in notification @docs", async ({ page }) => {
     await seedNotifications(page, scenario.notifications);
     await mockAgentsList(page, scenario.agents);
 
-    await page.goto("/#/agents");
+    await gotoDocs(page, "/#/agents");
 
     // The badge counts unread items. NotificationBell clears it via
     // markAllNotificationsAsRead() when the menu CLOSES, so the badge only
@@ -592,7 +644,7 @@ test.describe("documentation screenshots", () => {
     await mockTagsRegistry(page, scenario.tags);
     await mockCredentialsList(page, scenario.credentials);
 
-    await page.goto("/#/credentials");
+    await gotoDocs(page, "/#/credentials");
 
     // One assertion per default-visible column. This table has no
     // defaultHeader convention and no column picker (Credentials.vue:154-163
@@ -645,7 +697,7 @@ test.describe("documentation screenshots", () => {
     await mockTagsRegistry(page, scenario.tags);
     await mockCredentialsList(page, scenario.credentials);
 
-    await page.goto("/#/credentials");
+    await gotoDocs(page, "/#/credentials");
     await expect(page.getByText("svc-backup")).toBeVisible();
 
     // Open from an untagged row. TagViewer renders the literal "Add tags"
@@ -696,7 +748,7 @@ test.describe("documentation screenshots", () => {
     await mockTagsRegistry(page, scenario.tags);
     await mockDownloadsList(page, scenario.downloads);
 
-    await page.goto("/#/downloads");
+    await gotoDocs(page, "/#/downloads");
 
     // Default-visible columns: Id, Filename, Size, Created At, Updated At,
     // Tags, Actions (Downloads.vue:148-156, a static array).
@@ -765,7 +817,7 @@ test.describe("documentation screenshots", () => {
   test("tags registry @docs", async ({ page }) => {
     await mockTagsRegistry(page, scenario.tags);
 
-    await page.goto("/#/tags");
+    await gotoDocs(page, "/#/tags");
 
     // Default-visible columns: Name, Description, Usage, Actions
     // (Tags.vue:48-53). Name renders as a TagChip, not text — exact:true
@@ -803,7 +855,7 @@ test.describe("documentation screenshots", () => {
     await mockObfuscationKeywords(page, scenario.obfuscationKeywords);
     await mockObfuscationGlobal(page, scenario.obfuscationConfigs);
 
-    await page.goto("/#/obfuscation");
+    await gotoDocs(page, "/#/obfuscation");
 
     // Left card: the keyword table's two data columns. mockObfuscationKeywords
     // returned a hardcoded empty list until this branch, so an unpopulated
@@ -880,5 +932,124 @@ test.describe("documentation screenshots", () => {
     await captureDocsShot(page, "obfuscation_global.png", {
       clip: globalCard,
     });
+  });
+
+  test("dashboard @docs", async ({ page }) => {
+    // Grow the viewport up front so every card — including the charts below the
+    // topology — lays out at full size and the topology svg gets real
+    // dimensions to fit its nodes into.
+    await page.setViewportSize({ width: 1440, height: 1800 });
+
+    // CheckinChart's timeframe defaults to "Second", whose window is 60s
+    // ("Last 60 Seconds") — it would caption the card with a minute while
+    // plotting checkinAggregate's 10-hour span, on a per-second axis. "Hour"
+    // is the one that matches the fixture: a 24h window, hourly buckets. It
+    // also drops the refresh cadence from 5s to 5min, so the ~6.7s of clock
+    // this test ticks can no longer cross a poll boundary mid-capture.
+    // Persisted in the `application` slice, so patch it the same way
+    // prepareDocsPage patches empireVersion — before any navigation.
+    await page.addInitScript(() => {
+      const raw = localStorage.getItem("application");
+      if (!raw) throw new Error("dashboard: setFakeAuth must run first");
+      const state = JSON.parse(raw);
+      state.dashboardCheckinTimeframe = "Hour";
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+
+    // Stat cards + doughnut come from the three list stores; the Topology card
+    // (agent-graph) fetches /listener-templates on mount. mockDashboardOnly-
+    // Endpoints stubs the non-aggregate /checkins/ path and /agents/tasks
+    // empty; the two populated mocks after it win by LIFO.
+    await mockAgentsList(page, scenario.agents);
+    await mockCredentialsList(page, scenario.credentials);
+    await mockListenersList(page, scenario.listeners);
+    await mockListenerTemplates(page, scenario.listenerTemplates);
+    await mockDashboardOnlyEndpoints(page);
+    await mockCheckinsAggregate(page, scenario.checkinAggregate);
+    await mockAgentTasksFeed(page, scenario.recentTasks);
+
+    await gotoDocs(page, "/#/");
+
+    // Settle the boot fetch, the force sim, the chart.js canvases and the
+    // graph's first-render autofit under the paused clock. gotoDocs already
+    // ticked 500ms; this clears the 2000ms autofit + zoom settle.
+    await page.clock.runFor(2500);
+
+    // Assert the COUNTS, not the card titles. "Agents"/"Credentials"/
+    // "Listeners" are hardcoded toplineMetrics strings that render identically
+    // whether the store holds 5 rows or 0, so a title-only check passes on a
+    // dashboard whose every stat reads 0 — the one thing this shot must never
+    // publish. Dashboard.vue puts the value in p.sk-metric-value with
+    // aria-label="<title>: <value>", which getByLabel reads directly.
+    await expect(
+      page.getByLabel(`Agents: ${scenario.agents.length}`),
+    ).toBeVisible();
+    await expect(
+      page.getByLabel(`Credentials: ${scenario.credentials.length}`),
+    ).toBeVisible();
+    await expect(
+      page.getByLabel(`Listeners: ${scenario.listeners.length}`),
+    ).toBeVisible();
+
+    // A drifted-but-200 list response leaves the stats at 0 AND raises
+    // Dashboard's own refreshError banner, which countFailedApiResponses
+    // (status-based) and consoleGuard (both channels allowlisted) would miss.
+    // Matched on role, not `type="error"`: type is a Vuetify prop that maps to
+    // colour/icon classes and never reaches the DOM as an attribute, so a
+    // [type='error'] selector matches nothing and passes vacuously. VAlert sets
+    // role="alert" unconditionally, so any banner is caught.
+    await expect(page.getByRole("alert")).toHaveCount(0);
+
+    // Topology drew nodes (graphly-d3 renders each as ".gly-node"); then force
+    // a fit so they are centred in the svg — the automatic first-render autofit
+    // can settle against a mis-sized svg under the frozen clock — and tick the
+    // fit's zoom animation.
+    const graph = page.locator('svg[aria-label="Agent topology graph"]');
+    await expect(graph).toBeVisible();
+    await expect(page.getByText("Failed to load graph data.")).toHaveCount(0);
+    await tickUntil(
+      page,
+      async () => (await graph.locator(".gly-node").count()) > 0,
+    );
+    // Let the force simulation iterate so the nodes spread out of their initial
+    // cluster before fitting (d3-force ticks on rAF, which the paused clock
+    // only advances when we tick it).
+    await page.clock.runFor(1200);
+    // The toolbar's icon buttons expose no text name; Unfocus only renders with
+    // a focused node, so "Show All Nodes" is the first toolbar button here.
+    // showAllNodes() runs a d3-zoom moveTo *transition*; give it enough ticks
+    // to finish, or the graph is captured mid-pan (off-centre).
+    await page.locator(".agent-graph__toolbar button").first().click();
+    await page.clock.runFor(2000);
+    expect(await graph.locator(".gly-node").count()).toBeGreaterThan(0);
+
+    // Doughnut + check-in chart canvases both exist.
+    expect(await page.locator("canvas").count()).toBeGreaterThanOrEqual(2);
+
+    // Recent Tasks. Scoped to the card, because agent ids are NOT unique to
+    // this table: scenario agents set name === session_id and the topology
+    // above renders that name as svg text, so an unscoped
+    // getByText("K3H8P2WQ").first() resolves to a graph node and passes with
+    // the table empty. `username` appears only in recentTasks, and asserting
+    // the rendered relative time pins updated_at — the field whose absence
+    // silently renders "a few seconds ago" on every row.
+    const recentTasks = page
+      .locator(".v-card")
+      .filter({ hasText: "Recent Tasks" });
+    await expect(recentTasks.getByText("svc_deploy")).toBeVisible();
+    await expect(recentTasks.getByText("ACME\\j.mercer")).toBeVisible();
+    await expect(recentTasks.getByText("18 minutes ago")).toBeVisible();
+
+    // Size the viewport to the full content height (footer's bottom edge) now
+    // that everything is laid out, so the charts below the topology are
+    // in-frame, then let the chart.js responsive resize settle.
+    const footer = await page.locator(".v-footer").boundingBox();
+    await page.setViewportSize({
+      width: 1440,
+      height: Math.ceil(footer.y + footer.height + 20),
+    });
+    await page.clock.runFor(500);
+
+    await captureDocsShot(page, "dashboard.png");
   });
 });

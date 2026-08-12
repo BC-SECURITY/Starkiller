@@ -67,6 +67,22 @@ export async function tickUntil(page, check) {
     .toBe(true);
 }
 
+// Navigate, then tick the frozen clock to release the app's first-route boot:
+// under a clock paused from t=0 the first routed fetch/mount can sit behind a
+// setTimeout/rAF that never fires, so the content renders blank while the
+// static shell still paints. 500ms is a FLOOR, not a ceiling — it has to clear
+// TasksTable's 500ms debounce. Crossing an in-app poll cadence is harmless
+// here because every endpoint is mocked, so don't read this as a budget;
+// callers needing more settling tick again on top of it.
+//
+// `tick: 0` skips the advance for pages where the first tick is itself what
+// breaks the shot — see settleImages' header for the VTabs case, and the
+// plugin-dependencies test that hits it.
+export async function gotoDocs(page, url, { tick = 500 } = {}) {
+  await page.goto(url);
+  if (tick > 0) await page.clock.runFor(tick);
+}
+
 // `dir` exists for this helper's own test — pointing it at OUTPUT_DIR would
 // delete the real capture set out from under a run. Real callers use the
 // default.

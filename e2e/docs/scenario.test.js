@@ -38,6 +38,15 @@ const REQUIRED_AGENT_KEYS = [
 // or empty screenshot with nothing failing. See scenario.js.
 const REQUIRED_STAGER_KEYS = ["name", "template", "user_id", "created_at"];
 
+// The Recent Tasks card on the dashboard renders <agent-tasks-table> with only
+// id and task_name hidden, so these are its visible columns. updated_at is the
+// one that bites: it is agentTaskConfig's defaultHeader time column AND the
+// table's default sort key, and omitting it renders "a few seconds ago" on
+// every row (same allowlisted [Vue warn] as the stager case above) rather than
+// a blank cell. agent_id additionally backs the row's router-link, which throws
+// "Missing required param id" without it.
+const REQUIRED_TASK_KEYS = ["agent_id", "status", "username", "updated_at"];
+
 // Visits every string leaf in the dataset, reporting a dotted path so a
 // failure names the offending field. The path convention is what makes the
 // sweeps below actionable, hence one traversal rather than several.
@@ -69,10 +78,23 @@ describe("docs scenario", () => {
       "plugins",
       "autorunTasks",
       "notifications",
+      "agentFiles",
+      "recentTasks",
     ]) {
       expect(Array.isArray(scenario[key]), `${key} is not an array`).toBe(true);
       expect(scenario[key].length, `${key} is empty`).toBeGreaterThan(0);
     }
+
+    // checkinAggregate is an object wrapping `records`, so the loop above and
+    // the pagination sweep below (both keyed on Array.isArray) skip it
+    // entirely. Checked by hand for the same reason everything else here is:
+    // an empty records array leaves CheckinChart's hasData false, the <Bar>
+    // unrendered, and the dashboard shot missing its whole bottom card.
+    expect(Array.isArray(scenario.checkinAggregate?.records)).toBe(true);
+    expect(
+      scenario.checkinAggregate.records.length,
+      "checkinAggregate.records is empty",
+    ).toBeGreaterThan(0);
   });
 
   it("has no timestamp at or after the frozen instant", () => {
@@ -115,6 +137,43 @@ describe("docs scenario", () => {
     }
   });
 
+  it("populates every column the Recent Tasks card renders", () => {
+    for (const task of scenario.recentTasks) {
+      for (const key of REQUIRED_TASK_KEYS) {
+        expect(task, `task ${task.id} missing ${key}`).toHaveProperty(key);
+      }
+    }
+  });
+
+  it("every recent task names a real scenario agent", () => {
+    // Same failure mode as the autorun/module check below: TasksTable's Agent
+    // column renders the raw agent_id, so a dangling reference looks IDENTICAL
+    // to a matched one in the screenshot. The router-link it builds would only
+    // break on click, which a capture never does.
+    const sessionIds = scenario.agents.map((a) => a.session_id);
+    for (const task of scenario.recentTasks) {
+      expect(sessionIds).toContain(task.agent_id);
+    }
+  });
+
+  it("marks every agent file as a file or a folder", () => {
+    // AgentFileBrowser's transform() gives a node `children: []` only on a
+    // STRICT is_file === false, and that array is what makes a folder
+    // expandable. A missing key or the string "false" renders the folder as a
+    // non-expandable leaf — the file browser shot's entire subject — while
+    // getByText("Users") still passes. Assert the type, not just presence.
+    for (const entry of scenario.agentFiles) {
+      expect(typeof entry.is_file, `${entry.name} is_file is not boolean`).toBe(
+        "boolean",
+      );
+      expect(entry, `${entry.name} missing name`).toHaveProperty("name");
+      expect(entry, `${entry.name} missing path`).toHaveProperty("path");
+    }
+    // Both kinds must appear, or the shot stops teaching the distinction.
+    expect(scenario.agentFiles.some((e) => e.is_file)).toBe(true);
+    expect(scenario.agentFiles.some((e) => !e.is_file)).toBe(true);
+  });
+
   it("keeps every module enabled", () => {
     // AgentExecuteModule only offers enabled modules; a disabled one silently
     // vanishes from the tasking screenshot's picker.
@@ -138,6 +197,13 @@ describe("docs scenario", () => {
         expect(rows.length, `${name} exceeds one page`).toBeLessThanOrEqual(10);
       }
     }
+    // Not a paginated table, so the 10 is arbitrary — but a chart with dozens
+    // of buckets renders as unreadable hairlines in a 2880px-wide capture,
+    // which is the same "the shot stops showing anything" outcome.
+    expect(
+      scenario.checkinAggregate.records.length,
+      "checkinAggregate.records would crowd the chart",
+    ).toBeLessThanOrEqual(10);
   });
 
   // Starkiller is a public C2 framework: a screenshot must never be mistakable
