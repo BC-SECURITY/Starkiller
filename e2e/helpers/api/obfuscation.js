@@ -16,10 +16,10 @@ export function mockObfuscationGlobal(page, configs) {
 
 // Obfuscation.vue calls obfuscationStore.getKeywords() on mount in addition
 // to getConfigs(). Both must be mocked so the page renders without unmocked calls.
-export function mockObfuscationKeywords(page) {
+export function mockObfuscationKeywords(page, keywords = []) {
   return page.route(KEYWORDS, (route) => {
     if (route.request().method() !== "GET") return route.fallback();
-    return route.fulfill(paginatedResponse([]));
+    return route.fulfill(paginatedResponse(keywords));
   });
 }
 

@@ -339,8 +339,10 @@ export const scenario = {
     },
   ],
 
-  // Matched by module_id against scenario.modules[].id — AutoRunModules renders
-  // `${index + 1}. ${module.id}`, so an unmatched id renders "1. undefined".
+  // Matched by module_id against scenario.modules[].id. AutoRunModules renders
+  // `${index + 1}. ${module.id || module.module_id}` and falls through to the
+  // raw task when nothing matches, so an unmatched id renders the SAME string
+  // as a real one — scenario.test.js is the only guard against it.
   autorunTasks: [
     {
       module_id: "powershell_situational_awareness_host_processes",
@@ -432,6 +434,218 @@ export const scenario = {
       route: "/listeners",
       buttonText: "VIEW",
       timestamp: hoursAgo(6),
+    },
+  ],
+
+  tags: [
+    {
+      id: 1,
+      name: "engagement",
+      color: "#6c5ce7",
+      description: "Collected during the current engagement",
+      usage_count: 4,
+    },
+    {
+      id: 2,
+      name: "domain-admin",
+      color: "#d63031",
+      description: "Grants Domain Admin on example.com",
+      usage_count: 1,
+    },
+    {
+      id: 3,
+      name: "exfil",
+      color: "#00b894",
+      description: "Staged for exfiltration review",
+      usage_count: 2,
+    },
+    {
+      id: 4,
+      name: "task:input",
+      color: "#0984e3",
+      description:
+        "Attached automatically to module-generated tasking-input files (e.g. BOF/C# loader payloads)",
+      usage_count: 1,
+    },
+    {
+      id: 5,
+      name: "reviewed",
+      color: "#fdcb6e",
+      description: "Triaged by the reporting lead",
+      usage_count: 0,
+    },
+  ],
+
+  // REVISED after the first capture measured the rendered table. The original
+  // set had one record per credtype (netntlmv2, dcc2, krbtgs,
+  // dpapi_masterkey), whose secrets run 50-85 characters. At the docs viewport
+  // the sidebar and filter card leave ~1092px of content width, the Tags column
+  // is a fixed 300px, and the resulting table needed ~1450px — Host, Tags and
+  // Actions fell off-frame and Domain was severed mid-word.
+  //
+  // So this set keeps only the credtypes whose secret is short enough to
+  // render: plaintext and hash. The full eleven-value vocabulary, with what
+  // `password` holds for each, lives in the reference table in
+  // docs/starkiller/credentials.md.
+  //
+  // The hash values are bare 32-char NT hashes, not `<lm>:<nt>`. credtypes.py
+  // documents the paired form as "when a non-empty LM half is present", and
+  // aad3b435b51404eeaad3b435b51404ee is precisely the EMPTY-LM sentinel — so
+  // the bare form is the correct one here as well as the narrower one.
+  //
+  // Passwords render in the clear, so every value is synthetic: example.com
+  // domains and patterned hex that is structurally valid but not derived from
+  // any real secret.
+  credentials: [
+    {
+      id: 1,
+      credtype: "plaintext",
+      domain: "example.com",
+      username: "svc-backup",
+      password: "Backup!Example123",
+      host: "APP-01",
+      tags: [{ id: 1, name: "engagement", color: "#6c5ce7" }],
+    },
+    {
+      id: 2,
+      credtype: "hash",
+      domain: "example.com",
+      username: "administrator",
+      password: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      host: "DC-01",
+      tags: [
+        { id: 1, name: "engagement", color: "#6c5ce7" },
+        { id: 2, name: "domain-admin", color: "#d63031" },
+      ],
+    },
+    {
+      id: 3,
+      credtype: "plaintext",
+      domain: "example.com",
+      username: "jdoe",
+      password: "Summer2026!",
+      host: "WKS-14",
+      tags: [],
+    },
+    {
+      id: 4,
+      credtype: "hash",
+      domain: "example.com",
+      username: "mchen",
+      password: "0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+      host: "WKS-22",
+      tags: [],
+    },
+    {
+      id: 5,
+      credtype: "plaintext",
+      domain: "example.com",
+      username: "svc-sql",
+      password: "Sql$vc-Example26",
+      host: "APP-01",
+      tags: [],
+    },
+  ],
+
+  // Filenames read plausibly across the four DownloadSourceFilter values
+  // (upload, stager, agent_file, agent_task). Sizes are chosen so
+  // Downloads.vue's formatBytes renders varied units rather than six "1 KB"s.
+  downloads: [
+    {
+      id: 1,
+      filename: "seatbelt-output.txt",
+      size: 18432,
+      location: "/downloads/A1B2C3D4/seatbelt-output.txt",
+      created_at: hoursAgo(3),
+      updated_at: hoursAgo(3),
+      tags: [
+        { id: 1, name: "engagement", color: "#6c5ce7" },
+        { id: 3, name: "exfil", color: "#00b894" },
+      ],
+    },
+    {
+      id: 2,
+      filename: "launcher.ps1",
+      size: 4096,
+      location: "/downloads/uploads/empireadmin/launcher.ps1",
+      created_at: hoursAgo(9),
+      updated_at: hoursAgo(9),
+      tags: [{ id: 4, name: "task:input", color: "#0984e3" }],
+    },
+    {
+      id: 3,
+      filename: "hosts-export.csv",
+      size: 262144,
+      location: "/downloads/A1B2C3D4/hosts-export.csv",
+      created_at: hoursAgo(20),
+      updated_at: hoursAgo(20),
+      tags: [{ id: 3, name: "exfil", color: "#00b894" }],
+    },
+    {
+      id: 4,
+      filename: "chatlog.csv",
+      size: 2048,
+      location: "/downloads/uploads/empireadmin/chatlog.csv",
+      created_at: daysAgo(1),
+      updated_at: hoursAgo(6),
+      tags: [{ id: 1, name: "engagement", color: "#6c5ce7" }],
+    },
+    {
+      id: 5,
+      filename: "sysinfo.json",
+      size: 9216,
+      location: "/downloads/E5F6A7B8/sysinfo.json",
+      created_at: daysAgo(2),
+      updated_at: daysAgo(2),
+      tags: [],
+    },
+    {
+      id: 6,
+      filename: "beacon-x64.bin",
+      size: 1310720,
+      location: "/downloads/uploads_system/beacon-x64.bin",
+      created_at: daysAgo(3),
+      updated_at: daysAgo(3),
+      tags: [],
+    },
+  ],
+
+  // Shape is { id, keyword, replacement } per Obfuscation.vue:230-245. The
+  // first two echo config.yaml's database.defaults.keyword_obfuscation
+  // (Invoke-Empire, Invoke-Mimikatz) so the image matches what a fresh
+  // install actually seeds; replacements there are random per install, so
+  // these are representative rather than reproducible. The third is an
+  // operator-added pair.
+  obfuscationKeywords: [
+    { id: 1, keyword: "Invoke-Empire", replacement: "K7QW2" },
+    { id: 2, keyword: "Invoke-Mimikatz", replacement: "R4XB9" },
+    { id: 3, keyword: "Invoke-PowerDump", replacement: "T8MC3" },
+  ],
+
+  // Exact shipped defaults from empire/server/config.yaml:34-49. All three
+  // ship disabled; only powershell is preobfuscatable, which is why the
+  // Preobfuscate and Remove buttons render disabled on the other two.
+  obfuscationConfigs: [
+    {
+      language: "powershell",
+      enabled: false,
+      command: "Token\\All\\1",
+      module: "invoke-obfuscation",
+      preobfuscatable: true,
+    },
+    {
+      language: "csharp",
+      enabled: false,
+      command: "",
+      module: "confuser",
+      preobfuscatable: false,
+    },
+    {
+      language: "python",
+      enabled: false,
+      command: "",
+      module: "python-obfuscator",
+      preobfuscatable: false,
     },
   ],
 };

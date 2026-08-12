@@ -123,14 +123,19 @@ describe("docs scenario", () => {
     }
   });
 
-  it("keeps every collection within the 15-row pagination limit", () => {
-    // Not Vuetify's default (10) — every list view in this app sets
-    // :items-per-page="15" explicitly (AgentsTable.vue, ListenersTable.vue,
-    // StagersTable.vue, ModulesTable.vue, MalleableProfilesList.vue). A
-    // collection past that paginates, hiding rows the screenshot should show.
+  it("keeps every collection within the 10-row pagination limit", () => {
+    // The ceiling is the SMALLEST items-per-page any captured view uses, not
+    // the most common one. The list views set :items-per-page="15" explicitly
+    // (AgentsTable.vue, ListenersTable.vue, StagersTable.vue,
+    // ModulesTable.vue, MalleableProfilesList.vue), but Credentials.vue and
+    // Tags.vue render a bare <v-data-table> and so take Vuetify's default of
+    // 10, and Downloads.vue starts at 10 too. A collection past whichever
+    // limit applies to it paginates, hiding rows the screenshot should show —
+    // one shared ceiling of 10 keeps that from depending on which view a
+    // dataset happens to feed.
     for (const [name, rows] of Object.entries(scenario)) {
       if (Array.isArray(rows)) {
-        expect(rows.length, `${name} exceeds one page`).toBeLessThanOrEqual(15);
+        expect(rows.length, `${name} exceeds one page`).toBeLessThanOrEqual(10);
       }
     }
   });

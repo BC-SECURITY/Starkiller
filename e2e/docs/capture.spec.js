@@ -103,9 +103,10 @@ test.describe("capture helpers", () => {
   test("captureDocsShot clips to a locator when given one @docs", async ({
     page,
   }) => {
-    // The clip branch has exactly one caller (plugin-dependencies.png). If it
-    // were ignored, or the two branches swapped, that shot would publish as a
-    // full-viewport screenshot where the docs expect a cropped alert — a
+    // Four shots take the clip branch: plugin-dependencies.png,
+    // tag_picker.png, obfuscation_keywords.png and obfuscation_global.png. If
+    // it were ignored, or the two branches swapped, each would publish as a
+    // full-viewport screenshot where the docs expect a cropped element — a
     // difference nothing else in the suite would notice.
     await gotoListeners(page);
     const file = await captureDocsShot(page, "clip_probe.png", {

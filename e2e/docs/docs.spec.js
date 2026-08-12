@@ -30,6 +30,13 @@ import {
   mockPluginDetail,
 } from "../helpers/api/plugins.js";
 import { seedNotifications } from "../helpers/api/notifications.js";
+import { mockCredentialsList } from "../helpers/api/credentials.js";
+import { mockDownloadsList } from "../helpers/api/downloads.js";
+import { mockTagsRegistry } from "../helpers/api/tags.js";
+import {
+  mockObfuscationKeywords,
+  mockObfuscationGlobal,
+} from "../helpers/api/obfuscation.js";
 import { scenario } from "./scenario.js";
 import {
   prepareDocsPage,
@@ -37,10 +44,13 @@ import {
   captureDocsShot,
   closeDocsOverlay,
   tickUntil,
+  tickUntilSized,
   tickUntilTabStripSized,
   countFailedApiResponses,
   outputDir,
   emptyOutputDir,
+  resetCapturedShots,
+  capturedShots,
 } from "./capture.js";
 
 // Module-scoped state shared across tests, which is safe only because the docs
@@ -48,7 +58,13 @@ import {
 // playwright.config.js). Relaxing any of those would silently cross-contaminate
 // these or push a duplicate entry per retry.
 const results = [];
-let apiFailures;
+// Initialised, not left undefined: afterEach spreads this into the recorded
+// entry, and if a fixture fails setup before this describe's beforeEach runs,
+// afterEach still fires. A bare `let` would make that spread throw, skipping
+// the push entirely — the exact "absent from result.json instead of recorded"
+// outcome the push-before-assert ordering below exists to prevent. Reassigned
+// per test in beforeEach, so this value is only ever the fallback.
+let apiFailures = [];
 
 test.describe("documentation screenshots", () => {
   test.beforeAll(async () => {
@@ -58,6 +74,11 @@ test.describe("documentation screenshots", () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    // Reset per test so this test's result.json entry records exactly the
+    // filenames IT captured — some tests call captureDocsShot more than
+    // once (see the obfuscation test below), so a per-run image count alone
+    // can't distinguish a legitimate multi-shot test from a stale file.
+    resetCapturedShots();
     apiFailures = countFailedApiResponses(page);
     await mockDocsBackground(page);
     await prepareDocsPage(page);
@@ -69,20 +90,19 @@ test.describe("documentation screenshots", () => {
   // after this hook — so reading it here sees whatever has accumulated by the
   // end of the test body plus any afterEach work, same as `apiFailures`.
   test.afterEach(async ({ consoleGuard }, testInfo) => {
-    // Push BEFORE asserting: a throwing assertion would otherwise skip this
-    // and leave the failed shot absent from result.json instead of recorded
-    // as failed, which reads to the publish gate as "nothing wrong".
-    // testInfo.status here reflects only the test body's outcome, so a body
-    // that passed but hit a failing API response OR raised a page error/console
-    // error still records "passed" — that's exactly why `apiFailures` and
-    // `consoleErrors` must ride along in the same entry rather than relying
-    // on status alone.
+    // Push BEFORE asserting: a throwing assertion would otherwise leave the
+    // failed shot absent from result.json rather than recorded as failed, which
+    // reads to the publish gate as "nothing wrong". testInfo.status reflects
+    // only the body's outcome, so a body that passed while hitting a failing
+    // API response or a page error still records "passed" — hence `apiFailures`
+    // and `consoleErrors` riding along in the same entry.
     results.push({
       title: testInfo.title,
       status: testInfo.status,
       expectedStatus: testInfo.expectedStatus,
       apiFailures: [...apiFailures],
       consoleErrors: [...consoleGuard],
+      assets: capturedShots(),
     });
     expect(
       apiFailures,
@@ -198,15 +218,12 @@ test.describe("documentation screenshots", () => {
     await page.goto(`/#/modules/${scenario.modules[0].id}`);
     await expect(page.getByRole("button", { name: /submit/i })).toBeVisible();
 
-    // Select three agents to show multi-agent tasking. Must be same-language
-    // agents: AgentExecuteModule.vue's compatibleModules computed intersects
-    // each selected agent's language, and scenario.modules[0] is
-    // powershell-only — mixing in a python agent (the scenario has 3
-    // powershell agents and 2 python) renders a red "No modules are compatible
-    // with all selected agents" banner instead of a working demo. Selected by
-    // session_id
-    // (not scenario.agents.slice(0, 3)) so this stays correct regardless of
-    // array order.
+    // Select three agents to show multi-agent tasking. They must share a
+    // language: compatibleModules intersects each selected agent's language and
+    // scenario.modules[0] is powershell-only, so mixing in a python agent
+    // renders a red "No modules are compatible" banner instead of a working
+    // demo. Picked by session_id, not slice(0, 3), so array order can't break
+    // it.
     const taskedAgents = scenario.agents.filter((a) =>
       ["K3H8P2WQ", "M7QX4LZB", "T4LM9XRP"].includes(a.session_id),
     );
@@ -454,20 +471,14 @@ test.describe("documentation screenshots", () => {
     await expect(page.getByText("Executing on Agents:")).toBeVisible();
     await expect(page.getByText(agent.name).first()).toBeVisible();
 
-    // The module picker must be populated, not merely present — but its
-    // `getByPlaceholder("Search module...")` can never be used for that:
-    // AgentExecuteModule initializes `selectedModule: ""` rather than
-    // `null`, and VAutocomplete's isDirty is `model.value.length > 0`.
-    // Vuetify's transformIn wraps any non-nullish model value (including
-    // "") into a one-element array, so isDirty is true — and therefore the
-    // placeholder is suppressed (`isDirty ? undefined : props.placeholder`)
-    // — from the very first render, permanently, regardless of whether
-    // modules have loaded. Verified via the rendered <input>: it never
-    // carries a placeholder attribute at all. So prove population by
-    // opening the picker and asserting a real module id renders as an
-    // option, then close it the same way the multi-agent-tasking and
-    // malleable-listener tests above close their dropdowns before
-    // capturing.
+    // The module picker must be populated, not merely present — but
+    // getByPlaceholder is useless here: AgentExecuteModule initializes
+    // `selectedModule: ""`, and Vuetify's transformIn wraps any non-nullish
+    // model value into a one-element array, so isDirty is true and the
+    // placeholder is suppressed from the first render regardless of whether
+    // modules loaded. So prove population by opening the picker, asserting a
+    // real module id renders as an option, then closing it as the tests above
+    // close their dropdowns.
     const moduleField = page.locator(".v-autocomplete .v-field");
     const moduleInput = page.locator(".v-autocomplete input[role='combobox']");
     const moduleMenuId = await moduleInput.getAttribute("aria-controls");
@@ -519,47 +530,27 @@ test.describe("documentation screenshots", () => {
     ).toBeTruthy();
     await bell.click();
 
-    // VMenu's default transition is VDialogTransition (dialog-transition.js),
-    // whose onEnter (a) awaits two requestAnimationFrame ticks, then (b)
-    // calls the native Element.animate() WAAPI method to scale/fade the
-    // overlay in over ~225ms. Confirmed by reading dialog-transition.js
-    // directly — it has no reference to openDelay at all; that's a VMenu
-    // activation concept (useActivator.js) that only runs on the
-    // hover/focus paths (via runOpenDelay() from onMouseenter/onFocus). This
-    // bell is a plain click activator with no open-on-hover/open-on-focus,
-    // so isActive flips synchronously in the onClick handler and openDelay
-    // never gates anything here. None of the animation is a CSS transition
-    // or CSS animation — prepareDocsPage's `transition:none!important`
-    // override has no effect on it (measured: getComputedStyle(overlay)
-    // .transition/.animation both read "none" the entire time, while
-    // .transform kept interpolating). And it isn't the same rAF-driven
-    // virtual-scroller populate mechanism the autocomplete dropdowns above
-    // depend on either — WAAPI's Element.animate() runs against
-    // document.timeline, not the page's overridden
-    // window.requestAnimationFrame, so ticking the fake clock only
-    // (page.clock.runFor) let it drift for many ticks without ever
-    // reliably reaching completion within this file's usual 500ms budget
-    // (measured across several runs: still short of the fully-expanded
-    // ~177px content height after as much as 1500ms of fake time).
+    // VMenu's default transition is VDialogTransition, whose onEnter awaits two
+    // rAF ticks and then drives the fade through the WAAPI Element.animate().
+    // That is neither a CSS transition (so prepareDocsPage's `transition:none`
+    // override does not touch it) nor window.requestAnimationFrame (WAAPI runs
+    // against document.timeline), so ticking the fake clock alone never
+    // reliably reached the end state — measured: still short of the expanded
+    // ~177px content height after 1500ms of fake time.
     //
-    // So instead of waiting it out, finish it directly: tickUntil
-    // Element.animate() has actually been called — it hasn't yet immediately
-    // after bell.click(), since the two rAF awaits haven't resolved
-    // (root-cause candidate for the remaining delay, not chased further) —
-    // then call Animation.finish() on every in-flight animation to jump
-    // straight to the end state. A poll timeout here means those rAF awaits
-    // never resolved.
+    // So finish it directly: tick until Element.animate() has been called (it
+    // has not immediately after the click, since the two rAF awaits have not
+    // resolved), then Animation.finish() every in-flight animation. A poll
+    // timeout here means those rAF awaits never resolved.
     await tickUntil(
       page,
       async () =>
         (await page.evaluate(() => document.getAnimations().length)) > 0,
     );
-    // dialog-transition.js starts one animation on the overlay itself plus
-    // a separate per-child opacity animation for each list/card child
-    // (getChildren().forEach(...)) — finish() every in-flight animation,
-    // not just the first found, then give the DOM one more tick to reflect
-    // onEnter's post-animation cleanup (removing the temporary inline
-    // pointer-events/visibility styles onBeforeEnter set).
+    // dialog-transition.js starts one animation on the overlay plus a per-child
+    // opacity animation, so finish() every in-flight one rather than the first
+    // found — then give the DOM a tick for onEnter's cleanup of the temporary
+    // inline pointer-events/visibility styles onBeforeEnter set.
     await page.evaluate(() => {
       document.getAnimations().forEach((a) => a.finish());
     });
@@ -587,8 +578,307 @@ test.describe("documentation screenshots", () => {
     await expect(page.getByText("View All")).toBeVisible();
 
     // Full viewport, no clip: the agents table behind the menu is part of
-    // what this image shows, and every other full-page shot in the set is
-    // 2880x1440 (plugin-dependencies.png is the one deliberate element clip).
+    // what this image shows, and every full-page shot in the set is 2880x1440.
+    // The four deliberate element clips are plugin-dependencies.png,
+    // tag_picker.png, obfuscation_keywords.png and obfuscation_global.png.
     await captureDocsShot(page, "starkiller_checkin.png");
+  });
+
+  test("credentials list @docs", async ({ page }) => {
+    // mockTagsRegistry covers the whole **/api/v2/tags* glob, so it serves both
+    // Credentials.vue's fetchTags("credential") and the picker's bare registry
+    // fetch. Registered here, not in beforeEach, so LIFO puts it ahead of the
+    // empty tag list mockDocsBackground registers via mockTagsEndpoint.
+    await mockTagsRegistry(page, scenario.tags);
+    await mockCredentialsList(page, scenario.credentials);
+
+    await page.goto("/#/credentials");
+
+    // One assertion per default-visible column. This table has no
+    // defaultHeader convention and no column picker (Credentials.vue:154-163
+    // is a static array), so every column below always renders and a
+    // renamed field would publish a blank cell with a green gate.
+    // id: renders as a router-link styled with color:inherit, so it reads
+    // as plain text rather than a blue link — assert via role, not text.
+    await expect(
+      page.getByRole("link", { name: "1", exact: true }),
+    ).toBeVisible();
+    // CredType: only "plaintext" and "hash" appear in this scenario (see the
+    // credentials comment below), each on multiple rows — .first() confirms
+    // the column renders rather than asserting which row.
+    await expect(page.getByText("hash").first()).toBeVisible();
+    // Username: click-to-copy div, not a link.
+    await expect(page.getByText("svc-backup")).toBeVisible();
+    // Password renders in the clear — this is the screen's defining detail.
+    // Row 2's bare NT hash is unique in the table.
+    await expect(
+      page.getByText("a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"),
+    ).toBeVisible();
+    // Domain: every scenario record shares "example.com" so this cell
+    // repeats across the table — .first() confirms the column renders
+    // rather than asserting which row.
+    await expect(page.getByText("example.com").first()).toBeVisible();
+    // Host: DC-01 is unique to row 2, unlike some other host values reused
+    // across rows.
+    await expect(page.getByText("DC-01")).toBeVisible();
+    // Tags column: a real chip, not the empty-state "Add tags" affordance.
+    await expect(page.getByText("domain-admin")).toBeVisible();
+
+    // toBeVisible() does NOT detect clipping by an ancestor's overflow-x, so a
+    // column pushed outside the table wrapper passes every assertion above
+    // while being absent from the captured pixels. The first version of this
+    // shot lost Host, Tags and Actions off-frame with a fully green test.
+    const overflow = await page
+      .locator(".v-table__wrapper")
+      .evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(
+      overflow,
+      "the table overflows its wrapper horizontally, so the right-hand " +
+        "columns are clipped out of the capture",
+    ).toBeLessThanOrEqual(1);
+
+    await captureDocsShot(page, "credentials.png");
+  });
+
+  test("tag picker @docs", async ({ page }) => {
+    // Same registry mock, and same LIFO reason, as the credentials-list test.
+    await mockTagsRegistry(page, scenario.tags);
+    await mockCredentialsList(page, scenario.credentials);
+
+    await page.goto("/#/credentials");
+    await expect(page.getByText("svc-backup")).toBeVisible();
+
+    // Open from an untagged row. TagViewer renders the literal "Add tags"
+    // text only when the row has no tags (TagViewer.vue:9-14); a tagged row
+    // is a bare + icon with no accessible name. scenario.credentials ids 3-5
+    // are untagged, so several such chips exist — .first() is the row-3 chip.
+    await page.getByText("Add tags").first().click();
+
+    // TagPickerDialog is a v-dialog, whose default transition is also
+    // VDialogTransition (dialog-transition.js) — same mechanism the check-in
+    // notification menu above needs a runFor loop for. Unlike that menu's
+    // CLOSE path (the one the capture skill's force-hide workaround exists
+    // for), this is the OPEN path, which the skill notes works fine and
+    // which starkiller_checkin.png already exercises without a workaround.
+    // Tick until the overlay is genuinely active, not merely present in the
+    // DOM — onEnter's rAF awaits make no progress on the frozen clock.
+    await tickUntil(page, () => page.locator(".v-overlay--active").isVisible());
+
+    // Assert on registry content rendered INSIDE the dialog, so a broken
+    // registry fetch cannot publish an empty picker.
+    const dialog = page.locator(".v-dialog");
+    await expect(dialog.getByText("Add tags")).toBeVisible();
+    // exact: true — tag 1's description ("Collected during the current
+    // engagement") also contains the substring "engagement", which would
+    // otherwise resolve two elements and trip Playwright's strict mode.
+    await expect(dialog.getByText("engagement", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("domain-admin")).toBeVisible();
+    // exact: true — the field's clearable icon carries aria-label
+    // "Clear Filter tags", a substring match for "Filter tags" that would
+    // otherwise also trip strict mode here.
+    await expect(
+      dialog.getByLabel("Filter tags", { exact: true }),
+    ).toBeVisible();
+
+    // dialog (".v-dialog") is Vuetify's fixed, full-viewport positioning
+    // wrapper it uses to center the card — clipping to it captures the
+    // entire empty viewport with the card as a small region inside. The
+    // visible card lives in the nested ".v-overlay__content" box, so that is
+    // what must be clipped for a dialog-only shot.
+    await captureDocsShot(page, "tag_picker.png", {
+      clip: dialog.locator(".v-overlay__content"),
+    });
+  });
+
+  test("downloads list @docs", async ({ page }) => {
+    // Downloads.vue's fetchTags("download") hits the same glob — see the
+    // credentials-list test for why this is registered here.
+    await mockTagsRegistry(page, scenario.tags);
+    await mockDownloadsList(page, scenario.downloads);
+
+    await page.goto("/#/downloads");
+
+    // Default-visible columns: Id, Filename, Size, Created At, Updated At,
+    // Tags, Actions (Downloads.vue:148-156, a static array).
+    // Id: unlike the credentials table, Downloads.vue defines no
+    // #item.id template, so it's a plain text cell, not a router-link — a
+    // bare getByText("1") would match many cells (row count, "18 KB", tag
+    // ids, pagination), so scope to a table cell role with exact: true.
+    await expect(
+      page.getByRole("cell", { name: "1", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText("seatbelt-output.txt")).toBeVisible();
+    await expect(page.getByText("beacon-x64.bin")).toBeVisible();
+    // Size goes through formatBytes: 18432 -> "18 KB", 1310720 -> "1.25 MB".
+    await expect(page.getByText("18 KB")).toBeVisible();
+    // Created/Updated go through DateTimeDisplay, which renders a relative
+    // string off the frozen clock and silently shows "N/A" for an
+    // unparseable value.
+    await expect(page.getByText("3 hours ago").first()).toBeVisible();
+    // Tags column, a real chip rather than the "Add tags" empty state.
+    await expect(page.getByText("exfil").first()).toBeVisible();
+
+    // The four sources are this page's central concept and the panel holding
+    // them is COLLAPSED by default — Downloads.vue:27 mounts
+    // <v-expansion-panels> with no v-model, so a bare capture publishes a
+    // 250px card containing the words Search / Source / Tags and nothing
+    // else. Expand it. Scope to the filter card: "Tags" is also a sidebar
+    // nav item (SideNav.vue), and "Source" must not match a table header.
+    const filterCard = page.locator(".v-expansion-panels");
+    await filterCard.getByRole("button", { name: "Source" }).click();
+
+    // v-expansion-panel-text animates open through VExpandTransition, so the
+    // panel body can sit at height:0 while its checkboxes still pass
+    // toBeVisible() — exactly the failure two shots in the previous branch
+    // hit, caught only by an explicit height assertion. Same rAF-freeze
+    // mechanism the tab strip needs, so it uses the same helper.
+    const panelBody = filterCard.locator(".v-expansion-panel-text").nth(1);
+    await tickUntilSized(page, panelBody);
+
+    // All four sources are ticked on mount: ExpansionPanelFilter's mounted()
+    // hook selects everything unless emptyDefault is set, and the Source
+    // panel does not set it (Downloads.vue:33-40).
+    await expect(panelBody.getByText("Upload")).toBeVisible();
+    await expect(panelBody.getByText("Agent Task")).toBeVisible();
+    await expect(panelBody.getByText("Agent File")).toBeVisible();
+    await expect(panelBody.getByText("Stager")).toBeVisible();
+
+    // toBeVisible() does NOT detect clipping by an ancestor's overflow-x, so a
+    // column pushed outside the table wrapper passes every assertion above
+    // while being absent from the captured pixels. The credentials-list shot
+    // above lost Host, Tags and Actions off-frame this way with a fully green
+    // test. The downloads table has no fixed-width Tags column and short
+    // content columns, so it is likely to fit — but assert it rather than
+    // assume it.
+    const overflow = await page
+      .locator(".v-table__wrapper")
+      .evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(
+      overflow,
+      "the table overflows its wrapper horizontally, so the right-hand " +
+        "columns are clipped out of the capture",
+    ).toBeLessThanOrEqual(1);
+
+    await captureDocsShot(page, "downloads.png");
+  });
+
+  test("tags registry @docs", async ({ page }) => {
+    await mockTagsRegistry(page, scenario.tags);
+
+    await page.goto("/#/tags");
+
+    // Default-visible columns: Name, Description, Usage, Actions
+    // (Tags.vue:48-53). Name renders as a TagChip, not text — exact:true
+    // because a tag's own description also contains its name as a substring
+    // and TagChip puts the name in a title attribute too.
+    await expect(page.getByText("engagement", { exact: true })).toBeVisible();
+    await expect(page.getByText("domain-admin", { exact: true })).toBeVisible();
+    // Description column:
+    await expect(
+      page.getByText("Grants Domain Admin on example.com"),
+    ).toBeVisible();
+    // Usage column. These counts must equal the tags actually attached to
+    // scenario.credentials and scenario.downloads, or a reader who
+    // cross-references this image against credentials.png catches the docs
+    // contradicting themselves. Nothing else checks this.
+    await expect(page.getByText("4", { exact: true })).toBeVisible();
+
+    // toBeVisible() does NOT detect clipping by an ancestor's overflow-x, so a
+    // column pushed outside the table wrapper passes every assertion above
+    // while being absent from the captured pixels. The credentials-list shot
+    // lost Host, Tags and Actions off-frame this way with a fully green test.
+    const overflow = await page
+      .locator(".v-table__wrapper")
+      .evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(
+      overflow,
+      "the table overflows its wrapper horizontally, so the right-hand " +
+        "columns are clipped out of the capture",
+    ).toBeLessThanOrEqual(1);
+
+    await captureDocsShot(page, "tags.png");
+  });
+
+  test("obfuscation @docs", async ({ page }) => {
+    await mockObfuscationKeywords(page, scenario.obfuscationKeywords);
+    await mockObfuscationGlobal(page, scenario.obfuscationConfigs);
+
+    await page.goto("/#/obfuscation");
+
+    // Left card: the keyword table's two data columns. mockObfuscationKeywords
+    // returned a hardcoded empty list until this branch, so an unpopulated
+    // left card is the specific regression to guard against here.
+    await expect(page.getByText("Invoke-Mimikatz")).toBeVisible();
+    await expect(page.getByText("K7QW2")).toBeVisible();
+
+    // Right card: one bordered sub-card per language. All three ship
+    // disabled, and only powershell is preobfuscatable — which is why its
+    // Preobfuscate button is enabled and the other two are not.
+    await expect(page.getByText("powershell")).toBeVisible();
+    await expect(page.getByText("csharp")).toBeVisible();
+    await expect(page.getByText("python")).toBeVisible();
+    // The command field is the non-obvious part of the config; assert its value
+    // so a renamed field cannot publish an empty input. v-text-field renders it
+    // as a form control, not text content, so getByText can't see it — use
+    // toHaveValue, as elsewhere in this repo. All three language sub-cards
+    // share the "Command" label; powershell renders first and is the only one
+    // with a non-empty default, so .first() targets it.
+    await expect(page.getByLabel("Command").first()).toHaveValue(
+      "Token\\All\\1",
+    );
+
+    // Two clipped shots rather than one full-viewport capture. The two
+    // mechanisms are independent and the docs page treats them under
+    // separate headings, so one image per heading matches the prose — and
+    // three language sub-cards do not fit in 720px, so a single shot would
+    // crop python off the bottom.
+    const keywordCard = page
+      .locator(".v-card")
+      .filter({ hasText: "Keyword Obfuscation" })
+      .first();
+    const globalCard = page
+      .locator(".v-card")
+      .filter({ hasText: "Global Obfuscation" })
+      .first();
+
+    // Guard BEFORE capturing, per this suite's central rule. Both filters
+    // could collapse onto the same ancestor card that contains both
+    // headings, in which case the two captures would write byte-identical
+    // images and still report success. Comparing bounding boxes catches
+    // that; a count() check does not, because the ancestor and the two
+    // real cards together satisfy any count assertion.
+    const keywordBox = await keywordCard.boundingBox();
+    const globalBox = await globalCard.boundingBox();
+    expect(
+      keywordBox.x,
+      "the two obfuscation card locators resolved to the same element, so " +
+        "the clips would publish two identical images",
+    ).not.toBe(globalBox.x);
+
+    await captureDocsShot(page, "obfuscation_keywords.png", {
+      clip: keywordCard,
+    });
+
+    // globalCard (918px) exceeds the 720px viewport, so locator.screenshot()
+    // would reach for CDP's captureBeyondViewport — which paints position:fixed
+    // elements at their viewport-relative coordinates onto the oversized canvas
+    // rather than scrolling them out of frame. Measured at the default 720px
+    // viewport: App.vue's fixed app-bar icons and footer links were baked into
+    // the card, with every assertion above still green because they check the
+    // unclipped DOM, not the captured pixels.
+    //
+    // Growing the viewport so the card fits avoids captureBeyondViewport
+    // entirely: the footer's fixed band just needs to sit below the card's
+    // bottom edge, and the app-bar is already above the card's start. Computed
+    // from the measured boxes rather than hardcoded, so this survives the card
+    // growing taller.
+    const footerBox = await page.locator(".v-footer").boundingBox();
+    await page.setViewportSize({
+      width: 1440,
+      height: Math.ceil(globalBox.y + globalBox.height + footerBox.height + 40),
+    });
+    await captureDocsShot(page, "obfuscation_global.png", {
+      clip: globalCard,
+    });
   });
 });
