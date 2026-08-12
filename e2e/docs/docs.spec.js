@@ -17,7 +17,12 @@ import {
   mockListenerTemplate,
   mockAutorunTasks,
 } from "../helpers/api/listeners.js";
-import { mockStagersList } from "../helpers/api/stagers.js";
+import {
+  mockStagersList,
+  mockStagerDetail,
+  mockStagerTemplates,
+  mockStagerTemplate,
+} from "../helpers/api/stagers.js";
 import {
   mockAgentsList,
   mockAgentDetail,
@@ -27,12 +32,17 @@ import {
   mockCheckinsAggregate,
   mockAgentTasksFeed,
 } from "../helpers/api/agents.js";
-import { mockMalleableProfilesList } from "../helpers/api/malleable.js";
+import {
+  mockMalleableProfilesList,
+  mockMalleableProfileDetail,
+} from "../helpers/api/malleable.js";
 import { mockBypassesList, mockBypassDetail } from "../helpers/api/bypasses.js";
 import { mockModulesList, mockModuleDetail } from "../helpers/api/modules.js";
 import {
+  mockInstalledPlugins,
   mockPluginMarketplace,
   mockPluginDetail,
+  mockPluginTasks,
 } from "../helpers/api/plugins.js";
 import { seedNotifications } from "../helpers/api/notifications.js";
 import { mockCredentialsList } from "../helpers/api/credentials.js";
@@ -166,6 +176,61 @@ test.describe("documentation screenshots", () => {
     await captureDocsShot(page, "stagers.png");
   });
 
+  test("stager edit @docs", async ({ page }) => {
+    const stager = scenario.stagers[0]; // acme-powershell-launcher
+    // multi_launcher's display metadata (description/options descriptors) is
+    // not scenario content — StagerEdit only merges the VALUES from
+    // stager.options over it (see StagerEdit.vue's stagerOptions computed) —
+    // so it lives here rather than as a new scenario.js fixture, matching
+    // this shot's brief: reuse the existing stager mocks/fixtures, add no new
+    // ones.
+    const stagerTemplate = {
+      id: "multi_launcher",
+      name: "multi_launcher",
+      description: "Generates a launcher for multiple staging methods.",
+      authors: [],
+      comments: [],
+      options: {
+        Listener: {
+          value: "",
+          required: true,
+          description: "Listener to associate with this stager.",
+        },
+        Language: {
+          value: "powershell",
+          required: true,
+          description: "Language for the launcher.",
+        },
+      },
+    };
+    await mockGeneralFormBackground(page);
+    // Overrides mockGeneralFormBackground's empty listeners stub (LIFO) so
+    // the Listener field -- a useSuggestedValues STRICT_FIELDS entry -- has a
+    // real option to select, instead of rendering an empty dropdown.
+    await mockListenersList(page, scenario.listeners);
+    await mockStagerTemplates(page, [stagerTemplate]);
+    await mockStagerTemplate(page, stagerTemplate);
+    await mockStagerDetail(page, stager);
+
+    await gotoDocs(page, `/#/stagers/${stager.id}`);
+
+    await expect(
+      page.getByRole("heading", { name: "View Stager" }),
+    ).toBeVisible();
+    // Name: a plain editable text field, distinct from the Listener/Language
+    // option fields below.
+    await expect(page.getByLabel(/^name$/i)).toHaveValue(stager.name);
+    // Language: not a STRICT_FIELDS name and this template gives it no
+    // suggested_values, so it resolves to resolveWidget's plain-text fallback
+    // — toHaveValue is therefore the correct assertion, not a select's
+    // rendered option text.
+    await expect(page.getByLabel("Language")).toHaveValue(
+      stager.options.Language,
+    );
+
+    await captureDocsShot(page, "stager_edit.png");
+  });
+
   test("agents list @docs", async ({ page }) => {
     await mockAgentsList(page, scenario.agents);
     await gotoDocs(page, "/#/agents");
@@ -197,6 +262,77 @@ test.describe("documentation screenshots", () => {
       page.getByText("python", { exact: true }).first(),
     ).toBeVisible();
     await captureDocsShot(page, "agents_tab.png");
+  });
+
+  test("agents graph @docs", async ({ page }) => {
+    // GraphView passes :expandable="false" to <agent-graph>, so its own
+    // in-component toolbar (".agent-graph__toolbar", v-if="expandable") never
+    // renders — unlike the dashboard shot, which drives the bounded/expandable
+    // instance. GraphView supplies its own "Show All Nodes" button instead,
+    // teleported into #app-bar via list-page-top (same mechanism as every
+    // other list view's header controls) — TooltipButton renders no
+    // accessible name (the label text lives inside a v-tooltip, not an
+    // aria-label), so it's targeted by its icon class instead.
+    await mockAgentsList(page, scenario.agents);
+    await mockListenersList(page, scenario.listeners);
+    await mockListenerTemplates(page, scenario.listenerTemplates);
+
+    await gotoDocs(page, "/#/agents-graph");
+
+    const graph = page.locator('svg[aria-label="Agent topology graph"]');
+    await expect(graph).toBeVisible();
+    await expect(page.getByText("Failed to load graph data.")).toHaveCount(0);
+    await tickUntil(
+      page,
+      async () => (await graph.locator(".gly-node").count()) > 0,
+    );
+    // Let the force simulation spread the initial cluster out of its start
+    // position before fitting — same as the dashboard shot's graph handling.
+    await page.clock.runFor(1200);
+    // AgentGraph.vue's own 2000ms autoFitTimer is NOT enough on its own:
+    // measured directly, its first-render autofit can settle against a
+    // mis-sized svg under the frozen clock (same caveat the dashboard test's
+    // comment already calls out) and leaves nodes translated far outside the
+    // svg's viewBox — every node assertion below still passes toBeVisible()
+    // in that state (Playwright's visibility check does not consider
+    // transform-based off-canvas positioning, the same lesson the
+    // credentials/downloads/tags shots document for overflow-x clipping),
+    // but the captured PNG is a blank canvas. Explicitly triggering a fit
+    // resolves it reliably.
+    await page.locator("#app-bar button:has(.fa-expand)").first().click();
+    await page.clock.runFor(2000);
+    expect(await graph.locator(".gly-node").count()).toBeGreaterThan(0);
+
+    // Node labels are scenario values baked directly into the SVG by
+    // computer.js's shapeBuilder (agent.name / listener.name as `title`) —
+    // asserting them guards against a rename silently publishing blank nodes.
+    // "web-pivot" (R9TF6NCV's name) is distinct from its session_id, same
+    // rationale as the agents-list shot above.
+    await expect(graph.getByText("http-primary")).toBeVisible();
+    await expect(graph.getByText("web-pivot")).toBeVisible();
+
+    // Guard the exact defect measured above: toBeVisible() alone does not
+    // prove a node's transform lands inside the svg's own viewport, so
+    // confirm every node's bounding box actually overlaps it.
+    const svgBox = await graph.boundingBox();
+    const nodeBoxes = await graph
+      .locator(".gly-node")
+      .evaluateAll((els) => els.map((el) => el.getBoundingClientRect()));
+    const offCanvas = nodeBoxes.filter(
+      (b) =>
+        b.x + b.width < svgBox.x ||
+        b.x > svgBox.x + svgBox.width ||
+        b.y + b.height < svgBox.y ||
+        b.y > svgBox.y + svgBox.height,
+    );
+    expect(
+      offCanvas.length,
+      "a graph node's transform places it outside the svg's viewport — " +
+        "it would pass toBeVisible() while being absent from the captured " +
+        "pixels",
+    ).toBe(0);
+
+    await captureDocsShot(page, "agents_graph.png");
   });
 
   test("modules list @docs", async ({ page }) => {
@@ -330,6 +466,64 @@ test.describe("documentation screenshots", () => {
     await captureDocsShot(page, "autorun_modules.png");
   });
 
+  test("listener edit view @docs", async ({ page }) => {
+    // Plain HTTP ListenerEdit on its View tab — distinct from
+    // malleable_listener.png, which is the NEW-listener form for the
+    // http_malleable template instead of an existing http one.
+    //
+    // v-window mounts BOTH the View and Autorun window-items regardless of
+    // which is active (see the autorun shot's mockGeneralFormBackground
+    // comment above), so AutoRunModules' immediate fetchAutorunTasks /
+    // fetchAvailableModules calls still fire here even though Autorun is
+    // never the active tab — hence mockModulesList and mockAutorunTasks
+    // below, or those requests would hit the 599 sentinel.
+    await mockGeneralFormBackground(page);
+    await mockListenerDetail(page, scenario.listeners[0]);
+    await mockListenerTemplates(page, scenario.listenerTemplates);
+    await mockListenerTemplate(page, scenario.listenerTemplates[0]);
+    await mockModulesList(page, scenario.modules);
+    await mockAutorunTasks(page, scenario.autorunTasks);
+
+    await gotoDocs(page, `/#/listeners/${scenario.listeners[0].id}?tab=view`);
+
+    // ListenerEdit teleports its View/Autorun tabs into #app-bar-extension —
+    // see tickUntilTabStripSized's header for why they need an explicit tick.
+    await tickUntilTabStripSized(page);
+
+    const viewTab = page.getByRole("tab", { name: "View" });
+    await expect(viewTab).toBeVisible();
+    await expect(viewTab).toHaveAttribute("aria-selected", "true");
+
+    await expect(
+      page.getByRole("heading", { name: "View Listener" }),
+    ).toBeVisible();
+    // Host/Port values come from the http listener's own options, merged
+    // over the http template's descriptors (ListenerEdit.vue's
+    // listenerOptions computed) — a renamed options key would publish blank
+    // fields here.
+    await expect(page.getByLabel("Host")).toHaveValue(
+      scenario.listeners[0].options.Host,
+    );
+    await expect(page.getByLabel("Port")).toHaveValue(
+      scenario.listeners[0].options.Port,
+    );
+
+    await captureDocsShot(page, "listener_edit.png");
+  });
+
+  test("plugins list @docs", async ({ page }) => {
+    await mockInstalledPlugins(page, scenario.plugins);
+
+    await gotoDocs(page, "/#/plugins");
+
+    // The only rendered field is plugin.name (PluginsList.vue's
+    // v-list-item-title) — a renamed field publishes an empty list with a
+    // green gate otherwise.
+    await expect(page.getByText("basic_reporting")).toBeVisible();
+
+    await captureDocsShot(page, "plugins_list.png");
+  });
+
   test("plugin marketplace @docs", async ({ page }) => {
     await mockPluginMarketplace(page, scenario.marketplace);
 
@@ -387,6 +581,120 @@ test.describe("documentation screenshots", () => {
     });
   });
 
+  test("plugin edit @docs", async ({ page }) => {
+    // Full-viewport PluginEdit, unlike plugin-dependencies.png's clipped
+    // single-alert capture above — same plugin fixture, different framing.
+    await mockGeneralFormBackground(page);
+    // PluginTasksList's mounted() hook always calls pluginStore.getPlugins(),
+    // even on this tab's plugin-scoped instance where its own Plugins filter
+    // is hidden (v-if="!plugin") — see the plugin-tasks shot below for the
+    // full mechanism.
+    await mockInstalledPlugins(page, scenario.plugins);
+    await mockPluginDetail(page, scenario.plugins[0]);
+    // The Tasks window-item (PluginTasksList) mounts regardless of the active
+    // tab, same v-window eagerness as ListenerEdit's View/Autorun items
+    // above. Its Users filter auto-selects everything on mount (same
+    // ExpansionPanelFilter default the downloads-list shot documents), which
+    // makes selectedUsers non-empty and TasksTable.getTasks() actually fire —
+    // without this mock that GET hits the 599 sentinel even though the Tasks
+    // tab is never displayed.
+    await mockPluginTasks(page, scenario.pluginTasks);
+
+    await gotoDocs(page, `/#/plugins/${scenario.plugins[0].id}?tab=details`);
+
+    // PluginEdit teleports its tab strip into #app-bar-extension, same
+    // mechanism as ListenerEdit/AgentEdit above.
+    await tickUntilTabStripSized(page);
+
+    // The `?tab=details` query alone does NOT land on Details: the Details
+    // v-window-item is gated behind `v-if="initialLoad"` (PluginEdit.vue),
+    // so at first paint — before getPlugin() resolves — VWindow's group has
+    // no "details" child to match against the route-derived model value and
+    // self-corrects by calling the `tab` setter with "interact" (the first
+    // registered item), permanently overwriting the query via
+    // router.replace before initialLoad ever flips true. Measured directly:
+    // without this click, aria-selected stays false on Details and true on
+    // Interact even after tickUntilTabStripSized. Click it explicitly, the
+    // same way a real operator would after the page finishes loading, then
+    // tick the frozen clock — the resulting router.replace resolves via a
+    // microtask that this suite's paused clock does not flush on its own
+    // (confirmed empirically: reading aria-selected synchronously right
+    // after the click still showed the stale value).
+    const detailsTab = page.getByRole("tab", { name: "Details" });
+    await expect(detailsTab).toBeVisible();
+    await detailsTab.click();
+    await page.clock.runFor(300);
+    await expect(detailsTab).toHaveAttribute("aria-selected", "true");
+
+    // Same dependency-warning content as plugin-dependencies.png, proving the
+    // full page still renders it correctly framed.
+    await expect(page.locator(".plugin-deps-message")).toHaveText(
+      "This plugin requires additional Python dependencies. Please install and restart the server.",
+    );
+    await expect(page.locator(".plugin-deps-command")).toHaveText(
+      "poetry add twilio",
+    );
+    // The Enabled switch lives in edit-page-top's extra-stuff slot, outside
+    // the clipped v-alert the other shot captures — asserting it visible
+    // proves this capture spans the full page, not just the alert.
+    await expect(page.getByText("Enabled")).toBeVisible();
+
+    await captureDocsShot(page, "plugin_edit.png");
+  });
+
+  test("plugin tasks @docs", async ({ page }) => {
+    // Standalone PluginTasksList (plugin: null prop) — its own Plugins filter
+    // renders here (v-if="!plugin"), unlike the plugin-scoped instance inside
+    // PluginEdit above.
+    await mockInstalledPlugins(page, scenario.plugins);
+    await mockPluginTasks(page, scenario.pluginTasks);
+
+    await gotoDocs(page, "/#/plugin-tasks");
+
+    // Both the Plugins and Users expansion-panel filters auto-select every
+    // item on mount (ExpansionPanelFilter's default when emptyDefault is not
+    // set — same mechanism the downloads-list shot documents), which is what
+    // makes selectedEntities/selectedUsers non-empty and TasksTable.getTasks()
+    // actually fire: it no-ops to an empty list whenever either is empty. So
+    // the populated table below is itself proof that mechanism worked, not
+    // merely that the mock exists.
+    //
+    // TasksTable.vue's mounted() hook calls debouncedGetTasks() (a
+    // lodash.debounce-wrapped getTasks, 500ms) immediately, before the
+    // Plugins/Users filters' own async store fetches have resolved — so that
+    // FIRST call's getTasks() sees empty selectedEntities/selectedUsers and
+    // no-ops (see the comment above). The filters' items arrays only
+    // populate once pluginStore.getPlugins()/userStore.getUsers() resolve,
+    // which re-triggers debouncedGetTasks() via TasksTable's
+    // selectedEntities/selectedUsers watchers — but resolving those mocked
+    // fetches needs the browser's REAL event loop to run, which
+    // page.clock.runFor() does not provide: it only advances the fake
+    // in-page timer clock the debounce's setTimeout is gated on, not actual
+    // network/microtask processing. So a real wait has to come first (to let
+    // the stores populate and reschedule the debounce correctly), and only
+    // then does ticking the fake clock let that rescheduled timer fire.
+    // Measured directly: ticking the fake clock alone, however far, never
+    // gets a single GET /plugins/tasks request to fire.
+    await page.waitForTimeout(500);
+    await page.clock.runFor(600);
+    await tickUntil(
+      page,
+      async () => (await page.getByText("basic_reporting").count()) > 0,
+    );
+
+    // Plugin column: only rendered when no `entity` prop is bound
+    // (TasksTable.vue's `v-if="!entity"` on the item.<idField> slot) — true
+    // here, false inside PluginEdit's Tasks tab.
+    await expect(
+      page.getByRole("link", { name: "basic_reporting" }).first(),
+    ).toBeVisible();
+    // User column: plain text, distinct from the Plugin link above.
+    await expect(page.getByText("admin", { exact: true })).toBeVisible();
+    await expect(page.getByText("operator", { exact: true })).toBeVisible();
+
+    await captureDocsShot(page, "plugin_tasks.png");
+  });
+
   test("malleable profiles list @docs", async ({ page }) => {
     await mockMalleableProfilesList(page, scenario.malleableProfiles);
 
@@ -406,6 +714,28 @@ test.describe("documentation screenshots", () => {
     await expect(page.getByText("a day ago")).toBeVisible();
 
     await captureDocsShot(page, "malleable_profiles.png");
+  });
+
+  test("malleable profile edit @docs", async ({ page }) => {
+    const profile = scenario.malleableProfiles[0]; // acme-amazon
+    await mockMalleableProfileDetail(page, profile);
+
+    await gotoDocs(page, `/#/malleable-profiles/${profile.id}`);
+
+    // The mode computed returns "View" for a non-new, non-copy record, same
+    // convention as bypass_edit.png below.
+    await expect(
+      page.getByRole("heading", { name: "View Malleable Profile" }),
+    ).toBeVisible();
+    // MalleableProfileEdit has no <general-form> — these three v-text-field/
+    // v-textarea controls (labels are lowercase in the template: "name",
+    // "category", "code") are bound directly to form.*, so a renamed field
+    // publishes an empty editor and these fail.
+    await expect(page.getByLabel("name")).toHaveValue(profile.name);
+    await expect(page.getByLabel("category")).toHaveValue(profile.category);
+    await expect(page.getByLabel("code")).toHaveValue(/sample_name "Amazon"/);
+
+    await captureDocsShot(page, "malleable_profile_edit.png");
   });
 
   test("bypasses list @docs", async ({ page }) => {

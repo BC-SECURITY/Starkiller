@@ -457,6 +457,34 @@ export const scenario = {
     },
   ],
 
+  // Both PluginTasksList call sites — the standalone /plugin-tasks route
+  // (plugin: null) and PluginEdit's Tasks tab (plugin: plugins[0]) — drive
+  // TasksTable.getTasks() with an ARRAY `selected`, so both hit the same
+  // aggregate endpoint, GET /plugins/tasks, mocked by mockPluginTasks.
+  // idField is `plugin_id` (pluginTaskConfig.js); it matches plugins[0].id
+  // above so the Plugin column renders a real cross-referenced value rather
+  // than an orphaned id.
+  pluginTasks: [
+    {
+      id: 1,
+      plugin_id: "basic_reporting",
+      status: "completed",
+      input: "generate_report",
+      username: "admin",
+      updated_at: hoursAgo(1),
+      tags: [],
+    },
+    {
+      id: 2,
+      plugin_id: "basic_reporting",
+      status: "started",
+      input: "generate_report",
+      username: "operator",
+      updated_at: minutesAgo(20),
+      tags: [],
+    },
+  ],
+
   // registries must be a non-null object — PluginMarketplace calls
   // Object.keys(plugin.registries) in registryOptions. versions must be a
   // non-empty array of objects with `name`: the selection watcher reads
