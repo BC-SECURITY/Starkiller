@@ -155,12 +155,6 @@ export function killJob(sessionId, jobId) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateProxies(sessionId, proxies) {
-  return request
-    .post(`/agents/${sessionId}/tasks/proxy_list`, proxies)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function deleteTag(agentId, taskId, tag) {
   return request
     .delete(`agents/${agentId}/tasks/${taskId}/tags/${tag}`)

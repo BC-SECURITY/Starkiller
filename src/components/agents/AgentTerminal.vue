@@ -40,6 +40,7 @@
 import { getCurrentInstance, watch } from "vue";
 import * as moduleApi from "@/api/module-api";
 import * as agentTaskApi from "@/api/agent-task-api";
+import { useAgentStore } from "@/stores/agent-module";
 import { ansiToHtml, colorizeText } from "@/utils/ansi";
 import { table, BOX_BORDER } from "@/utils/ascii-table";
 import { useModuleStore } from "@/stores/module-module";
@@ -215,6 +216,41 @@ export default {
             "Task the agent to return back a list of all previous tasks and their status",
           usage: "jobs",
         },
+        {
+          command: "kill_job",
+          description: "Task the agent to kill a running job by id",
+          usage: "kill_job <job_id>",
+        },
+        {
+          command: "history",
+          description: "Show recent task history for this agent",
+          usage: "history [count]",
+        },
+        {
+          command: "download",
+          description: "Task the agent to download a file from the target",
+          usage: "download <remote_path>",
+        },
+        {
+          command: "kill_date",
+          description: "Task the agent to update its kill date",
+          usage: "kill_date <date>",
+        },
+        {
+          command: "working_hours",
+          description: "Task the agent to update its working hours",
+          usage: "working_hours <hours>",
+        },
+        {
+          command: "rename",
+          description: "Rename the current agent",
+          usage: "rename <new_name>",
+        },
+        {
+          command: "kill",
+          description: "Task the agent to exit",
+          usage: "kill",
+        },
       ],
       moduleHelpCommands: [
         {
@@ -224,7 +260,7 @@ export default {
         },
         {
           command: "generate",
-          description: "Generate the selected module",
+          description: "Alias for execute (matches Empire's module menu)",
           usage: "generate",
         },
         {
@@ -268,6 +304,9 @@ export default {
   computed: {
     moduleStore() {
       return useModuleStore();
+    },
+    agentStore() {
+      return useAgentStore();
     },
     allModules() {
       return this.moduleStore.modules;
@@ -613,6 +652,27 @@ export default {
               );
             }
             break;
+          case "download":
+            this.taskDownload(commandParts.slice(1).join(" "));
+            break;
+          case "kill_date":
+            this.taskKillDate(commandParts.slice(1).join(" "));
+            break;
+          case "working_hours":
+            this.taskWorkingHours(commandParts.slice(1).join(" "));
+            break;
+          case "kill_job":
+            this.taskKillJob(args[0]);
+            break;
+          case "history":
+            this.taskHistory(args[0]);
+            break;
+          case "kill":
+            this.killThisAgent();
+            break;
+          case "rename":
+            this.renameThisAgent(commandParts.slice(1).join(" "));
+            break;
           default:
             switch (this.currentInput) {
               case "help":
@@ -637,6 +697,9 @@ export default {
           case "unset":
             this.unsetModuleOption(args[0]);
             break;
+          // generate is an intentional alias for execute: Empire's own module
+          // menu aliased them (UseModuleMenu.generate just called execute), and
+          // there is no generate-without-execute path for agent modules.
           case "generate":
             this.executeCurrentModule();
             break;
@@ -673,6 +736,118 @@ export default {
       }
       this.moduleOptions[optionName].value = null;
       this.addInfo(`Unset ${optionName}.`);
+    },
+    taskDownload(path) {
+      if (!path) {
+        this.addError("Usage: download <remote_path>");
+        return undefined;
+      }
+      return agentTaskApi
+        .downloadFile(this.agent.session_id, path)
+        .then(() => this.addInfo(`Tasked agent to download ${path}`))
+        .catch((error) =>
+          this.addError(`Error downloading file: ${error.message}`),
+        );
+    },
+    taskKillDate(killDate) {
+      if (!killDate) {
+        this.addError("Usage: kill_date <date>");
+        return undefined;
+      }
+      return agentTaskApi
+        .updateKillDate(this.agent.session_id, killDate)
+        .then(() =>
+          this.addInfo(`Tasked agent to update kill date to ${killDate}`),
+        )
+        .catch((error) =>
+          this.addError(`Error updating kill date: ${error.message}`),
+        );
+    },
+    taskWorkingHours(workingHours) {
+      if (!workingHours) {
+        this.addError("Usage: working_hours <hours>");
+        return undefined;
+      }
+      return agentTaskApi
+        .updateWorkingHours(this.agent.session_id, workingHours)
+        .then(() =>
+          this.addInfo(
+            `Tasked agent to update working hours to ${workingHours}`,
+          ),
+        )
+        .catch((error) =>
+          this.addError(`Error updating working hours: ${error.message}`),
+        );
+    },
+    taskKillJob(jobId) {
+      if (!jobId) {
+        this.addError("Usage: kill_job <job_id>");
+        return undefined;
+      }
+      return agentTaskApi
+        .killJob(this.agent.session_id, jobId)
+        .then(() => this.addInfo(`Tasked agent to kill job ${jobId}`))
+        .catch((error) => this.addError(`Error killing job: ${error.message}`));
+    },
+    async taskHistory(count) {
+      const parsed = Number(count);
+      const limit = parsed > 0 ? parsed : 10;
+      try {
+        const response = await agentTaskApi.getTasks(this.agent.session_id, {
+          limit,
+        });
+        const records = response.records || [];
+        if (!records.length) {
+          this.addInfo("No task history.");
+          return;
+        }
+        const tableData = [
+          [
+            colorizeText("ID", "green"),
+            colorizeText("Status", "green"),
+            colorizeText("Input", "green"),
+          ],
+        ];
+        records.forEach((task) => {
+          tableData.push([
+            String(task.id),
+            task.status,
+            (task.input || "").split("\n")[0].slice(0, 60),
+          ]);
+        });
+        this.displayTable(
+          table(tableData, {
+            ...this.tableConfig,
+            columns: { 2: { width: 60 } },
+          }),
+        );
+      } catch (error) {
+        this.addError(`Error fetching history: ${error.message}`);
+      }
+    },
+    killThisAgent() {
+      // Route through the store (not the API directly) so the shared agent
+      // list reflects the archived state without a refetch.
+      return this.agentStore
+        .killAgent({ sessionId: this.agent.session_id })
+        .then(() => this.addInfo("Tasked agent to exit"))
+        .catch((error) =>
+          this.addError(`Error killing agent: ${error.message}`),
+        );
+    },
+    renameThisAgent(newName) {
+      if (!newName) {
+        this.addError("Usage: rename <new_name>");
+        return undefined;
+      }
+      // Route through the store so the new name propagates to the shared
+      // agent list without a refetch.
+      return this.agentStore
+        .rename({ sessionId: this.agent.session_id, newName })
+        .then(() => this.addInfo(`Renamed agent to ${newName}`))
+        .catch((error) =>
+          this.addError(`Error renaming agent: ${error.message}`),
+        );
     },
     async executeRevToSelfModule() {
       try {
@@ -902,9 +1077,14 @@ export default {
       }
     },
     displayHelpMenu() {
-      if (this.currentModule) {
-        this.helpCommands = this.moduleHelpCommands;
-      }
+      // Select the list to render locally -- do NOT reassign this.helpCommands.
+      // Overwriting it with moduleHelpCommands here is permanent (back never
+      // restores it), which drops the main-menu commands (including
+      // download/kill/rename/etc.) from both this menu and generateSuggestions
+      // on every later main-menu use.
+      const commands = this.currentModule
+        ? this.moduleHelpCommands
+        : this.helpCommands;
 
       const modifiedConfig = {
         ...this.tableConfig,
@@ -918,7 +1098,7 @@ export default {
         ],
       ];
 
-      this.helpCommands.forEach((command) => {
+      commands.forEach((command) => {
         tableData.push([command.command, command.description, command.usage]);
       });
       this.displayTable(table(tableData, modifiedConfig));

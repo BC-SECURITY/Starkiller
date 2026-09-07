@@ -56,14 +56,18 @@ export const useAgentStore = defineStore("agent", {
       return agent ? agent.name : null;
     },
     async killAgent({ sessionId }) {
+      // Always task the API, even when the agent isn't in the cached list --
+      // callers like AgentEdit and AgentTerminal load their agent via a direct
+      // agentApi.getAgent() and never add it here, so an early return would
+      // silently no-op the kill while the caller reports success. Only the
+      // local archived-state update is conditional on the agent being cached.
+      await agentApi.killAgent(sessionId);
+
       const agentIndex = this.agents.findIndex(
         (el) => el.session_id === sessionId,
       );
-      if (agentIndex < 0) return;
-
-      const agent = this.agents[agentIndex];
-      await agentApi.killAgent(sessionId);
-      if (agent) {
+      if (agentIndex >= 0) {
+        const agent = this.agents[agentIndex];
         agent.archived = true;
         this.agents.splice(agentIndex, 1, agent);
       }
