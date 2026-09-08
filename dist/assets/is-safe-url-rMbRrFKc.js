@@ -1,0 +1,1 @@
+function e(e,{allowMailto:t=!1}={}){if(typeof e!=`string`)return!1;try{let{protocol:n}=new URL(e);return n===`http:`||n===`https:`?!0:t&&n===`mailto:`}catch{return!1}}export{e as t};

@@ -1,0 +1,1 @@
+import{Ai as e,Ni as t,Si as n,sa as r}from"./index-BcfgyrRh.js";import{t as i}from"./markdown-it-oiErKD1M.js";var a=e(e=>{let a=r(new i(e.options??{}));for(let t of e.plugins??[])a.value.use(t);let o=n(()=>a.value.render(e.source));return()=>t(`div`,{innerHTML:o.value})},{props:[`source`,`options`,`plugins`]});export{a as t};

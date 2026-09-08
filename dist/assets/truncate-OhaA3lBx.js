@@ -1,0 +1,1 @@
+function e(e,t=60){let n=e==null?``:String(e);return n.length>t?`${n.substring(0,t)}...`:n}export{e as t};
