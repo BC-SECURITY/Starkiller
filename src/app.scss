@@ -21,3 +21,59 @@
   color: rgba(255, 255, 255, 0.4);
   font-style: italic;
 }
+
+// Task-detail panel header: name chip with single-line ellipsis + options
+// label. Shared by AgentTasksTable.vue and PluginTasksTable.vue, which render
+// the same expanded-row header. Keep the chip's only child a bare text node —
+// adding an icon or wrapper span inside the chip breaks the ellipsis below.
+.task-name-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.task-name-chip .v-chip__content {
+  font-size: 0.8125rem;
+  min-width: 0; // allow the inner flex item to shrink so ellipsis triggers
+  white-space: nowrap; // all three needed for text-overflow to render
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-options-label {
+  font-size: 0.8125rem;
+}
+
+// Stats-page visual tokens. --sk-accent and --sk-chart-height mirror ACCENT
+// and CHART_HEIGHT_PX in src/components/charts/tokens.js — keep those two in
+// sync. --sk-metric-font-size is CSS-only (no JS consumer).
+.sk-stats-surface {
+  --sk-chart-height: 350px;
+  --sk-accent: #32cd32;
+  --sk-metric-font-size: 1.5rem;
+}
+
+// Fallbacks are intentional: if these classes are ever used outside a
+// .sk-stats-surface ancestor, var() resolves to the literal fallback rather
+// than the property's CSS initial value (height: auto). With Chart.js's
+// maintainAspectRatio: false the canvas needs a parent with an explicit
+// height — height: auto collapses it to ~0px. The fallback prevents that.
+.sk-chart-canvas {
+  position: relative;
+  height: var(--sk-chart-height, 350px);
+}
+
+.sk-metric-value {
+  color: var(--sk-accent, #32cd32);
+  // fallback must track the token above
+  font-size: var(--sk-metric-font-size, 1.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.sk-card-title-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}

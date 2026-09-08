@@ -29,7 +29,10 @@ let notificationCounter = 0;
 // eslint-disable-next-line import/prefer-default-export
 export const useApplicationStore = defineStore("application", {
   persist: {
-    omit: ["chatUnreadCount"],
+    // forcedLogoutReason is intentionally never persisted -- it's a
+    // same-session, fire-once signal for Login.vue to show a snack, not
+    // something that should ever survive a reload into a future session.
+    omit: ["chatUnreadCount", "forcedLogoutReason", "chatOpen"],
     afterHydrate: (ctx) => {
       try {
         setInstance(ctx.store.url, ctx.store.token);
@@ -66,13 +69,42 @@ export const useApplicationStore = defineStore("application", {
     taskHeaders: [],
     pluginTaskHeaders: [],
     connectionError: 0,
+    // Set by logout(reason) when the interceptor forces a logout (401/403).
+    // Empty string means "no forced-logout message to show" -- cleared on
+    // every login() attempt and by clear(), so it can never linger into an
+    // unrelated future session or attempt. See the persist.omit note above.
+    forcedLogoutReason: "",
     chatUnreadCount: 0,
+    // Whether the chat drawer is open. Lives here rather than inside Chat.vue
+    // because the two components that drive it mount independently: the app
+    // bar's chat button renders as soon as `chatWidget` is true, while
+    // <socket-notifications> (and the async <chat> beneath it) waits on
+    // `empireVersion` satisfying >=4.0 and on the socket connecting. Holding
+    // the flag in a component meant an early click had nothing to set and was
+    // silently swallowed. Not persisted — reopening the app should not
+    // reopen the drawer.
+    chatOpen: false,
     notifications: [],
+    dashboardSelectedAgentIds: [],
+    // Stats-page view preferences. Shared across all agents (a user who picks
+    // "Hour" on agent A sees "Hour" on agent B) and intentionally survive
+    // logout()/clear() — same precedent as dashboardSelectedAgentIds above.
+    // Cross-user caveat (all survive-logout keys): on a shared machine User B
+    // inherits User A's values. For dashboardSelectedAgentIds the leak is
+    // mitigated by pruneSelection() (in Dashboard.vue — drops ids absent from
+    // the current agent list); these timeframe prefs have no equivalent prune
+    // (a stale timeframe is harmless). Don't "fix" the survive-logout behavior
+    // without accounting for this.
+    dashboardCheckinTimeframe: "Second",
+    agentStatsCheckinTimeframe: "Second",
+    agentStatsTaskTimeframe: "Day",
   }),
   actions: {
     async login({ url, socketUrl, username, password }) {
       try {
         this.loginError = "";
+        // A fresh login attempt supersedes any prior forced-logout message.
+        this.forcedLogoutReason = "";
         const formData = new FormData();
         formData.append("username", username);
         formData.append("password", password);
@@ -128,13 +160,20 @@ export const useApplicationStore = defineStore("application", {
     clearNotifications() {
       this.notifications = [];
     },
-    async logout() {
+    // `reason`, if given, is shown as a snack once Login.vue mounts (see its
+    // forcedLogoutReason watcher) -- used by http.js's 401/403 interceptor
+    // to explain a forced logout. The voluntary "Log Out" button in
+    // Settings.vue calls this with no argument, which clears any stale
+    // reason from a previous forced logout.
+    async logout(reason = "") {
       this.token = "";
       this.url = "";
       this.socketUrl = "";
       this.user = {};
       this.empireVersion = "";
       this.notifications = [];
+      this.chatOpen = false;
+      this.forcedLogoutReason = reason;
     },
     clear() {
       this.token = "";
@@ -143,6 +182,7 @@ export const useApplicationStore = defineStore("application", {
       this.loginError = "";
       this.empireVersion = "";
       this.chatWidget = true;
+      this.chatOpen = false;
       this.hideStaleAgents = false;
       this.hideArchivedAgents = true;
       this.filterOnlyMyStagers = true;
@@ -151,6 +191,7 @@ export const useApplicationStore = defineStore("application", {
       this.taskHeaders = [];
       this.pluginTaskHeaders = [];
       this.notifications = [];
+      this.forcedLogoutReason = "";
     },
   },
   getters: {

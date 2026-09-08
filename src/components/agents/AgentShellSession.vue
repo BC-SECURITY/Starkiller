@@ -13,7 +13,11 @@
       </div>
       <div class="terminal-input">
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <span class="prompt" v-html="ansiToHTML(currentPrompt)" />
+        <span
+          ref="promptSpan"
+          class="prompt"
+          v-html="ansiToHTML(currentPrompt)"
+        />
         <input
           ref="inputField"
           v-model="currentInput"
@@ -22,16 +26,31 @@
         />
       </div>
     </div>
+
+    <TerminalSuggestions
+      :suggestions="suggestions"
+      :highlighted-index="currentSuggestionIndex"
+      :anchor="() => ({ input: $refs.inputField, prompt: $refs.promptSpan })"
+      @select="applySuggestion"
+    />
   </div>
 </template>
 
 <script>
-import pause from "@/utils/pause";
+import { getCurrentInstance, watch } from "vue";
 import * as agentTaskApi from "@/api/agent-task-api";
-import { ansiToHtml } from "@/utils/ansi";
+import { ansiToHtml, colorizeText } from "@/utils/ansi";
+import { useTerminalOutput } from "@/composables/useTerminalOutput";
+import { usePollForResult } from "@/composables/usePollForResult";
+import {
+  useCommandHistory,
+  historyMatches,
+} from "@/composables/useCommandHistory";
+import TerminalSuggestions from "@/components/agents/TerminalSuggestions.vue";
 
 export default {
   name: "AgentShellSession",
+  components: { TerminalSuggestions },
   props: {
     agent: {
       type: Object,
@@ -42,59 +61,165 @@ export default {
       default: null,
     },
   },
+  setup(props) {
+    const instance = getCurrentInstance();
+    const { output, outputLines, addLine, addError, addInfo, loadHistory } =
+      useTerminalOutput(() => instance.proxy.storageName());
+    const { pollForResult } = usePollForResult(() => props.agent, {
+      addLine,
+      addInfo,
+    });
+    const {
+      commandHistory,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+      loadCommandHistory,
+    } = useCommandHistory(() => instance.proxy.historyStorageKey());
+    // AgentEdit.vue can mount this component before its own agent fetch
+    // resolves (it persists the active interact-tab and restores it as the
+    // initial render, and Vue mounts children before the parent's mounted()
+    // hook runs) -- when that happens, mounted()'s loadHistory() call reads
+    // the wrong storage key (agent.session_id is still undefined) and finds
+    // nothing. Retry once session_id actually arrives, so history isn't
+    // silently lost on a reload while this tab happens to be the persisted
+    // active one.
+    watch(
+      () => props.agent?.session_id,
+      (sessionId, previousSessionId) => {
+        if (!sessionId || sessionId === previousSessionId) return;
+        // Command history reloads on ANY change of agent, not just the
+        // undefined -> real one. AgentEdit renders this component without a
+        // :key and swaps the agent prop when the route param changes, so on a
+        // real -> real switch the instance is reused: without this, the
+        // previous agent's commands stay in memory and the next push persists
+        // them under the new agent's key.
+        loadCommandHistory();
+        if (!previousSessionId) {
+          loadHistory();
+          // updateCurrentDirectory() probes the agent by session_id; if it ran
+          // in mounted() while session_id was still undefined (Shell mounted as
+          // the persisted active tab before AgentEdit's getAgent() resolved),
+          // the probe hit /agents/undefined/... and the prompt fell back to an
+          // undefined directory. Re-run it here once the real session_id lands.
+          instance.proxy.updateCurrentDirectory();
+        }
+      },
+    );
+    return {
+      output,
+      outputLines,
+      addLine,
+      addError,
+      addInfo,
+      loadHistory,
+      pollForResult,
+      commandHistory,
+      pushCommand,
+      navigatePrev,
+      navigateNext,
+      loadCommandHistory,
+    };
+  },
   data() {
     return {
       currentInput: "",
-      outputLines: [],
-      commandHistory: [],
-      historyIndex: -1,
       currentDir: "loading...",
+      suggestions: [],
+      currentSuggestionIndex: -1,
     };
   },
   computed: {
     currentPrompt() {
-      const prefix = this.colorizeText("(Empire: ", "white");
-      const suffix = this.colorizeText(" )>", "white");
-      const body = this.colorizeText(this.currentDir, "green");
+      const prefix = colorizeText("(Empire: ", "white");
+      const suffix = colorizeText(" )>", "white");
+      const body = colorizeText(this.currentDir, "green");
       return prefix + body + suffix;
     },
   },
   watch: {
-    outputLines(val) {
-      localStorage.setItem(this.storageName(), JSON.stringify(val));
+    currentInput() {
+      // Any manual edit dismisses an open completion list. (Applying a
+      // suggestion sets currentInput too, but the list is already cleared by
+      // then, so this is a harmless no-op in that path.)
+      if (this.suggestions.length) {
+        this.suggestions = [];
+        this.currentSuggestionIndex = -1;
+      }
     },
   },
   async mounted() {
     this.$refs.inputField.focus();
-
-    const savedHistory = localStorage.getItem(this.storageName());
-    if (savedHistory) {
-      this.outputLines = JSON.parse(savedHistory);
+    this.loadHistory();
+    this.loadCommandHistory();
+    // Probe only with a real session_id; the setup() watch retries otherwise.
+    if (this.agent?.session_id) {
+      this.updateCurrentDirectory();
     }
-
-    this.scrollToBottom();
-    this.updateCurrentDirectory();
   },
   methods: {
     storageName() {
       const suffix = this.tabId != null ? `-${this.tabId}` : "";
       return `shell-session-${this.agent.session_id}${suffix}`;
     },
+    // Null until session_id lands. mounted() runs before AgentEdit's getAgent()
+    // resolves on the persisted-active-tab path, and AgentEdit passes no tabId,
+    // so an unguarded key would be the literal "shell-session-undefined:history"
+    // -- shared by every agent, in both directions: the initial read can pull
+    // another agent's commands into this session, and anything typed in that
+    // window is written where the next agent will read it. The setup() watch
+    // re-loads once the real id arrives.
+    historyStorageKey() {
+      if (!this.agent?.session_id) return null;
+      return `${this.storageName()}:history`;
+    },
     handleKeyEvents(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
-        if (this.historyIndex > 0) {
-          this.historyIndex--;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const prev = this.navigatePrev(this.currentInput);
+        if (prev !== undefined) {
+          this.currentInput = prev;
         }
       } else if (event.code === "ArrowDown") {
-        if (this.historyIndex < this.commandHistory.length - 1) {
-          this.historyIndex++;
-          this.currentInput = this.commandHistory[this.historyIndex];
+        const next = this.navigateNext();
+        if (next !== undefined) {
+          this.currentInput = next;
+        }
+      } else if (event.code === "Tab") {
+        // Shift+Tab is reverse focus navigation, never completion. event.code
+        // is the physical key, so it lands in this branch too.
+        if (event.shiftKey) return;
+        const matches = historyMatches(this.commandHistory, this.currentInput);
+        // preventDefault only once there is something to complete: matching is
+        // synchronous, so it still suppresses the default during keydown.
+        // Swallowing Tab with no matches (or empty input) leaves a
+        // keyboard-only operator no way out of an input mounted() focuses.
+        if (matches.length === 1) {
+          event.preventDefault();
+          this.currentInput = matches[0];
+          this.suggestions = [];
+          this.currentSuggestionIndex = -1;
+        } else if (matches.length > 1) {
+          event.preventDefault();
+          this.suggestions = matches;
+          this.currentSuggestionIndex =
+            (this.currentSuggestionIndex + 1) % matches.length;
         }
       }
     },
+    applySuggestion(suggestion) {
+      this.currentInput = suggestion;
+      this.suggestions = [];
+      this.currentSuggestionIndex = -1;
+    },
     async processCommand() {
+      if (this.suggestions.length > 0 && this.currentSuggestionIndex !== -1) {
+        this.currentInput = this.suggestions[this.currentSuggestionIndex];
+        this.suggestions = [];
+        this.currentSuggestionIndex = -1;
+        return;
+      }
+
       if (!this.currentInput.trim()) {
         this.addLine("");
         this.addLine(this.currentPrompt);
@@ -111,8 +236,7 @@ export default {
         return;
       }
 
-      this.commandHistory.push(command);
-      this.historyIndex = this.commandHistory.length;
+      this.pushCommand(command);
       this.currentInput = "";
 
       await this.shellCommandOperator(command);
@@ -137,11 +261,14 @@ export default {
       const complete = await this.pollForResult(response.id, { print: false });
 
       if (["cd", "set-location"].includes(stdin.toLowerCase().split(" ")[0])) {
+        if (complete?.output) {
+          this.addLine(complete.output, "indent-5-spaces");
+        }
         this.updateCurrentDirectory();
         return;
       }
 
-      if (complete) {
+      if (complete?.output) {
         this.addLine(complete.output, "indent-5-spaces");
       }
     },
@@ -156,120 +283,26 @@ export default {
     },
     async updateCurrentDirectory() {
       this.currentDir = "loading...";
-      const response = await agentTaskApi.shell(
-        this.agent.session_id,
-        this.getDirectoryCommand(),
-      );
-
-      const complete = await this.pollForResult(response.id, { print: false });
-
-      if (complete) {
-        // eslint-disable-next-line prefer-destructuring
-        this.currentDir = (
-          await this.checkTaskComplete(response.id)
-        ).output.split("\r")[0];
-      }
-    },
-    async pollForResult(
-      taskId,
-      config = { print: true, attempts: 30, delay: 5000 },
-    ) {
-      if (!config.attempts) config.attempts = 30;
-      config.delay = Math.max(
-        config.delay ||
-          (this.agent.delay != null ? this.agent.delay * 1000 : 5000),
-        1000,
-      );
-
-      let res = null;
-      let hasPrintedJobStarted = false;
-      let i = 0;
-      let complete = false;
-      while (i < config.attempts) {
-        // eslint-disable-next-line no-await-in-loop
-        res = await this.checkTaskComplete(taskId);
-        if (res) {
-          const { output } = res;
-          if (!output.toLowerCase().includes("job started")) {
-            if (config.print) {
-              const taskName = res.module_name || res.task_name || "shell";
-              this.addLine(
-                `[*] Task ${res.id} (${taskName}) completed`,
-                "info-text",
-              );
-              this.addLine(output, "indent-5-spaces");
-            }
-            complete = true;
-            break;
-          } else if (!hasPrintedJobStarted) {
-            this.addLine(output, "indent-5-spaces");
-            hasPrintedJobStarted = true;
-          }
-        }
-
-        // eslint-disable-next-line no-await-in-loop
-        await pause(config.delay);
-        i++;
-      }
-
-      if (!complete) {
-        this.addInfo(`No output received for task ${taskId}.`);
-      }
-
-      return res;
-    },
-    async checkTaskComplete(taskId) {
       try {
-        const task = await agentTaskApi.getTask(this.agent.session_id, taskId);
-        if (task.output) {
-          return task;
+        const response = await agentTaskApi.shell(
+          this.agent.session_id,
+          this.getDirectoryCommand(),
+        );
+
+        const complete = await this.pollForResult(response.id, {
+          print: false,
+        });
+
+        if (complete?.output) {
+          this.currentDir = complete.output.split("\r")[0];
+        } else {
+          this.currentDir = this.agent.session_id;
         }
-        return false;
-      } catch (_err) {
-        return false;
+      } catch {
+        this.currentDir = this.agent.session_id;
       }
-    },
-    addLine(content, cssClasses = "preserve-newlines") {
-      this.outputLines.push({ content, cssClasses });
-      this.scrollToBottom();
-    },
-    addError(content) {
-      this.addLine(content, "error-text");
-    },
-    addInfo(content) {
-      this.addLine(content, "info-text");
-    },
-    scrollToBottom() {
-      this.$nextTick(() => {
-        const outputDiv = this.$refs.output;
-        outputDiv.scrollTop = outputDiv.scrollHeight;
-      });
     },
     ansiToHTML: ansiToHtml,
-    colorizeText(text, color = "") {
-      let colorCode = "";
-      const boldCode = "\u001b[1m";
-      switch (color.toLowerCase()) {
-        case "red":
-          colorCode = "\u001b[91m";
-          break;
-        case "green":
-          colorCode = "\u001b[92m";
-          break;
-        case "blue":
-          colorCode = "\u001b[94m";
-          break;
-        case "yellow":
-          colorCode = "\u001b[93m";
-          break;
-        case "white":
-          colorCode = "\u001b[97m";
-          break;
-        default:
-          return text;
-      }
-      return `${boldCode}${colorCode}${text}\u001b[0m`;
-    },
   },
 };
 </script>

@@ -18,7 +18,6 @@ export function getAgents(includeArchived = false) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-// or even just id if we remove the numeric ids.
 /**
  * Rename an agent.
  */
@@ -68,14 +67,43 @@ export function deleteTag(agentId, tag) {
     .catch((error) => Promise.reject(handleError(error)));
 }
 
-export function updateTag(agentId, tag) {
-  return request
-    .put(`agents/${agentId}/tags/${tag.id}`, tag)
-    .catch((error) => Promise.reject(handleError(error)));
-}
-
 export function addTag(agentId, tag) {
   return request
     .post(`agents/${agentId}/tags`, tag)
     .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function getProcesses(hostId) {
+  return request(`/hosts/${hostId}/processes`)
+    .then((data) => data.records)
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function getCheckinsLast() {
+  return request("/agents/checkins/", {
+    params: {
+      limit: 1,
+      order_direction: "desc",
+    },
+  })
+    .then((data) => data.records[0])
+    .catch((error) => Promise.reject(handleError(error)));
+}
+
+export function getCheckinsAgg(
+  bucketSize = "day",
+  startDate = null,
+  endDate = null,
+  sessionId = null,
+  signal = null,
+) {
+  return request("/agents/checkins/aggregate", {
+    params: {
+      bucket_size: bucketSize.toLowerCase(),
+      start_date: startDate,
+      end_date: endDate,
+      session_id: sessionId,
+    },
+    signal,
+  }).catch((error) => Promise.reject(handleError(error)));
 }

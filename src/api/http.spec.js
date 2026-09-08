@@ -136,10 +136,13 @@ describe("request — error contract", () => {
     });
   });
 
-  it("handleError unwraps detail synchronously", async () => {
+  it("handleError unwraps detail into an ApiError that stringifies to it", async () => {
     mockFetch({ ok: false, status: 422, body: { detail: "bad" } });
     const err = await request("/x").catch((e) => e);
-    expect(handleError(err)).toBe("bad");
+    const handled = handleError(err);
+    expect(String(handled)).toBe("bad");
+    expect(handled.message).toBe("bad");
+    expect(handled.response.status).toBe(422);
   });
 
   it("calls logout() on 401 and 403, not on other 4xx", async () => {
@@ -158,6 +161,27 @@ describe("request — error contract", () => {
     expect(mockStore.logout).not.toHaveBeenCalled();
   });
 
+  // Regression test: 401 ("your session expired") and 403 ("you lack
+  // permission") are different operator-facing situations and must not
+  // share one hardcoded message.
+  it("passes distinct reason strings to logout() for 401 vs 403", async () => {
+    mockFetch({ ok: false, status: 401, body: {} });
+    await request("/x").catch(() => {});
+    expect(mockStore.logout).toHaveBeenCalledWith(
+      expect.stringMatching(/session has expired/i),
+    );
+
+    mockStore.logout.mockClear();
+    mockFetch({ ok: false, status: 403, body: {} });
+    await request("/x").catch(() => {});
+    expect(mockStore.logout).toHaveBeenCalledWith(
+      expect.stringMatching(/permission/i),
+    );
+    expect(mockStore.logout.mock.calls[0][0]).not.toMatch(
+      /session has expired/i,
+    );
+  });
+
   it("bumps connectionError and rethrows on network failure (no logout)", async () => {
     global.fetch = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
     await expect(request("/x")).rejects.toBeInstanceOf(TypeError);
@@ -165,11 +189,91 @@ describe("request — error contract", () => {
     expect(mockStore.logout).not.toHaveBeenCalled();
   });
 
+  it("rethrows an AbortError without bumping connectionError (deliberate cancel)", async () => {
+    const abortErr = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    global.fetch = vi.fn().mockRejectedValue(abortErr);
+    await expect(request("/x")).rejects.toBe(abortErr);
+    expect(mockStore.connectionError).toBe(0);
+    expect(mockStore.logout).not.toHaveBeenCalled();
+  });
+
+  it("forwards an AbortSignal to fetch", async () => {
+    mockFetch({ body: { ok: true } });
+    const controller = new AbortController();
+    await request("/x", { signal: controller.signal });
+    expect(global.fetch.mock.calls.at(-1)[1].signal).toBe(controller.signal);
+  });
+
+  it("rethrows an AbortError raised while reading a non-2xx error body (not a synthetic HTTP error)", async () => {
+    const abortErr = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: "Server Error",
+      headers: new Headers(),
+      text: vi.fn().mockRejectedValue(abortErr),
+      blob: vi.fn(),
+    });
+    await expect(request("/x")).rejects.toBe(abortErr);
+    expect(mockStore.connectionError).toBe(0);
+  });
+
   it("tolerates a non-JSON error body (data undefined, no parse throw)", async () => {
     mockFetch({ ok: false, status: 500, body: "Internal Server Error" });
     const err = await request("/x").catch((e) => e);
     expect(err.response.status).toBe(500);
     expect(err.response.data).toBeUndefined();
+  });
+});
+
+describe("handleError", () => {
+  it("preserves response.status while exposing the FastAPI detail message", () => {
+    // Regression guard: a {detail}-shaped 404 must stay introspectable via
+    // err.response.status (AgentStats's 404-terminal branch) — returning a bare
+    // string would strip it and make the status check silently fail forever.
+    const err = {
+      name: "AxiosError",
+      response: { status: 404, data: { detail: "Agent not found" } },
+    };
+    const result = handleError(err);
+    expect(result.response.status).toBe(404);
+    expect(result.message).toBe("Agent not found");
+  });
+
+  it("stringifies to the bare detail (no 'Error:' prefix)", () => {
+    // Keeps existing `${err}` / `Error: ${err}` interpolations rendering the
+    // same as when handleError returned a plain string.
+    const result = handleError({
+      response: { status: 400, data: { detail: "Bad request" } },
+    });
+    expect(`${result}`).toBe("Bad request");
+    expect(String(result)).toBe("Bad request");
+  });
+
+  it("preserves a FastAPI 422 array detail on .detail for field routing", () => {
+    // The array must survive on `.detail` (Error message can only be a string),
+    // so normalizeSubmitError can route per-field 422 messages to inputs.
+    const detail = [{ loc: ["body", "Name"], msg: "field required" }];
+    const result = handleError({ response: { status: 422, data: { detail } } });
+    expect(result.detail).toEqual(detail);
+    expect(result.response.status).toBe(422);
+  });
+
+  it("returns the original error untouched when there is no detail body", () => {
+    const networkErr = { name: "AxiosError", message: "Network Error" };
+    expect(handleError(networkErr)).toBe(networkErr);
+  });
+
+  it("returns the original error when the response has a body but no detail", () => {
+    // e.g. a 500 with a non-FastAPI body — status must stay introspectable.
+    const err = { name: "AxiosError", response: { status: 500, data: {} } };
+    const result = handleError(err);
+    expect(result).toBe(err);
+    expect(result.response.status).toBe(500);
   });
 });
 

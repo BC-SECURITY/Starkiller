@@ -16,6 +16,23 @@ export const defaultInstalledPlugins = [
   },
 ];
 
+// notLoadedPluginDetail: the boilerplate half of a plugin-detail response for
+//   a plugin that failed to load, for spreading into a PluginEdit.vue fixture.
+//   These fields are load-bearing rather than decorative — the three false
+//   flags are what put the view on the Details tab (interactDisabled), and
+//   PluginEdit's pluginDepsMessage/pluginDepsCommand both read
+//   `python_deps.length` with no guard, so a caller MUST supply python_deps
+//   (along with id/name) or the component throws during render and the
+//   failure surfaces inside whatever the test was actually asserting.
+export const notLoadedPluginDetail = {
+  loaded: false,
+  enabled: false,
+  execution_enabled: false,
+  authors: [],
+  execution_options: {},
+  settings_options: {},
+};
+
 export const defaultMarketplacePlugins = [
   {
     name: "marketplace-plugin",

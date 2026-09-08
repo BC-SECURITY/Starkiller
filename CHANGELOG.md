@@ -14,6 +14,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.3] - 2026-08-12
+
+### Fixed
+
+-   The `poetry add` command shown for a plugin's missing Python dependencies is now shell-quoted, so a version-pinned requirement like `mcp>=1.2,<2` can be pasted as-is — previously the shell read `>`/`<` as redirection and installed the package unpinned
+-   Agent graph draws pivot chains again against Empire 7.0 — peer-to-peer (SMB / port-forward) listeners are now detected by their `Agent` option instead of the listener-template `category` field that Empire 7.0 removed
+
+## [4.0.2] - 2026-08-01
+
+### Added
+
+-   Chat messages now render Markdown — bold, italic, strikethrough, inline code, code blocks, links, lists, blockquotes, and tables. Code blocks wrap rather than scroll and have a copy button; tables scroll horizontally in their own container instead of stretching the drawer. Headings and raw HTML are intentionally not rendered, and images render as their alt text only (never as an `<img>`, so a message cannot beacon out). Links open in a new tab, hardened with `noopener`/`noreferrer`/`no-referrer`, and are restricted to `http`/`https`. Markdown's backslash-escapes are disabled so pasted Windows/UNC paths survive intact — the tradeoff is that `\*literal\*` now shows its backslashes instead of suppressing emphasis. The message box is now multi-line: Enter sends, Shift+Enter adds a newline
+
+### Changed
+
+-   Plugin tasks table now matches the agent tasks table layout — the expand chevron renders in the leftmost column (it was previously appended on the right), the Status icon is centered, and shared columns follow the same order
+
+### Fixed
+
+-   Clicking the chat button in the top bar no longer does nothing when pressed right after the app loads — the button appears before the chat panel is ready, and clicks landing in that window were silently dropped
+
+-   The chat panel now scrolls to the newest message again — the watcher driving it was watching the message array rather than its length, so it never fired on a new message and the panel stayed wherever the operator had left it. It also stays pinned to the bottom while the message box grows to fit a multi-line message
+
+-   A wide table in your own chat message no longer escapes its bubble and puts a horizontal scrollbar on the message list; it now scrolls inside its own container the way it already did for other operators' messages
+
+-   Chat no longer loads its Markdown renderer as part of the initial app bundle, cutting roughly 50 kB (gzipped) off the critical path
+
+-   Column selections made in the agent tasks table's column picker no longer reset on every page mount — its persisted header preferences were being reseeded to defaults whenever the table remounted (the plugin tasks table was unaffected; it is protected by the same fix as it adopts the expand column in this release)
+
+-   Always-visible columns are no longer persisted with the column-picker selection (agents, agent tasks, and plugin tasks tables), so deselecting every column now restores the default columns on the next visit — previously this left the agents and plugin tasks tables permanently reduced to their always-visible columns; installs already stuck in that state are repaired on the next visit
+
+## [4.0.1] - 2026-07-28
+
+### Changed
+
+-   Agent **Listener** field is now read-only on the agent view — Empire 7.0 removed the server-side ability to reassign an agent's listener, so the edit control (which called a `tasks/update_comms` endpoint that no longer exists) has been removed while the value is still displayed
+
+## [4.0.0] - 2026-07-25
+
+### Added
+
+-   Revamped v2 tag system with a new tag picker dialog for attaching tags to agents, listeners, and other taggable entities — a centered dialog with a filter box, a checklist of existing tags, and inline create-and-attach for a new tag typed into the filter
+-   Per-agent Stats tab on the agent page (task counts, host info, check-in and tasks-over-time charts)
+-   Dashboard overview page with summary metrics, agent check-ins, a recent-tasks list, an agents breakdown chart, and an interactive topology panel
+-   Multi-agent selection on the Dashboard Check Ins card
+-   Interactive agent topology graph panel on the Dashboard with fullscreen expand and a context-aware right-click menu (Open, Popout, Execute shell/module, Kill, Focus); one shared `AgentGraph` component now powers both the panel and the Agents Graph page
+-   Auto-select best DotNetVersion based on agent's installed .NET
+-   Dashboard and Graph View available for all users
+-   Dedicated Shell session tab and multi-tab Terminal support
+-   Background override toggle to module execution
+-   Expanded Playwright end-to-end test coverage across the app
+
+### Changed
+
+-   **BREAKING**: Switched package manager from yarn to pnpm 11 (requires Node 22+)
+-   Support Empire 7.0's typed boolean module options, rendering them as toggle switches via the `value_type` option metadata
+-   Filtered the bypass picker to stagers matching the selected execution language
+-   Added a confirmation prompt before stopping a running task
+-   Explained forced logouts to the user instead of silently returning to the sign-out screen
+-   Respected each module's `depends_on` metadata when rendering AutoRunModules options
+-   Capped the terminal's live output buffer at 500 lines to bound memory growth on long-running sessions
+-   Consolidated the agent and plugin task tables into a shared `TasksTable`
+    component driven by per-entity config/adapter modules, removing ~850 lines
+    of duplication so task-table fixes apply once instead of twice
+-   Extracted the shared "terminal chrome" (output buffer, task polling, ANSI
+    coloring, command-history navigation) out of `AgentTerminal` and
+    `AgentShellSession` into reusable composables, so a fix to any of that
+    shared logic lands once instead of twice
+
+### Fixed
+
+-   Fixed long task/module names overflowing the expanded agent- and plugin-task detail panels
+-   Fixed a render crash in the expanded task panel for non-string option values
+-   Fixed Rerun Task erroring for shell/sysinfo tasks with lowercase names
+-   Fixed loss of terminal history when reloading while the Shell tab was active
+-   Fixed a stale-index bug that could rename the wrong agent
+-   Fixed bulk delete and kill silently doing nothing on the Bypasses, Credentials, Listeners, and Stagers pages
+-   Fixed the shell command input double-submitting on rapid Enter presses
+-   Fixed edit pages (Agent, Bypass, Credential, Listener, Stager) applying stale data from out-of-order fetch responses and navigating before deletes completed
+-   Surfaced previously-silent failures on fire-and-forget actions (kill, clear queue, download, avatar upload) and hardened download filename parsing
+-   Fixed duplicate notification socket listeners stacking on reconnect and hardened the reconnect UX
+-   Fixed mass kill action on agents list page not sending kill commands due to incorrect session ID reference
+-   Fixed agent upload path for Go/IronPython and removed file size limit
+
+### Security
+
+-   Fixed a stored XSS vulnerability in the plugin dependency warning
+-   Validated plugin link URL schemes before binding them to `href`, blocking `javascript:` and other unsafe protocols
+
 ## [3.6.0] - 2026-07-06
 
 ### Added
@@ -511,7 +600,15 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.3...HEAD
+
+[4.0.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.2...v4.0.3
+
+[4.0.2]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.1...v4.0.2
+
+[4.0.1]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.0...v4.0.1
+
+[4.0.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.6.0...v4.0.0
 
 [3.6.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v3.5.0...v3.6.0
 

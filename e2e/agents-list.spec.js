@@ -1,6 +1,7 @@
 // e2e/agents-list.spec.js
 import { test, expect } from "./fixtures/test.js";
 import { setFakeAuth } from "./helpers/auth.js";
+import { navigateInApp } from "./helpers/navigation.js";
 import {
   blockSockets,
   mockEmpireBootstrap,
@@ -100,5 +101,134 @@ test.describe("agents list", () => {
     await expect(page).toHaveURL(
       new RegExp(`#/agents/${defaultAgents[0].session_id}$`),
     );
+  });
+
+  test("deselecting every column and saving reseeds defaults on the next mount", async ({
+    page,
+  }) => {
+    // Same persisted-header model as the task tables (see
+    // plugin-tasks-table.spec.js): alwaysShow columns are never persisted,
+    // so a deselect-all save writes an empty agentHeaders store, which
+    // mounted() reseeds to defaults on remount. Before this model, the
+    // save persisted the four titled alwaysShow entries, the reseed guard
+    // never fired, and the table was stuck at four columns permanently.
+    await mockAgentsList(page, defaultAgents);
+    await page.goto("/#/agents");
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Hostname" }),
+    ).toHaveCount(1);
+
+    await page.locator("button:has(.mdi-format-columns)").click();
+    const menu = page.locator(".v-overlay__content");
+    // Two clicks: check "Select All" (every selectable column), then
+    // uncheck it (none), and save the empty selection.
+    await menu.getByLabel("Select All", { exact: true }).click();
+    await menu.getByLabel("Select All", { exact: true }).click();
+    await menu.getByRole("button", { name: "Save" }).click();
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Hostname" }),
+    ).toHaveCount(0);
+    // alwaysShow columns keep rendering via the headers short-circuit.
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Name" }).first(),
+    ).toBeVisible();
+
+    // Remount via Settings, which mounts with this spec's mocks and has
+    // no data table — positive proof the agents table unmounted.
+    await navigateInApp(page, "#/settings");
+    await expect(page.locator(".v-data-table")).toHaveCount(0);
+    await navigateInApp(page, "#/agents");
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Hostname" }),
+    ).toHaveCount(1);
+  });
+
+  test("a legacy-shaped agentHeaders store with no titled entries reseeds to defaults", async ({
+    page,
+  }) => {
+    // Pre-4.0 stores persisted {text, value} header objects. None of
+    // those entries has a title, so mounted()'s reseed guard must fire —
+    // otherwise nothing would match the current header shape and the
+    // table would render only its alwaysShow columns.
+    await page.addInitScript(() => {
+      const state = JSON.parse(localStorage.getItem("application"));
+      state.agentHeaders = [{ text: "Delay", value: "delay" }];
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+    await mockAgentsList(page, defaultAgents);
+    await page.goto("/#/agents");
+    // Non-vacuity: the reseeded defaults must render (Hostname is a
+    // default) while the legacy pick for the non-default Delay column is
+    // discarded rather than honored.
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Hostname" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Delay" }),
+    ).toHaveCount(0);
+  });
+
+  test("a store contaminated by a pre-fix deselect-all reseeds to defaults", async ({
+    page,
+  }) => {
+    // Migration: a deselect-all save under the previous build persisted
+    // exactly the four titled alwaysShow entries, which pass the
+    // `some(h => h.title)` reseed guard. Without mounted() stripping
+    // alwaysShow entries first, an already-affected install would stay
+    // stuck at four columns forever.
+    await page.addInitScript(() => {
+      const state = JSON.parse(localStorage.getItem("application"));
+      state.agentHeaders = [
+        { title: "Name", key: "name", alwaysShow: true, order: 1 },
+        {
+          title: "Last Seen",
+          key: "lastseen_time",
+          alwaysShow: true,
+          order: 2,
+        },
+        {
+          title: "First Seen",
+          key: "checkin_time",
+          alwaysShow: true,
+          order: 3,
+        },
+        { title: "Actions", key: "actions", alwaysShow: true, order: 18 },
+      ];
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+    await mockAgentsList(page, defaultAgents);
+    await page.goto("/#/agents");
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Hostname" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Delay" }),
+    ).toHaveCount(0);
+  });
+
+  test("cleaning a contaminated store preserves the user's real picks", async ({
+    page,
+  }) => {
+    // Migration: alwaysShow entries persisted by older builds are
+    // stripped, but a store that still holds a titled real pick must NOT
+    // be reseeded — the user's selection survives the cleanup. Delay has
+    // no defaultHeader, so it fully discriminates preserve from reseed:
+    // reseeding would drop Delay and bring back the default Hostname.
+    await page.addInitScript(() => {
+      const state = JSON.parse(localStorage.getItem("application"));
+      state.agentHeaders = [
+        { title: "Name", key: "name", alwaysShow: true, order: 1 },
+        { title: "Delay", key: "delay", order: 15 },
+      ];
+      localStorage.setItem("application", JSON.stringify(state));
+    });
+    await mockAgentsList(page, defaultAgents);
+    await page.goto("/#/agents");
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Delay" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".v-data-table th", { hasText: "Hostname" }),
+    ).toHaveCount(0);
   });
 });

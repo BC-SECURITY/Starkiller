@@ -16,7 +16,7 @@
       :items="bypasses"
       :items-per-page-options="[5, 10, 15, 20, 50, 100]"
       :items-per-page="15"
-      item-value="name"
+      item-value="id"
       density="compact"
       show-select
     >
@@ -147,9 +147,10 @@ export default {
           { color: "red" },
         )
       ) {
-        this.selected.forEach((bypass) => {
-          this.bypassStore.deleteBypass(bypass.id);
+        this.selected.forEach((id) => {
+          this.bypassStore.deleteBypass(id);
         });
+        this.selected = [];
       }
     },
   },

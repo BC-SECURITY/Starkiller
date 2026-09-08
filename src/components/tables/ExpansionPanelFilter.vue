@@ -25,6 +25,8 @@
 </template>
 
 <script>
+import { reconcileSelection } from "@/components/tables/filterSelection";
+
 export default {
   name: "ExpansionPanelFilter",
   props: {
@@ -86,7 +88,13 @@ export default {
     items: {
       handler(val) {
         if (this.emptyDefault) {
-          this.selectedItems = [];
+          // Preserve an active filter across refreshes (e.g. after a tag is
+          // attached/detached); drop only values whose item disappeared.
+          this.selectedItems = reconcileSelection(
+            this.selectedItems,
+            val,
+            this.itemValue,
+          );
         } else {
           this.selectedItems = val.map((a) => a[this.itemValue]);
         }

@@ -39,29 +39,29 @@ It is prepackaged in Empire as a submodule and served via Empire's API.
 [Sponsoring](https://github.com/sponsors/BC-SECURITY/) at the `Individual` level will give access to extra features.
 At the moment, the extra Starkiller sponsorship features include:
 
-## Dashboard
-
-  <div align="left"><img width="800" src="https://github.com/BC-SECURITY/Starkiller/assets/9831420/7fda92cd-52ab-4d84-a835-89c35b38cf7e"></div>
-
-## Graph View
-
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/216792129-5b0fed82-b209-48cb-9a43-eeb3e69c7229.gif"></div>
-
 ## Process Browser
 
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/131264080-0264558d-59c4-44d9-8dae-7b518c47a9cb.gif"></div>
+Browse the running processes on an agent's host from the Processes tab.
+
+  <div align="left"><img width="800" src="docs/images/process_browser.gif"></div>
 
 ## Modify Module Scripts
 
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/221427395-28d63b1d-bbe5-423e-9113-e58a10a86ced.gif"></div>
+Edit a module's script in an in-browser editor before executing it.
 
-## Enable/Disable modules
+  <div align="left"><img width="800" src="docs/images/modify_module_scripts.gif"></div>
 
-  <div align="left"><img width="800" src="https://user-images.githubusercontent.com/9831420/123528242-e7f78c80-d69a-11eb-9e88-3410c151cd20.gif"></div>
+## Enable/Disable Modules
 
-## Ip Filtering
+Bulk-select modules and toggle their availability from the Modules page.
 
-  <div align="left"><img width="800" src="https://private-user-images.githubusercontent.com/9831420/424823702-95f90eb6-055d-4847-a1eb-87cb2ee4e9aa.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI0NDcyMzIsIm5iZiI6MTc0MjQ0NjkzMiwicGF0aCI6Ii85ODMxNDIwLzQyNDgyMzcwMi05NWY5MGViNi0wNTVkLTQ4NDctYTFlYi04N2NiMmVlNGU5YWEucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI1MDMyMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNTAzMjBUMDUwMjEyWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9YmNhYTcyOTQ0ODA2ZTg5YTZhYjJlNWZmYWMyNzI4MjJhMTlkYjFjY2M4MDdmNDc3MGZlYzg4NjExM2Y5MTEyOCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.cI0M--nasJDRIRSk1JY-iG370ccUfKmRwQRmJXxHKPA"></div>
+  <div align="left"><img width="800" src="docs/images/enable_disable_modules.gif"></div>
+
+## IP Filtering
+
+Allow and deny lists controlling which source addresses Empire accepts agent traffic from.
+
+  <div align="left"><img width="800" src="docs/images/ip_filtering.png"></div>
 
 There is also a collection of Empire plugins available via sponsorship.
 
@@ -72,35 +72,40 @@ Thanks to our sponsors the following features which started as sponsor features 
 - Chat widget
 - Bypass management
 - Malleable profile management
+- Dashboard
+- Graph View
 
 ## Build and run from source
 
 Prerequisites:
 
-- [Node.js](http://nodejs.org/) 16+.
-- [Yarn](https://classic.yarnpkg.com/en/docs/install)
-  Currently it has been tested using Yarn 1.22.
+- [Node.js](http://nodejs.org/) 22+.
+- [pnpm](https://pnpm.io/installation) 11+.
+
+The exact pnpm version is pinned via the `packageManager` field in `package.json`.
+Run `corepack enable` once and Corepack will automatically use the pinned version;
+otherwise install pnpm 11+ manually.
 
 ```
-yarn
+pnpm install
 ```
 
 ### Compile and hot-reload for development
 
 ```
-yarn dev
+pnpm dev
 ```
 
 ### Compile and minify for production
 
 ```
-yarn build
+pnpm build
 ```
 
 ### Run end-to-end tests
 
 ```
-yarn test:e2e
+pnpm test:e2e
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#running-tests) for the testing workflow.

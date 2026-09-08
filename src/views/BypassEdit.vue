@@ -201,7 +201,7 @@ export default {
         )
       ) {
         try {
-          this.bypassStore.deleteBypass(this.form.id);
+          await this.bypassStore.deleteBypass(this.form.id);
           this.$router.push({ name: "bypasses" });
         } catch (err) {
           this.snack.error(`Error: ${err}`);

@@ -48,7 +48,7 @@ async function safeParse(res, responseType) {
 
 export async function request(
   path,
-  { method = "GET", params, data, headers, responseType = "json" } = {},
+  { method = "GET", params, data, headers, responseType = "json", signal } = {},
 ) {
   if (!config.baseURL) {
     throw new Error("http.js: setInstance() must be called before request()");
@@ -79,23 +79,43 @@ export async function request(
       method,
       headers: finalHeaders,
       body,
+      signal,
     });
   } catch (networkErr) {
+    // An aborted request (AbortController) isn't a connection failure — callers
+    // cancel in-flight requests deliberately (e.g. the checkin chart). Don't
+    // count it toward the connection-error banner; just propagate.
+    if (networkErr?.name === "AbortError") throw networkErr;
     // No response object => network failure (matches the old interceptor's !err.response).
     useApplicationStore().connectionError += 1;
     throw networkErr;
   }
 
   if (!res.ok) {
-    if (res.status === 401 || res.status === 403)
-      useApplicationStore().logout();
+    // login()/rawFetchJson() bypasses this wrapper entirely (see the
+    // comment on rawFetchJson in application-module.js), so a failed
+    // login attempt's 401 never reaches here -- this only fires for a
+    // previously-valid session going stale or losing permission mid-use.
+    if (res.status === 401) {
+      useApplicationStore().logout(
+        "Your session has expired. Please log in again.",
+      );
+    } else if (res.status === 403) {
+      useApplicationStore().logout(
+        "You no longer have permission to perform that action. Please log in again.",
+      );
+    }
     // safeParse handles its own parse failures; if the error body is malformed
     // we still want to surface the status, so swallow safeParse's throw here
     // and fall through to the synthetic error below with data=undefined.
     let errBody;
     try {
       errBody = await safeParse(res, "json");
-    } catch {
+    } catch (parseErr) {
+      // A cancel during the error-body read is a deliberate abort, not a
+      // malformed body — re-throw so callers can still detect AbortError
+      // instead of seeing a synthetic "HTTP <status>".
+      if (parseErr?.name === "AbortError") throw parseErr;
       errBody = undefined;
     }
     // axios-compatible shape so handleError, extractErrorMessage, and direct
@@ -119,8 +139,54 @@ request.put = (path, data, opts) =>
   request(path, { ...opts, method: "PUT", data });
 request.delete = (path, opts) => request(path, { ...opts, method: "DELETE" });
 
-// Synchronous — same axios-shaped lookup as the old handleError.
+// handleError returns an ApiError so callers keep `err.response.status`
+// introspectable (e.g. AgentStats's 404-terminal branch) while still
+// stringifying to a bare, prefix-free message for `${err}` snackbars. The raw
+// `detail` (string | FastAPI 422 array | object) is preserved on `.detail` so
+// the form-error normalizer (normalizeSubmitError) can still route field-level
+// validation messages. `.response` / `.detail` are set in the constructor so
+// the shape can't drift across edits.
+class ApiError extends Error {
+  constructor(message, { response, detail } = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.response = response;
+    this.detail = detail;
+  }
+
+  toString() {
+    return this.message;
+  }
+}
+
+// Best-effort readable string for the ApiError message. The structured detail
+// lives on `.detail`; this is only the `${err}` / snackbar fallback text, so it
+// must always resolve to a string (an object/array would render "[object
+// Object]").
+function detailToMessage(detail) {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const withMsg = detail.find(
+      (d) => typeof d?.msg === "string" && d.msg.trim(),
+    );
+    return withMsg ? withMsg.msg : "Validation failed.";
+  }
+  if (detail && typeof detail === "object") {
+    const msg = detail.msg || detail.message || detail.detail;
+    return typeof msg === "string" ? msg : "Request failed.";
+  }
+  return String(detail);
+}
+
+// Wraps response.data.detail in an ApiError (see ApiError above); returns the
+// raw error untouched when there's no detail (network / 5xx-with-no-body /
+// CORS), preserving its `.response` for status introspection.
 export function handleError(error) {
   console.error(error);
-  return error?.response?.data?.detail || error;
+  const detail = error?.response?.data?.detail;
+  if (detail == null) return error;
+  return new ApiError(detailToMessage(detail), {
+    response: error.response,
+    detail,
+  });
 }

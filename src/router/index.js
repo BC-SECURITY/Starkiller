@@ -9,6 +9,11 @@ const routes = [
     component: Home,
   },
   {
+    path: "/dashboard",
+    name: "dashboard",
+    component: () => import("../views/Dashboard.vue"),
+  },
+  {
     path: "/about",
     name: "about",
     component: () => import("../views/About.vue"),
@@ -58,6 +63,11 @@ const routes = [
     path: "/agents",
     name: "agents",
     component: () => import("../components/agents/AgentsList.vue"),
+  },
+  {
+    path: "/agents-graph",
+    name: "agentsGraph",
+    component: () => import("../components/agents/GraphView.vue"),
   },
   {
     path: "/agent-tasks",
@@ -144,6 +154,11 @@ const routes = [
     path: "/downloads",
     name: "downloads",
     component: () => import("../views/Downloads.vue"),
+  },
+  {
+    path: "/tags",
+    name: "tags",
+    component: () => import("../views/Tags.vue"),
   },
   {
     path: "/plugins",

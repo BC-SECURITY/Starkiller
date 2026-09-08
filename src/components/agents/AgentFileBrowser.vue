@@ -2,7 +2,7 @@
   <div>
     <execute-module-dialog
       v-model="executeDialog"
-      :agent="agent.session_id"
+      :agent="agent"
       :module-name="moduleName"
       :module-option-defaults="moduleOptionDefaults"
     />
@@ -315,10 +315,17 @@ export default {
 
         this.open.push(this.selected.id);
       } else if (action === "download") {
-        agentTaskApi.downloadFile(this.agent.session_id, this.selected.path);
-        this.snack.success(
-          `Tasked ${this.agent.session_id} for download ${this.selected.path}`,
-        );
+        try {
+          await agentTaskApi.downloadFile(
+            this.agent.session_id,
+            this.selected.path,
+          );
+          this.snack.success(
+            `Tasked ${this.agent.session_id} for download ${this.selected.path}`,
+          );
+        } catch (err) {
+          this.snack.error(`Failed to task download: ${err}`);
+        }
       } else if (action === "zip") {
         this.prepareZip();
       } else if (action === "upload") {

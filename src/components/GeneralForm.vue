@@ -65,6 +65,10 @@ const props = defineProps({
   readonly: { type: Boolean, default: false },
   priority: { type: Array, default: () => [] },
   serverErrors: { type: [Array, String, Object], default: null },
+  // Launcher execution language used to filter the Bypasses picker (passed by
+  // AgentExecuteModule as the selected module's language). Falls back to the
+  // form's own Language field when not provided.
+  formLanguage: { type: String, default: null },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -76,7 +80,25 @@ const { allFields } = useFieldDescriptors(
   toRef(props, "options"),
   toRef(props, "priority"),
 );
-const { suggestedValuesFor, strictFor, defaultBypasses } = useSuggestedValues();
+
+// Bypasses are filtered by the launcher's *execution* language, which can
+// differ from the payload Language. bypass_language_map (from the Bypasses
+// field descriptor) translates one to the other — e.g. a csharp payload
+// shipped as a PowerShell downloader oneliner uses powershell bypasses.
+const bypassLanguageMap = computed(() => {
+  const bypassField = allFields.value.find((f) => f.name === "Bypasses");
+  return bypassField?.bypass_language_map || null;
+});
+const activeLanguage = computed(() => {
+  const lang = form.value?.Language || props.formLanguage;
+  if (!lang) return null;
+  const lowered = String(lang).toLowerCase();
+  return bypassLanguageMap.value?.[lowered] ?? lowered;
+});
+
+const { suggestedValuesFor, strictFor, defaultBypasses } = useSuggestedValues({
+  activeLanguage,
+});
 const { isFieldVisible, recentlyVisibleFields, updateVisibility } =
   useFieldVisibility(allFields);
 const { buildInitialForm, serializeForm } = useFieldCoercion();
@@ -177,6 +199,31 @@ watch(
 // call; otherwise it covers the warm-store case (Pinia cache survives
 // navigation, so defaults are already populated at mount).
 watch(defaultBypasses, trySeedBypassDefaults, { immediate: true });
+
+// When the execution language changes (user picked a different payload
+// Language), drop any selected bypasses that don't exist for the new language.
+// If pruning empties the selection, re-arm the one-shot seed so the new
+// language's defaults populate — but a user who deliberately cleared the field
+// before switching keeps it empty.
+watch(activeLanguage, (newLang, oldLang) => {
+  if (newLang === oldLang) return;
+  if (!Array.isArray(form.value?.Bypasses)) return;
+  const allowed = new Set(suggestedValuesFor({ name: "Bypasses" }));
+  // An empty allow-set almost always means the bypass store hasn't loaded yet
+  // (the load is fire-and-forget), not that every selection is invalid — defer
+  // pruning rather than wiping the user's bypasses on a language switch during
+  // load. A real language with zero bypasses is indistinguishable here, but the
+  // load race is the common case and silently clearing the field is worse.
+  if (allowed.size === 0) return;
+  const current = form.value.Bypasses;
+  const pruned = current.filter((name) => allowed.has(name));
+  if (pruned.length === current.length) return;
+  form.value.Bypasses = pruned;
+  if (pruned.length === 0) {
+    bypassDefaultsSeeded = false;
+    trySeedBypassDefaults();
+  }
+});
 
 // `immediate: true` is load-bearing. The options watch above (also immediate)
 // builds form.value during setup, BEFORE this watch is registered, so a plain

@@ -42,7 +42,7 @@ export default {
       default: false,
     },
     agent: {
-      type: String,
+      type: Object,
       required: true,
     },
     moduleName: {

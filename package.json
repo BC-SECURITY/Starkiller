@@ -1,7 +1,11 @@
 {
   "name": "starkiller",
-  "version": "3.6.0",
+  "version": "4.0.3",
   "private": true,
+  "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -9,27 +13,31 @@
     "lint": "eslint --fix .",
     "format": "prettier .  --write",
     "format:check": "prettier .  --check",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:ui": "playwright test --project=chromium --ui",
+    "docs:screenshots": "playwright test --project=docs",
+    "docs:publish": "node scripts/publish-docs-screenshots.mjs",
     "test:unit": "vitest",
     "test:unit:run": "vitest run"
   },
   "main": "background.js",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
   "dependencies": {
     "@fontsource/roboto": "^4.5.1",
     "@fortawesome/fontawesome-free": "^6",
+    "@livereader/graphly-d3": "^1.5.3",
     "@mdi/font": "^7.0",
     "ansi_up": "^5.2.1",
+    "chart.js": "^4.5.1",
+    "chartjs-adapter-dayjs-4": "^1.0.4",
     "dayjs": "^1.11.20",
     "lodash.debounce": "^4.0.8",
+    "markdown-it": "^14.1.1",
     "pinia": "^3",
     "pinia-plugin-persistedstate": "^4",
     "socket.io-client": "^4.1.2",
     "splitpanes": "^3.1.0",
     "vue": "^3.5",
+    "vue-chartjs": "^5.3.3",
     "vue-markdown-render": "^2.3.0",
     "vue-router": "^4.3",
     "vuedraggable": "^4.1",
@@ -49,6 +57,6 @@
     "sass": "^1.70",
     "vite": "^8",
     "vite-plugin-vuetify": "^2.1",
-    "vitest": "4.1.7"
+    "vitest": "^4.1.6"
   }
 }

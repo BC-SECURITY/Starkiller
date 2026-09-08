@@ -24,7 +24,14 @@
           <span>{{ literal.tooltipText }}</span>
         </v-tooltip>
       </div>
-      <v-btn color="primary" :loading="loading" type="submit"> Submit </v-btn>
+      <v-btn
+        color="primary"
+        :loading="loading"
+        :disabled="loading"
+        type="submit"
+      >
+        Submit
+      </v-btn>
     </v-form>
   </div>
 </template>
@@ -58,7 +65,7 @@ export default {
   watch: {},
   methods: {
     async submit() {
-      if (this.form.command.length < 1) {
+      if (this.loading || this.form.command.length < 1) {
         return;
       }
 

@@ -23,10 +23,11 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
-      - uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: "yarn"
+          cache: "pnpm"
       - name: Set application version as variable
         run: |
           echo "APP_VERSION=$(npm pkg get version | sed 's/"//g')" >> $GITHUB_ENV
@@ -34,8 +35,8 @@ jobs:
         # Can remove this check after 2.0 is released.
         if: ${{ !startsWith(env.APP_VERSION, '1') }}
         run: |
-          yarn
-          yarn build
+          pnpm install --frozen-lockfile
+          pnpm build
       - name: Commit dist
         if: ${{ !startsWith(env.APP_VERSION, '1') }}
         run: |

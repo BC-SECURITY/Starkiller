@@ -1,4 +1,4 @@
-import { computed, onMounted, inject } from "vue";
+import { computed, onMounted, inject, unref } from "vue";
 import { useListenerStore } from "@/stores/listener-module";
 import { useBypassStore } from "@/stores/bypass-module";
 import { useCredentialStore } from "@/stores/credential-module";
@@ -30,7 +30,7 @@ export function shouldSeedBypasses(form, defaults) {
   );
 }
 
-export function useSuggestedValues() {
+export function useSuggestedValues({ activeLanguage = null } = {}) {
   const agentStore = useAgentStore();
   const listenerStore = useListenerStore();
   const bypassStore = useBypassStore();
@@ -43,8 +43,16 @@ export function useSuggestedValues() {
 
   const agents = computed(() => agentStore.agents);
   const listeners = computed(() => listenerStore.listenerNames);
-  const bypasses = computed(() => bypassStore.mergedBypassNames);
-  const defaultBypasses = computed(() => bypassStore.defaultBypassNames);
+  // Bypasses are filtered to the launcher's execution language when the form
+  // provides one (GeneralForm passes activeLanguage). A null language returns
+  // the full set, so callers that don't filter by language can omit it and get
+  // the old (unfiltered) behavior.
+  const bypasses = computed(() =>
+    bypassStore.mergedBypassNamesByLanguage(unref(activeLanguage)),
+  );
+  const defaultBypasses = computed(() =>
+    bypassStore.defaultBypassNamesByLanguage(unref(activeLanguage)),
+  );
   const credentials = computed(() => credentialStore.credentials);
   const malleableProfiles = computed(() => malleableProfileStore.profileNames);
 

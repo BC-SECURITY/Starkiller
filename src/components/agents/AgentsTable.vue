@@ -25,24 +25,30 @@
       show-select
     >
       <template #item.name="{ item }">
-        <v-tooltip location="top">
-          <template #activator="{ props: activatorProps }">
-            <v-icon
-              v-if="item.high_integrity"
-              size="small"
-              v-bind="activatorProps"
-            >
-              fa-user-cog
-            </v-icon>
-          </template>
-          <span>Elevated Process</span>
-        </v-tooltip>
-        <router-link
-          style="color: inherit"
-          :to="{ name: 'agentEdit', params: { id: item.session_id } }"
-        >
-          {{ item.name }}
-        </router-link>
+        <div class="d-flex align-center">
+          <v-tooltip location="top">
+            <template #activator="{ props: activatorProps }">
+              <!-- transform is an optical nudge to center the fa-user-cog glyph against the name text -->
+              <v-icon
+                v-if="item.high_integrity"
+                class="mr-1"
+                style="transform: translate(-2px, -2px)"
+                size="small"
+                v-bind="activatorProps"
+              >
+                fa-user-cog
+              </v-icon>
+            </template>
+            <span>Elevated Process</span>
+          </v-tooltip>
+          <router-link
+            class="text-no-wrap"
+            style="color: inherit"
+            :to="{ name: 'agentEdit', params: { id: item.session_id } }"
+          >
+            {{ item.name }}
+          </router-link>
+        </div>
       </template>
       <template #item.lastseen_time="{ item }">
         <date-time-display :timestamp="item.lastseen_time" />
@@ -64,9 +70,8 @@
       <template #item.tags="{ item }">
         <tag-viewer
           :tags="item.tags"
-          @update-tag="updateTag(item, ...arguments)"
-          @delete-tag="deleteTag(item, ...arguments)"
-          @new-tag="addTag(item, ...arguments)"
+          @attach-tag="addTag(item, $event)"
+          @detach-tag="deleteTag(item, $event)"
         />
       </template>
       <template #item.actions="{ item }">
@@ -126,6 +131,7 @@ import { useAgentStore } from "@/stores/agent-module";
 import { useApplicationStore } from "@/stores/application-module";
 import * as agentTaskApi from "@/api/agent-task-api";
 import { useAutoRefresh } from "@/composables/useAutoRefresh";
+import truncate from "@/utils/truncate";
 
 export default {
   name: "AgentsTable",
@@ -271,8 +277,13 @@ export default {
       return this.headersFull
         .filter(
           (h) =>
+            // alwaysShow columns bypass the persisted header selection —
+            // they render regardless of the stored choices and are never
+            // HeaderMenu options or persisted (same model as
+            // TasksTable.vue).
+            h.alwaysShow ||
             this.applicationStore.agentHeaders.findIndex(
-              (h2) => h2.title === h.title,
+              (h2) => h2.key === h.key,
             ) > -1,
         )
         .sort((a, b) => a.order - b.order);
@@ -291,7 +302,7 @@ export default {
       }
 
       sorted = sorted.filter((agent) => {
-        const agentTags = agent.tags.map((tag) => `${tag.name}:${tag.value}`);
+        const agentTags = agent.tags.map((tag) => tag.name);
         return agentTags.some((tag) => this.selectedTags.includes(tag));
       });
 
@@ -316,18 +327,30 @@ export default {
       immediate: true,
     },
   },
-  async mounted() {
+  mounted() {
     this.getAgents();
-    if (
-      this.applicationStore.agentHeaders.length === 0 ||
-      !this.applicationStore.agentHeaders[0].title
-    ) {
+    // Same persisted-header model as TasksTable.vue: the store holds only
+    // the user's selectable picks (alwaysShow columns render via the
+    // `headers` short-circuit and are never persisted). Strip alwaysShow
+    // entries persisted by older builds BEFORE judging the store — a
+    // pre-fix deselect-all left exactly the four titled alwaysShow
+    // entries, which would otherwise defeat the reseed guard and leave an
+    // already-affected install stuck at four columns. After cleaning,
+    // reseed when nothing titled remains — an empty store or a legacy
+    // {text, value} shape.
+    const storedHeaders = this.applicationStore.agentHeaders;
+    const cleanedHeaders = storedHeaders.filter((h) => !h.alwaysShow);
+    if (!cleanedHeaders.some((h) => h.title)) {
       this.applicationStore.agentHeaders = this.headersFull.filter(
-        (h) => h.defaultHeader === true,
+        (h) => h.defaultHeader === true && !h.alwaysShow,
       );
+    } else if (cleanedHeaders.length !== storedHeaders.length) {
+      // Write back only when the cleanup actually removed something —
+      // every store write re-serializes the whole persisted state.
+      this.applicationStore.agentHeaders = cleanedHeaders;
     }
     this.selectedHeadersTemp = this.headersFull.filter((h) =>
-      this.applicationStore.agentHeaders.some((h2) => h2.title === h.title),
+      this.applicationStore.agentHeaders.some((h2) => h2.key === h.key),
     );
   },
   methods: {
@@ -340,22 +363,11 @@ export default {
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
     },
-    updateTag(agent, tag) {
+    addTag(agent, payload) {
       agentApi
-        .updateTag(agent.session_id, tag)
+        .addTag(agent.session_id, payload)
         .then((t) => {
-          const index = agent.tags.findIndex((x) => x.id === t.id);
-          agent.tags.splice(index, 1, t);
-          this.$emit("refresh-tags");
-          this.snack.success("Tag updated");
-        })
-        .catch((err) => this.snack.error(`Error: ${err}`));
-    },
-    addTag(agent, tag) {
-      agentApi
-        .addTag(agent.session_id, tag)
-        .then((t) => {
-          agent.tags.push(t);
+          if (!agent.tags.some((x) => x.id === t.id)) agent.tags.push(t);
           this.$emit("refresh-tags");
         })
         .catch((err) => this.snack.error(`Error: ${err}`));
@@ -363,14 +375,6 @@ export default {
     submitHeaderForm(val) {
       this.selectedHeadersTemp = val;
       this.applicationStore.agentHeaders = [...this.selectedHeadersTemp];
-    },
-    resetHeaders() {
-      this.applicationStore.agentHeaders = this.headersFull.filter(
-        (h) => h.defaultHeader === true,
-      );
-      this.selectedHeadersTemp = this.headersFull.filter((h) =>
-        this.applicationStore.agentHeaders.some((h2) => h2.title === h.title),
-      );
     },
     getAgents() {
       this.agentStore.getAgents();
@@ -396,10 +400,7 @@ export default {
       );
     },
     truncateMessage(str) {
-      if (str) {
-        return str.length > 30 ? `${str.substr(0, 30)}...` : str;
-      }
-      return "";
+      return truncate(str, 30);
     },
     getRowProps({ item }) {
       return { class: item.stale ? "warning-row" : "" };

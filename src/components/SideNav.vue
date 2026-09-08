@@ -122,6 +122,7 @@ export default {
       mini: true,
       openedGroups: [],
       items: [
+        { title: "Dashboard", pathName: "dashboard", icon: "fa-chart-line" },
         {
           title: "Listeners",
           icon: "fa-server",
@@ -164,6 +165,11 @@ export default {
               icon: "fa-link",
             },
             {
+              title: "Agents Graph",
+              pathName: "agentsGraph",
+              icon: "fa-diagram-project",
+            },
+            {
               title: "Agent Tasks",
               pathName: "agentTasks",
               icon: "fa-tasks",
@@ -178,6 +184,7 @@ export default {
         { title: "Obfuscation", pathName: "obfuscation", icon: "fa-mask" },
         { title: "Credentials", pathName: "credentials", icon: "fa-key" },
         { title: "Downloads", pathName: "downloads", icon: "fa-download" },
+        { title: "Tags", pathName: "tags", icon: "fa-tags" },
         {
           title: "Plugins",
           icon: "fa-puzzle-piece",

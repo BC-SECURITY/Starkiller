@@ -163,7 +163,7 @@ export default {
       immediate: true,
       handler(val) {
         if (val === true && this.isLoggedIn === true) {
-          this.$router.push({ name: "listeners" });
+          this.$router.push({ name: "dashboard" });
         } else if (val === false && this.isLoggedIn === false) {
           this.$router.push({ name: "home" });
         }
@@ -172,8 +172,8 @@ export default {
     isLoggedIn(val) {
       if (val === false && !this.isLoginPage) {
         this.$router.push({ name: "home" });
-      } else if (val === true && this.$route.name !== "listeners") {
-        this.$router.push({ name: "listeners" });
+      } else if (val === true && this.$route.name !== "dashboard") {
+        this.$router.push({ name: "dashboard" });
       }
     },
     empireVersion: {
@@ -198,7 +198,12 @@ export default {
   },
   methods: {
     openChat() {
-      this.$refs.socketNotifications?.$refs.chat?.open();
+      // Straight to the store, not through $refs. This button renders as soon
+      // as `chatWidget` is true, but <socket-notifications> additionally waits
+      // on empireVersion satisfying >=4.0 and <chat> is loaded async on top of
+      // that — so a ref reach-through was undefined for the first frames after
+      // load and dropped the click on the floor.
+      useApplicationStore().chatOpen = true;
     },
     versionSatisfies(version) {
       return satisfies(this.empireVersion.split(" ")[0].split("-")[0], version);
@@ -207,7 +212,7 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "app.scss";
+@use "./app.scss";
 
 #app {
   -webkit-font-smoothing: antialiased;

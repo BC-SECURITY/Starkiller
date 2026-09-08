@@ -68,4 +68,33 @@ test.describe("credentials", () => {
     expect(actions.calls[0].body.credtype).toBe("plaintext");
     expect(actions.calls[0].body.domain).toBe("TEST");
   });
+
+  test("bulk delete calls DELETE for each selected credential (regression: bulk delete was a silent no-op)", async ({
+    page,
+  }) => {
+    const actions = recordCredentialActions(page);
+    await page.goto("/#/credentials");
+
+    const table = page.locator(".v-data-table");
+    await expect(table).toBeVisible();
+    await expect(
+      table.getByText(defaultCredentials[0].username).first(),
+    ).toBeVisible();
+
+    // Select all rows. v-data-table's "select all" checkbox is in thead.
+    await page.locator("thead input[type='checkbox']").first().check();
+
+    await page.getByRole("button", { name: /delete/i }).click();
+    await page.getByRole("button", { name: "Yes" }).click();
+
+    const deletes = () => actions.calls.filter((c) => c.method === "DELETE");
+    await expect.poll(() => deletes().length).toBe(defaultCredentials.length);
+
+    // Regression assertion: each DELETE must target the credential's real id.
+    const got = new Set(
+      deletes().map((c) => c.url.match(/\/credentials\/([^/]+)$/)?.[1]),
+    );
+    const expected = new Set(defaultCredentials.map((c) => String(c.id)));
+    expect(got).toEqual(expected);
+  });
 });

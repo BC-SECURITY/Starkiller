@@ -57,20 +57,34 @@
                 <author-chips :authors="selectedPluginObj.authors" />
                 <v-spacer />
                 <a
+                  v-if="isSafeUrl(selectedPluginObj.homepage_url)"
                   :href="selectedPluginObj.homepage_url"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Homepage
                 </a>
+                <span
+                  v-else-if="selectedPluginObj.homepage_url"
+                  :title="selectedPluginObj.homepage_url"
+                >
+                  Homepage
+                </span>
                 <v-spacer />
                 <a
+                  v-if="isSafeUrl(selectedPluginObj.source_url)"
                   :href="selectedPluginObj.source_url"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Source Code
                 </a>
+                <span
+                  v-else-if="selectedPluginObj.source_url"
+                  :title="selectedPluginObj.source_url"
+                >
+                  Source Code
+                </span>
                 <v-spacer />
               </v-card-subtitle>
             </div>
@@ -146,6 +160,7 @@ import VueMarkdown from "vue-markdown-render";
 import * as pluginApi from "@/api/plugin-api";
 import AuthorChips from "@/components/AuthorChips.vue";
 import ListPageTop from "@/components/ListPageTop.vue";
+import { isSafeUrl } from "@/utils/is-safe-url";
 
 export default {
   name: "PluginMarketplace",
@@ -216,6 +231,7 @@ export default {
     }
   },
   methods: {
+    isSafeUrl,
     async refreshMarketplace() {
       const { records } = await pluginApi.getMarketplace();
       this.marketplacePlugins = records.sort((a, b) =>

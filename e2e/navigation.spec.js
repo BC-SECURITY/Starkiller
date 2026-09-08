@@ -72,4 +72,17 @@ test.describe("navigation", () => {
     await page.locator('[href="#/listeners"]').first().click();
     await expect(page).toHaveURL(/#\/listeners$/);
   });
+
+  test("sidebar navigates to tags", async ({ page }) => {
+    await page.goto("/#/agents");
+    // Expand the sidebar from mini/rail mode.
+    await page
+      .locator(".v-navigation-drawer")
+      .getByRole("button")
+      .first()
+      .click();
+    // Tags is a top-level item — click directly via its href.
+    await page.locator('[href="#/tags"]').first().click();
+    await expect(page).toHaveURL(/#\/tags$/);
+  });
 });
