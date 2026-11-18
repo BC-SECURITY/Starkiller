@@ -1,0 +1,1 @@
+import{fi as e}from"./index-CvK4leFT.js";import{n as t}from"./module-api-C3pvvlmg.js";var n=e(`module`,{state:()=>({modules:[]}),actions:{async getModules(){let e=await t();this.modules=e}},getters:{}});export{n as t};
