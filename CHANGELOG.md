@@ -14,6 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-10-14
+
+### Added
+
+-   The agent terminal gains `download`, `kill_date`, `working_hours`, `kill_job`, `kill`, and `rename` commands, restoring verbs from the removed Empire CLI; `kill` and `rename` update the agent list without a refetch
+
+### Fixed
+
+-   The Kill Agent button now tasks the agent even when it is missing from the cached agent list — previously the kill was silently skipped
+-   Main-menu commands no longer vanish from terminal help and autocomplete after entering and leaving a module
+
 ## [4.0.3] - 2026-08-12
 
 ### Fixed
@@ -600,7 +611,9 @@ Including but not limited to:
 
 -   Initial Release
 
-[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.3...HEAD
+[Unreleased]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.1.0...HEAD
+
+[4.1.0]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.3...v4.1.0
 
 [4.0.3]: https://github.com/BC-SECURITY/Starkiller-Sponsors/compare/v4.0.2...v4.0.3
 
